@@ -234,16 +234,12 @@ export const useGamificationStore = create<GamificationState>()(
 
       getActiveQuests: () => {
         const state = get();
-        return QUESTS.filter(
-          (q) => !state.stats.questsCompleted.includes(q.id)
-        );
+        return QUESTS.filter((q) => !state.stats.questsCompleted.includes(q.id));
       },
 
       getCompletedQuests: () => {
         const state = get();
-        return QUESTS.filter((q) =>
-          state.stats.questsCompleted.includes(q.id)
-        );
+        return QUESTS.filter((q) => state.stats.questsCompleted.includes(q.id));
       },
 
       closeLevelUpModal: () => {
@@ -254,13 +250,25 @@ export const useGamificationStore = create<GamificationState>()(
       name: 'metalpedia-gamification',
       storage: createJSONStorage(() => ({
         getItem: async (name) => {
-          const value = await idbGet(name, idbStore);
-          return value ? JSON.parse(value) : null;
+          try {
+            const value = await idbGet(name, idbStore);
+            return value ? JSON.parse(value) : null;
+          } catch {
+            return null;
+          }
         },
         setItem: async (name, value) => {
-          await idbSet(name, JSON.stringify(value), idbStore);
+          try {
+            await idbSet(name, JSON.stringify(value), idbStore);
+          } catch (err) {
+            console.error('Failed to persist gamification:', err);
+          }
         },
       })),
     }
   )
 );
+
+// Sélecteurs optimisés
+export const usePlayerLevel = () => useGamificationStore((s) => s.stats.level);
+export const usePlayerXP = () => useGamificationStore((s) => s.stats.totalXP);
