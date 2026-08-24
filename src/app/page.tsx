@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useBandsByGenre } from '@/api/hooks';
 import BandGrid from '@/components/bands/BandGrid';
 import StatsPanel from '@/components/visual/StatsPanel';
+import QuestsPanel from '@/components/gamification/QuestsPanel';
 import { Suspense } from 'react';
 
 const GENRES = [
@@ -14,8 +15,6 @@ const GENRES = [
   { label: '⚡ Thrash Metal', value: 'Thrash Metal' },
   { label: '🎻 Power Metal', value: 'Power Metal' },
   { label: '🌑 Doom Metal', value: 'Doom Metal' },
-  { label: '🎼 Progressive Metal', value: 'Progressive Metal' },
-  { label: '⚔️ Folk Metal', value: 'Folk Metal' },
 ];
 
 function HomePageContent() {
@@ -26,13 +25,10 @@ function HomePageContent() {
 
   return (
     <div className="space-y-8">
-      <section className="text-center py-8 md:py-12 border-b border-metal-gray">
-        <h2 className="font-metal text-5xl md:text-7xl text-metal-rust mb-4 leading-none">
+      <section className="text-center py-8 border-b border-metal-gray">
+        <h2 className="font-metal text-5xl md:text-7xl text-metal-rust mb-4">
           Bienvenue dans les ténèbres
         </h2>
-        <p className="text-gray-400 text-lg max-w-2xl mx-auto font-serif">
-          Explorez plus de 170 000 groupes de metal à travers le monde.
-        </p>
       </section>
 
       <section className="grid lg:grid-cols-4 gap-8">
@@ -53,18 +49,12 @@ function HomePageContent() {
             ))}
           </div>
 
-          {error ? (
-            <div className="text-center py-16">
-              <p className="text-6xl mb-4">⚠️</p>
-              <p className="text-red-400">{(error as Error).message}</p>
-            </div>
-          ) : (
-            <BandGrid bands={bands || []} isLoading={isLoading} />
-          )}
+          <BandGrid bands={bands || []} isLoading={isLoading} />
         </div>
 
         <aside className="space-y-6">
           <StatsPanel />
+          <QuestsPanel />
         </aside>
       </section>
     </div>
