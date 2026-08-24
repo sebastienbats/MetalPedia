@@ -1,0 +1,203 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Sauvegarder",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "next": "Suivant",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "seeAll": "Tout voir",
+    "loadMore": "Charger plus"
+  },
+  "nav": {
+    "home": "Accueil",
+    "favorites": "Favoris",
+    "profile": "Profil",
+    "map": "Carte",
+    "timeline": "Chronologie",
+    "ai": "Studio IA",
+    "search": "Recherche"
+  },
+  "home": {
+    "title": "Bienvenue dans les ténèbres",
+    "subtitle": "Explorez plus de 170 000 groupes de metal à travers le monde.",
+    "exploreByGenre": "Explorer par genre",
+    "noResults": "Aucun groupe trouvé dans les ténèbres..."
+  },
+  "band": {
+    "biography": "Biographie",
+    "discography": "Discographie",
+    "members": "Membres",
+    "reviews": "Critiques",
+    "currentMembers": "Membres actuels",
+    "pastMembers": "Anciens membres",
+    "formedIn": "Formé en",
+    "country": "Pays",
+    "genre": "Genre",
+    "status": "Statut",
+    "themes": "Thèmes",
+    "label": "Label",
+    "yearsActive": "Années d'activité",
+    "addToFavorites": "Ajouter aux favoris",
+    "removeFromFavorites": "Retirer des favoris",
+    "viewGraph": "Voir le graphe",
+    "viewAudio": "Analyse audio",
+    "externalLink": "Voir sur Metal Archives"
+  },
+  "status": {
+    "active": "Actif",
+    "splitUp": "Séparé",
+    "changedName": "Renommé",
+    "onHold": "En pause",
+    "unknown": "Inconnu"
+  },
+  "reviews": {
+    "title": "Critiques communautaires",
+    "write": "Écrire une critique",
+    "writeFor": "Écrire une critique pour {{band}}",
+    "rating": "Note",
+    "titlePlaceholder": "Titre de votre critique...",
+    "contentPlaceholder": "Partagez votre avis sur ce groupe... (minimum 50 caractères)",
+    "submit": "Publier la critique",
+    "publishing": "Publication...",
+    "loginToReview": "Connectez-vous pour écrire une critique",
+    "noReviews": "Aucune critique pour l'instant. Soyez le premier !",
+    "deleteConfirm": "Confirmer la suppression ?",
+    "deleteSuccess": "Critique supprimée",
+    "submitSuccess": "Critique publiée ! +100 XP gagnés.",
+    "minLength": "Votre critique doit contenir au moins 50 caractères.",
+    "maxLength": "Votre critique ne doit pas dépasser 5000 caractères."
+  },
+  "auth": {
+    "signIn": "Connexion",
+    "signUp": "Rejoindre la Horde",
+    "signOut": "Déconnexion",
+    "email": "Email",
+    "password": "Mot de passe",
+    "username": "Pseudo de métalleux",
+    "signInSubtitle": "Retournez dans les ténèbres",
+    "signUpSubtitle": "Créez votre légende métallique",
+    "noAccount": "Pas encore de compte ? Rejoindre la horde →",
+    "hasAccount": "Déjà membre ? Se connecter →",
+    "submitSignIn": "Se connecter",
+    "submitSignUp": "Créer mon compte",
+    "authenticating": "Invocation en cours...",
+    "emailConfirmation": "Compte créé ! Vérifiez votre email pour confirmer."
+  },
+  "favorites": {
+    "title": "Mes Favoris",
+    "subtitle": "{{count}} groupes dans votre horde",
+    "empty": "Aucun favori pour l'instant. Explorez les ténèbres !",
+    "explore": "Explorer",
+    "added": "Ajouté aux favoris",
+    "removed": "Retiré des favoris"
+  },
+  "profile": {
+    "title": "Ta Légende",
+    "subtitle": "Le Conseil des Neuf Genres observe ta progression",
+    "level": "Niveau",
+    "totalXP": "XP Total",
+    "views": "Groupes vus",
+    "favoritesCount": "Favoris",
+    "reviewsCount": "Reviews",
+    "badges": "Reliques",
+    "nextRank": "Prochain rang"
+  },
+  "gamification": {
+    "levelUp": "LEVEL UP !",
+    "continueQuest": "Continuer la quête",
+    "quests": "Journal des Quêtes",
+    "activeQuests": "Quêtes en cours",
+    "completedQuests": "Quêtes accomplies",
+    "badges": "Reliques des Anciens",
+    "badgesCollected": "{{count}}/{{total}} reliques collectionnées",
+    "questsCompleted": "{{count}}/{{total}} quêtes accomplies",
+    "xpGained": "+{{amount}} XP",
+    "dailyBonus": "Bénédiction quotidienne des Anciens",
+    "rarity": {
+      "common": "COMMUN",
+      "rare": "RARE",
+      "epic": "ÉPIQUE",
+      "legendary": "LÉGENDAIRE"
+    }
+  },
+  "stats": {
+    "title": "Votre ADN Metal",
+    "subtitle": "Basé sur {{count}} groupes consultés",
+    "emptyText": "Explorez des groupes pour découvrir votre profil metal unique.",
+    "topGenre": "Genre dominant",
+    "topCountry": "Pays favori",
+    "genreBreakdown": "Répartition des genres",
+    "countryBreakdown": "Top pays explorés",
+    "totalProgress": "Progression totale"
+  },
+  "concerts": {
+    "title": "Concerts à venir",
+    "upcoming": "Concerts à venir",
+    "noConcerts": "Aucun concert prévu pour {{band}} pour le moment.",
+    "tickets": "Billets",
+    "seeAll": "Voir tous les concerts",
+    "loadError": "Impossible de charger les concerts"
+  },
+  "search": {
+    "placeholder": "Rechercher un groupe...",
+    "results": "Résultats de recherche",
+    "resultsFor": "Recherche pour : « {{query}} »",
+    "resultsCount": "{{count}} résultat{{count > 1 ? 's' : ''}} trouvé{{count > 1 ? 's' : ''}}",
+    "noResults": "Aucun groupe trouvé pour « {{query}} »",
+    "tryAgain": "Essayez une autre recherche ou explorez par genre depuis l'accueil.",
+    "exploreByGenre": "Explorer par genre"
+  },
+  "audio": {
+    "title": "Empreinte Audio",
+    "subtitle": "Analyse Spotify des top tracks de {{band}}",
+    "tempo": "Tempo moyen",
+    "loudness": "Loudness",
+    "tracksAnalyzed": "Tracks analysées",
+    "interpretation": "Interprétation musicale",
+    "basedOn": "Données basées sur les {{count}} tracks les plus populaires du groupe",
+    "bpmCategories": {
+      "veryFast": "Très rapide",
+      "fast": "Rapide",
+      "moderate": "Modéré",
+      "slow": "Lent"
+    }
+  },
+  "map": {
+    "title": "Metal Map",
+    "subtitle": "Densité mondiale des groupes de metal par pays",
+    "bands": "{{count}} groupes"
+  },
+  "timeline": {
+    "title": "Timeline du Metal",
+    "subtitle": "60 ans d'histoire du metal, 1968 → 2026"
+  },
+  "ai": {
+    "title": "AI Metal Studio",
+    "subtitle": "Générez un logo de groupe avec l'intelligence artificielle",
+    "bandNamePlaceholder": "Nom du groupe (ex: Infernal Frost)",
+    "genreLabel": "Genre",
+    "generate": "Générer le logo",
+    "generating": "Génération en cours...",
+    "download": "Télécharger"
+  },
+  "offline": {
+    "title": "Mode hors ligne",
+    "subtitle": "Vos favoris et données locales sont toujours accessibles.",
+    "retry": "Réessayer",
+    "pendingSync": "{{count}} opérations en attente de synchronisation"
+  },
+  "errors": {
+    "notFound": "Page introuvable",
+    "serverError": "Erreur serveur",
+    "networkError": "Erreur réseau",
+    "tryAgain": "Réessayer",
+    "goHome": "Retour à l'accueil"
+  }
+}
