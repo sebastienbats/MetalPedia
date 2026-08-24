@@ -68,6 +68,107 @@
 
 ---
 
+## 📁 Structure du projet
+```txt
+MetalPedia/
+├── README.md
+├── package.json
+├── next.config.mjs
+├── tsconfig.json
+├── tailwind.config.js
+├── postcss.config.js
+├── .env.example
+├── .gitignore
+├── public/
+│   ├── manifest.json
+│   ├── offline.html
+│   └── icons/
+│       ├── icon-192.png
+│       ├── icon-512.png
+│       └── icon-512-maskable.png
+├── ml-service/
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── app/
+│       ├── __init__.py
+│       ├── main.py
+│       ├── spotify_client.py
+│       ├── embeddings.py
+│       └── recommendations.py
+├── scripts/
+│   ├── export_dataset.py
+│   └── upload_huggingface.py
+└── src/
+    ├── app/
+    │   ├── layout.tsx
+    │   ├── page.tsx
+    │   ├── providers.tsx
+    │   ├── globals.css
+    │   ├── band/[id]/page.tsx
+    │   ├── search/[query]/page.tsx
+    │   ├── map/page.tsx
+    │   ├── timeline/page.tsx
+    │   ├── ai/page.tsx
+    │   ├── graph/[bandId]/page.tsx
+    │   ├── audio/[bandId]/page.tsx
+    │   ├── favorites/page.tsx
+    │   └── api/
+    │       ├── bands/[id]/route.ts
+    │       ├── search/route.ts
+    │       ├── recommendations/route.ts
+    │       └── ai/logo/route.ts
+    ├── components/
+    │   ├── layout/Header.tsx
+    │   ├── layout/Footer.tsx
+    │   ├── ui/Loader.tsx
+    │   ├── ui/ErrorBoundary.tsx
+    │   ├── ui/CommandPalette.tsx
+    │   ├── ui/ThemeSwitcher.tsx
+    │   ├── ui/OfflineIndicator.tsx
+    │   ├── bands/BandCard.tsx
+    │   ├── bands/BandGrid.tsx
+    │   ├── bands/AlbumCard.tsx
+    │   ├── search/SearchBar.tsx
+    │   ├── search/AdvancedSearch.tsx
+    │   ├── visual/SimilarityGraph.tsx
+    │   ├── visual/AudioRadar.tsx
+    │   ├── visual/StatsPanel.tsx
+    │   ├── social/ReviewForm.tsx
+    │   ├── social/ReviewList.tsx
+    │   ├── social/AuthModal.tsx
+    │   ├── widgets/SpotifyEmbed.tsx
+    │   └── widgets/ConcertsWidget.tsx
+    ├── stores/
+    │   ├── favoritesStore.ts
+    │   ├── uiStore.ts
+    │   └── statsStore.ts
+    ├── lib/
+    │   ├── cache.ts
+    │   ├── metal-api.ts
+    │   ├── supabase.ts
+    │   ├── offline-sync.ts
+    │   ├── d3-utils.ts
+    │   └── sentry.ts
+    ├── api/
+    │   ├── hooks.ts
+    │   ├── authApi.ts
+    │   ├── reviewsApi.ts
+    │   ├── concertsApi.ts
+    │   └── spotify.ts
+    ├── types/
+    │   ├── api.ts
+    │   └── supabase.ts
+    ├── i18n/
+    │   ├── index.ts
+    │   └── locales/
+    │       ├── fr.json
+    │       └── en.json
+    └── middleware.ts
+```
+
+---
+
 ## 🏗️ Architecture
 ```text
 ┌─────────────────────────────────────────────────────────────────────────────┐
