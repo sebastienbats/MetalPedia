@@ -2,7 +2,7 @@
   "name": "metal-pedia",
   "version": "3.0.0",
   "private": true,
-  "description": "Encyclopédie collaborative des groupes de Metal avec gamification épique - 170K+ bands référencés",
+  "description": "Encyclopédie collaborative des groupes de Metal avec gamification épique",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,7 +10,6 @@
     "lint": "next lint",
     "analyze": "ANALYZE=true next build",
     "ml:dev": "cd ml-service && uvicorn app.main:app --reload --port 8000",
-    "ml:build": "docker build -t metalpedia-ml ./ml-service",
     "export:data": "python scripts/export_dataset.py",
     "export:hf": "python scripts/upload_huggingface.py"
   },
@@ -37,6 +36,9 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.1.0",
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
     "@types/d3": "^7.4.3",
     "@types/node": "^20.10.6",
     "@types/react": "^18.2.46",
