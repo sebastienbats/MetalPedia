@@ -20,9 +20,7 @@ export default function ThemeSwitcher() {
           onClick={() => setTheme(th.id)}
           title={th.name}
           className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-            theme === th.id
-              ? 'bg-metal-gray scale-110 shadow-lg'
-              : 'hover:bg-metal-gray/50'
+            theme === th.id ? 'bg-metal-gray scale-110 shadow-lg' : 'hover:bg-metal-gray/50'
           }`}
         >
           <span className="text-lg">{th.icon}</span>
