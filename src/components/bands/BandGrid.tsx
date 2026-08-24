@@ -3,10 +3,7 @@
 import BandCard from './BandCard';
 import type { BandSearchResult } from '@/types/api';
 
-interface Props {
-  bands: BandSearchResult[];
-  isLoading: boolean;
-}
+interface Props { bands: BandSearchResult[]; isLoading: boolean; }
 
 export default function BandGrid({ bands, isLoading }: Props) {
   if (isLoading) {
@@ -26,16 +23,14 @@ export default function BandGrid({ bands, isLoading }: Props) {
     return (
       <div className="text-center py-16">
         <p className="text-6xl mb-4">💀</p>
-        <p className="text-xl text-gray-400">Aucun groupe trouvé dans les ténèbres...</p>
+        <p className="text-xl text-gray-400">Aucun groupe trouvé...</p>
       </div>
     );
   }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {bands.map((band) => (
-        <BandCard key={band.id} band={band} />
-      ))}
+      {bands.map((band) => <BandCard key={band.id} band={band} />)}
     </div>
   );
 }
