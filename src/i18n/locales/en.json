@@ -1,0 +1,203 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "search": "Search",
+    "seeAll": "See all",
+    "loadMore": "Load more"
+  },
+  "nav": {
+    "home": "Home",
+    "favorites": "Favorites",
+    "profile": "Profile",
+    "map": "Map",
+    "timeline": "Timeline",
+    "ai": "AI Studio",
+    "search": "Search"
+  },
+  "home": {
+    "title": "Welcome to the darkness",
+    "subtitle": "Explore over 170,000 metal bands from around the world.",
+    "exploreByGenre": "Explore by genre",
+    "noResults": "No bands found in the darkness..."
+  },
+  "band": {
+    "biography": "Biography",
+    "discography": "Discography",
+    "members": "Members",
+    "reviews": "Reviews",
+    "currentMembers": "Current members",
+    "pastMembers": "Past members",
+    "formedIn": "Formed in",
+    "country": "Country",
+    "genre": "Genre",
+    "status": "Status",
+    "themes": "Themes",
+    "label": "Label",
+    "yearsActive": "Years active",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "viewGraph": "View graph",
+    "viewAudio": "Audio analysis",
+    "externalLink": "View on Metal Archives"
+  },
+  "status": {
+    "active": "Active",
+    "splitUp": "Split-up",
+    "changedName": "Changed name",
+    "onHold": "On hold",
+    "unknown": "Unknown"
+  },
+  "reviews": {
+    "title": "Community reviews",
+    "write": "Write a review",
+    "writeFor": "Write a review for {{band}}",
+    "rating": "Rating",
+    "titlePlaceholder": "Your review title...",
+    "contentPlaceholder": "Share your opinion about this band... (minimum 50 characters)",
+    "submit": "Publish review",
+    "publishing": "Publishing...",
+    "loginToReview": "Log in to write a review",
+    "noReviews": "No reviews yet. Be the first!",
+    "deleteConfirm": "Confirm deletion?",
+    "deleteSuccess": "Review deleted",
+    "submitSuccess": "Review published! +100 XP earned.",
+    "minLength": "Your review must contain at least 50 characters.",
+    "maxLength": "Your review must not exceed 5000 characters."
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Join the Horde",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "username": "Metalhead username",
+    "signInSubtitle": "Return to the darkness",
+    "signUpSubtitle": "Create your metal legend",
+    "noAccount": "No account yet? Join the horde →",
+    "hasAccount": "Already a member? Sign in →",
+    "submitSignIn": "Sign in",
+    "submitSignUp": "Create my account",
+    "authenticating": "Summoning in progress...",
+    "emailConfirmation": "Account created! Check your email to confirm."
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "subtitle": "{{count}} bands in your horde",
+    "empty": "No favorites yet. Explore the darkness!",
+    "explore": "Explore",
+    "added": "Added to favorites",
+    "removed": "Removed from favorites"
+  },
+  "profile": {
+    "title": "Your Legend",
+    "subtitle": "The Council of Nine Genres watches your progress",
+    "level": "Level",
+    "totalXP": "Total XP",
+    "views": "Bands viewed",
+    "favoritesCount": "Favorites",
+    "reviewsCount": "Reviews",
+    "badges": "Relics",
+    "nextRank": "Next rank"
+  },
+  "gamification": {
+    "levelUp": "LEVEL UP!",
+    "continueQuest": "Continue the quest",
+    "quests": "Quest Journal",
+    "activeQuests": "Active quests",
+    "completedQuests": "Completed quests",
+    "badges": "Relics of the Ancients",
+    "badgesCollected": "{{count}}/{{total}} relics collected",
+    "questsCompleted": "{{count}}/{{total}} quests completed",
+    "xpGained": "+{{amount}} XP",
+    "dailyBonus": "Daily blessing from the Ancients",
+    "rarity": {
+      "common": "COMMON",
+      "rare": "RARE",
+      "epic": "EPIC",
+      "legendary": "LEGENDARY"
+    }
+  },
+  "stats": {
+    "title": "Your Metal DNA",
+    "subtitle": "Based on {{count}} bands viewed",
+    "emptyText": "Explore bands to discover your unique metal profile.",
+    "topGenre": "Dominant genre",
+    "topCountry": "Favorite country",
+    "genreBreakdown": "Genre breakdown",
+    "countryBreakdown": "Top countries explored",
+    "totalProgress": "Total progress"
+  },
+  "concerts": {
+    "title": "Upcoming concerts",
+    "upcoming": "Upcoming concerts",
+    "noConcerts": "No concerts scheduled for {{band}} at the moment.",
+    "tickets": "Tickets",
+    "seeAll": "See all concerts",
+    "loadError": "Unable to load concerts"
+  },
+  "search": {
+    "placeholder": "Search for a band...",
+    "results": "Search results",
+    "resultsFor": "Search for: \"{{query}}\"",
+    "resultsCount": "{{count}} result{{count > 1 ? 's' : ''}} found",
+    "noResults": "No bands found for \"{{query}}\"",
+    "tryAgain": "Try another search or explore by genre from the home page.",
+    "exploreByGenre": "Explore by genre"
+  },
+  "audio": {
+    "title": "Audio Fingerprint",
+    "subtitle": "Spotify analysis of {{band}}'s top tracks",
+    "tempo": "Average tempo",
+    "loudness": "Loudness",
+    "tracksAnalyzed": "Tracks analyzed",
+    "interpretation": "Musical interpretation",
+    "basedOn": "Data based on the {{count}} most popular tracks of the band",
+    "bpmCategories": {
+      "veryFast": "Very fast",
+      "fast": "Fast",
+      "moderate": "Moderate",
+      "slow": "Slow"
+    }
+  },
+  "map": {
+    "title": "Metal Map",
+    "subtitle": "Worldwide density of metal bands by country",
+    "bands": "{{count}} bands"
+  },
+  "timeline": {
+    "title": "Metal Timeline",
+    "subtitle": "60 years of metal history, 1968 → 2026"
+  },
+  "ai": {
+    "title": "AI Metal Studio",
+    "subtitle": "Generate a band logo with artificial intelligence",
+    "bandNamePlaceholder": "Band name (e.g., Infernal Frost)",
+    "genreLabel": "Genre",
+    "generate": "Generate logo",
+    "generating": "Generating...",
+    "download": "Download"
+  },
+  "offline": {
+    "title": "Offline mode",
+    "subtitle": "Your favorites and local data are still accessible.",
+    "retry": "Retry",
+    "pendingSync": "{{count}} operations pending synchronization"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "serverError": "Server error",
+    "networkError": "Network error",
+    "tryAgain": "Try again",
+    "goHome": "Back to home"
+  }
+}
