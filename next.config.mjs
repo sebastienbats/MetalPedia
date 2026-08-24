@@ -10,16 +10,6 @@ const config = withPWA({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
-  runtimeCaching: [
-    {
-      urlPattern: /^https:\/\/www\.metal-api\.dev\/.*/i,
-      handler: 'StaleWhileRevalidate',
-      options: {
-        cacheName: 'metal-api-cache',
-        expiration: { maxEntries: 500, maxAgeSeconds: 24 * 60 * 60 },
-      },
-    },
-  ],
 })({
   images: {
     remotePatterns: [
