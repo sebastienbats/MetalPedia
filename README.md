@@ -2,8 +2,6 @@
 
 > **Encyclopédie collaborative des groupes de Metal avec gamification épique** — 170 000+ groupes référencés, recommandations ML, visualisations interactives, mode offline-first et système de progression RPG.
 
-![MetalPedia Banner](https://via.placeholder.com/1200x300/0a0a0a/d63031?text=METALPEDIA)
-
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue?logo=typescript)](https://www.typescriptlang.org)
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org)
@@ -162,7 +160,7 @@ Python 3.11+ (pour le ML service)
 Docker (optionnel)
 ### 1. Cloner et installer
 ```bash
-git clone https://github.com/votre-username/metal-pedia.git
+git clone https://github.com/sebastienbats/MetalPedia.git
 cd metal-pedia
 npm install
 ```
