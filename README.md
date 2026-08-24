@@ -70,7 +70,7 @@
 
 ## 📁 Structure du projet
 ```txt
-MetalPedia/
+metal-pedia/
 ├── README.md
 ├── package.json
 ├── next.config.mjs
@@ -79,9 +79,11 @@ MetalPedia/
 ├── postcss.config.js
 ├── .env.example
 ├── .gitignore
+├── LICENSE
 ├── public/
 │   ├── manifest.json
 │   ├── offline.html
+│   ├── sw.js
 │   └── icons/
 │       ├── icon-192.png
 │       ├── icon-512.png
@@ -100,6 +102,7 @@ MetalPedia/
 │   ├── export_dataset.py
 │   └── upload_huggingface.py
 └── src/
+    ├── middleware.ts
     ├── app/
     │   ├── layout.tsx
     │   ├── page.tsx
@@ -107,49 +110,69 @@ MetalPedia/
     │   ├── globals.css
     │   ├── band/[id]/page.tsx
     │   ├── search/[query]/page.tsx
+    │   ├── favorites/page.tsx
+    │   ├── profile/page.tsx
     │   ├── map/page.tsx
     │   ├── timeline/page.tsx
     │   ├── ai/page.tsx
     │   ├── graph/[bandId]/page.tsx
     │   ├── audio/[bandId]/page.tsx
-    │   ├── favorites/page.tsx
     │   └── api/
     │       ├── bands/[id]/route.ts
     │       ├── search/route.ts
     │       ├── recommendations/route.ts
     │       └── ai/logo/route.ts
     ├── components/
-    │   ├── layout/Header.tsx
-    │   ├── layout/Footer.tsx
-    │   ├── ui/Loader.tsx
-    │   ├── ui/ErrorBoundary.tsx
-    │   ├── ui/CommandPalette.tsx
-    │   ├── ui/ThemeSwitcher.tsx
-    │   ├── ui/OfflineIndicator.tsx
-    │   ├── bands/BandCard.tsx
-    │   ├── bands/BandGrid.tsx
-    │   ├── bands/AlbumCard.tsx
-    │   ├── search/SearchBar.tsx
-    │   ├── search/AdvancedSearch.tsx
-    │   ├── visual/SimilarityGraph.tsx
-    │   ├── visual/AudioRadar.tsx
-    │   ├── visual/StatsPanel.tsx
-    │   ├── social/ReviewForm.tsx
-    │   ├── social/ReviewList.tsx
-    │   ├── social/AuthModal.tsx
-    │   ├── widgets/SpotifyEmbed.tsx
-    │   └── widgets/ConcertsWidget.tsx
+    │   ├── layout/
+    │   │   ├── Header.tsx
+    │   │   └── Footer.tsx
+    │   ├── ui/
+    │   │   ├── Loader.tsx
+    │   │   ├── ErrorBoundary.tsx
+    │   │   ├── CommandPalette.tsx
+    │   │   ├── ThemeSwitcher.tsx
+    │   │   └── OfflineIndicator.tsx
+    │   ├── bands/
+    │   │   ├── BandCard.tsx
+    │   │   ├── BandGrid.tsx
+    │   │   ├── AlbumCard.tsx
+    │   │   └── BandDetailClient.tsx
+    │   ├── search/
+    │   │   └── SearchBar.tsx
+    │   ├── visual/
+    │   │   ├── SimilarityGraph.tsx
+    │   │   ├── AudioRadar.tsx
+    │   │   └── StatsPanel.tsx
+    │   ├── social/
+    │   │   ├── ReviewForm.tsx
+    │   │   ├── ReviewList.tsx
+    │   │   └── AuthModal.tsx
+    │   ├── widgets/
+    │   │   ├── SpotifyEmbed.tsx
+    │   │   └── ConcertsWidget.tsx
+    │   └── gamification/
+    │       ├── XPBar.tsx
+    │       ├── LevelUpModal.tsx
+    │       ├── BadgesPanel.tsx
+    │       ├── QuestsPanel.tsx
+    │       └── PlayerCard.tsx
     ├── stores/
     │   ├── favoritesStore.ts
+    │   ├── statsStore.ts
     │   ├── uiStore.ts
-    │   └── statsStore.ts
+    │   └── gamificationStore.ts
     ├── lib/
     │   ├── cache.ts
     │   ├── metal-api.ts
     │   ├── supabase.ts
     │   ├── offline-sync.ts
     │   ├── d3-utils.ts
-    │   └── sentry.ts
+    │   ├── sentry.ts
+    │   └── gamification/
+    │       ├── lore.ts
+    │       ├── badges.ts
+    │       ├── quests.ts
+    │       └── engine.ts
     ├── api/
     │   ├── hooks.ts
     │   ├── authApi.ts
@@ -159,12 +182,11 @@ MetalPedia/
     ├── types/
     │   ├── api.ts
     │   └── supabase.ts
-    ├── i18n/
-    │   ├── index.ts
-    │   └── locales/
-    │       ├── fr.json
-    │       └── en.json
-    └── middleware.ts
+    └── i18n/
+        ├── index.ts
+        └── locales/
+            ├── fr.json
+            └── en.json
 ```
 
 ---
