@@ -7,12 +7,10 @@ import StatsPanel from '@/components/visual/StatsPanel';
 
 export default function ProfilePage() {
   return (
-    <div className="space-y-8 pb-24">
+    <div className="space-y-8">
       <header className="text-center border-b border-metal-gray pb-6">
         <h1 className="font-metal text-5xl text-metal-rust mb-3">⚔️ Ta Légende</h1>
-        <p className="text-gray-400 font-serif">
-          Le Conseil des Neuf Genres observe ta progression
-        </p>
+        <p className="text-gray-400 font-serif">Le Conseil des Neuf Genres observe ta progression</p>
       </header>
 
       <div className="grid lg:grid-cols-2 gap-8">
@@ -20,7 +18,6 @@ export default function ProfilePage() {
           <PlayerCard />
           <StatsPanel />
         </div>
-
         <div className="space-y-6">
           <QuestsPanel />
           <BadgesPanel />
