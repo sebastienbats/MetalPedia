@@ -356,7 +356,7 @@ railway up
 
 ## 📊 Datasets publics
 Le projet exporte régulièrement ses données vers des plateformes publiques :
-- HuggingFace : https://huggingface.co/datasets/votre-username/metalpedia-bands
+- HuggingFace : https://huggingface.co/datasets/Montecsys/metalpedia-bands
 - Kaggle : https://www.kaggle.com/datasets/votre-username/metalpedia-bands
 ### Schéma du dataset
 |Colonne|Type|Description|
