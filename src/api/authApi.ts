@@ -130,7 +130,6 @@ export function useSyncGamification() {
         badgesUnlocked: string[];
       };
     }) => {
-      // ✅ CORRECTION : Type explicite pour éviter l'erreur TypeScript
       const gamificationData = {
         user_id: userId,
         total_xp: stats.totalXP,
@@ -143,9 +142,11 @@ export function useSyncGamification() {
         badges_unlocked: stats.badgesUnlocked,
       };
 
-      const { error } = await supabase
+      // ✅ CORRECTION : Cast explicite pour contourner le problème
+      // de typage Supabase (types non-alignés avec le schéma DB)
+      const { error } = await (supabase
         .from('gamification_progress')
-        .upsert(gamificationData);
+        .upsert(gamificationData) as any);
 
       if (error) throw error;
     },
