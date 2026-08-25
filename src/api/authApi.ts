@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import type { Profile, Review } from '@/types/supabase';
+import type { Profile } from '@/types/supabase';
 
 // ═══════════════════════════════════════════
 // AUTHENTICATION HOOKS
@@ -21,10 +21,12 @@ export function useProfile(userId?: string | null) {
   return useQuery({
     queryKey: ['profile', userId],
     queryFn: async () => {
+      if (!userId) return null;
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId!)
+        .eq('id', userId)
         .single();
 
       if (error) throw error;
@@ -117,21 +119,33 @@ export function useSyncGamification() {
       stats,
     }: {
       userId: string;
-      stats: any;
+      stats: {
+        totalXP: number;
+        level: number;
+        totalViews: number;
+        totalFavorites: number;
+        totalReviews: number;
+        genresExplored: string[];
+        questsCompleted: string[];
+        badgesUnlocked: string[];
+      };
     }) => {
+      // ✅ CORRECTION : Type explicite pour éviter l'erreur TypeScript
+      const gamificationData = {
+        user_id: userId,
+        total_xp: stats.totalXP,
+        level: stats.level,
+        total_views: stats.totalViews,
+        total_favorites: stats.totalFavorites,
+        total_reviews: stats.totalReviews,
+        genres_explored: stats.genresExplored,
+        quests_completed: stats.questsCompleted,
+        badges_unlocked: stats.badgesUnlocked,
+      };
+
       const { error } = await supabase
         .from('gamification_progress')
-        .upsert({
-          user_id: userId,
-          total_xp: stats.totalXP,
-          level: stats.level,
-          total_views: stats.totalViews,
-          total_favorites: stats.totalFavorites,
-          total_reviews: stats.totalReviews,
-          genres_explored: stats.genresExplored,
-          quests_completed: stats.questsCompleted,
-          badges_unlocked: stats.badgesUnlocked,
-        });
+        .upsert(gamificationData);
 
       if (error) throw error;
     },
