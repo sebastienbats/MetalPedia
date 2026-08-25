@@ -2,10 +2,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/types/supabase';
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // AUTHENTICATION HOOKS
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
+/**
+ * Hook pour récupérer l'utilisateur actuellement connecté
+ * Retourne null si non connecté
+ */
 export function useAuth() {
   return useQuery({
     queryKey: ['auth-user'],
@@ -17,6 +21,10 @@ export function useAuth() {
   });
 }
 
+/**
+ * Hook pour récupérer le profil d'un utilisateur
+ * @param userId - ID de l'utilisateur (optionnel, utilise l'user connecté si non fourni)
+ */
 export function useProfile(userId?: string | null) {
   return useQuery({
     queryKey: ['profile', userId],
@@ -36,6 +44,10 @@ export function useProfile(userId?: string | null) {
   });
 }
 
+/**
+ * Hook pour créer un nouveau compte utilisateur
+ * Envoie un email de confirmation si activé dans Supabase
+ */
 export function useSignUp() {
   const qc = useQueryClient();
 
@@ -64,6 +76,9 @@ export function useSignUp() {
   });
 }
 
+/**
+ * Hook pour se connecter avec email et mot de passe
+ */
 export function useSignIn() {
   const qc = useQueryClient();
 
@@ -84,6 +99,9 @@ export function useSignIn() {
   });
 }
 
+/**
+ * Hook pour se déconnecter
+ */
 export function useSignOut() {
   const qc = useQueryClient();
 
@@ -97,6 +115,9 @@ export function useSignOut() {
   });
 }
 
+/**
+ * Hook pour envoyer un email de réinitialisation de mot de passe
+ */
 export function useResetPassword() {
   return useMutation({
     mutationFn: async (email: string) => {
@@ -106,10 +127,18 @@ export function useResetPassword() {
   });
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // GAMIFICATION SYNC HOOKS
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
+/**
+ * Hook pour synchroniser la progression gamification avec Supabase
+ * Utilisé pour persister l'XP, le niveau, les badges et quêtes dans le cloud
+ * 
+ * Note: Utilise un cast explicite car les types Supabase générés ne sont pas
+ * parfaitement alignés avec le schéma de base de données. L'opération est
+ * valide au runtime, seul le typage TypeScript pose problème.
+ */
 export function useSyncGamification() {
   const qc = useQueryClient();
 
@@ -142,11 +171,15 @@ export function useSyncGamification() {
         badges_unlocked: stats.badgesUnlocked,
       };
 
-      // ✅ CORRECTION : Cast explicite pour contourner le problème
-      // de typage Supabase (types non-alignés avec le schéma DB)
-      const { error } = await (supabase
-        .from('gamification_progress')
-        .upsert(gamificationData) as any);
+      // ✅ Cast du builder pour contourner le mauvais typage Supabase
+      // La table gamification_progress existe bien en DB mais les types
+      // générés ne sont pas synchronisés avec le schéma réel
+      const query = supabase
+        .from('gamification_progress') as unknown as {
+          upsert: (data: typeof gamificationData) => Promise<{ error: any }>;
+        };
+
+      const { error } = await query.upsert(gamificationData);
 
       if (error) throw error;
     },
