@@ -23,7 +23,7 @@ export function useAuth() {
 
 /**
  * Hook pour récupérer le profil d'un utilisateur
- * @param userId - ID de l'utilisateur (optionnel, utilise l'user connecté si non fourni)
+ * @param userId - ID de l'utilisateur (optionnel)
  */
 export function useProfile(userId?: string | null) {
   return useQuery({
@@ -135,9 +135,8 @@ export function useResetPassword() {
  * Hook pour synchroniser la progression gamification avec Supabase
  * Utilisé pour persister l'XP, le niveau, les badges et quêtes dans le cloud
  * 
- * Note: Utilise un cast explicite car les types Supabase générés ne sont pas
- * parfaitement alignés avec le schéma de base de données. L'opération est
- * valide au runtime, seul le typage TypeScript pose problème.
+ * ✅ Les types Supabase sont maintenant parfaitement alignés avec le schéma DB,
+ * aucun cast explicite n'est nécessaire.
  */
 export function useSyncGamification() {
   const qc = useQueryClient();
@@ -159,27 +158,19 @@ export function useSyncGamification() {
         badgesUnlocked: string[];
       };
     }) => {
-      const gamificationData = {
-        user_id: userId,
-        total_xp: stats.totalXP,
-        level: stats.level,
-        total_views: stats.totalViews,
-        total_favorites: stats.totalFavorites,
-        total_reviews: stats.totalReviews,
-        genres_explored: stats.genresExplored,
-        quests_completed: stats.questsCompleted,
-        badges_unlocked: stats.badgesUnlocked,
-      };
-
-      // ✅ Cast du builder pour contourner le mauvais typage Supabase
-      // La table gamification_progress existe bien en DB mais les types
-      // générés ne sont pas synchronisés avec le schéma réel
-      const query = supabase
-        .from('gamification_progress') as unknown as {
-          upsert: (data: typeof gamificationData) => Promise<{ error: any }>;
-        };
-
-      const { error } = await query.upsert(gamificationData);
+      const { error } = await supabase
+        .from('gamification_progress')
+        .upsert({
+          user_id: userId,
+          total_xp: stats.totalXP,
+          level: stats.level,
+          total_views: stats.totalViews,
+          total_favorites: stats.totalFavorites,
+          total_reviews: stats.totalReviews,
+          genres_explored: stats.genresExplored,
+          quests_completed: stats.questsCompleted,
+          badges_unlocked: stats.badgesUnlocked,
+        });
 
       if (error) throw error;
     },
