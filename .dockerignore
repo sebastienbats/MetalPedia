@@ -1,0 +1,41 @@
+# Dépendances
+node_modules
+ml-service/venv
+ml-service/.venv
+
+# Builds
+.next
+out
+build
+dist
+*.log
+
+# Git
+.git
+.gitignore
+
+# Environnement
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+coverage
+.nyc_output
+
+# Divers
+*.md
+LICENSE
+docker-compose.yml
+Dockerfile
+.dockerignore
