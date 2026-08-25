@@ -452,11 +452,3 @@ export type TableName = keyof Database['public']['Tables'];
 export type RowType<T extends TableName> = Database['public']['Tables'][T]['Row'];
 export type InsertType<T extends TableName> = Database['public']['Tables'][T]['Insert'];
 export type UpdateType<T extends TableName> = Database['public']['Tables'][T]['Update'];
-
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
