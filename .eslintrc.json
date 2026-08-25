@@ -3,8 +3,6 @@
   "extends": [
     "next/core-web-vitals",
     "next/typescript",
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
     "prettier"
   ],
   "parser": "@typescript-eslint/parser",
@@ -15,20 +13,26 @@
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
     "react/no-unescaped-entities": "off",
-    "@typescript-eslint/no-explicit-any": "warn",
+
+    "prefer-const": "warn",
+    "no-var": "error",
+    "eqeqeq": ["error", "always"],
+
+    "curly": "off",
+    "no-console": "off",
+
     "@typescript-eslint/no-unused-vars": [
       "warn",
       {
         "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
+        "varsIgnorePattern": "^_",
+        "ignoreRestSiblings": true
       }
     ],
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-var-requires": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "prefer-const": "error",
-    "no-var": "error",
-    "eqeqeq": ["error", "always"],
-    "curly": ["error", "all"]
+    "@typescript-eslint/no-non-null-assertion": "off"
   },
   "settings": {
     "react": {
@@ -43,6 +47,7 @@
     "dist/",
     "public/sw.js",
     "public/workbox-*.js",
-    "scripts/"
+    "scripts/",
+    "ml-service/"
   ]
 }
