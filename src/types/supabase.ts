@@ -421,12 +421,8 @@ export const Constants = {
     Enums: {},
   },
 } as const
-// ═══════════════════════════════════════════════════════════
-// ALIAS DE TYPES (compatibilité avec le reste du code)
-// ═══════════════════════════════════════════════════════════
-
 // ─────────────────────────────────────────
-// Types de base (Row des tables)
+// 👇 AJOUTER CE BLOC À LA FIN 👇
 // ─────────────────────────────────────────
 export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type Review = Database['public']['Tables']['reviews']['Row'];
@@ -434,22 +430,13 @@ export type UserFavorite = Database['public']['Tables']['user_favorites']['Row']
 export type GamificationProgress = Database['public']['Tables']['gamification_progress']['Row'];
 export type XPHistory = Database['public']['Tables']['xp_history']['Row'];
 
-// ─────────────────────────────────────────
-// Types d'insertion (pour les mutations)
-// ─────────────────────────────────────────
 export type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
 export type ReviewInsert = Database['public']['Tables']['reviews']['Insert'];
 export type GamificationProgressInsert = Database['public']['Tables']['gamification_progress']['Insert'];
 
-// ─────────────────────────────────────────
-// Types de mise à jour
-// ─────────────────────────────────────────
 export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 export type ReviewUpdate = Database['public']['Tables']['reviews']['Update'];
 
-// ─────────────────────────────────────────
-// Types composés (pour les requêtes avec JOIN)
-// ─────────────────────────────────────────
 export interface ReviewWithAuthor extends Review {
   profiles: {
     username: string;
@@ -461,23 +448,11 @@ export interface ProfileWithStats extends Profile {
   gamification_progress: GamificationProgress | null;
 }
 
-// ─────────────────────────────────────────
-// Types utilitaires
-// ─────────────────────────────────────────
 export type TableName = keyof Database['public']['Tables'];
+export type RowType<T extends TableName> = Database['public']['Tables'][T]['Row'];
+export type InsertType<T extends TableName> = Database['public']['Tables'][T]['Insert'];
+export type UpdateType<T extends TableName> = Database['public']['Tables'][T]['Update'];
 
-export type RowType<T extends TableName> =
-  Database['public']['Tables'][T]['Row'];
-
-export type InsertType<T extends TableName> =
-  Database['public']['Tables'][T]['Insert'];
-
-export type UpdateType<T extends TableName> =
-  Database['public']['Tables'][T]['Update'];
-
-// ─────────────────────────────────────────
-// Type Json (nécessaire pour certains champs)
-// ─────────────────────────────────────────
 export type Json =
   | string
   | number
