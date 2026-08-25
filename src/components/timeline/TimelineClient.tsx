@@ -7,9 +7,9 @@ import Loader from '@/components/ui/Loader';
 // Next.js 15 gère nativement cet import (pas de config webpack custom)
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // TYPES
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
 interface TimelineEvent {
   id: number;
@@ -20,9 +20,9 @@ interface TimelineEvent {
   type?: 'point' | 'range';
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // DONNÉES HISTORIQUES (60 ans de metal)
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
 const METAL_EVENTS: TimelineEvent[] = [
   // Naissance du metal
@@ -77,9 +77,9 @@ const METAL_EVENTS: TimelineEvent[] = [
   { id: 35, content: '🎸 Ghost - "Meliora"', start: '2015-08-21', className: 'event-heavy' },
 ];
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // COMPOSANT PRINCIPAL
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
 export default function TimelineClient() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -91,7 +91,13 @@ export default function TimelineClient() {
   }, []);
 
   useEffect(() => {
-    if (!mounted || !containerRef.current) return;
+    if (!mounted) return;
+
+    // ✅ CAPTURER la référence dans une variable locale
+    // Cela garantit à TypeScript que container n'est pas null
+    // même si le composant se démonte pendant l'await
+    const container = containerRef.current;
+    if (!container) return;
 
     let timeline: any = null;
 
@@ -118,7 +124,8 @@ export default function TimelineClient() {
           },
         };
 
-        timeline = new Timeline(containerRef.current, items, options);
+        // ✅ Utilisation de la variable locale 'container' (non-null garantie)
+        timeline = new Timeline(container, items, options);
         setIsLoading(false);
       } catch (error) {
         console.error('Erreur initialisation timeline:', error);
