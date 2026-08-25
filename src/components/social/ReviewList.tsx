@@ -44,8 +44,10 @@ function ReviewItem({
     }
   };
 
-  // Formater la date
-  const formattedDate = new Date(review.created_at).toLocaleDateString('fr-FR', {
+  // Formater la date (avec fallback si created_at est null)
+  const formattedDate = new Date(
+    review.created_at ?? new Date().toISOString()
+  ).toLocaleDateString('fr-FR', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
