@@ -1,22 +1,14 @@
 import withPWAInit from 'next-pwa';
 import bundleAnalyzer from '@next/bundle-analyzer';
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // WRAPPERS DE CONFIGURATION
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
-/**
- * Bundle Analyzer
- * Activé via : ANALYZE=true npm run build
- */
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-/**
- * PWA (Progressive Web App)
- * Désactivé en dev pour éviter les conflits de cache
- */
 const withPWA = withPWAInit({
   dest: 'public',
   register: true,
@@ -27,80 +19,64 @@ const withPWA = withPWAInit({
     image: '/icons/icon-192.png',
   },
   runtimeCaching: [
-    // API Metal (metal-api.dev) - StaleWhileRevalidate
     {
       urlPattern: /^https:\/\/www\.metal-api\.dev\/.*/i,
       handler: 'StaleWhileRevalidate',
       options: {
         cacheName: 'metal-api-cache',
-        expiration: {
-          maxEntries: 500,
-          maxAgeSeconds: 24 * 60 * 60, // 24h
-        },
+        expiration: { maxEntries: 500, maxAgeSeconds: 24 * 60 * 60 },
         cacheableResponse: { statuses: [0, 200] },
       },
     },
-
-    // API interne - NetworkFirst
     {
       urlPattern: /^\/api\/.*$/i,
       handler: 'NetworkFirst',
       options: {
         cacheName: 'internal-api-cache',
         networkTimeoutSeconds: 10,
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 60 * 60, // 1h
-        },
+        expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 },
         cacheableResponse: { statuses: [0, 200] },
       },
     },
-
-    // Images - CacheFirst
     {
       urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|avif|ico)$/i,
       handler: 'CacheFirst',
       options: {
         cacheName: 'images-cache',
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 jours
-        },
+        expiration: { maxEntries: 200, maxAgeSeconds: 30 * 24 * 60 * 60 },
       },
     },
-
-    // Google Fonts - CacheFirst
     {
       urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
       handler: 'CacheFirst',
       options: {
         cacheName: 'google-fonts-cache',
-        expiration: {
-          maxEntries: 20,
-          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 an
-        },
+        expiration: { maxEntries: 20, maxAgeSeconds: 365 * 24 * 60 * 60 },
         cacheableResponse: { statuses: [0, 200] },
       },
     },
-
-    // Spotify Embeds - StaleWhileRevalidate
     {
       urlPattern: /^https:\/\/open\.spotify\.com\/embed\/.*/i,
       handler: 'StaleWhileRevalidate',
       options: {
         cacheName: 'spotify-embed-cache',
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 24 * 60 * 60,
-        },
+        expiration: { maxEntries: 50, maxAgeSeconds: 24 * 60 * 60 },
+      },
+    },
+    {
+      urlPattern: /\/_next\/static\/.*/i,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'next-static-cache',
+        expiration: { maxEntries: 1000, maxAgeSeconds: 365 * 24 * 60 * 60 },
       },
     },
   ],
 });
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // HEADERS DE SÉCURITÉ
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
 const securityHeaders = [
   { key: 'X-Frame-Options', value: 'DENY' },
@@ -115,11 +91,11 @@ const cspDirectives = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://cdn.jsdelivr.net",
+  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co http://localhost:8000 https://*.up.railway.app",
+  "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com",
   "frame-src 'self' https://open.spotify.com https://www.youtube.com",
-  "media-src 'self' https://open.spotify.com",
+  "media-src 'self' https://open.spotify.com https://*.scdn.co",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
   "object-src 'none'",
@@ -128,36 +104,28 @@ const cspDirectives = [
   "upgrade-insecure-requests",
 ].join('; ');
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // CONFIGURATION PRINCIPALE
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
-  // ⚠️ PAS de output: 'standalone' sur Vercel
-  // Vercel détecte automatiquement Next.js
-  // Le standalone est uniquement pour Docker/self-hosting
-
-  // ─────────────────────────────────────────
-  // IMAGES OPTIMISÉES
-  // ─────────────────────────────────────────
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'www.metal-archives.com', pathname: '/**' },
       { protocol: 'https', hostname: 'cdn.metal-api.dev', pathname: '/**' },
       { protocol: 'https', hostname: 'i.scdn.co', pathname: '/**' },
       { protocol: 'https', hostname: 'cdn.jsdelivr.net', pathname: '/**' },
-      { protocol: 'https', hostname: '*.supabase.co', pathname: '/**' },
+      { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
     ],
     formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 jours
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
   },
 
-  // ─────────────────────────────────────────
-  // HEADERS
-  // ─────────────────────────────────────────
   async headers() {
     return [
       {
@@ -169,22 +137,15 @@ const nextConfig = {
       },
       {
         source: '/icons/(.*)',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
       {
         source: '/manifest.json',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=86400' },
-        ],
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=86400' }],
       },
     ];
   },
 
-  // ─────────────────────────────────────────
-  // REDIRECTS
-  // ─────────────────────────────────────────
   async redirects() {
     return [
       { source: '/home', destination: '/', permanent: true },
@@ -192,9 +153,6 @@ const nextConfig = {
     ];
   },
 
-  // ─────────────────────────────────────────
-  // REWRITES (Proxy ML Service)
-  // ─────────────────────────────────────────
   async rewrites() {
     return [
       {
@@ -204,57 +162,37 @@ const nextConfig = {
     ];
   },
 
-  // ─────────────────────────────────────────
-  // EXPERIMENTAL (features stables uniquement)
-  // ─────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════
+  // EXPERIMENTAL (uniquement features stables de Next.js 15.1.x)
+  // ═══════════════════════════════════════════════════════════
   experimental: {
-    // ❌ PPR retiré (nécessite next@canary)
-    // ❌ typedRoutes retiré (pas dans 15.1.4 stable)
-    // ❌ logging retiré (pas une option de experimental)
-    
-    // ✅ serverActions
     serverActions: {
       bodySizeLimit: '2mb',
     },
-
-    // ✅ optimizePackageImports
     optimizePackageImports: [
       'recharts',
       'd3',
       '@tanstack/react-query',
       'vis-timeline',
+      'cmdk',
     ],
   },
 
-  // ─────────────────────────────────────────
-  // COMPILATION
-  // ─────────────────────────────────────────
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production'
-      ? { exclude: ['error', 'warn'] }
-      : false,
+    removeConsole: process.env.NODE_ENV === 'production',
   },
 
-  // ─────────────────────────────────────────
-  // VARIABLES D'ENVIRONNEMENT
-  // ─────────────────────────────────────────
   env: {
     NEXT_PUBLIC_BUILD_TIME: new Date().toISOString(),
     NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version || '3.0.0',
   },
 
-  // ─────────────────────────────────────────
-  // WEBPACK CUSTOM
-  // ─────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════
+  // WEBPACK CUSTOM (SIMPLIFIÉ)
+  // ❌ Pas de règle CSS custom (Next.js 15 gère nativement)
+  // ✅ Import CSS vis-timeline directement dans le composant
+  // ═══════════════════════════════════════════════════════════
   webpack: (config, { isServer, webpack }) => {
-    // Support vis-timeline CSS
-    config.module.rules.push({
-      test: /\.css$/i,
-      include: /node_modules\/vis-timeline/,
-      use: ['style-loader', 'css-loader'],
-    });
-
-    // Fallbacks pour modules Node côté client
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -274,7 +212,6 @@ const nextConfig = {
       };
     }
 
-    // Ignorer les locales moment.js
     config.plugins.push(
       new webpack.IgnorePlugin({
         resourceRegExp: /^\.\/locale$/,
@@ -285,19 +222,8 @@ const nextConfig = {
     return config;
   },
 
-  // ─────────────────────────────────────────
-  // VALIDATIONS
-  // ─────────────────────────────────────────
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
-  typescript: {
-    ignoreBuildErrors: false,
-  },
+  eslint: { ignoreDuringBuilds: false },
+  typescript: { ignoreBuildErrors: false },
 };
-
-// ═══════════════════════════════════════════
-// EXPORT AVEC WRAPPERS
-// ═══════════════════════════════════════════
 
 export default withBundleAnalyzer(withPWA(nextConfig));
