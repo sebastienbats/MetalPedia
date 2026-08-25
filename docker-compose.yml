@@ -1,0 +1,88 @@
+version: '3.9'
+
+services:
+  # ═══════════════════════════════════════════
+  # FRONTEND NEXT.JS
+  # ═══════════════════════════════════════════
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: metalpedia-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SITE_URL=http://localhost:3000
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+      - NEXT_PUBLIC_ML_SERVICE_URL=http://ml-service:8000
+    depends_on:
+      - ml-service
+      - redis
+    networks:
+      - metalpedia-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ═══════════════════════════════════════════
+  # ML SERVICE (FASTAPI)
+  # ═══════════════════════════════════════════
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: metalpedia-ml
+    ports:
+      - "8000:8000"
+    environment:
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - metalpedia-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ═══════════════════════════════════════════
+  # REDIS (CACHE)
+  # ═══════════════════════════════════════════
+  redis:
+    image: redis:7-alpine
+    container_name: metalpedia-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - metalpedia-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# ═══════════════════════════════════════════
+# RÉSEAUX ET VOLUMES
+# ═══════════════════════════════════════════
+networks:
+  metalpedia-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local
