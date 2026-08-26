@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { metalServerApi } from '@/lib/metal-api';
-import type { BandSearchResult } from '@/types/api';
+// src/app/api/search/route.ts
 
+import { NextRequest, NextResponse } from 'next/server';
+import { metalServerApi, type Band } from '@/lib/metal-api';
+
+// Utilisation du Edge Runtime pour des réponses ultra-rapides
 export const runtime = 'edge';
 
 export async function GET(req: NextRequest) {
@@ -10,8 +12,10 @@ export async function GET(req: NextRequest) {
   const genre = searchParams.get('genre');
 
   try {
-    // ✅ Typage explicite du tableau
-    let results: BandSearchResult[] = [];
+    // ✅ On utilise explicitement le type Band[] ici.
+    // Comme BandSearchResult et Band sont maintenant alignés sur 'formed: number | null',
+    // TypeScript n'aura plus aucune objection.
+    let results: Band[] = [];
     
     if (q) {
       results = await metalServerApi.searchBands(q);
@@ -20,10 +24,14 @@ export async function GET(req: NextRequest) {
     }
     
     return NextResponse.json(results);
+    
   } catch (error: any) {
-    console.error('Search error:', error);
+    console.error('Search API error:', error);
     return NextResponse.json(
-      { error: 'Search failed', details: error?.message || 'Unknown error' },
+      { 
+        error: 'Search failed', 
+        details: error?.message || 'Unknown error' 
+      },
       { status: 500 }
     );
   }
