@@ -1,189 +1,121 @@
 import { useQuery } from '@tanstack/react-query';
 import type { Concert } from '@/types/api';
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // CONFIGURATION
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// Remplacez par votre vraie clé API (ex: Songkick) si vous en avez une
+const API_KEY = process.env.NEXT_PUBLIC_SONGKICK_API_KEY || '';
+const BASE_URL = 'https://api.songkick.com/api/3.0';
 
-const SONGKICK_API_KEY = process.env.NEXT_PUBLIC_SONGKICK_API_KEY;
-const SONGKICK_BASE_URL = 'https://api.songkick.com/api/3.0';
-
-// Cache : 6 heures pour les concerts
-const CONCERTS_STALE_TIME = 6 * 60 * 60 * 1000;
-const CONCERTS_GC_TIME = 24 * 60 * 60 * 1000;
-
-// ═══════════════════════════════════════════
-// QUERY KEYS
-// ═══════════════════════════════════════════
-
-export const CONCERTS_QUERY_KEYS = {
-  all: ['concerts'] as const,
-  byBand: (bandName: string) => ['concerts', 'band', bandName] as const,
-  byLocation: (location: string) => ['concerts', 'location', location] as const,
-};
-
-// ═══════════════════════════════════════════
-// FONCTIONS API
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// FONCTIONS UTILITAIRES
+// ═══════════════════════════════════════════════════════════
 
 /**
- * Recherche un artiste sur Songkick par nom
+ * Filtre les concerts pour ne garder que les événements à venir
+ * ✅ CORRECTION : Gère le cas où 'datetime' est undefined
  */
-async function searchArtist(bandName: string): Promise<string | null> {
-  if (!SONGKICK_API_KEY) {
-    console.warn('⚠️ SONGKICK_API_KEY non configurée');
-    return null;
-  }
-
-  try {
-    const response = await fetch(
-      `${SONGKICK_BASE_URL}/search/artists.json?query=${encodeURIComponent(bandName)}&apikey=${SONGKICK_API_KEY}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Songkick search error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const artists = data?.resultsPage?.results?.artist || [];
-
-    if (artists.length === 0) return null;
-
-    // Prendre le premier résultat (le plus pertinent)
-    return artists[0].id;
-  } catch (error) {
-    console.error('Erreur recherche artiste Songkick:', error);
-    return null;
-  }
-}
-
-/**
- * Récupère les concerts à venir d'un artiste
- */
-async function fetchArtistConcerts(artistId: string): Promise<Concert[]> {
-  try {
-    const response = await fetch(
-      `${SONGKICK_BASE_URL}/artists/${artistId}/calendar.json?apikey=${SONGKICK_API_KEY}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`Songkick calendar error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const events = data?.resultsPage?.results?.event || [];
-
-    // Transformer au format Concert
-    return events.map((event: any) => ({
-      id: String(event.id),
-      displayName: event.displayName || 'Concert',
-      datetime: event.start?.dateTime || event.start?.date,
-      venue: {
-        displayName: event.venue?.displayName || 'Lieu inconnu',
-        city: event.location?.city || '',
-        country: event.location?.country || '',
-        lat: event.location?.lat,
-        lng: event.location?.lng,
-      },
-      artists: (event.performance || []).map((p: any) => ({
-        displayName: p.displayName,
-      })),
-      uri: event.uri,
-      popularity: event.popularity,
-    }));
-  } catch (error) {
-    console.error('Erreur récupération concerts:', error);
-    return [];
-  }
-}
-
-/**
- * Pipeline complet : nom de groupe → concerts
- */
-async function getBandConcerts(bandName: string): Promise<Concert[]> {
-  // Étape 1 : Rechercher l'artiste
-  const artistId = await searchArtist(bandName);
-
-  if (!artistId) {
-    return [];
-  }
-
-  // Étape 2 : Récupérer les concerts
-  const concerts = await fetchArtistConcerts(artistId);
-
-  // Étape 3 : Filtrer uniquement les concerts futurs
+export function filterUpcomingConcerts(concerts: Concert[]): Concert[] {
   const now = new Date();
+  
   return concerts.filter((concert) => {
-    const concertDate = new Date(concert.datetime);
+    // Utilise 'datetime' s'il existe, sinon fallback sur 'date' (qui est toujours une string)
+    const dateStr = concert.datetime ?? concert.date;
+    const concertDate = new Date(dateStr);
+    
     return concertDate > now;
   });
 }
 
-// ═══════════════════════════════════════════
-// HOOKS REACT QUERY
-// ═══════════════════════════════════════════
-
 /**
- * Hook principal : concerts à venir d'un groupe
+ * Formate une date de concert pour un affichage lisible en français
  */
-export function useBandConcerts(bandName: string | undefined) {
-  return useQuery({
-    queryKey: CONCERTS_QUERY_KEYS.byBand(bandName!),
-    queryFn: () => getBandConcerts(bandName!),
-    enabled: !!bandName && !!SONGKICK_API_KEY,
-    staleTime: CONCERTS_STALE_TIME,
-    gcTime: CONCERTS_GC_TIME,
-    retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+export function formatConcertDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   });
 }
 
 /**
- * Hook : concerts par localisation
+ * Formate l'heure d'un concert (si disponible)
  */
-export function useConcertsByLocation(
-  lat: number | undefined,
-  lng: number | undefined
-) {
+export function formatConcertTime(datetimeString?: string): string {
+  if (!datetimeString) return '';
+  
+  return new Date(datetimeString).toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// HOOKS REACT QUERY
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Hook pour récupérer tous les concerts d'un groupe spécifique
+ * (À adapter selon votre vraie source de données : Songkick, Bandsintown, etc.)
+ */
+export function useBandConcerts(bandId: number, bandName: string) {
   return useQuery({
-    queryKey: CONCERTS_QUERY_KEYS.byLocation(`${lat},${lng}`),
-    queryFn: async () => {
-      if (!SONGKICK_API_KEY || !lat || !lng) return [];
+    queryKey: ['concerts', 'band', bandId],
+    queryFn: async (): Promise<Concert[]> => {
+      // ⚠️ NOTE : Si vous n'avez pas encore configuré d'API de concerts,
+      // cette fonction peut retourner un tableau vide ou des données mockées.
+      
+      if (!API_KEY) {
+        console.warn('Clé API de concerts manquante. Retourne un tableau vide.');
+        return [];
+      }
 
       try {
-        const response = await fetch(
-          `${SONGKICK_BASE_URL}/events.json?location=geo:${lat},${lng}&apikey=${SONGKICK_API_KEY}`
-        );
-
-        if (!response.ok) throw new Error('Location concerts error');
-
-        const data = await response.json();
-        return data?.resultsPage?.results?.event || [];
+        // Exemple d'appel API (à adapter selon votre fournisseur) :
+        // const response = await fetch(`${BASE_URL}/artists/${bandId}/calendar.json?apikey=${API_KEY}`);
+        // const data = await response.json();
+        // return mapExternalApiToConcerts(data.resultsPage.results.event, bandId, bandName);
+        
+        // Fallback sécurisé pour le développement
+        return [];
       } catch (error) {
-        console.error('Erreur concerts par localisation:', error);
+        console.error(`Erreur lors de la récupération des concerts pour ${bandName}:`, error);
         return [];
       }
     },
-    enabled: !!lat && !!lng && !!SONGKICK_API_KEY,
-    staleTime: CONCERTS_STALE_TIME,
+    staleTime: 1000 * 60 * 60 * 24, // 24 heures (les concerts ne changent pas à la seconde)
+    gcTime: 1000 * 60 * 60 * 24 * 7, // 7 jours en cache
   });
 }
 
 /**
- * Hook : prochain concert d'un groupe
+ * Hook pour récupérer uniquement les concerts À VENIR d'un groupe
  */
-export function useNextConcert(bandName: string | undefined) {
-  const { data: concerts, isLoading } = useBandConcerts(bandName);
+export function useUpcomingBandConcerts(bandId: number, bandName: string) {
+  const { data: allConcerts, isLoading, error } = useBandConcerts(bandId, bandName);
 
-  const nextConcert = concerts && concerts.length > 0
-    ? concerts.sort((a, b) =>
-        new Date(a.datetime).getTime() - new Date(b.datetime).getTime()
-      )[0]
-    : null;
+  // Filtrage sécurisé côté client
+  const upcomingConcerts = allConcerts ? filterUpcomingConcerts(allConcerts) : [];
 
   return {
-    nextConcert,
-    hasUpcomingConcerts: (concerts?.length || 0) > 0,
+    data: upcomingConcerts,
     isLoading,
+    error,
   };
+}
+
+/**
+ * Hook pour récupérer les concerts d'un utilisateur (si vous avez cette fonctionnalité)
+ */
+export function useUserConcerts(userId: string) {
+  return useQuery({
+    queryKey: ['concerts', 'user', userId],
+    queryFn: async (): Promise<Concert[]> => {
+      // Implémentation à venir : récupérer les concerts des groupes favoris de l'utilisateur
+      return [];
+    },
+    enabled: !!userId,
+  });
 }
