@@ -23,7 +23,7 @@ export interface BandSearchResult {
   name: string;
   genre: Genre;
   country: string;
-  formed: number | null;
+  formed?: number | null; // ✅ AJOUT DU '?' ICI : rend la propriété optionnelle
   status?: string;
   image_url?: string | null;
 }
@@ -34,9 +34,6 @@ export interface Band extends BandSearchResult {
 
 export type BandDetail = Band;
 
-/**
- * ✅ Interface Album enrichie pour correspondre à l'usage dans AlbumCard.tsx
- */
 export interface Album {
   id: number;
   band_id: number;
@@ -49,9 +46,6 @@ export interface Album {
   image_url?: string | null;
 }
 
-/**
- * ✅ Interface BandMember (alias Member pour compatibilité)
- */
 export interface BandMember {
   name: string;
   role: string;
@@ -59,7 +53,7 @@ export interface BandMember {
   is_current?: boolean;
 }
 
-export type Member = BandMember; // Alias pour éviter de casser d'autres imports
+export type Member = BandMember;
 
 export interface Concert {
   id: string;
