@@ -1,47 +1,66 @@
-import { getCached, setCache, cacheConfig } from './cache';
-import type { BandDetail, BandSearchResult } from '@/types/api';
+import { supabase } from '@/lib/supabase';
 
-const API_BASE = 'https://www.metal-api.dev/rest/v1';
-
-async function fetchWithCache<T>(url: string, cacheKey: string, ttl: number): Promise<T> {
-  const cached = getCached<T>(cacheKey);
-  if (cached) return cached;
-
-  const res = await fetch(url, {
-    next: { revalidate: Math.floor(ttl / 1000) },
-  });
-
-  if (!res.ok) {
-    throw new Error(`API error ${res.status}: ${await res.text()}`);
-  }
-
-  const data = await res.json();
-  setCache(cacheKey, data, ttl);
-  return data;
+// Type correspondant à la table 'bands' dans Supabase
+export interface Band {
+  id: number;
+  name: string;
+  genre: string;
+  country: string;
+  formed: number | null;
+  status: string;
+  biography: string | null;
+  image_url: string | null;
 }
 
 export const metalServerApi = {
-  async getBand(id: number): Promise<BandDetail> {
-    return fetchWithCache<BandDetail>(
-      `${API_BASE}/bands/${id}`,
-      `band:${id}`,
-      cacheConfig.band
-    );
+  /**
+   * Récupère un groupe par son ID
+   */
+  async getBand(id: number): Promise<Band | null> {
+    const { data, error } = await supabase
+      .from('bands')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error(`Error fetching band ${id}:`, error);
+      return null;
+    }
+    return data as Band;
   },
 
-  async searchBands(query: string): Promise<BandSearchResult[]> {
-    return fetchWithCache<BandSearchResult[]>(
-      `${API_BASE}/search/bands/name/${encodeURIComponent(query)}`,
-      `search:${query}`,
-      cacheConfig.search
-    );
+  /**
+   * Recherche des groupes par nom (insensible à la casse)
+   */
+  async searchBands(query: string): Promise<Band[]> {
+    const { data, error } = await supabase
+      .from('bands')
+      .select('*')
+      .ilike('name', `%${query}%`)
+      .limit(20);
+
+    if (error) {
+      console.error(`Error searching bands for "${query}":`, error);
+      return [];
+    }
+    return data as Band[];
   },
 
-  async getBandsByGenre(genre: string): Promise<BandSearchResult[]> {
-    return fetchWithCache<BandSearchResult[]>(
-      `${API_BASE}/search/bands/genre/${encodeURIComponent(genre)}`,
-      `genre:${genre}`,
-      cacheConfig.genre
-    );
+  /**
+   * Récupère des groupes par genre
+   */
+  async getBandsByGenre(genre: string): Promise<Band[]> {
+    const { data, error } = await supabase
+      .from('bands')
+      .select('*')
+      .ilike('genre', `%${genre}%`)
+      .limit(20);
+
+    if (error) {
+      console.error(`Error fetching bands by genre "${genre}":`, error);
+      return [];
+    }
+    return data as Band[];
   },
 };
