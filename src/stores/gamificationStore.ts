@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { createStore, set as idbSet, get as idbGet } from 'idb-keyval';
+import { createStore, set as idbSet, get as idbGet, del as idbDel } from 'idb-keyval';
 import {
   PlayerStats,
   XPEvent,
@@ -14,7 +14,14 @@ import { BADGES } from '@/lib/gamification/badges';
 import { QUESTS } from '@/lib/gamification/quests';
 import { getLevelFromXP } from '@/lib/gamification/lore';
 
+// ═══════════════════════════════════════════════════════════
+// CONFIGURATION INDEXEDDB
+// ═══════════════════════════════════════════════════════════
 const idbStore = createStore('metalpedia', 'gamification');
+
+// ═══════════════════════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════════════════════
 
 interface GamificationState {
   stats: PlayerStats;
@@ -40,6 +47,10 @@ interface GamificationState {
   closeLevelUpModal: () => void;
 }
 
+// ═══════════════════════════════════════════════════════════
+// ÉTAT INITIAL
+// ═══════════════════════════════════════════════════════════
+
 const initialStats: PlayerStats = {
   totalViews: 0,
   totalFavorites: 0,
@@ -51,6 +62,10 @@ const initialStats: PlayerStats = {
   level: 1,
   lastDailyBonus: null,
 };
+
+// ═══════════════════════════════════════════════════════════
+// STORE ZUSTAND
+// ═══════════════════════════════════════════════════════════
 
 export const useGamificationStore = create<GamificationState>()(
   persist(
@@ -81,7 +96,6 @@ export const useGamificationStore = create<GamificationState>()(
             level: newLevel,
           };
 
-          // Vérifier les badges
           const newBadges = BADGES.filter(
             (b) => !newStats.badgesUnlocked.includes(b.id) && checkBadgeUnlocked(b, newStats)
           ).map((b) => b.id);
@@ -141,7 +155,6 @@ export const useGamificationStore = create<GamificationState>()(
             level: newLevel,
           };
 
-          // Vérifier les quêtes de reviews
           const completedQuests = QUESTS.filter(
             (q) =>
               !newStats.questsCompleted.includes(q.id) &&
@@ -264,11 +277,22 @@ export const useGamificationStore = create<GamificationState>()(
             console.error('Failed to persist gamification:', err);
           }
         },
+        // ✅ AJOUT : removeItem est requis par l'interface StateStorage de Zustand
+        removeItem: async (name) => {
+          try {
+            await idbDel(name, idbStore);
+          } catch (err) {
+            console.error('Failed to remove gamification:', err);
+          }
+        },
       })),
     }
   )
 );
 
-// Sélecteurs optimisés
+// ═══════════════════════════════════════════════════════════
+// SÉLECTEURS OPTIMISÉS
+// ═══════════════════════════════════════════════════════════
+
 export const usePlayerLevel = () => useGamificationStore((s) => s.stats.level);
 export const usePlayerXP = () => useGamificationStore((s) => s.stats.totalXP);

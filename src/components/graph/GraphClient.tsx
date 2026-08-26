@@ -14,14 +14,22 @@ const SimilarityGraph = dynamic(
   }
 );
 
+// ═══════════════════════════════════════════════════════════
+// PROPS
+// ═══════════════════════════════════════════════════════════
+
 interface Props {
   sourceBand: {
-    id: number;
+    band_id: number;  // ✅ Changé de 'id' à 'band_id'
     name: string;
     genre: Genre;
     country: string;
   };
 }
+
+// ═══════════════════════════════════════════════════════════
+// COMPOSANT PRINCIPAL
+// ═══════════════════════════════════════════════════════════
 
 export default function GraphClient({ sourceBand }: Props) {
   const { data: recommendations, isLoading, error } = useSimilarBands(sourceBand, 15);
@@ -46,7 +54,12 @@ export default function GraphClient({ sourceBand }: Props) {
 
   return (
     <SimilarityGraph
-      sourceBand={sourceBand}
+      sourceBand={{
+        id: sourceBand.band_id,  // ✅ Map 'band_id' vers 'id' pour SimilarityGraph
+        name: sourceBand.name,
+        genre: sourceBand.genre,
+        country: sourceBand.country,
+      }}
       recommendations={recommendations || []}
       height={600}
     />

@@ -2,9 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Review, ReviewWithAuthor } from '@/types/supabase';
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // QUERY KEYS
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
 export const REVIEW_QUERY_KEYS = {
   all: ['reviews'] as const,
@@ -13,9 +13,9 @@ export const REVIEW_QUERY_KEYS = {
   byId: (reviewId: string) => ['reviews', 'id', reviewId] as const,
 };
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // HOOKS DE LECTURE
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
 /**
  * Récupère toutes les reviews d'un groupe
@@ -91,12 +91,15 @@ export function useReview(reviewId: string | undefined) {
   });
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // HOOKS DE MUTATION
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
 /**
  * Soumet une nouvelle review
+ * 
+ * ✅ Les types Supabase sont maintenant parfaitement alignés avec le schéma DB,
+ * aucun cast explicite n'est nécessaire.
  */
 export function useSubmitReview() {
   const queryClient = useQueryClient();
@@ -113,8 +116,12 @@ export function useSubmitReview() {
       const { data, error } = await supabase
         .from('reviews')
         .insert({
-          ...review,
+          user_id: review.user_id,
+          band_id: review.band_id,
           album_id: review.album_id ?? null,
+          rating: review.rating,
+          title: review.title,
+          content: review.content,
         })
         .select()
         .single();
@@ -137,6 +144,9 @@ export function useSubmitReview() {
 
 /**
  * Met à jour une review existante
+ * 
+ * ✅ Les types Supabase sont maintenant parfaitement alignés avec le schéma DB,
+ * aucun cast explicite n'est nécessaire.
  */
 export function useUpdateReview() {
   const queryClient = useQueryClient();
@@ -174,6 +184,9 @@ export function useUpdateReview() {
 
 /**
  * Supprime une review
+ * 
+ * ✅ Les types Supabase sont maintenant parfaitement alignés avec le schéma DB,
+ * aucun cast explicite n'est nécessaire.
  */
 export function useDeleteReview() {
   const queryClient = useQueryClient();
@@ -196,9 +209,9 @@ export function useDeleteReview() {
   });
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // HOOKS UTILITAIRES
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
 /**
  * Calcule la note moyenne d'un groupe

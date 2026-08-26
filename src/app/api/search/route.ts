@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { metalServerApi } from '@/lib/metal-api';
+import type { BandSearchResult } from '@/types/api';
 
 export const runtime = 'edge';
 
@@ -9,14 +10,21 @@ export async function GET(req: NextRequest) {
   const genre = searchParams.get('genre');
 
   try {
-    let results = [];
+    // ✅ Typage explicite du tableau
+    let results: BandSearchResult[] = [];
+    
     if (q) {
       results = await metalServerApi.searchBands(q);
     } else if (genre) {
       results = await metalServerApi.getBandsByGenre(genre);
     }
+    
     return NextResponse.json(results);
-  } catch {
-    return NextResponse.json({ error: 'Search failed' }, { status: 500 });
+  } catch (error: any) {
+    console.error('Search error:', error);
+    return NextResponse.json(
+      { error: 'Search failed', details: error?.message || 'Unknown error' },
+      { status: 500 }
+    );
   }
 }

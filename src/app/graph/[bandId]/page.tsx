@@ -5,16 +5,16 @@ import { metalServerApi } from '@/lib/metal-api';
 import GraphClient from '@/components/graph/GraphClient';
 import Loader from '@/components/ui/Loader';
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // PARAMS (Next.js 15)
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 interface Props {
   params: Promise<{ bandId: string }>;
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // METADATA
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { bandId } = await params;
 
@@ -31,9 +31,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // PAGE PRINCIPALE
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 export default async function GraphPage({ params }: Props) {
   const { bandId } = await params;
   const id = parseInt(bandId, 10);
@@ -65,7 +65,7 @@ export default async function GraphPage({ params }: Props) {
         <Suspense fallback={<Loader text="Construction du graphe..." />}>
           <GraphClient
             sourceBand={{
-              id: band.id,
+              band_id: band.id,  // ✅ Passé comme 'band_id' (au lieu de 'id')
               name: band.name,
               genre: band.genre,
               country: band.country,
