@@ -1,9 +1,5 @@
 // src/types/api.ts
 
-/**
- * Liste des genres principaux du metal.
- * Le fallback `| string` permet d'accepter n'importe quel genre venant de la base de données.
- */
 export type Genre = 
   | 'Black Metal' 
   | 'Death Metal' 
@@ -27,7 +23,7 @@ export interface BandSearchResult {
   name: string;
   genre: Genre;
   country: string;
-  formed: number | null; // ✅ Correspond à la colonne INTEGER de Supabase
+  formed: number | null;
   status?: string;
   image_url?: string | null;
 }
@@ -36,17 +32,21 @@ export interface Band extends BandSearchResult {
   biography: string | null;
 }
 
-/**
- * ✅ ALIAS AJOUTÉ : Pour la compatibilité avec src/api/hooks.ts et d'autres composants
- */
 export type BandDetail = Band;
 
+/**
+ * ✅ Interface Album enrichie pour correspondre exactement à l'usage dans AlbumCard.tsx
+ */
 export interface Album {
   id: number;
   band_id: number;
-  title: string;
-  year: number | null;
-  type: 'Studio' | 'Live' | 'EP' | 'Demo' | 'Compilation';
+  name?: string;          // ✅ Ajouté pour AlbumCard
+  title?: string;         // Conservé pour compatibilité API
+  year?: number | null;
+  releaseDate?: string;   // ✅ Ajouté pour AlbumCard
+  type: string;           // Assoupli en string pour éviter les conflits d'union stricts
+  reviews?: number | any; // ✅ Ajouté pour AlbumCard
+  image_url?: string | null;
 }
 
 export interface Member {
@@ -63,7 +63,7 @@ export interface Concert {
   city: string;
   country: string;
   date: string; 
-  datetime?: string; // ✅ Géré avec ?? dans concertsApi.ts
+  datetime?: string;
   url?: string;
   status?: 'upcoming' | 'past' | 'cancelled';
 }
