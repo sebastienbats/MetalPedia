@@ -35,25 +35,31 @@ export interface Band extends BandSearchResult {
 export type BandDetail = Band;
 
 /**
- * ✅ Interface Album enrichie pour correspondre exactement à l'usage dans AlbumCard.tsx
+ * ✅ Interface Album enrichie pour correspondre à l'usage dans AlbumCard.tsx
  */
 export interface Album {
   id: number;
   band_id: number;
-  name?: string;          // ✅ Ajouté pour AlbumCard
-  title?: string;         // Conservé pour compatibilité API
+  name?: string;
+  title?: string;
   year?: number | null;
-  releaseDate?: string;   // ✅ Ajouté pour AlbumCard
-  type: string;           // Assoupli en string pour éviter les conflits d'union stricts
-  reviews?: number | any; // ✅ Ajouté pour AlbumCard
+  releaseDate?: string;
+  type: string;
+  reviews?: number | any;
   image_url?: string | null;
 }
 
-export interface Member {
+/**
+ * ✅ Interface BandMember (alias Member pour compatibilité)
+ */
+export interface BandMember {
   name: string;
   role: string;
   years_active?: string;
+  is_current?: boolean;
 }
+
+export type Member = BandMember; // Alias pour éviter de casser d'autres imports
 
 export interface Concert {
   id: string;
