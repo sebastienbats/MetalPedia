@@ -1,10 +1,10 @@
 import { supabase } from '@/lib/supabase';
+import type { Genre } from '@/types/api'; // Assurez-vous que ce chemin correspond à votre fichier de types
 
-// Type correspondant à la table 'bands' dans Supabase
 export interface Band {
   id: number;
   name: string;
-  genre: string;
+  genre: Genre; // On force le type strict ici
   country: string;
   formed: number | null;
   status: string;
@@ -27,7 +27,9 @@ export const metalServerApi = {
       console.error(`Error fetching band ${id}:`, error);
       return null;
     }
-    return data as Band;
+    
+    // On dit à TypeScript que les données de Supabase correspondent à notre interface Band
+    return data as unknown as Band;
   },
 
   /**
@@ -44,7 +46,8 @@ export const metalServerApi = {
       console.error(`Error searching bands for "${query}":`, error);
       return [];
     }
-    return data as Band[];
+    
+    return data as unknown as Band[];
   },
 
   /**
@@ -61,6 +64,7 @@ export const metalServerApi = {
       console.error(`Error fetching bands by genre "${genre}":`, error);
       return [];
     }
-    return data as Band[];
+    
+    return data as unknown as Band[];
   },
 };
