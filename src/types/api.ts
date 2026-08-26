@@ -36,6 +36,11 @@ export interface Band extends BandSearchResult {
   biography: string | null;
 }
 
+/**
+ * ✅ ALIAS AJOUTÉ : Pour la compatibilité avec src/api/hooks.ts et d'autres composants
+ */
+export type BandDetail = Band;
+
 export interface Album {
   id: number;
   band_id: number;
@@ -58,7 +63,7 @@ export interface Concert {
   city: string;
   country: string;
   date: string; 
-  datetime?: string; // ✅ AJOUTÉ : pour correspondre à l'usage dans concertsApi.ts (new Date)
+  datetime?: string; // ✅ Géré avec ?? dans concertsApi.ts
   url?: string;
   status?: 'upcoming' | 'past' | 'cancelled';
 }
