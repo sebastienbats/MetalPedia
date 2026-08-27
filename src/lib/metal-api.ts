@@ -5,10 +5,6 @@ import type { Band, Genre } from '@/types/api';
 // TYPE CUSTOM POUR LA TABLE BANDS
 // ═══════════════════════════════════════════════════════════
 
-/**
- * Type pour les requêtes Supabase sur la table 'bands'.
- * Contourne l'absence de la table 'bands' dans les types générés par Supabase.
- */
 type BandRow = {
   id: number;
   name: string;
@@ -24,9 +20,6 @@ type BandRow = {
   original_name?: string | null;
 };
 
-// Client Supabase casté pour inclure la table 'bands'
-const bandsTable = supabase.from('bands' as any);
-
 // ═══════════════════════════════════════════════════════════
 // API DES GROUPES
 // ═══════════════════════════════════════════════════════════
@@ -36,65 +29,71 @@ export const metalServerApi = {
    * Récupère un groupe par son ID
    */
   async getBand(id: number): Promise<Band | null> {
-    const { data, error } = await bandsTable
+    // ✅ Cast complet de la réponse pour éviter SelectQueryError
+    const { data, error } = await (supabase as any)
+      .from('bands')
       .select('*')
       .eq('id', id)
-      .single();
+      .single() as { data: BandRow | null; error: any };
 
-    if (error) {
+    if (error || !data) {
       console.error(`Error fetching band ${id}:`, error);
       return null;
     }
 
-    return mapRowToBand(data as BandRow);
+    return mapRowToBand(data);
   },
 
   /**
    * Recherche des groupes par nom (insensible à la casse)
    */
   async searchBands(query: string): Promise<Band[]> {
-    const { data, error } = await bandsTable
+    const { data, error } = await (supabase as any)
+      .from('bands')
       .select('*')
       .ilike('name', `%${query}%`)
-      .limit(20);
+      .limit(20) as { data: BandRow[] | null; error: any };
 
-    if (error) {
+    if (error || !data) {
       console.error(`Error searching bands for "${query}":`, error);
       return [];
     }
 
-    return ((data as BandRow[]) || []).map(mapRowToBand);
+    return data.map(mapRowToBand);
   },
 
   /**
    * Récupère des groupes par genre
    */
   async getBandsByGenre(genre: string): Promise<Band[]> {
-    const { data, error } = await bandsTable
+    const { data, error } = await (supabase as any)
+      .from('bands')
       .select('*')
       .ilike('genre', `%${genre}%`)
-      .limit(20);
+      .limit(20) as { data: BandRow[] | null; error: any };
 
-    if (error) {
+    if (error || !data) {
       console.error(`Error fetching bands by genre "${genre}":`, error);
       return [];
     }
 
-    return ((data as BandRow[]) || []).map(mapRowToBand);
+    return data.map(mapRowToBand);
   },
 
   /**
    * Récupère tous les groupes (pour generateStaticParams)
    */
   async getAllBands(): Promise<Band[]> {
-    const { data, error } = await bandsTable.select('id, name, genre, country');
+    const { data, error } = await (supabase as any)
+      .from('bands')
+      .select('id, name, genre, country') as { data: BandRow[] | null; error: any };
 
-    if (error) {
+    if (error || !data) {
       console.error('Error fetching all bands:', error);
       return [];
     }
 
-    return ((data as BandRow[]) || []).map(mapRowToBand);
+    return data.map(mapRowToBand);
   },
 };
 
