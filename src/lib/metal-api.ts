@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { Band, Genre } from '@/types/api';
+import type { Band, Genre, BioLang, BandStatus, CountrySource, FormedSource } from '@/types/api';
 
 // ═══════════════════════════════════════════════════════════
 // TYPE CUSTOM POUR LA TABLE BANDS
@@ -14,10 +14,15 @@ type BandRow = {
   status: string | null;
   biography: string | null;
   image_url: string | null;
-  listeners?: number | null;
-  source_tag?: string | null;
-  fetched_at?: string | null;
-  original_name?: string | null;
+  listeners: number | null;
+  source_tag: string | null;
+  fetched_at: string | null;
+  original_name: string | null;
+  bio_lang: string | null;
+  // 🆕 Nouveaux champs MusicBrainz
+  mbid: string | null;
+  country_source: string | null;
+  formed_source: string | null;
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -25,11 +30,7 @@ type BandRow = {
 // ═══════════════════════════════════════════════════════════
 
 export const metalServerApi = {
-  /**
-   * Récupère un groupe par son ID
-   */
   async getBand(id: number): Promise<Band | null> {
-    // ✅ Cast complet de la réponse pour éviter SelectQueryError
     const { data, error } = await (supabase as any)
       .from('bands')
       .select('*')
@@ -44,9 +45,6 @@ export const metalServerApi = {
     return mapRowToBand(data);
   },
 
-  /**
-   * Recherche des groupes par nom (insensible à la casse)
-   */
   async searchBands(query: string): Promise<Band[]> {
     const { data, error } = await (supabase as any)
       .from('bands')
@@ -62,9 +60,6 @@ export const metalServerApi = {
     return data.map(mapRowToBand);
   },
 
-  /**
-   * Récupère des groupes par genre
-   */
   async getBandsByGenre(genre: string): Promise<Band[]> {
     const { data, error } = await (supabase as any)
       .from('bands')
@@ -80,16 +75,61 @@ export const metalServerApi = {
     return data.map(mapRowToBand);
   },
 
-  /**
-   * Récupère tous les groupes (pour generateStaticParams)
-   */
   async getAllBands(): Promise<Band[]> {
     const { data, error } = await (supabase as any)
       .from('bands')
-      .select('id, name, genre, country') as { data: BandRow[] | null; error: any };
+      .select('*') as { data: BandRow[] | null; error: any };
 
     if (error || !data) {
       console.error('Error fetching all bands:', error);
+      return [];
+    }
+
+    return data.map(mapRowToBand);
+  },
+
+  async getTopBands(limit: number = 50): Promise<Band[]> {
+    const { data, error } = await (supabase as any)
+      .from('bands')
+      .select('*')
+      .order('listeners', { ascending: false })
+      .limit(limit) as { data: BandRow[] | null; error: any };
+
+    if (error || !data) {
+      console.error('Error fetching top bands:', error);
+      return [];
+    }
+
+    return data.map(mapRowToBand);
+  },
+
+  async getBandsWithFrenchBio(limit: number = 50): Promise<Band[]> {
+    const { data, error } = await (supabase as any)
+      .from('bands')
+      .select('*')
+      .eq('bio_lang', 'fr')
+      .order('listeners', { ascending: false })
+      .limit(limit) as { data: BandRow[] | null; error: any };
+
+    if (error || !data) {
+      console.error('Error fetching bands with French bio:', error);
+      return [];
+    }
+
+    return data.map(mapRowToBand);
+  },
+
+  // 🆕 Récupère les groupes avec pays vérifié via MusicBrainz
+  async getBandsWithVerifiedCountry(limit: number = 50): Promise<Band[]> {
+    const { data, error } = await (supabase as any)
+      .from('bands')
+      .select('*')
+      .eq('country_source', 'musicbrainz')
+      .order('listeners', { ascending: false })
+      .limit(limit) as { data: BandRow[] | null; error: any };
+
+    if (error || !data) {
+      console.error('Error fetching bands with verified country:', error);
       return [];
     }
 
@@ -108,8 +148,18 @@ function mapRowToBand(row: BandRow): Band {
     genre: (row.genre || 'Metal') as Genre,
     country: row.country || 'Unknown',
     formed: row.formed,
-    status: row.status || 'Unknown',
+    status: (row.status || 'Unknown') as BandStatus,
     biography: row.biography,
     image_url: row.image_url,
+    // Champs Last.fm
+    bio_lang: (row.bio_lang || null) as BioLang | null,
+    listeners: row.listeners || 0,
+    source_tag: row.source_tag,
+    fetched_at: row.fetched_at,
+    original_name: row.original_name,
+    // 🆕 Champs MusicBrainz
+    mbid: row.mbid,
+    country_source: (row.country_source || 'unknown') as CountrySource,
+    formed_source: (row.formed_source || 'unknown') as FormedSource,
   };
 }
