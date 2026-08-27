@@ -2,7 +2,7 @@
 
 # 🤘 MetalPedia
 
-### L'encyclopédie ultime du Metal avec gamification épique
+### L'encyclopédie du Metal avec gamification épique
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
@@ -11,7 +11,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Explorez plus de 170 000 groupes de metal, gagnez de l'XP, collectionnez des reliques et devenez le DIEU DU METALVERSE.**
+**Explorez les groupes de metal, gagnez de l'XP, collectionnez des reliques et devenez le DIEU DU METALVERSE.**
 
 </div>
 
