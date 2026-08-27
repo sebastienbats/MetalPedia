@@ -1,7 +1,8 @@
 // src/app/api/search/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
-import { metalServerApi, type Band } from '@/lib/metal-api';
+import { metalServerApi } from '@/lib/metal-api';
+import type { Band } from '@/types/api'; // ✅ Import direct depuis le fichier de types
 
 // Utilisation du Edge Runtime pour des réponses ultra-rapides
 export const runtime = 'edge';
@@ -12,9 +13,7 @@ export async function GET(req: NextRequest) {
   const genre = searchParams.get('genre');
 
   try {
-    // ✅ On utilise explicitement le type Band[] ici.
-    // Comme BandSearchResult et Band sont maintenant alignés sur 'formed: number | null',
-    // TypeScript n'aura plus aucune objection.
+    // On utilise explicitement le type Band[] ici
     let results: Band[] = [];
     
     if (q) {
