@@ -42,7 +42,7 @@
 
 ## 🎯 Aperçu
 
-**MetalPedia** est une encyclopédie collaborative dédiée aux groupes de metal, inspirée de [Encyclopaedia Metallum](https://www.metal-archives.com) et propulsée par l'API [metal-api.dev](https://www.metal-api.dev).
+**MetalPedia** est une encyclopédie dédiée aux groupes de metal.
 
 Au-delà d'une simple base de données, MetalPedia transforme l'exploration musicale en une **aventure RPG** : gagnez de l'XP en découvrant des groupes, accomplissez des quêtes épiques, collectionnez des reliques légendaires et gravissez les échelons de la Hiérarchie du Riff.
 
@@ -195,40 +195,9 @@ Au-delà d'une simple base de données, MetalPedia transforme l'exploration musi
 
 ## 🏗 Architecture
 
-```mermaid
-graph TB
-    subgraph "Frontend - Next.js 15"
-        A[App Router<br/>SSR/ISR] --> B[React Server Components]
-        A --> C[Client Components<br/>Zustand + TanStack Query]
-        C --> D[PWA<br/>Service Worker]
-        C --> E[IndexedDB<br/>Offline Sync]
-    end
-
-    subgraph "Backend & Services"
-        F[Supabase<br/>Auth + PostgreSQL]
-        G[ML Service<br/>Python FastAPI]
-        H[Redis Cache]
-    end
-
-    subgraph "APIs Externes"
-        I[metal-api.dev]
-        J[Spotify API]
-        K[OpenAI API]
-        L[Songkick API]
-    end
-
-    C --> F
-    C --> G
-    G --> H
-    G --> J
-    A --> I
-    C --> K
-    C --> L
-```
-
 ### Flux de données
 
-1. **Recherche/Consultation** : Next.js → metal-api.dev (avec cache Redis)
+1. **Recherche/Consultation** : Next.js → Supabase Database
 2. **Recommandations ML** : Next.js → ML Service → Spotify API → Embeddings
 3. **Authentification** : Next.js → Supabase Auth → JWT
 4. **Reviews/Favoris** : Next.js → Supabase Database (RLS)
@@ -673,8 +642,7 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 ## 🙏 Remerciements
 
-- [Encyclopaedia Metallum](https://www.metal-archives.com) — La source de données originelle
-- [metal-api.dev](https://www.metal-api.dev) — L'API REST qui rend tout possible
+- [Last.fm](www.last.fm) — La source de données originelle
 - [Spotify](https://developer.spotify.com) — Pour les audio features
 - [OpenAI](https://openai.com) — Pour la génération d'images
 - Toute la communauté metal 🤘
