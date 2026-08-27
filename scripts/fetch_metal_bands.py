@@ -2,17 +2,19 @@
 """
 Récupère des groupes metal via Last.fm + MusicBrainz.
 
-Sources de données :
-  - Last.fm : nom, bio, images, popularité, tags, MBID
-  - MusicBrainz : pays, année de formation (via le MBID)
-  - Tags Last.fm : fallback pour le pays si MusicBrainz échoue
+Optimisations anti-rate-limit :
+  - User-Agent conforme aux recommandations officielles MusicBrainz
+  - Cache local des MBID (évite les requêtes redondantes)
+  - Délai configurable (défaut 2s)
+  - Retry avec backoff exponentiel (2s → 4s → 8s → ...)
+  - Statistiques détaillées des rate limits
 
 Usage:
   python fetch_metal_bands.py                        # 10 000 groupes
   python fetch_metal_bands.py --limit 500            # 500 groupes
-  python fetch_metal_bands.py --lang en              # Bios en anglais
-  python fetch_metal_bands.py --resume               # Reprendre après interruption
-  python fetch_metal_bands.py --skip-musicbrainz     # Désactiver MusicBrainz (plus rapide)
+  python fetch_metal_bands.py --mb-delay 3           # Délai MusicBrainz 3s
+  python fetch_metal_bands.py --skip-musicbrainz     # Sans MusicBrainz
+  python fetch_metal_bands.py --resume               # Reprendre
 """
 
 import os
@@ -36,14 +38,16 @@ load_dotenv(Path(__file__).parent.parent / '.env')
 LASTFM_API_KEY = os.getenv('LASTFM_API_KEY')
 LASTFM_API_URL = 'http://ws.audioscrobbler.com/2.0/'
 MUSICBRAINZ_API_URL = 'https://musicbrainz.org/ws/2/'
+
 DEFAULT_OUTPUT = '../data/metal_bands.json'
 DEFAULT_LIMIT = 10000
 DEFAULT_LANG = 'fr'
 MIN_BIO_LENGTH = 100
 
-# Rate limiting
-LASTFM_DELAY = 0.25          # 4 req/sec pour Last.fm
-MUSICBRAINZ_DELAY = 1.1      # ~1 req/sec pour MusicBrainz (recommandé officiellement)
+# 🎯 Rate limiting optimisé
+LASTFM_DELAY = 0.25              # 4 req/sec pour Last.fm
+DEFAULT_MB_DELAY = 2.0           # 🆕 2s par défaut (recommandé MusicBrainz)
+MB_CACHE_FILE = '../data/mbid_cache.json'  # 🆕 Cache local des MBID
 
 PROGRESS_FILE = '../data/fetch_progress.json'
 
@@ -79,9 +83,7 @@ METAL_GENRES = {
 # EXTRACTION DU PAYS DEPUIS LES TAGS (fallback)
 # ═══════════════════════════════════════════════════════════
 
-# Mapping tag → pays (pour extraction depuis les tags Last.fm)
 TAG_TO_COUNTRY = {
-    # Pays complets
     'swedish': 'Sweden', 'norwegian': 'Norway', 'finnish': 'Finland',
     'danish': 'Denmark', 'icelandic': 'Iceland', 'german': 'Germany',
     'french': 'France', 'british': 'United Kingdom', 'english': 'United Kingdom',
@@ -95,34 +97,71 @@ TAG_TO_COUNTRY = {
     'mexican': 'Mexico', 'argentine': 'Argentina', 'chilean': 'Chile',
     'colombian': 'Colombia', 'chinese': 'China', 'korean': 'South Korea',
     'indian': 'India', 'south african': 'South Africa',
-    
-    # Régions metal célèbres
-    'scandinavian': 'Sweden',  # Fallback par défaut pour la Scandinavie
-    'baltic': 'Latvia',
+    'scandinavian': 'Sweden', 'baltic': 'Latvia',
 }
 
 def extract_country_from_tags(tags: List[Dict]) -> Optional[str]:
-    """
-    Tente d'extraire le pays depuis les tags Last.fm.
-    Cherche des patterns comme "swedish death metal", "norwegian black metal", etc.
-    """
     for tag in tags:
         tag_name = tag.get('name', '').lower()
-        
-        # Cherche un mot-clé de pays dans le tag
         for keyword, country in TAG_TO_COUNTRY.items():
             if keyword in tag_name:
                 return country
-    
     return None
 
 # ═══════════════════════════════════════════════════════════
-# CLIENT LAST.FM
+# CACHE LOCAL MBID (pour éviter les requêtes redondantes)
+# ═══════════════════════════════════════════════════════════
+
+class MBIDCache:
+    """
+    Cache local des données MusicBrainz par MBID.
+    Évite de re-interroger l'API pour un MBID déjà vu.
+    Persiste sur disque pour être réutilisé entre les exécutions.
+    """
+    
+    def __init__(self, cache_path: str):
+        self.cache_path = Path(cache_path)
+        self.cache: Dict[str, Dict] = {}
+        self.hits = 0
+        self.misses = 0
+        self._load()
+    
+    def _load(self):
+        """Charge le cache depuis le disque."""
+        if self.cache_path.exists():
+            try:
+                with open(self.cache_path, 'r', encoding='utf-8') as f:
+                    self.cache = json.load(f)
+                print(f"💾 Cache MBID chargé : {len(self.cache)} entrées")
+            except (json.JSONDecodeError, IOError):
+                self.cache = {}
+    
+    def save(self):
+        """Sauvegarde le cache sur le disque."""
+        self.cache_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.cache_path, 'w', encoding='utf-8') as f:
+            json.dump(self.cache, f, ensure_ascii=False)
+    
+    def get(self, mbid: str) -> Optional[Dict]:
+        """Récupère les données depuis le cache."""
+        if mbid in self.cache:
+            self.hits += 1
+            return self.cache[mbid]
+        self.misses += 1
+        return None
+    
+    def set(self, mbid: str, data: Dict):
+        """Ajoute des données au cache."""
+        self.cache[mbid] = data
+    
+    def stats(self) -> Dict[str, int]:
+        return {'hits': self.hits, 'misses': self.misses, 'size': len(self.cache)}
+
+# ═══════════════════════════════════════════════════════════
+# CLIENT LAST.FM (inchangé)
 # ═══════════════════════════════════════════════════════════
 
 class LastFmClient:
-    """Client HTTP pour l'API Last.fm avec rate limiting et retry."""
-    
     def __init__(self, api_key: str, default_lang: str = 'fr'):
         self.api_key = api_key
         self.default_lang = default_lang
@@ -147,7 +186,7 @@ class LastFmClient:
                     print(f"\n⚠️  Rate limit Last.fm, attente de {wait_time}s...")
                     time.sleep(wait_time)
                 elif response.status_code == 403:
-                    print(f"\n❌ Clé API Last.fm invalide ou quota dépassé")
+                    print(f"\n❌ Clé API Last.fm invalide")
                     return None
                 else:
                     return None
@@ -189,7 +228,6 @@ class LastFmClient:
         preferred_lang: str = 'fr',
         fallback_lang: str = 'en'
     ) -> Tuple[Optional[Dict], str]:
-        """Récupère les infos avec fallback linguistique."""
         # 1. Langue préférée
         artist_data = self.get_artist_info(artist_name, lang=preferred_lang)
         if artist_data:
@@ -208,104 +246,148 @@ class LastFmClient:
         return artist_data, 'none'
 
 # ═══════════════════════════════════════════════════════════
-# CLIENT MUSICBRAINZ
+# CLIENT MUSICBRAINZ OPTIMISÉ
 # ═══════════════════════════════════════════════════════════
 
 class MusicBrainzClient:
     """
-    Client pour l'API MusicBrainz (gratuite, sans clé API).
-    Récupère le pays et l'année de formation via le MBID.
-    
-    Rate limit officiel : 1 requête/seconde avec User-Agent approprié.
-    Documentation : https://musicbrainz.org/doc/MusicBrainz_API
+    Client MusicBrainz avec :
+      - User-Agent conforme aux recommandations officielles
+      - Cache local des MBID
+      - Retry avec backoff exponentiel
+      - Délai configurable
     """
     
-    def __init__(self):
+    def __init__(self, mb_delay: float = DEFAULT_MB_DELAY, use_cache: bool = True):
+        self.mb_delay = mb_delay
         self.session = requests.Session()
-        # User-Agent obligatoire selon les règles de MusicBrainz
+        
+        # 🎯 User-Agent OPTIMISÉ selon les recommandations officielles MusicBrainz
+        # Format : "ApplicationName/Version ( ContactURL )"
+        # Voir : https://musicbrainz.org/doc/MusicBrainz_API/Rate_Limiting
         self.session.headers.update({
-            'User-Agent': 'MetalPedia/1.0 (https://metalpedia.vercel.app; contact@metalpedia.com)',
+            'User-Agent': 'MetalPedia/1.0.0 ( https://github.com/sebastienbats/MetalPedia ; contact@metalpedia.dev )',
             'Accept': 'application/json',
         })
+        
         self.request_count = 0
-        self.stats = {
-            'found': 0,
-            'not_found': 0,
-            'errors': 0,
-            'no_mbid': 0,
-        }
+        self.cache_hits = 0
+        self.rate_limited_count = 0
+        
+        # 🆕 Cache local pour éviter les requêtes redondantes
+        self.cache = MBIDCache(MB_CACHE_FILE) if use_cache else None
+        
+        # 🆕 Backoff state
+        self.current_backoff = mb_delay
+        self.max_backoff = 120.0  # Maximum 2 minutes
     
     def get_artist(self, mbid: str) -> Optional[Dict]:
-        """
-        Récupère les infos d'un artiste via son MBID.
-        
-        Returns:
-            Dict avec 'country' et 'life_span.begin' (année de formation)
-            ou None en cas d'échec.
-        """
+        """Récupère les infos d'un artiste avec cache + backoff."""
         if not mbid:
-            self.stats['no_mbid'] += 1
             return None
         
-        try:
-            time.sleep(MUSICBRAINZ_DELAY)  # Respect du rate limit
-            url = f"{MUSICBRAINZ_API_URL}artist/{mbid}"
-            response = self.session.get(url, timeout=10)
-            self.request_count += 1
-            
-            if response.status_code == 200:
-                self.stats['found'] += 1
-                return response.json()
-            elif response.status_code == 404:
-                self.stats['not_found'] += 1
-                return None
-            elif response.status_code == 503:
-                # Rate limit MusicBrainz
-                print(f"\n⚠️  Rate limit MusicBrainz, attente de 60s...")
-                time.sleep(60)
-                return None
-            else:
-                self.stats['errors'] += 1
-                return None
+        # 🆕 Vérifier le cache d'abord
+        if self.cache:
+            cached = self.cache.get(mbid)
+            if cached is not None:
+                self.cache_hits += 1
+                return cached
+        
+        # 🎯 Retry avec backoff exponentiel
+        max_attempts = 5
+        for attempt in range(max_attempts):
+            try:
+                # Délai avec backoff progressif
+                delay = min(self.current_backoff, self.max_backoff)
+                time.sleep(delay)
                 
-        except requests.RequestException as e:
-            print(f"\n⚠️  Erreur réseau MusicBrainz: {e}")
-            self.stats['errors'] += 1
-            return None
+                url = f"{MUSICBRAINZ_API_URL}artist/{mbid}"
+                response = self.session.get(url, timeout=15)
+                self.request_count += 1
+                
+                if response.status_code == 200:
+                    # Succès : reset du backoff
+                    self.current_backoff = self.mb_delay
+                    data = response.json()
+                    
+                    # Sauvegarder dans le cache
+                    if self.cache:
+                        self.cache.set(mbid, data)
+                        # Sauvegarde périodique tous les 50 entrées
+                        if len(self.cache.cache) % 50 == 0:
+                            self.cache.save()
+                    
+                    return data
+                
+                elif response.status_code == 404:
+                    # Artiste non trouvé : pas de retry
+                    self.current_backoff = self.mb_delay
+                    return None
+                
+                elif response.status_code == 503:
+                    # 🎯 Rate limit : backoff exponentiel
+                    self.rate_limited_count += 1
+                    self.current_backoff = min(self.current_backoff * 2, self.max_backoff)
+                    
+                    wait_time = int(self.current_backoff)
+                    print(f"\n⚠️  Rate limit MusicBrainz (503) - "
+                          f"Tentative {attempt + 1}/{max_attempts} - "
+                          f"Attente de {wait_time}s (backoff)")
+                    
+                    # Si c'est la dernière tentative, on abandonne
+                    if attempt == max_attempts - 1:
+                        print(f"❌ Abandon après {max_attempts} tentatives pour MBID {mbid[:8]}...")
+                        return None
+                
+                elif response.status_code == 429:
+                    # Rate limit explicite
+                    self.rate_limited_count += 1
+                    retry_after = int(response.headers.get('Retry-After', 60))
+                    print(f"\n⚠️  Rate limit MusicBrainz (429) - Retry-After: {retry_after}s")
+                    time.sleep(retry_after)
+                
+                else:
+                    print(f"\n⚠️  MusicBrainz HTTP {response.status_code}")
+                    return None
+                    
+            except requests.RequestException as e:
+                print(f"\n⚠️  Erreur réseau MusicBrainz: {e}")
+                time.sleep(2)
+        
+        return None
     
     def extract_country_and_formed(self, mbid: str) -> Tuple[Optional[str], Optional[int]]:
-        """
-        Extrait le pays et l'année de formation depuis MusicBrainz.
-        
-        Returns:
-            Tuple (country, formed_year)
-        """
+        """Extrait pays et année de formation depuis MusicBrainz."""
         artist_data = self.get_artist(mbid)
         if not artist_data:
             return None, None
         
         # Extraction du pays
-        country = artist_data.get('country')  # Code ISO 2 lettres (ex: 'SE', 'US')
+        country = artist_data.get('country')
         if country:
             country = iso_to_country_name(country)
         
         # Extraction de l'année de formation
         formed = None
         life_span = artist_data.get('life_span', {})
-        begin_date = life_span.get('begin', '')  # Format: '1981-04-23' ou '1981'
+        begin_date = life_span.get('begin', '')
         
         if begin_date:
             try:
-                # Prend seulement l'année (4 premiers caractères)
                 year_str = begin_date[:4]
                 year = int(year_str)
-                # Validation : année raisonnable pour un groupe de metal
                 if 1960 <= year <= datetime.now().year:
                     formed = year
             except (ValueError, TypeError):
                 pass
         
         return country, formed
+    
+    def save_cache(self):
+        """Sauvegarde le cache sur le disque."""
+        if self.cache:
+            self.cache.save()
+            print(f"💾 Cache MBID sauvegardé : {len(self.cache.cache)} entrées")
 
 # ═══════════════════════════════════════════════════════════
 # CONVERSION ISO → NOM DE PAYS
@@ -335,7 +417,6 @@ ISO_TO_COUNTRY = {
 }
 
 def iso_to_country_name(iso_code: str) -> str:
-    """Convertit un code ISO 2 lettres en nom de pays."""
     if not iso_code:
         return 'Unknown'
     return ISO_TO_COUNTRY.get(iso_code.upper(), iso_code)
@@ -367,14 +448,6 @@ def process_artist(
     bio_lang: str,
     musicbrainz_client: Optional[MusicBrainzClient] = None,
 ) -> Optional[Dict]:
-    """
-    Transforme les données Last.fm + MusicBrainz en format JSON.
-    
-    Stratégie pour le pays :
-      1. MusicBrainz (via MBID) - source la plus fiable
-      2. Tags Last.fm (fallback) - ex: "swedish death metal" → Sweden
-      3. 'Unknown' si aucune source ne fonctionne
-    """
     if not artist_data:
         return None
     
@@ -382,18 +455,14 @@ def process_artist(
     if not name:
         return None
     
-    # Tags/genres
     tags = artist_data.get('tags', {}).get('tag', [])
     if not isinstance(tags, list):
         tags = []
     
     genre = extract_genre_from_tags(tags)
-    
-    # Biographie
     bio_content = artist_data.get('bio', {}).get('content', '')
     biography = clean_biography(bio_content)
     
-    # Image
     images = artist_data.get('image', [])
     image_url = None
     if images:
@@ -402,7 +471,6 @@ def process_artist(
                 image_url = img['#text']
                 break
     
-    # Listeners
     try:
         listeners = int(artist_data.get('stats', {}).get('listeners', 0) or 0)
     except (ValueError, TypeError):
@@ -418,7 +486,6 @@ def process_artist(
     
     mbid = artist_data.get('mbid', '').strip()
     
-    # 1. Tentative via MusicBrainz (si activé et MBID disponible)
     if musicbrainz_client and mbid:
         mb_country, mb_formed = musicbrainz_client.extract_country_and_formed(mbid)
         if mb_country:
@@ -428,14 +495,12 @@ def process_artist(
             formed = mb_formed
             formed_source = 'musicbrainz'
     
-    # 2. Fallback pour le pays : extraction depuis les tags Last.fm
     if not country:
         tag_country = extract_country_from_tags(tags)
         if tag_country:
             country = tag_country
             country_source = 'lastfm_tags'
     
-    # 3. Dernier recours
     if not country:
         country = 'Unknown'
         country_source = 'unknown'
@@ -449,10 +514,10 @@ def process_artist(
         'name': name,
         'genre': genre,
         'country': country,
-        'country_source': country_source,  # 🆕 Traçabilité
+        'country_source': country_source,
         'formed': formed,
-        'formed_source': formed_source,    # 🆕 Traçabilité
-        'mbid': mbid or None,              # 🆕 MBID pour référence
+        'formed_source': formed_source,
+        'mbid': mbid or None,
         'status': 'Active',
         'biography': biography or None,
         'bio_lang': bio_lang,
@@ -498,6 +563,7 @@ def fetch_all_metal_bands(
     progress_path: str = PROGRESS_FILE,
     preferred_lang: str = DEFAULT_LANG,
     use_musicbrainz: bool = True,
+    mb_delay: float = DEFAULT_MB_DELAY,
 ) -> Tuple[List[Dict], Dict, Dict]:
     
     if not LASTFM_API_KEY:
@@ -505,9 +571,8 @@ def fetch_all_metal_bands(
         return [], {}, {}
     
     lastfm_client = LastFmClient(LASTFM_API_KEY, default_lang=preferred_lang)
-    musicbrainz_client = MusicBrainzClient() if use_musicbrainz else None
+    musicbrainz_client = MusicBrainzClient(mb_delay=mb_delay, use_cache=use_musicbrainz) if use_musicbrainz else None
     
-    # Chargement de la progression
     if resume:
         progress = load_progress(progress_path)
         seen_names: Set[str] = set(progress.get('seen_names', []))
@@ -527,13 +592,12 @@ def fetch_all_metal_bands(
     print(f"📊 {len(METAL_TAGS)} sous-genres à explorer")
     print(f"🌍 Langue préférée : {preferred_lang.upper()} (avec fallback sur anglais)")
     if use_musicbrainz:
-        print(f"🎵 MusicBrainz : ACTIVÉ (pays + année de formation)")
+        print(f"🎵 MusicBrainz : ACTIVÉ (délai: {mb_delay}s)")
     else:
-        print(f"🎵 MusicBrainz : DÉSACTIVÉ (pays via tags uniquement)")
+        print(f"🎵 MusicBrainz : DÉSACTIVÉ")
     print(f"🔑 Clé Last.fm: {LASTFM_API_KEY[:8]}...")
     print()
     
-    # Parcours de chaque tag
     for tag_idx, tag in enumerate(tqdm(METAL_TAGS[start_tag_idx:], desc="Genres", initial=start_tag_idx)):
         actual_tag_idx = start_tag_idx + tag_idx
         page = start_page if tag_idx == 0 else 1
@@ -555,7 +619,6 @@ def fetch_all_metal_bands(
                 
                 seen_names.add(artist_name)
                 
-                # Last.fm avec fallback linguistique
                 artist_info, actual_lang = lastfm_client.get_artist_info_with_fallback(
                     artist_name,
                     preferred_lang=preferred_lang,
@@ -563,7 +626,6 @@ def fetch_all_metal_bands(
                 )
                 
                 if artist_info:
-                    # Stats linguistiques
                     if actual_lang == preferred_lang:
                         lastfm_client.stats[f'bio_{preferred_lang}'] += 1
                     elif actual_lang == 'en':
@@ -571,7 +633,6 @@ def fetch_all_metal_bands(
                     else:
                         lastfm_client.stats['bio_none'] += 1
                     
-                    # Traitement avec MusicBrainz
                     processed = process_artist(
                         artist_info, 
                         tag, 
@@ -581,7 +642,6 @@ def fetch_all_metal_bands(
                     if processed:
                         bands_list.append(processed)
             
-            # Sauvegarde de la progression
             progress['seen_names'] = list(seen_names)
             progress['bands'] = bands_list
             progress['last_tag_index'] = actual_tag_idx
@@ -592,11 +652,18 @@ def fetch_all_metal_bands(
         
         start_page = 0
     
+    # Sauvegarde finale du cache MBID
+    if musicbrainz_client:
+        musicbrainz_client.save_cache()
+    
     print(f"\n✅ Récupération terminée !")
     print(f"📊 {len(bands_list)} groupes uniques récupérés")
     print(f"🌐 Last.fm     : {lastfm_client.request_count} requêtes")
     if use_musicbrainz:
-        print(f"🎵 MusicBrainz : {musicbrainz_client.request_count} requêtes")
+        cache_stats = musicbrainz_client.cache.stats() if musicbrainz_client.cache else {}
+        print(f"🎵 MusicBrainz : {musicbrainz_client.request_count} requêtes API")
+        print(f"💾 Cache MBID  : {cache_stats.get('hits', 0)} hits / {cache_stats.get('misses', 0)} misses")
+        print(f"⚠️  Rate limits : {musicbrainz_client.rate_limited_count} occurrences")
     
     return bands_list, lastfm_client.stats, musicbrainz_client.stats if musicbrainz_client else {}
 
@@ -623,12 +690,10 @@ def save_to_json(bands: List[Dict], output_path: str, lastfm_stats: Dict, mb_sta
     print(f"📦 Taille du fichier: {path.stat().st_size / 1024:.1f} KB")
 
 def print_stats(lastfm_stats: Dict, mb_stats: Dict):
-    """Affiche un résumé des statistiques."""
     print("\n" + "=" * 60)
     print("📊 STATISTIQUES DE RÉCUPÉRATION")
     print("=" * 60)
     
-    # Stats linguistiques Last.fm
     if lastfm_stats:
         total_bio = sum(lastfm_stats.values())
         if total_bio > 0:
@@ -638,7 +703,6 @@ def print_stats(lastfm_stats: Dict, mb_stats: Dict):
                 label = {'bio_fr': '🇫🇷 Français', 'bio_en': '🇬🇧 Anglais', 'bio_none': '❌ Aucune'}.get(lang, lang)
                 print(f"   {label:25s} {count:5,} ({pct:2d}%)")
     
-    # Stats MusicBrainz
     if mb_stats:
         total_mb = sum(mb_stats.values())
         if total_mb > 0:
@@ -661,8 +725,17 @@ def print_stats(lastfm_stats: Dict, mb_stats: Dict):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Récupère des groupes metal via Last.fm + MusicBrainz',
+        description='Récupère des groupes metal via Last.fm + MusicBrainz (optimisé anti-rate-limit)',
         formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Exemples:
+  python fetch_metal_bands.py                        # 10 000 groupes (délai 2s)
+  python fetch_metal_bands.py --limit 500            # 500 groupes
+  python fetch_metal_bands.py --mb-delay 3           # Délai MusicBrainz 3s
+  python fetch_metal_bands.py --mb-delay 5           # Délai MusicBrainz 5s (ultra-safe)
+  python fetch_metal_bands.py --skip-musicbrainz     # Sans MusicBrainz
+  python fetch_metal_bands.py --resume               # Reprendre
+        """
     )
     
     parser.add_argument('--limit', type=int, default=DEFAULT_LIMIT)
@@ -670,18 +743,28 @@ def main():
     parser.add_argument('--lang', type=str, default=DEFAULT_LANG)
     parser.add_argument('--resume', action='store_true')
     parser.add_argument('--reset', action='store_true')
-    parser.add_argument('--skip-musicbrainz', action='store_true',
-                        help='Désactiver MusicBrainz (plus rapide, mais pas de pays/année)')
+    parser.add_argument('--skip-musicbrainz', action='store_true')
+    parser.add_argument('--mb-delay', type=float, default=DEFAULT_MB_DELAY,
+                        help=f'Délai entre requêtes MusicBrainz en secondes (défaut: {DEFAULT_MB_DELAY}s)')
+    parser.add_argument('--clear-mb-cache', action='store_true',
+                        help='Vider le cache MBID avant de commencer')
     
     args = parser.parse_args()
     
     print("\n" + "=" * 60)
     print("🎸 METALPEDIA - Récupération Last.fm + MusicBrainz")
+    print("   (Version optimisée anti-rate-limit)")
     print("=" * 60)
     
     if args.reset:
         reset_progress(PROGRESS_FILE)
         return
+    
+    if args.clear_mb_cache:
+        cache_path = Path(MB_CACHE_FILE)
+        if cache_path.exists():
+            cache_path.unlink()
+            print(f"🗑️  Cache MBID vidé")
     
     valid_langs = {'fr', 'en', 'de', 'es', 'it', 'pl', 'pt', 'ru', 'sv', 'ja', 'zh'}
     if args.lang not in valid_langs:
@@ -694,6 +777,7 @@ def main():
         args.resume,
         preferred_lang=args.lang,
         use_musicbrainz=not args.skip_musicbrainz,
+        mb_delay=args.mb_delay,
     )
     
     if bands:
