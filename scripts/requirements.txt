@@ -1,8 +1,22 @@
+# ═══════════════════════════════════════════════════════════
+# DÉPENDANCES PYTHON POUR METALPEDIA (SCRIPTS D'IMPORT)
+# ═══════════════════════════════════════════════════════════
+
+# Requêtes HTTP (Last.fm, MusicBrainz)
 requests==2.31.0
+
+# Gestion des variables d'environnement (.env)
 python-dotenv==1.0.0
+
+# Barres de progression dans le terminal
 tqdm==4.66.1
+
+# Client officiel Supabase et ses dépendances strictes
+# (Versions épinglées pour éviter les conflits de résolution pip)
 supabase==2.3.4
 postgrest==0.16.4
 gotrue==2.4.3
 storage3==0.7.4
-httpx==0.27.0
+
+# Client HTTP utilisé par Supabase (DOIT être < 0.26 pour supabase 2.3.4)
+httpx==0.25.2
