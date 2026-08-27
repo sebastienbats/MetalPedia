@@ -1,22 +1,19 @@
 # ═══════════════════════════════════════════════════════════
-# DÉPENDANCES PYTHON POUR METALPEDIA (SCRIPTS D'IMPORT)
+# DÉPENDANCES PYTHON METALPEDIA - VERSIONS ÉPINGLÉES
+# ═══════════════════════════════════════════════════════════
+# Ces versions ont été testées ensemble pour éviter :
+# - Les conflits de résolution pip
+# - Le bug "unexpected keyword argument 'proxy'" de gotrue 2.9+
 # ═══════════════════════════════════════════════════════════
 
-# Requêtes HTTP (Last.fm, MusicBrainz)
 requests==2.31.0
-
-# Gestion des variables d'environnement (.env)
 python-dotenv==1.0.0
-
-# Barres de progression dans le terminal
 tqdm==4.66.1
 
-# Client officiel Supabase et ses dépendances strictes
-# (Versions épinglées pour éviter les conflits de résolution pip)
+# Client Supabase et SES SOUS-DÉPENDANCES ÉPINGLÉES
+# (gotrue DOIT rester en 2.4.3 max pour éviter le bug proxy)
 supabase==2.3.4
-postgrest==0.16.4
+postgrest==0.15.1
 gotrue==2.4.3
 storage3==0.7.4
-
-# Client HTTP utilisé par Supabase (DOIT être < 0.26 pour supabase 2.3.4)
 httpx==0.25.2
