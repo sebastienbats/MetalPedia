@@ -1,35 +1,44 @@
 // src/types/api.ts
 
 export type Genre = 
-  | 'Black Metal' 
-  | 'Death Metal' 
-  | 'Heavy Metal' 
-  | 'Thrash Metal' 
-  | 'Power Metal' 
-  | 'Doom Metal' 
-  | 'Progressive Metal' 
-  | 'Folk Metal' 
-  | 'Symphonic Metal' 
-  | 'Gothic Metal' 
-  | 'Nu Metal' 
-  | 'Metalcore' 
-  | 'Sludge Metal' 
-  | 'Stoner Metal' 
-  | 'Groove Metal'
+  | 'Black Metal' | 'Death Metal' | 'Heavy Metal' | 'Thrash Metal' 
+  | 'Power Metal' | 'Doom Metal' | 'Progressive Metal' | 'Folk Metal' 
+  | 'Symphonic Metal' | 'Gothic Metal' | 'Nu Metal' | 'Metalcore' 
+  | 'Sludge Metal' | 'Stoner Metal' | 'Groove Metal'
   | string; 
+
+export type BioLang = 'fr' | 'en' | 'de' | 'es' | 'it' | 'pl' | 'pt' | 'ru' | 'sv' | 'ja' | 'zh' | 'none';
+
+export type BandStatus = 'Active' | 'On hold' | 'Split-up' | 'Unknown' | 'Changed name' | 'Disputed' | 'Vacation';
+
+// 🆕 Sources de données pour le pays
+export type CountrySource = 'musicbrainz' | 'lastfm_tags' | 'unknown';
+
+// 🆕 Sources de données pour l'année de formation
+export type FormedSource = 'musicbrainz' | 'unknown';
 
 export interface BandSearchResult {
   id: number;
   name: string;
   genre: Genre;
   country: string;
-  formed?: number | null; // ✅ AJOUT DU '?' ICI : rend la propriété optionnelle
-  status?: string;
+  formed?: number | null;
+  status?: BandStatus | string;
   image_url?: string | null;
 }
 
 export interface Band extends BandSearchResult {
   biography: string | null;
+  // Champs enrichis via Last.fm
+  bio_lang?: BioLang | null;
+  listeners?: number | null;
+  source_tag?: string | null;
+  fetched_at?: string | null;
+  original_name?: string | null;
+  // 🆕 Champs enrichis via MusicBrainz
+  mbid?: string | null;              // MusicBrainz ID
+  country_source?: CountrySource;    // Source du pays
+  formed_source?: FormedSource;      // Source de l'année de formation
 }
 
 export type BandDetail = Band;
