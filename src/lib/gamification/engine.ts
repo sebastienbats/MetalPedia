@@ -1,17 +1,18 @@
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // LE MOTEUR DU METALVERSE
 // Logique de calcul XP, niveaux, progression
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 
 import {
   getLevelFromXP,
   getXPForNextLevel,
   getRankForLevel,
   XP_RULES,
-  Rank,
+  type Rank,
 } from './lore';
-import { BADGES, Badge } from './badges';
-import { QUESTS, Quest } from './quests';
+import { BADGES, type Badge } from './badges';
+import { QUESTS, type Quest } from './quests';
+import { GAMIFICATION_PILLARS, type GamificationPillar } from '@/types/api';
 
 // ─────────────────────────────────────────
 // TYPES
@@ -406,4 +407,48 @@ export function analyzeXPHistory(history: XPEvent[]): {
     mostFrequentAction,
     xpPerDay,
   };
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🆕 NORMALISATION DES GENRES POUR LA GAMIFICATION
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Normalise n'importe quel genre en l'un des 9 piliers de gamification.
+ * Utilise genre_pillar si fourni, sinon déduit depuis le genre original.
+ * 
+ * @param genre - Le sous-genre original (ex: "Viking Metal")
+ * @param genrePillar - Le pilier pré-calculé (ex: "Folk Metal") - optionnel
+ * @returns L'un des 9 piliers de gamification
+ */
+export function normalizeGenreForGamification(
+  genre: string | null | undefined,
+  genrePillar?: string | null
+): GamificationPillar {
+  // 1. Si le pilier est déjà fourni et valide, on l'utilise directement
+  if (genrePillar && (GAMIFICATION_PILLARS as readonly string[]).includes(genrePillar)) {
+    return genrePillar as GamificationPillar;
+  }
+  
+  // 2. Si le genre original est déjà un pilier, on le garde
+  if (genre && (GAMIFICATION_PILLARS as readonly string[]).includes(genre)) {
+    return genre as GamificationPillar;
+  }
+  
+  // 3. Sinon, on déduit le pilier depuis le genre original
+  if (!genre) return 'Heavy Metal';
+  
+  const lower = genre.toLowerCase();
+  
+  if (lower.includes('death') || lower.includes('deathcore')) return 'Death Metal';
+  if (lower.includes('black')) return 'Black Metal';
+  if (lower.includes('thrash') || lower.includes('speed')) return 'Thrash Metal';
+  if (lower.includes('folk') || lower.includes('viking') || lower.includes('pagan')) return 'Folk Metal';
+  if (lower.includes('power') || lower.includes('epic') || lower.includes('symphonic')) return 'Power Metal';
+  if (lower.includes('doom') || lower.includes('sludge') || lower.includes('stoner')) return 'Doom Metal';
+  if (lower.includes('progressive') || lower.includes('djent') || lower.includes('post')) return 'Progressive Metal';
+  if (lower.includes('core') || lower.includes('hardcore')) return 'Metalcore';
+  
+  // 4. Fallback : Heavy Metal
+  return 'Heavy Metal';
 }
