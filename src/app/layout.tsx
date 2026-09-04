@@ -119,7 +119,6 @@ export const viewport: Viewport = {
 
 // ═══════════════════════════════════════════
 // SCRIPT ANTI-FLASH DE THÈME
-// Exécuté avant le rendu pour éviter le flash blanc/thème par défaut
 // ═══════════════════════════════════════════
 const themeInitializer = `
 (function() {
@@ -156,28 +155,25 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Script anti-flash : haute priorité, exécuté avant le paint */}
         <Script
           id="theme-initializer"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: themeInitializer }}
         />
 
-        {/* Préconnexions pour les APIs tierces */}
         <link rel="preconnect" href="https://www.metal-api.dev" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
 
-        {/* DNS prefetch pour performance */}
         <link rel="dns-prefetch" href="https://www.metal-api.dev" />
         <link rel="dns-prefetch" href="https://open.spotify.com" />
       </head>
 
+      {/* 🛡️ BLINDAGE 1 : Fond solide global pour éviter toute transparence indésirable */}
       <body
-        className={`${fontInter.className} antialiased min-h-screen flex flex-col`}
+        className={`${fontInter.className} antialiased min-h-screen flex flex-col bg-metal-black text-gray-100`}
         suppressHydrationWarning
       >
-        {/* Skip link pour accessibilité */}
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[999] focus:metal-button"
@@ -186,35 +182,33 @@ export default function RootLayout({
         </a>
 
         <Providers>
-          {/* Header sticky avec recherche et sélecteur de thème */}
           <Header />
 
-          {/* Contenu principal */}
+          {/* 🛡️ BLINDAGE 2 : flex-1 pousse le footer vers le bas. 
+              pb-32 (128px) réserve un espace de sécurité pour les widgets fixes en bas de page. */}
           <main
             id="main-content"
-            className="flex-1 container mx-auto px-4 py-8 max-w-7xl pb-28"
+            className="flex-1 container mx-auto px-4 py-8 max-w-7xl pb-32"
             tabIndex={-1}
           >
             {children}
           </main>
 
-          {/* Footer */}
-          <Footer />
+          {/* 🛡️ BLINDAGE 3 : Le footer a un z-index (50) SUPÉRIEUR à la XPBar (40). 
+              Le bg-metal-black assure qu'il est 100% opaque et recouvre proprement la XPBar au scroll. */}
+          <div className="relative z-50 bg-metal-black border-t border-metal-gray">
+            <Footer />
+          </div>
 
           {/* ═══════════════════════════════════════════
-              COMPOSANTS GLOBAUX
+              COMPOSANTS GLOBAUX (z-index gérés en interne)
               ═══════════════════════════════════════════ */}
-
-          {/* Navigation rapide (Ctrl+K) */}
           <CommandPalette />
-
-          {/* Indicateur offline (bas à droite) */}
           <OfflineIndicator />
-
-          {/* Barre d'XP gamification (bas fixe) */}
+          
+          {/* La XPBar reste en z-40, elle sera donc en dessous du footer (z-50) en bas de page */}
           <XPBar />
-
-          {/* Modal de level up (overlay) */}
+          
           <LevelUpModal />
         </Providers>
       </body>
