@@ -9,19 +9,13 @@ import {
   checkQuestCompleted,
   getLevelProgress,
   createXPEvent,
+  normalizeGenreForGamification, // 🆕 Import ajouté
 } from '@/lib/gamification/engine';
 import { BADGES } from '@/lib/gamification/badges';
 import { QUESTS } from '@/lib/gamification/quests';
 import { getLevelFromXP } from '@/lib/gamification/lore';
 
-// ═══════════════════════════════════════════════════════════
-// CONFIGURATION INDEXEDDB
-// ═══════════════════════════════════════════════════════════
 const idbStore = createStore('metalpedia', 'gamification');
-
-// ═══════════════════════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════════════════════
 
 interface GamificationState {
   stats: PlayerStats;
@@ -29,27 +23,26 @@ interface GamificationState {
   showLevelUpModal: boolean;
   pendingLevelUp: number | null;
 
-  // Actions
-  recordView: (band: { id: number; name: string; genre: string; country: string }) => void;
+  // 🆕 Action mise à jour pour accepter genre_pillar
+  recordView: (band: { 
+    id: number; 
+    name: string; 
+    genre: string; 
+    genre_pillar?: string | null; 
+    country: string 
+  }) => void;
   recordFavorite: (bandId: number, isAdding: boolean) => void;
   recordReview: () => void;
   recordGenreDiscovery: (genre: string) => void;
   claimDailyBonus: () => void;
   completeQuest: (questId: string) => void;
 
-  // Getters
   getLevelProgress: () => ReturnType<typeof getLevelProgress>;
   getUnlockedBadges: () => typeof BADGES;
   getActiveQuests: () => typeof QUESTS;
   getCompletedQuests: () => typeof QUESTS;
-
-  // UI
   closeLevelUpModal: () => void;
 }
-
-// ═══════════════════════════════════════════════════════════
-// ÉTAT INITIAL
-// ═══════════════════════════════════════════════════════════
 
 const initialStats: PlayerStats = {
   totalViews: 0,
@@ -63,10 +56,6 @@ const initialStats: PlayerStats = {
   lastDailyBonus: null,
 };
 
-// ═══════════════════════════════════════════════════════════
-// STORE ZUSTAND
-// ═══════════════════════════════════════════════════════════
-
 export const useGamificationStore = create<GamificationState>()(
   persist(
     (set, get) => ({
@@ -79,14 +68,18 @@ export const useGamificationStore = create<GamificationState>()(
         const xp = calculateXP('VIEW_BAND');
         const event = createXPEvent('VIEW_BAND', band.name);
 
+        // 🛡️ CORRECTION CRITIQUE : Utiliser le pilier pour la gamification
+        const gamificationGenre = normalizeGenreForGamification(band.genre, band.genre_pillar);
+
         set((state) => {
           const newXP = state.stats.totalXP + xp;
           const newLevel = getLevelFromXP(newXP);
           const oldLevel = state.stats.level;
 
-          const newGenres = state.stats.genresExplored.includes(band.genre)
+          // On track le PILIER, pas le sous-genre original
+          const newGenres = state.stats.genresExplored.includes(gamificationGenre)
             ? state.stats.genresExplored
-            : [...state.stats.genresExplored, band.genre];
+            : [...state.stats.genresExplored, gamificationGenre];
 
           const newStats: PlayerStats = {
             ...state.stats,
@@ -156,9 +149,7 @@ export const useGamificationStore = create<GamificationState>()(
           };
 
           const completedQuests = QUESTS.filter(
-            (q) =>
-              !newStats.questsCompleted.includes(q.id) &&
-              checkQuestCompleted(q, newStats)
+            (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats)
           );
 
           if (completedQuests.length > 0) {
@@ -180,15 +171,18 @@ export const useGamificationStore = create<GamificationState>()(
       },
 
       recordGenreDiscovery: (genre) => {
+        // 🛡️ CORRECTION CRITIQUE : Normaliser ici aussi
+        const gamificationGenre = normalizeGenreForGamification(genre);
+
         set((state) => {
-          if (state.stats.genresExplored.includes(genre)) return state;
+          if (state.stats.genresExplored.includes(gamificationGenre)) return state;
 
           const xp = calculateXP('DISCOVER_NEW_GENRE');
-          const event = createXPEvent('DISCOVER_NEW_GENRE', genre);
+          const event = createXPEvent('DISCOVER_NEW_GENRE', gamificationGenre);
 
           const newStats: PlayerStats = {
             ...state.stats,
-            genresExplored: [...state.stats.genresExplored, genre],
+            genresExplored: [...state.stats.genresExplored, gamificationGenre],
             totalXP: state.stats.totalXP + xp,
           };
 
@@ -235,29 +229,11 @@ export const useGamificationStore = create<GamificationState>()(
         });
       },
 
-      getLevelProgress: () => {
-        const state = get();
-        return getLevelProgress(state.stats.totalXP);
-      },
-
-      getUnlockedBadges: () => {
-        const state = get();
-        return BADGES.filter((b) => state.stats.badgesUnlocked.includes(b.id));
-      },
-
-      getActiveQuests: () => {
-        const state = get();
-        return QUESTS.filter((q) => !state.stats.questsCompleted.includes(q.id));
-      },
-
-      getCompletedQuests: () => {
-        const state = get();
-        return QUESTS.filter((q) => state.stats.questsCompleted.includes(q.id));
-      },
-
-      closeLevelUpModal: () => {
-        set({ showLevelUpModal: false, pendingLevelUp: null });
-      },
+      getLevelProgress: () => getLevelProgress(get().stats.totalXP),
+      getUnlockedBadges: () => BADGES.filter((b) => get().stats.badgesUnlocked.includes(b.id)),
+      getActiveQuests: () => QUESTS.filter((q) => !get().stats.questsCompleted.includes(q.id)),
+      getCompletedQuests: () => QUESTS.filter((q) => get().stats.questsCompleted.includes(q.id)),
+      closeLevelUpModal: () => set({ showLevelUpModal: false, pendingLevelUp: null }),
     }),
     {
       name: 'metalpedia-gamification',
@@ -266,33 +242,20 @@ export const useGamificationStore = create<GamificationState>()(
           try {
             const value = await idbGet(name, idbStore);
             return value ? JSON.parse(value) : null;
-          } catch {
-            return null;
-          }
+          } catch { return null; }
         },
         setItem: async (name, value) => {
-          try {
-            await idbSet(name, JSON.stringify(value), idbStore);
-          } catch (err) {
-            console.error('Failed to persist gamification:', err);
-          }
+          try { await idbSet(name, JSON.stringify(value), idbStore); }
+          catch (err) { console.error('Failed to persist gamification:', err); }
         },
-        // ✅ AJOUT : removeItem est requis par l'interface StateStorage de Zustand
         removeItem: async (name) => {
-          try {
-            await idbDel(name, idbStore);
-          } catch (err) {
-            console.error('Failed to remove gamification:', err);
-          }
+          try { await idbDel(name, idbStore); }
+          catch (err) { console.error('Failed to remove gamification:', err); }
         },
       })),
     }
   )
 );
-
-// ═══════════════════════════════════════════════════════════
-// SÉLECTEURS OPTIMISÉS
-// ═══════════════════════════════════════════════════════════
 
 export const usePlayerLevel = () => useGamificationStore((s) => s.stats.level);
 export const usePlayerXP = () => useGamificationStore((s) => s.stats.totalXP);
