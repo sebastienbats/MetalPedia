@@ -391,8 +391,8 @@ metal-pedia/
 │   ├── generate-icons.mjs        # Génération icônes
 │   ├── export_dataset.py         # Export dataset
 │   └── upload_huggingface.py     # Upload HuggingFace
-|   └── upload_huggingface.py     # 🐍 fetch-MetalBands.py (fetch)
-|   └── upload_huggingface.py     # 🐍 Pipeline Python (import)
+|   └── fetch_metal_bands.py      # 🐍 fetch_metal_bands.py (fetch)
+|   └── import_to_supabase.py     # 🐍 Pipeline Python (import)
 ├── src/
 │   ├── app/                      # App Router Next.js
 |   |   ├── genres/              # 🆕 Navigation par 9 piliers + filtres
