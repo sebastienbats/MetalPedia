@@ -91,9 +91,11 @@ const cspDirectives = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co",
+  // 🛡️ AJOUT : https://cdn.jsdelivr.net autorisé pour la texture du globe 3D
+  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com",
+  // 🛡️ AJOUT : https://cdn.jsdelivr.net autorisé pour les requêtes de ressources CDN
+  "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net",
   "frame-src 'self' https://open.spotify.com https://www.youtube.com",
   "media-src 'self' https://open.spotify.com https://*.scdn.co",
   "worker-src 'self' blob:",
@@ -189,8 +191,6 @@ const nextConfig = {
 
   // ═══════════════════════════════════════════════════════════
   // WEBPACK CUSTOM (SIMPLIFIÉ)
-  // ❌ Pas de règle CSS custom (Next.js 15 gère nativement)
-  // ✅ Import CSS vis-timeline directement dans le composant
   // ═══════════════════════════════════════════════════════════
   webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
