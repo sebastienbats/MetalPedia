@@ -140,7 +140,7 @@ export default function BandDetailClient({
             </div>
 
             {/* Bouton Favori */}
-            {user && <FavoriteButton band={band} />}
+            {<FavoriteButton band={band} />}
           </div>
         </div>
       </div>
