@@ -589,8 +589,8 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 
 ## 🙏 Remerciements
 
-- [Last.fm](www.last.fm) — La source de données originelle
-- [Spotify](https://developer.spotify.com) — Pour les audio features
+- [Last.fm](www.last.fm) — Source de données originelle
+- [MusicBrainz](https://musicbrainz.org/) — Source de données originelle
 - [OpenAI](https://openai.com) — Pour la génération d'images
 - Toute la communauté metal 🤘
 
