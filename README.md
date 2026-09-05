@@ -2,13 +2,14 @@
 
 # 🤘 MetalPedia
 
-### L'encyclopédie du Metal avec gamification épique
+### L'encyclopédie interactive du Metal avec gamification épique
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org)
+[![Next.js](https://img.shields.io/badge/Next.js-15.1-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org)
-[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000?style=flat&logo=vercel)](https://metalpedia.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Explorez les groupes de metal, gagnez de l'XP, collectionnez des reliques et devenez le DIEU DU METALVERSE.**
@@ -20,85 +21,52 @@
 ## 📖 Table des matières
 
 - [Aperçu](#-aperçu)
-- [Fonctionnalités](#-fonctionnalités)
+- [Fonctionnalités Implémentées](#-fonctionnalités-implémentées)
 - [Système de Gamification](#-système-de-gamification)
 - [Stack Technique](#-stack-technique)
-- [Architecture](#-architecture)
-- [Prérequis](#-prérequis)
 - [Installation](#-installation)
 - [Variables d'environnement](#-variables-denvironnement)
-- [Utilisation](#-utilisation)
-- [Scripts disponibles](#-scripts-disponibles)
-- [Structure du projet](#-structure-du-projet)
-- [API](#-api)
-- [Déploiement](#-déploiement)
-- [Tests](#-tests)
+- [Pipeline de Données Python](#-pipeline-de-données-python)
+- [Structure du Projet](#-structure-du-projet)
 - [Roadmap](#-roadmap)
 - [Contribuer](#-contribuer)
 - [Licence](#-licence)
-- [Remerciements](#-remerciements)
 
 ---
 
 ## 🎯 Aperçu
 
-**MetalPedia** est une encyclopédie dédiée aux groupes de metal.
+**MetalPedia** est bien plus qu'une simple base de données. C'est une **encyclopédie vivante** qui transforme l'exploration musicale en une aventure RPG. 
 
-Au-delà d'une simple base de données, MetalPedia transforme l'exploration musicale en une **aventure RPG** : gagnez de l'XP en découvrant des groupes, accomplissez des quêtes épiques, collectionnez des reliques légendaires et gravissez les échelons de la Hiérarchie du Riff.
-
-### ✨ Ce qui rend MetalPedia unique
-
-| Fonctionnalité | Description |
-|----------------|-------------|
-| 🤖 **Recommandations ML** | Moteur de similarité basé sur les embeddings Spotify |
-| 🕸️ **Graphes interactifs** | Visualisation D3.js force-directed des groupes liés |
-| 🎧 **Analyse audio** | Empreinte musicale (BPM, énergie, valence) via Spotify |
-| 🎨 **Générateur IA** | Créez des logos de groupes avec OpenAI |
-| 🌍 **Metal Map 3D** | Globe interactif de la densité metal par pays |
-| 📜 **Timeline historique** | 60 ans d'histoire du metal (1968-2026) |
-| 🎮 **Gamification RPG** | XP, niveaux, badges, quêtes avec lore immersif |
-| 📱 **PWA Offline-first** | Installable, fonctionne hors ligne |
+Grâce à un pipeline d'ingestion de données robuste et une architecture moderne, MetalPedia offre une expérience fluide, fonctionnant même hors ligne, avec des visualisations de données avancées et un système de progression profondément immersif.
 
 ---
 
-## ✨ Fonctionnalités
+## ✨ Fonctionnalités Implémentées
 
-### 🔍 Exploration & Recherche
+### 🎸 Encyclopédie & Navigation Hiérarchique
+- ✅ **Double système de genres** : Genre original (Last.fm) + **9 Piliers de Gamification** (Black, Death, Heavy, Thrash, Power, Doom, Progressive, Folk, Metalcore).
+- ✅ **Navigation par Piliers** : Pages dédiées `/genres` avec grille interactive et filtres dynamiques par sous-genre.
+- ✅ **Fiches de groupes enrichies** : Biographies multi-langues, pays vérifiés (MusicBrainz), année de formation, statut, et compteur d'auditeurs.
+- ✅ **Recherche intelligente** : Autocomplétion avec debounce et Command Palette (`Ctrl+K`).
 
-- ✅ **Recherche instantanée** avec autocomplétion (debounce 400ms)
-- ✅ **Command Palette** (`Ctrl+K`) pour navigation rapide
-- ✅ **Filtres par genre** : Black, Death, Heavy, Thrash, Power, Doom, Progressive, Folk Metal
-- ✅ **Fiches détaillées** : biographie, discographie, line-up actuel/passé, liens externes
-- ✅ **Critiques communautaires** avec système de notation
+### 🎮 Système de Gamification (RPG)
+- ✅ **Moteur d'XP local-first** : Calcul en temps réel via Zustand + persistance IndexedDB (`idb-keyval`), fonctionnant même hors ligne.
+- ✅ **8 Rangs épiques** : De "Novice du Silence" à "DIEU DU METALVERSE" 👑.
+- ✅ **Badges & Quêtes** : Déblocage conditionnel basé sur les actions (vues, favoris, exploration de genres).
+- ✅ **Lore immersif** : Chaque action est narrativisée (ex: "Rune déchiffrée", "Sortilège lancé").
 
-### 🤖 Intelligence Artificielle
+### 🌍 Visualisations & Data
+- ✅ **Metal Map 3D** : Globe interactif (`react-globe.gl`) montrant la densité réelle des groupes par pays, connecté en temps réel à Supabase.
+- ✅ **Graphe de similarité** : Visualisation D3.js force-directed des groupes liés.
+- ✅ **Timeline historique** : Chronologie interactive de l'histoire du metal.
 
-- ✅ **Recommandations ML** : similarité cosinus sur embeddings Spotify
-- ✅ **Graphe de similarité** : visualisation D3.js force-directed interactive
-- ✅ **Audio Fingerprint** : analyse BPM, énergie, valence, danceabilité
-- ✅ **Générateur de logos IA** : création de logos via OpenAI GPT-Image
-
-### 📊 Data & Visualisations
-
-- ✅ **Metal Map 3D** : globe react-globe.gl avec densité par pays
-- ✅ **Timeline historique** : chronologie interactive vis-timeline
-- ✅ **ADN Metal personnel** : statistiques de consultation avec radar chart
-- ✅ **Dataset public** : export vers HuggingFace et Kaggle
-
-### 👥 Communauté
-
-- ✅ **Authentification Supabase** (email + OAuth GitHub/Google)
-- ✅ **Reviews et notations** : critiques avec barre de progression
-- ✅ **Profils gamifiés** : page personnelle avec XP et badges
-- ✅ **Concerts** : intégration Songkick pour les événements à venir
-
-### 📱 Expérience Utilisateur
-
-- ✅ **PWA complète** : installable, offline-first, push notifications
-- ✅ **Mode offline** : sync automatique des favoris au retour en ligne
-- ✅ **4 thèmes visuels** : Forge, Cathédrale, Hellfire, Frost
-- ✅ **Responsive** : mobile-first, 1 à 4 colonnes
-- ✅ **i18n** : français et anglais
+### 📱 Expérience Utilisateur & PWA
+- ✅ **Favoris Local-First** : Système de favoris robuste avec compteur dynamique dans le Header, résistant au rechargement et fonctionnant hors ligne.
+- ✅ **PWA Complète** : Installable, page de fallback offline, et service worker configuré via `next-pwa`.
+- ✅ **Thèmes dynamiques** : Système de thèmes avec persistance et script anti-flash.
+- ✅ **Layout optimisé** : Flexbox strict garantissant que le Footer ne chevauche jamais les widgets flottants (comme la XPBar).
+- ✅ **Widget Concerts** : Intégration des événements à venir sur les fiches des groupes.
 
 ---
 
@@ -158,38 +126,14 @@ Au-delà d'une simple base de données, MetalPedia transforme l'exploration musi
 
 ## 🛠 Stack Technique
 
-### Frontend
-
-| Technologie | Version | Usage |
-|-------------|---------|-------|
-| [Next.js](https://nextjs.org) | 15.1 | Framework React SSR/ISR |
-| [React](https://react.dev) | 18.2 | Bibliothèque UI |
-| [TypeScript](https://www.typescriptlang.org) | 5.3 | Typage statique |
-| [Tailwind CSS](https://tailwindcss.com) | 3.4 | Styling |
-| [Zustand](https://zustand-demo.pmnd.rs) | 4.4 | State management |
-| [TanStack Query](https://tanstack.com/query) | 5.17 | Data fetching + cache |
-| [D3.js](https://d3js.org) | 7.8 | Visualisations |
-| [Recharts](https://recharts.org) | 2.10 | Charts |
-| [react-globe.gl](https://github.com/vasturiano/react-globe.gl) | 2.27 | Globe 3D |
-| [vis-timeline](https://visjs.org) | 7.7 | Timeline historique |
-| [i18next](https://www.i18next.com) | 23.7 | Internationalisation |
-
-### Backend & Services
-
-| Technologie | Usage |
-|-------------|-------|
-| [Supabase](https://supabase.com) | Auth, PostgreSQL, Storage, Realtime |
-| [Python FastAPI](https://fastapi.tiangolo.com) | Microservice ML |
-| [Redis](https://redis.io) | Cache distribué |
-
-### APIs Externes
-
-| API | Usage |
-|-----|-------|
-| [metal-api.dev](https://www.metal-api.dev) | Données des groupes |
-| [Spotify Web API](https://developer.spotify.com) | Audio features |
-| [OpenAI API](https://platform.openai.com) | Génération de logos |
-| [Songkick API](https://www.songkick.com/developer) | Concerts |
+| Catégorie | Technologies |
+|-----------|--------------|
+| **Frontend** | Next.js 15 (App Router), React 18, TypeScript, Tailwind CSS |
+| **State & Cache** | Zustand, TanStack Query, IndexedDB (`idb-keyval`) |
+| **Backend / DB** | Supabase (PostgreSQL, Auth, RLS), Python 3.12 (Scripts d'ingestion) |
+| **Visualisation** | `react-globe.gl`, D3.js, Recharts, `vis-timeline` |
+| **APIs Externes** | Last.fm, MusicBrainz, Spotify Web API (ML Service) |
+| **DevOps** | Vercel, Docker, GitHub Actions (CI/CD), ESLint, Prettier, Husky |
 
 ---
 
@@ -447,8 +391,11 @@ metal-pedia/
 │   ├── generate-icons.mjs        # Génération icônes
 │   ├── export_dataset.py         # Export dataset
 │   └── upload_huggingface.py     # Upload HuggingFace
+|   └── upload_huggingface.py     # 🐍 fetch-MetalBands.py (fetch)
+|   └── upload_huggingface.py     # 🐍 Pipeline Python (import)
 ├── src/
 │   ├── app/                      # App Router Next.js
+|   |   ├── genres/              # 🆕 Navigation par 9 piliers + filtres
 │   │   ├── layout.tsx           # Layout racine
 │   │   ├── page.tsx             # Accueil
 │   │   ├── band/[id]/           # Fiche groupe
