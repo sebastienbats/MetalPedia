@@ -7,13 +7,16 @@ import Loader from '@/components/ui/Loader';
 // Import dynamique du globe (client-only, pas de SSR)
 const Globe = dynamic(() => import('react-globe.gl'), {
   ssr: false,
-  loading: () => <Loader text="Chargement du globe 3D..." />,
+  loading: () => (
+    <div className="flex items-center justify-center h-[600px] bg-metal-black/50 rounded-lg border border-metal-gray">
+      <Loader text="Chargement du globe 3D..." />
+    </div>
+  ),
 });
 
 // ═══════════════════════════════════════════
-// DONNÉES DES PAYS (illustratives)
+// DONNÉES DES PAYS
 // ═══════════════════════════════════════════
-
 interface CountryData {
   name: string;
   lat: number;
@@ -65,7 +68,6 @@ export default function MetalMapClient() {
     []
   );
 
-  // Top 10 pays
   const topCountries = useMemo(
     () => [...METAL_COUNTRIES].sort((a, b) => b.bandCount - a.bandCount).slice(0, 10),
     []
@@ -74,10 +76,14 @@ export default function MetalMapClient() {
   return (
     <div className="space-y-6">
       {/* Globe 3D */}
-      <div className="metal-card overflow-hidden" style={{ height: '600px' }}>
+      {/* 🛡️ CORRECTION 1 : Ajout de 'relative' pour le positionnement absolu de l'info-bulle */}
+      <div className="metal-card overflow-hidden relative" style={{ height: '600px' }}>
         <Globe
+          // 🛡️ CORRECTION 2 : Dimensions explicites pour remplir le conteneur de 600px
+          width="100%"
+          height="100%"
           globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg"
-          backgroundColor="#0a0a0a"
+          backgroundColor="transparent"
           pointsData={METAL_COUNTRIES}
           pointLat={(d: any) => d.lat}
           pointLng={(d: any) => d.lng}
@@ -86,20 +92,21 @@ export default function MetalMapClient() {
           pointRadius={(d: any) => 0.3 + Math.sqrt(d.bandCount / maxBandCount) * 0.7}
           pointsMerge={false}
           onPointHover={(point: any) => setHoveredCountry(point as CountryData)}
+          // 🛡️ CORRECTION 3 : HTML sécurisé et stylisé pour le label
           pointLabel={(d: any) => `
-            <div style="background: #1a1a1a; padding: 8px 12px; border-radius: 6px; border: 1px solid #2a2a2a;">
-              <div style="font-weight: bold;">${d.flag} ${d.name}</div>
-              <div style="color: #d63031;">${d.bandCount.toLocaleString()} groupes</div>
+            <div style="background: #1a1a1a; padding: 8px 12px; border-radius: 6px; border: 1px solid #d63031; color: white; font-family: sans-serif; pointer-events: none;">
+              <div style="font-weight: bold; font-size: 14px; margin-bottom: 4px;">${d.flag} ${d.name}</div>
+              <div style="color: #d63031; font-size: 12px;">${d.bandCount.toLocaleString()} groupes</div>
             </div>
           `}
         />
 
-        {/* Info du pays survolé */}
+        {/* Info du pays survolé (overlay) */}
         {hoveredCountry && (
-          <div className="absolute top-4 left-4 metal-card p-4 pointer-events-none">
-            <div className="text-2xl mb-1">{hoveredCountry.flag}</div>
-            <div className="font-serif font-bold text-lg">{hoveredCountry.name}</div>
-            <div className="text-metal-fire">
+          <div className="absolute top-4 left-4 metal-card p-4 pointer-events-none z-10 backdrop-blur-sm bg-metal-black/80">
+            <div className="text-3xl mb-1">{hoveredCountry.flag}</div>
+            <div className="font-serif font-bold text-lg text-white">{hoveredCountry.name}</div>
+            <div className="text-metal-fire font-semibold">
               {hoveredCountry.bandCount.toLocaleString()} groupes
             </div>
           </div>
@@ -108,19 +115,15 @@ export default function MetalMapClient() {
 
       {/* Stats globales */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="metal-card p-5 text-center">
-          <div className="text-3xl font-bold text-metal-fire">
-            {METAL_COUNTRIES.length}
-          </div>
+        <div className="metal-card p-5 text-center border border-metal-gray">
+          <div className="text-3xl font-bold text-metal-fire">{METAL_COUNTRIES.length}</div>
           <div className="text-sm text-gray-400 mt-1">Pays référencés</div>
         </div>
-        <div className="metal-card p-5 text-center">
-          <div className="text-3xl font-bold text-metal-fire">
-            {totalBands.toLocaleString()}
-          </div>
+        <div className="metal-card p-5 text-center border border-metal-gray">
+          <div className="text-3xl font-bold text-metal-fire">{totalBands.toLocaleString()}</div>
           <div className="text-sm text-gray-400 mt-1">Groupes au total</div>
         </div>
-        <div className="metal-card p-5 text-center">
+        <div className="metal-card p-5 text-center border border-metal-gray">
           <div className="text-3xl font-bold text-metal-fire">
             {topCountries[0]?.flag} {topCountries[0]?.name}
           </div>
@@ -129,25 +132,21 @@ export default function MetalMapClient() {
       </div>
 
       {/* Classement des pays */}
-      <div className="metal-card p-6">
-        <h3 className="font-serif text-xl mb-4">🏆 Top 10 des pays metal</h3>
+      <div className="metal-card p-6 border border-metal-gray">
+        <h3 className="font-serif text-xl mb-4 text-metal-rust">🏆 Top 10 des pays metal</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {topCountries.map((country, index) => (
             <div
               key={country.name}
               className="flex items-center gap-3 p-3 bg-metal-black/50 rounded-lg border border-metal-gray hover:border-metal-fire transition-colors"
             >
-              <div className="text-xl font-bold text-metal-fire w-8">
-                #{index + 1}
-              </div>
+              <div className="text-xl font-bold text-metal-fire w-8">#{index + 1}</div>
               <div className="text-2xl">{country.flag}</div>
               <div className="flex-1">
-                <div className="font-semibold">{country.name}</div>
-                <div className="text-xs text-gray-400">
-                  {country.bandCount.toLocaleString()} groupes
-                </div>
+                <div className="font-semibold text-gray-200">{country.name}</div>
+                <div className="text-xs text-gray-400">{country.bandCount.toLocaleString()} groupes</div>
               </div>
-              <div className="text-sm text-metal-fire">
+              <div className="text-sm text-metal-fire font-mono">
                 {((country.bandCount / totalBands) * 100).toFixed(1)}%
               </div>
             </div>
