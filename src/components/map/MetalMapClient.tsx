@@ -136,8 +136,8 @@ export default function MetalMapClient() {
       {/* Globe 3D */}
       <div className="metal-card overflow-hidden relative" style={{ height: '600px' }}>
         <Globe
-          // 🛡️ CORRECTION : width et height supprimés. Le globe s'adapte automatiquement au conteneur parent (600px de haut, 100% de large).
-          globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg"
+          // 🛡️ CORRECTION 1 : Image locale pour contourner le blocage CSP de Vercel
+          globeImageUrl="/earth-night.jpg"
           backgroundColor="transparent"
           pointsData={countriesData}
           pointLat={(d: any) => d.lat}
@@ -147,6 +147,7 @@ export default function MetalMapClient() {
           pointRadius={(d: any) => 0.3 + Math.sqrt(d.bandCount / maxBandCount) * 0.7}
           pointsMerge={false}
           onPointHover={(point: any) => setHoveredCountry(point as CountryData)}
+          // 🛡️ CORRECTION 2 : width et height supprimés, le globe s'adapte automatiquement au conteneur parent
           pointLabel={(d: any) => `
             <div style="background: #1a1a1a; padding: 8px 12px; border-radius: 6px; border: 1px solid #d63031; color: white; font-family: sans-serif; pointer-events: none;">
               <div style="font-weight: bold; font-size: 14px; margin-bottom: 4px;">${d.flag} ${d.name}</div>
