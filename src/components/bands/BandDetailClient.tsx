@@ -131,8 +131,8 @@ export default function BandDetailClient({
                 <span className="flex items-center gap-1">📅 Formé en {band.formed}</span>
               )}
               
-              {/* 🛡️ CORRECTION : Vérification stricte de null ET undefined */}
-              {band.listeners != null && band.listeners > 0 && (
+              {/* 🛡️ CORRECTION ESLINT : Vérification stricte du type 'number' */}
+              {typeof band.listeners === 'number' && band.listeners > 0 && (
                 <span className="flex items-center gap-1">
                   👥 {band.listeners.toLocaleString()} auditeurs
                 </span>
