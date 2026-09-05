@@ -8,6 +8,7 @@ import { PILLAR_METADATA } from '@/types/api';
 import Loader from '@/components/ui/Loader';
 import FavoriteButton from '@/components/bands/FavoriteButton';
 import ConcertsWidget from '@/components/widgets/ConcertsWidget';
+import ReviewList from '@/components/reviews/ReviewList'; // 🆕 Import du système d'avis
 
 // ═══════════════════════════════════════════════════════════
 // PROPS
@@ -30,9 +31,11 @@ export default function BandDetailClient({
 }: Props) {
   const { data: user } = useAuth();
   const { recordView } = useGamificationStore();
-  const [activeTab, setActiveTab] = useState<'about' | 'albums' | 'members'>('about');
+  
+  // 🆕 Ajout de 'reviews' aux types d'onglets
+  const [activeTab, setActiveTab] = useState<'about' | 'albums' | 'members' | 'reviews'>('about');
 
-  // Récupérer les métadonnées du pilier pour l'affichage
+  // Récupérer les métadonnées du pilier pour l'affichage (couleur, icône)
   const pillarMeta = PILLAR_METADATA[band.genre_pillar as GamificationPillar] || PILLAR_METADATA['Heavy Metal'];
 
   // 1. Enregistrer la vue pour la gamification au montage
@@ -61,11 +64,12 @@ export default function BandDetailClient({
     return configs[statusKey];
   }, [band.status]);
 
-  // 3. Définition des onglets
+  // 3. Définition des onglets (🆕 Ajout de l'onglet Avis)
   const tabs = useMemo(() => [
     { id: 'about', label: 'Biographie' },
     { id: 'albums', label: `Discographie (${albums.length})` },
     { id: 'members', label: `Membres (${members.length})` },
+    { id: 'reviews', label: 'Avis' },
   ], [albums.length, members.length]);
 
   // 4. État de chargement de sécurité
@@ -105,12 +109,10 @@ export default function BandDetailClient({
 
             {/* Genres : Original + Pilier */}
             <div className="flex flex-wrap gap-3 text-sm">
-              {/* Genre original */}
               <span className="flex items-center gap-1 text-gray-300">
                 🎸 {band.genre}
               </span>
 
-              {/* Pilier de gamification */}
               <span 
                 className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border"
                 style={{ 
@@ -139,8 +141,8 @@ export default function BandDetailClient({
               )}
             </div>
 
-            {/* Bouton Favori */}
-            {<FavoriteButton band={band} />}
+            {/* Bouton Favori (visible pour tous, connecté ou non) */}
+            <FavoriteButton band={band} />
           </div>
         </div>
       </div>
@@ -170,8 +172,10 @@ export default function BandDetailClient({
       {/* CONTENU DES ONGLETS                             */}
       {/* ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
         {/* Colonne principale (2/3) */}
         <div className="lg:col-span-2 min-h-[300px]">
+          
           {activeTab === 'about' && (
             <div className="metal-card p-6 animate-slide-up">
               <h3 className="font-serif text-xl mb-4 text-metal-rust flex items-center gap-2">
@@ -238,6 +242,14 @@ export default function BandDetailClient({
               )}
             </div>
           )}
+
+          {/* 🆕 ONGLET AVIS */}
+          {activeTab === 'reviews' && (
+            <div className="animate-slide-up">
+              <ReviewList bandId={band.id} />
+            </div>
+          )}
+
         </div>
 
         {/* Colonne latérale (1/3) : Widgets */}
