@@ -87,19 +87,22 @@ const securityHeaders = [
   { key: 'X-XSS-Protection', value: '1; mode=block' },
 ];
 
+// 🛡️ SOLUTION ULTIME CSP (Conforme web.dev)
 const cspDirectives = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  // Autorise les scripts de ton domaine + Vercel (pour les previews SSO)
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.com https://*.vercel.app",
   "style-src 'self' 'unsafe-inline'",
-  // 🛡️ AJOUT : https://cdn.jsdelivr.net autorisé pour la texture du globe 3D
-  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net",
+  // 🌍 CRITIQUE CARTE : Autorise les CDN de textures 3D + tes domaines d'images
+  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com",
   "font-src 'self' data: https://fonts.gstatic.com",
-  // 🛡️ AJOUT : https://cdn.jsdelivr.net autorisé pour les requêtes de ressources CDN
-  "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net",
-  "frame-src 'self' https://open.spotify.com https://www.youtube.com",
+  // Autorise les connexions réseau vers tes APIs + les CDN de ressources + Vercel
+  "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app",
+  "frame-src 'self' https://open.spotify.com https://www.youtube.com https://vercel.com https://*.vercel.app",
   "media-src 'self' https://open.spotify.com https://*.scdn.co",
   "worker-src 'self' blob:",
-  "manifest-src 'self'",
+  // 📜 CRITIQUE MANIFESTE : Autorise le manifeste de ton domaine + celui de Vercel SSO
+  "manifest-src 'self' https://vercel.com https://*.vercel.app",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
