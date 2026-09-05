@@ -2,10 +2,12 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/api/authApi';
-import { useFavoritesStore } from '@/stores/favoritesStore';
 import { useGamificationStore } from '@/stores/gamificationStore';
-import type { BandDetail, Album, BandMember } from '@/types/api';
+import type { BandDetail, Album, BandMember, GamificationPillar } from '@/types/api';
+import { PILLAR_METADATA } from '@/types/api';
 import Loader from '@/components/ui/Loader';
+import FavoriteButton from '@/components/bands/FavoriteButton';
+import ConcertsWidget from '@/components/widgets/ConcertsWidget';
 
 // ═══════════════════════════════════════════════════════════
 // PROPS
@@ -27,9 +29,11 @@ export default function BandDetailClient({
   members = [] 
 }: Props) {
   const { data: user } = useAuth();
-  const { isFavorite, toggle } = useFavoritesStore();
   const { recordView } = useGamificationStore();
   const [activeTab, setActiveTab] = useState<'about' | 'albums' | 'members'>('about');
+
+  // Récupérer les métadonnées du pilier pour l'affichage
+  const pillarMeta = PILLAR_METADATA[band.genre_pillar as GamificationPillar] || PILLAR_METADATA['Heavy Metal'];
 
   // 1. Enregistrer la vue pour la gamification au montage
   useMemo(() => {
@@ -38,29 +42,13 @@ export default function BandDetailClient({
         id: band.id,
         name: band.name,
         genre: band.genre,
+        genre_pillar: band.genre_pillar,
         country: band.country,
       });
     }
   }, [band, recordView]);
 
-  // 2. Vérifier si le groupe est en favori
-  const isFav = useMemo(() => {
-    return user ? isFavorite(band.id) : false;
-  }, [user, band.id, isFavorite]);
-
-  // 3. Gestion du toggle favori
-  const handleToggleFavorite = useCallback(() => {
-    if (!user) return;
-    
-    toggle({
-      id: band.id,
-      name: band.name,
-      genre: band.genre,
-      country: band.country,
-    });
-  }, [user, band.id, band.name, band.genre, band.country, toggle]);
-
-  // 4. Configuration du statut (✅ CORRECTION : gestion sécurisée de undefined)
+  // 2. Configuration du statut
   const statusConfig = useMemo(() => {
     const configs: Record<string, { label: string; icon: string; color: string }> = {
       'Active': { label: 'Actif', icon: '🟢', color: 'text-green-500' },
@@ -69,19 +57,18 @@ export default function BandDetailClient({
       'Unknown': { label: 'Inconnu', icon: '❓', color: 'text-gray-500' },
     };
     
-    // On garantit que la clé est toujours une string valide présente dans configs
     const statusKey = (band.status && band.status in configs) ? band.status : 'Unknown';
     return configs[statusKey];
   }, [band.status]);
 
-  // 5. Définition des onglets
+  // 3. Définition des onglets
   const tabs = useMemo(() => [
     { id: 'about', label: 'Biographie' },
     { id: 'albums', label: `Discographie (${albums.length})` },
     { id: 'members', label: `Membres (${members.length})` },
   ], [albums.length, members.length]);
 
-  // 6. État de chargement de sécurité
+  // 4. État de chargement de sécurité
   if (!band) {
     return <Loader text="Chargement des détails du groupe..." />;
   }
@@ -116,27 +103,42 @@ export default function BandDetailClient({
               </span>
             </div>
 
+            {/* Genres : Original + Pilier */}
+            <div className="flex flex-wrap gap-3 text-sm">
+              {/* Genre original */}
+              <span className="flex items-center gap-1 text-gray-300">
+                🎸 {band.genre}
+              </span>
+
+              {/* Pilier de gamification */}
+              <span 
+                className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border"
+                style={{ 
+                  backgroundColor: `${pillarMeta.color}20`, 
+                  borderColor: pillarMeta.color, 
+                  color: pillarMeta.color 
+                }}
+              >
+                <span>{pillarMeta.icon}</span>
+                {band.genre_pillar || 'Heavy Metal'}
+              </span>
+            </div>
+
+            {/* Infos secondaires */}
             <div className="flex flex-wrap gap-4 text-sm text-gray-300">
-              <span className="flex items-center gap-1">🎸 {band.genre}</span>
               <span className="flex items-center gap-1">🌍 {band.country}</span>
               {band.formed && (
                 <span className="flex items-center gap-1">📅 Formé en {band.formed}</span>
               )}
+              {band.listeners !== undefined && band.listeners > 0 && (
+                <span className="flex items-center gap-1">
+                  👥 {band.listeners.toLocaleString()} auditeurs
+                </span>
+              )}
             </div>
 
-            {/* Bouton Favori */}
-            {user && (
-              <button
-                onClick={handleToggleFavorite}
-                className={`mt-4 px-6 py-2 rounded-lg font-bold transition-all flex items-center gap-2 ${
-                  isFav 
-                    ? 'bg-metal-fire text-white hover:bg-metal-fire/80' 
-                    : 'bg-metal-gray text-gray-300 hover:bg-metal-blood/30'
-                }`}
-              >
-                {isFav ? '★ Retirer des favoris' : '☆ Ajouter aux favoris'}
-              </button>
-            )}
+            {/* Bouton Favori (utilise maintenant le composant dédié) */}
+            {user && <FavoriteButton band={band} />}
           </div>
         </div>
       </div>
@@ -165,66 +167,94 @@ export default function BandDetailClient({
       {/* ─────────────────────────────────────────────── */}
       {/* CONTENU DES ONGLETS                             */}
       {/* ─────────────────────────────────────────────── */}
-      <div className="min-h-[300px]">
-        {activeTab === 'about' && (
-          <div className="metal-card p-6 animate-slide-up">
-            <h3 className="font-serif text-xl mb-4 text-metal-rust">Biographie</h3>
-            <p className="text-gray-300 leading-relaxed whitespace-pre-line">
-              {band.biography || 'Aucune biographie disponible pour ce groupe pour le moment.'}
-            </p>
-          </div>
-        )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Colonne principale (2/3) */}
+        <div className="lg:col-span-2 min-h-[300px]">
+          {activeTab === 'about' && (
+            <div className="metal-card p-6 animate-slide-up">
+              <h3 className="font-serif text-xl mb-4 text-metal-rust flex items-center gap-2">
+                📜 Biographie
+                {band.bio_lang && (
+                  <span className="text-xs font-sans font-normal text-gray-400 bg-metal-gray/30 px-2 py-1 rounded">
+                    {band.bio_lang.toUpperCase()}
+                  </span>
+                )}
+              </h3>
+              <p className="text-gray-300 leading-relaxed whitespace-pre-line">
+                {band.biography || 'Aucune biographie disponible pour ce groupe pour le moment.'}
+              </p>
+            </div>
+          )}
 
-        {activeTab === 'albums' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-slide-up">
-            {albums.length > 0 ? (
-              albums.map((album) => (
-                <div key={album.id} className="metal-card p-4 hover:border-metal-fire/50 transition-colors">
-                  <div className="flex items-start gap-3">
-                    <div className="w-16 h-16 rounded bg-metal-gray flex items-center justify-center text-2xl shrink-0">
-                      💿
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold truncate">{album.name || album.title}</h4>
-                      <p className="text-xs text-metal-fire mt-1 capitalize">{album.type}</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {album.releaseDate || album.year || 'Année inconnue'}
-                      </p>
+          {activeTab === 'albums' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
+              {albums.length > 0 ? (
+                albums.map((album) => (
+                  <div key={album.id} className="metal-card p-4 hover:border-metal-fire/50 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="w-16 h-16 rounded bg-metal-gray flex items-center justify-center text-2xl shrink-0">
+                        💿
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold truncate">{album.name || album.title}</h4>
+                        <p className="text-xs text-metal-fire mt-1 capitalize">{album.type}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {album.releaseDate || album.year || 'Année inconnue'}
+                        </p>
+                      </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="col-span-full metal-card p-12 text-center text-gray-500">
+                  Aucune discographie enregistrée pour ce groupe.
                 </div>
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12 text-gray-500">
-                Aucune discographie enregistrée pour ce groupe.
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
 
-        {activeTab === 'members' && (
-          <div className="metal-card p-6 animate-slide-up">
-            {members.length > 0 ? (
-              <ul className="space-y-3">
-                {members.map((member, idx) => (
-                  <li key={idx} className="flex items-center justify-between py-2 border-b border-metal-gray last:border-0">
-                    <span className="font-semibold text-gray-200">{member.name}</span>
-                    <div className="text-right">
-                      <span className="text-sm text-metal-fire block">{member.role}</span>
-                      {member.years_active && (
-                        <span className="text-xs text-gray-500">{member.years_active}</span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="text-center py-12 text-gray-500">
-                Aucune information sur les membres disponible.
-              </div>
-            )}
+          {activeTab === 'members' && (
+            <div className="metal-card p-6 animate-slide-up">
+              {members.length > 0 ? (
+                <ul className="space-y-3">
+                  {members.map((member, idx) => (
+                    <li key={idx} className="flex items-center justify-between py-2 border-b border-metal-gray last:border-0">
+                      <span className="font-semibold text-gray-200">{member.name}</span>
+                      <div className="text-right">
+                        <span className="text-sm text-metal-fire block">{member.role}</span>
+                        {member.years_active && (
+                          <span className="text-xs text-gray-500">{member.years_active}</span>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  Aucune information sur les membres disponible.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Colonne latérale (1/3) : Widgets */}
+        <div className="space-y-6">
+          {/* Widget Concerts */}
+          <ConcertsWidget bandId={band.id} bandName={band.name} />
+          
+          {/* Widget Gamification Info */}
+          <div className="metal-card p-6 border border-metal-gray">
+            <h3 className="font-serif text-lg text-gray-200 mb-3">💡 Progression</h3>
+            <p className="text-sm text-gray-400">
+              Explorer ce groupe vous a fait gagner <span className="text-metal-fire font-bold">+10 XP</span> 
+              et contribue à votre progression dans le pilier{' '}
+              <span className="font-semibold" style={{ color: pillarMeta.color }}>
+                {band.genre_pillar}
+              </span>.
+            </p>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
