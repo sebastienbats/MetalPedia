@@ -11,7 +11,7 @@ import type {
 } from '@/types/api';
 
 // ═══════════════════════════════════════════════════════════
-// TYPE CUSTOM POUR LA TABLE BANDS (Supabase → TypeScript)
+// TYPES CUSTOMS (Supabase → TypeScript)
 // ═══════════════════════════════════════════════════════════
 
 type BandRow = {
@@ -32,6 +32,15 @@ type BandRow = {
   mbid: string | null;
   country_source: string | null;
   formed_source: string | null;
+};
+
+export type Review = {
+  id: string;
+  band_id: number;
+  user_id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -191,6 +200,82 @@ export const metalServerApi = {
     }
 
     return data.map(mapRowToBand);
+  },
+
+  // ─────────────────────────────────────────────────────
+  // REVIEWS & NOTATIONS (NOUVEAU)
+  // ─────────────────────────────────────────────────────
+
+  /**
+   * Récupère tous les avis d'un groupe avec la moyenne calculée.
+   * Retourne également le nombre total d'avis.
+   */
+  async getBandReviews(bandId: number): Promise<{
+    reviews: Review[];
+    averageRating: number;
+    totalReviews: number;
+  }> {
+    const { data, error } = await (supabase as any)
+      .from('reviews')
+      .select('*')
+      .eq('band_id', bandId)
+      .order('created_at', { ascending: false }) as { 
+        data: Review[] | null; 
+        error: any 
+      };
+
+    if (error) {
+      console.error('Error fetching reviews:', error);
+      return { reviews: [], averageRating: 0, totalReviews: 0 };
+    }
+
+    const reviews = data || [];
+    const totalReviews = reviews.length;
+    const averageRating = totalReviews > 0 
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews 
+      : 0;
+
+    return { reviews, averageRating, totalReviews };
+  },
+
+  /**
+   * Ajoute un nouvel avis pour un groupe.
+   * Lance une erreur si l'utilisateur a déjà laissé un avis (contrainte UNIQUE).
+   */
+  async addReview(bandId: number, userId: string, rating: number, comment: string): Promise<Review> {
+    const { data, error } = await (supabase as any)
+      .from('reviews')
+      .insert({ 
+        band_id: bandId, 
+        user_id: userId, 
+        rating, 
+        comment: comment.trim() || null 
+      })
+      .select()
+      .single() as { data: Review | null; error: any };
+
+    if (error) {
+      console.error('Error adding review:', error);
+      throw error;
+    }
+
+    return data!;
+  },
+
+  /**
+   * Supprime un avis (uniquement si l'utilisateur en est l'auteur).
+   */
+  async deleteReview(reviewId: string, userId: string): Promise<void> {
+    const { error } = await (supabase as any)
+      .from('reviews')
+      .delete()
+      .eq('id', reviewId)
+      .eq('user_id', userId); // Double sécurité : vérification côté client ET RLS
+
+    if (error) {
+      console.error('Error deleting review:', error);
+      throw error;
+    }
   },
 
   // ─────────────────────────────────────────────────────
