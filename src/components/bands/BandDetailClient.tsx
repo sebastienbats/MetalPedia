@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '@/api/authApi';
 import { useGamificationStore } from '@/stores/gamificationStore';
 import type { BandDetail, Album, BandMember, GamificationPillar } from '@/types/api';
@@ -130,14 +130,16 @@ export default function BandDetailClient({
               {band.formed && (
                 <span className="flex items-center gap-1">📅 Formé en {band.formed}</span>
               )}
-              {band.listeners !== undefined && band.listeners > 0 && (
+              
+              {/* 🛡️ CORRECTION : Vérification stricte de null ET undefined */}
+              {band.listeners != null && band.listeners > 0 && (
                 <span className="flex items-center gap-1">
                   👥 {band.listeners.toLocaleString()} auditeurs
                 </span>
               )}
             </div>
 
-            {/* Bouton Favori (utilise maintenant le composant dédié) */}
+            {/* Bouton Favori */}
             {user && <FavoriteButton band={band} />}
           </div>
         </div>
