@@ -46,13 +46,11 @@ function applyClassBonus(
 
   let isEligible = false;
 
+  // On évalue le TYPE de bonus de la classe
   switch (bonus.type) {
     case 'all':
+      // Le bonus 'all' s'applique à TOUTES les actions, y compris 'daily'
       isEligible = true;
-      break;
-    case 'daily':
-      // Le bonus quotidien ne bénéficie du multiplicateur que si la classe a le bonus 'all'
-      isEligible = bonus.type === 'all';
       break;
     case 'low_listeners':
       isEligible = !!(
@@ -95,7 +93,7 @@ function applyClassBonus(
       isEligible = actionType === 'quiz';
       break;
     case 'rare_country':
-      isEligible = false;
+      isEligible = false; // À implémenter plus tard avec une liste de pays rares
       break;
   }
 
@@ -326,7 +324,7 @@ export const useGamificationStore = create<GamificationState>()(
         if (state.stats.lastDailyBonus === today) return;
 
         const baseXp = calculateXP('DAILY_LOGIN');
-        // 🛡️ CORRECTION : Utilisation de 'daily' au lieu de 'all' pour correspondre au type
+        // Passe 'daily' comme actionType. Si la classe a le bonus 'all', isEligible sera true.
         const { finalXp } = applyClassBonus(baseXp, 'daily');
         const event = createXPEvent('DAILY_LOGIN');
 
