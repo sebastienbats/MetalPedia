@@ -47,40 +47,46 @@ function applyClassBonus(
       isEligible = true;
       break;
     case 'low_listeners':
-      isEligible = actionType === 'view' && 
-                   context?.band && 
-                   context.band.listeners !== undefined &&
-                   context.band.listeners < (bonus.threshold || 1000);
+      isEligible = !!(
+        actionType === 'view' && 
+        context?.band && 
+        typeof context.band.listeners === 'number' &&
+        context.band.listeners < (bonus.threshold || 1000)
+      );
       break;
     case 'reviews':
       isEligible = actionType === 'review';
       break;
     case 'vintage':
-      isEligible = actionType === 'view' && 
-                   context?.band && 
-                   context.band.formed !== undefined &&
-                   context.band.formed !== null &&
-                   context.band.formed < (bonus.threshold || 1990);
+      isEligible = !!(
+        actionType === 'view' && 
+        context?.band && 
+        typeof context.band.formed === 'number' &&
+        context.band.formed < (bonus.threshold || 1990)
+      );
       break;
     case 'favorites':
       isEligible = actionType === 'favorite';
       break;
     case 'active_bands':
-      isEligible = actionType === 'view' && 
-                   context?.band && 
-                   context.band.status === 'Active';
+      isEligible = !!(
+        actionType === 'view' && 
+        context?.band && 
+        context.band.status === 'Active'
+      );
       break;
     case 'biography':
-      isEligible = actionType === 'view' && 
-                   context?.band && 
-                   context.band.biography && 
-                   context.band.biography.split(/\s+/).length > (bonus.threshold || 500);
+      isEligible = !!(
+        actionType === 'view' && 
+        context?.band && 
+        typeof context.band.biography === 'string' && 
+        context.band.biography.split(/\s+/).length > (bonus.threshold || 500)
+      );
       break;
     case 'quiz':
       isEligible = actionType === 'quiz';
       break;
     case 'rare_country':
-      // À implémenter plus tard avec une liste de pays rares
       isEligible = false;
       break;
   }
@@ -312,7 +318,7 @@ export const useGamificationStore = create<GamificationState>()(
         if (state.stats.lastDailyBonus === today) return;
 
         const baseXp = calculateXP('DAILY_LOGIN');
-        const { finalXp } = applyClassBonus(baseXp, 'all'); // Le bonus 'all' s'applique ici si la classe le permet
+        const { finalXp } = applyClassBonus(baseXp, 'all');
         const event = createXPEvent('DAILY_LOGIN');
 
         set((state) => ({
