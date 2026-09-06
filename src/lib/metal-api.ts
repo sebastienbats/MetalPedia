@@ -43,6 +43,18 @@ export type Review = {
   created_at: string;
 };
 
+export interface QuizQuestion {
+  id: string;
+  band_id: number;
+  question_type: string;
+  question_text: string;
+  correct_answer: string;
+  wrong_answers: string[];
+  difficulty: number;
+  pillar_id: string;
+  created_at: string;
+}
+
 // ═══════════════════════════════════════════════════════════
 // API DES GROUPES
 // ═══════════════════════════════════════════════════════════
@@ -203,7 +215,7 @@ export const metalServerApi = {
   },
 
   // ─────────────────────────────────────────────────────
-  // REVIEWS & NOTATIONS (NOUVEAU)
+  // REVIEWS & NOTATIONS
   // ─────────────────────────────────────────────────────
 
   /**
@@ -274,6 +286,58 @@ export const metalServerApi = {
 
     if (error) {
       console.error('Error deleting review:', error);
+      throw error;
+    }
+  },
+
+  // ─────────────────────────────────────────────────────
+  // SYSTÈME DE QUIZ (NOUVEAU)
+  // ─────────────────────────────────────────────────────
+
+  /**
+   * Récupère des questions de quiz aléatoires, optionnellement filtrées par pilier.
+   */
+  async getQuizQuestions(pillar?: string, limit: number = 5): Promise<QuizQuestion[]> {
+    let query = (supabase as any)
+      .from('quiz_questions')
+      .select('*')
+      .limit(limit);
+
+    if (pillar) {
+      query = query.eq('pillar_id', pillar);
+    }
+
+    const { data, error } = await query as { data: QuizQuestion[] | null; error: any };
+
+    if (error || !data) {
+      console.error('Error fetching quiz questions:', error);
+      return [];
+    }
+
+    // Mélange simple côté client pour garantir l'aléatoire à chaque appel
+    return data.sort(() => Math.random() - 0.5);
+  },
+
+  /**
+   * Enregistre une tentative de réponse au quiz dans la base de données.
+   */
+  async submitQuizAttempt(
+    userId: string,
+    questionId: string,
+    userAnswer: string,
+    isCorrect: boolean,
+    xpEarned: number
+  ): Promise<void> {
+    const { error } = await (supabase as any).from('quiz_attempts').insert({
+      user_id: userId,
+      question_id: questionId,
+      user_answer: userAnswer,
+      is_correct: isCorrect,
+      xp_earned: xpEarned,
+    });
+
+    if (error) {
+      console.error('Error submitting quiz attempt:', error);
       throw error;
     }
   },
