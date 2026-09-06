@@ -28,13 +28,16 @@ export default function QuizGame({ pillar, onComplete }: Props) {
       const data = await metalServerApi.getQuizQuestions(pillar, 5); // 5 questions par session
       
       const formatted = data.map((q: QuizQuestion) => {
-        const options = [q.correct_answer, ...q.wrong_answers];
-        // Mélange aléatoire des options
+        // 🛡️ FILET DE SÉCURITÉ : Utiliser un Set pour garantir l'unicité absolue des options
+        // Cela élimine tout doublon résiduel provenant de la base de données
+        const uniqueOptions = Array.from(new Set([q.correct_answer, ...q.wrong_answers]));
+        
         return {
           ...q,
-          options: options.sort(() => Math.random() - 0.5),
+          // Mélange aléatoire des options uniques
+          options: uniqueOptions.sort(() => Math.random() - 0.5),
         };
-      });
+      }).filter(q => q.options.length >= 2); // Sécurité : on écarte toute question corrompue avec < 2 options
       
       setQuestions(formatted);
       setIsLoading(false);
@@ -88,6 +91,9 @@ export default function QuizGame({ pillar, onComplete }: Props) {
     }
   };
 
+  // ─────────────────────────────────────────────────────
+  // ÉTAT DE CHARGEMENT
+  // ─────────────────────────────────────────────────────
   if (isLoading) {
     return (
       <div className="metal-card p-12 text-center border-2 border-metal-gray">
@@ -97,16 +103,28 @@ export default function QuizGame({ pillar, onComplete }: Props) {
     );
   }
 
+  // ─────────────────────────────────────────────────────
+  // AUCUNE QUESTION DISPONIBLE
+  // ─────────────────────────────────────────────────────
   if (questions.length === 0) {
     return (
       <div className="metal-card p-12 text-center border-2 border-metal-gray">
-        <p className="text-gray-400 text-lg">Aucune question disponible pour le moment dans cette catégorie.</p>
+        <div className="text-5xl mb-4">📜</div>
+        <p className="text-gray-400 text-lg mb-4">
+          Aucune question disponible pour le moment dans cette catégorie.
+        </p>
+        <p className="text-sm text-gray-500">
+          Essaie de sélectionner "Tous les Piliers" ou reviens plus tard !
+        </p>
       </div>
     );
   }
 
   const currentQ = questions[currentIndex];
 
+  // ─────────────────────────────────────────────────────
+  // INTERFACE DU JEU
+  // ─────────────────────────────────────────────────────
   return (
     <div className="metal-card p-6 md:p-8 border-2 border-metal-gray max-w-2xl mx-auto animate-fade-in">
       {/* Header du Quiz */}
