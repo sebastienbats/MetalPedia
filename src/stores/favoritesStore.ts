@@ -4,6 +4,7 @@ import { createStore, set as idbSet, get as idbGet, del as idbDel } from 'idb-ke
 import type { BandSearchResult } from '@/types/api';
 import { offlineSync } from '@/lib/offline-sync';
 import { useGamificationStore } from './gamificationStore';
+import { useStore } from 'zustand';
 
 const idbStore = createStore('metalpedia', 'favorites');
 
