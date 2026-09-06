@@ -17,7 +17,7 @@ import { QUESTS } from '@/lib/gamification/quests';
 import { getLevelFromXP } from '@/lib/gamification/lore';
 import { useClassStore } from './classStore';
 import { getClassMetadata } from '@/lib/gamification/classes';
-import { type GamificationPillar } from '@/types/api'; // 🛡️ CORRECTION : Importé depuis @/types/api
+import { type GamificationPillar } from '@/types/api';
 
 const idbStore = createStore('metalpedia', 'gamification');
 
@@ -191,9 +191,11 @@ export const useGamificationStore = create<GamificationState>()(
             newStats.questsCompleted = [...newStats.questsCompleted, ...completedQuests.map((q) => q.id)];
           }
 
+          // 🛡️ DÉTECTION ROBUSTE DU PALIER (fonctionne même en sautant des niveaux)
           let pendingTrial = state.pendingTrial;
-          if (newLevel > oldLevel && newLevel % 5 === 0 && oldLevel % 5 !== 0) {
-            pendingTrial = { type: 'passage', level: newLevel, pillar: getLeastExploredPillar(newStats) };
+          const crossedTrialThreshold = Math.floor(newLevel / 5) > Math.floor(oldLevel / 5) && newLevel >= 5;
+          if (crossedTrialThreshold && !state.pendingTrial) {
+            pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar(newStats) };
           }
 
           if (bonusApplied) {
@@ -245,6 +247,13 @@ export const useGamificationStore = create<GamificationState>()(
             newStats.questsCompleted = [...newStats.questsCompleted, ...completedQuests.map((q) => q.id)];
           }
 
+          // 🛡️ DÉTECTION ROBUSTE DU PALIER
+          let pendingTrial = state.pendingTrial;
+          const crossedTrialThreshold = Math.floor(newLevel / 5) > Math.floor(oldLevel / 5) && newLevel >= 5;
+          if (crossedTrialThreshold && !state.pendingTrial) {
+            pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar(newStats) };
+          }
+
           if (isAdding && bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
             if (selectedClass) {
@@ -258,6 +267,7 @@ export const useGamificationStore = create<GamificationState>()(
             stats: newStats,
             showLevelUpModal: newLevel > oldLevel,
             pendingLevelUp: newLevel > oldLevel ? newLevel : null,
+            pendingTrial,
             trialBonusRemaining: newTrialBonusRemaining,
           };
         });
@@ -292,6 +302,13 @@ export const useGamificationStore = create<GamificationState>()(
             newStats.questsCompleted = [...newStats.questsCompleted, ...completedQuests.map((q) => q.id)];
           }
 
+          // 🛡️ DÉTECTION ROBUSTE DU PALIER
+          let pendingTrial = state.pendingTrial;
+          const crossedTrialThreshold = Math.floor(newLevel / 5) > Math.floor(oldLevel / 5) && newLevel >= 5;
+          if (crossedTrialThreshold && !state.pendingTrial) {
+            pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar(newStats) };
+          }
+
           if (bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
             if (selectedClass) {
@@ -306,6 +323,7 @@ export const useGamificationStore = create<GamificationState>()(
             xpHistory: [event, ...state.xpHistory].slice(0, 100),
             showLevelUpModal: newLevel > oldLevel,
             pendingLevelUp: newLevel > oldLevel ? newLevel : null,
+            pendingTrial,
             trialBonusRemaining: newTrialBonusRemaining,
           };
         });
@@ -326,10 +344,15 @@ export const useGamificationStore = create<GamificationState>()(
           const finalXPWithTrial = Math.round(finalXp * trialMultiplier);
           const newTrialBonusRemaining = state.trialBonusRemaining > 0 ? state.trialBonusRemaining - 1 : 0;
 
+          const newXP = state.stats.totalXP + finalXPWithTrial;
+          const newLevel = getLevelFromXP(newXP);
+          const oldLevel = state.stats.level;
+
           const newStats: PlayerStats = {
             ...state.stats,
             genresExplored: [...state.stats.genresExplored, gamificationGenre],
-            totalXP: state.stats.totalXP + finalXPWithTrial,
+            totalXP: newXP,
+            level: newLevel,
           };
 
           const completedQuests = QUESTS.filter((q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass));
@@ -339,9 +362,19 @@ export const useGamificationStore = create<GamificationState>()(
             newStats.questsCompleted = [...newStats.questsCompleted, ...completedQuests.map((q) => q.id)];
           }
 
+          // 🛡️ DÉTECTION ROBUSTE DU PALIER
+          let pendingTrial = state.pendingTrial;
+          const crossedTrialThreshold = Math.floor(newLevel / 5) > Math.floor(oldLevel / 5) && newLevel >= 5;
+          if (crossedTrialThreshold && !state.pendingTrial) {
+            pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar(newStats) };
+          }
+
           return {
             stats: newStats,
             xpHistory: [event, ...state.xpHistory].slice(0, 100),
+            showLevelUpModal: newLevel > oldLevel,
+            pendingLevelUp: newLevel > oldLevel ? newLevel : null,
+            pendingTrial,
             trialBonusRemaining: newTrialBonusRemaining,
           };
         });
@@ -372,12 +405,29 @@ export const useGamificationStore = create<GamificationState>()(
 
         set((state) => {
           if (state.stats.questsCompleted.includes(questId)) return state;
+          
+          const newXP = state.stats.totalXP + quest.xpReward;
+          const newLevel = getLevelFromXP(newXP);
+          const oldLevel = state.stats.level;
+
+          // 🛡️ DÉTECTION ROBUSTE DU PALIER (même pour les grosses récompenses de quête)
+          let pendingTrial = state.pendingTrial;
+          const crossedTrialThreshold = Math.floor(newLevel / 5) > Math.floor(oldLevel / 5) && newLevel >= 5;
+          if (crossedTrialThreshold && !state.pendingTrial) {
+            const newStatsForTrial = { ...state.stats, totalXP: newXP, level: newLevel, questsCompleted: [...state.stats.questsCompleted, questId] };
+            pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar(newStatsForTrial) };
+          }
+
           return {
             stats: {
               ...state.stats,
               questsCompleted: [...state.stats.questsCompleted, questId],
-              totalXP: state.stats.totalXP + quest.xpReward,
-            }
+              totalXP: newXP,
+              level: newLevel,
+            },
+            showLevelUpModal: newLevel > oldLevel,
+            pendingLevelUp: newLevel > oldLevel ? newLevel : null,
+            pendingTrial,
           };
         });
       },
@@ -396,6 +446,13 @@ export const useGamificationStore = create<GamificationState>()(
           const newLevel = getLevelFromXP(newXP);
           const oldLevel = state.stats.level;
 
+          // 🛡️ DÉTECTION ROBUSTE DU PALIER
+          let pendingTrial = state.pendingTrial;
+          const crossedTrialThreshold = Math.floor(newLevel / 5) > Math.floor(oldLevel / 5) && newLevel >= 5;
+          if (crossedTrialThreshold && !state.pendingTrial) {
+            pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar({ ...state.stats, totalXP: newXP, level: newLevel }) };
+          }
+
           if (bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
             if (selectedClass) {
@@ -410,6 +467,7 @@ export const useGamificationStore = create<GamificationState>()(
             xpHistory: [event, ...state.xpHistory].slice(0, 100),
             showLevelUpModal: newLevel > oldLevel,
             pendingLevelUp: newLevel > oldLevel ? newLevel : null,
+            pendingTrial,
             trialBonusRemaining: newTrialBonusRemaining,
           };
         });
