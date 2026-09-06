@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { createStore, set as idbSet, get as idbGet, del as idbDel } from 'idb-keyval';
+import { useEffect, useState } from 'react';
 import type { BandSearchResult } from '@/types/api';
 import { offlineSync } from '@/lib/offline-sync';
 import { useGamificationStore } from './gamificationStore';
@@ -9,7 +10,8 @@ const idbStore = createStore('metalpedia', 'favorites');
 
 interface FavoritesState {
   favorites: Record<number, BandSearchResult>;
-  hydrated: boolean; // 🆕 Indicateur de chargement depuis IndexedDB
+  hydrated: boolean;
+  hydrationError: string | null; // 🆕 Gérer les erreurs d'hydratation
 
   // Actions
   add: (band: BandSearchResult) => void;
@@ -18,7 +20,8 @@ interface FavoritesState {
   isFavorite: (id: number) => boolean;
   clearAll: () => void;
   syncToCloud: () => Promise<void>;
-  setHydrated: () => void; // 🆕 Action pour marquer l'hydratation comme terminée
+  setHydrated: () => void;
+  setHydrationError: (error: string | null) => void; // 🆕 Action pour les erreurs
 
   // Getters
   getCount: () => number;
@@ -29,9 +32,11 @@ export const useFavoritesStore = create<FavoritesState>()(
   persist(
     (set, get) => ({
       favorites: {},
-      hydrated: false, // 🆕 État initial : pas encore chargé depuis IndexedDB
+      hydrated: false,
+      hydrationError: null, // 🆕 État initial : pas d'erreur
 
-      setHydrated: () => set({ hydrated: true }), // 🆕 Action
+      setHydrated: () => set({ hydrated: true }),
+      setHydrationError: (error) => set({ hydrationError: error }),
 
       add: (band) => {
         set((state) => ({
@@ -90,8 +95,9 @@ export const useFavoritesStore = create<FavoritesState>()(
           try {
             const value = await idbGet(name, idbStore);
             return value ? JSON.parse(value) : null;
-          } catch {
-            return null;
+          } catch (error) {
+            console.error('Failed to read from IndexedDB:', error);
+            throw error;
           }
         },
         setItem: async (name, value) => {
@@ -109,10 +115,12 @@ export const useFavoritesStore = create<FavoritesState>()(
           }
         },
       })),
-      // 🆕 Hook Zustand appelé automatiquement quand la réhydratation est terminée
       onRehydrateStorage: () => {
         return (state, error) => {
-          if (state) {
+          if (error) {
+            console.error('Hydration error:', error);
+            state?.setHydrationError(error.message);
+          } else if (state) {
             state.setHydrated();
           }
         };
@@ -122,7 +130,7 @@ export const useFavoritesStore = create<FavoritesState>()(
 );
 
 // ═══════════════════════════════════════════════════════════
-// SÉLECTEURS OPTIMISÉS
+// SÉLECTEURS OPTIMISÉS (Hooks simples)
 // ═══════════════════════════════════════════════════════════
 
 export const useFavoritesCount = () =>
@@ -131,6 +139,63 @@ export const useFavoritesCount = () =>
 export const useFavoriteBands = () =>
   useFavoritesStore((s) => Object.values(s.favorites));
 
-// 🆕 Sélecteur pour savoir si le store a fini de charger depuis IndexedDB
 export const useFavoritesHydrated = () =>
   useFavoritesStore((s) => s.hydrated);
+
+// ═══════════════════════════════════════════════════════════
+// 🆕 HOOK PERSONNALISÉ AVANCÉ POUR L'HYDRATATION
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Hook avancé pour vérifier l'état d'hydratation du store de favoris.
+ * 
+ * @returns {
+ *   isHydrated: boolean - True si les données sont chargées depuis IndexedDB
+ *   isLoading: boolean - True pendant le chargement
+ *   error: string | null - Message d'erreur si l'hydratation a échoué
+ * }
+ * 
+ * @example
+ * ```tsx
+ * const { isHydrated, isLoading, error } = useFavoritesHydration();
+ * 
+ * if (isLoading) return <Spinner />;
+ * if (error) return <ErrorMessage message={error} />;
+ * return <FavoritesList />;
+ * ```
+ */
+export function useFavoritesHydration() {
+  const hydrated = useFavoritesStore((s) => s.hydrated);
+  const error = useFavoritesStore((s) => s.hydrationError);
+  const [isFirstRender, setIsFirstRender] = useState(true);
+
+  useEffect(() => {
+    // Après le premier rendu, on n'est plus en "chargement initial"
+    const timer = setTimeout(() => setIsFirstRender(false), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return {
+    isHydrated: hydrated,
+    isLoading: !hydrated && isFirstRender,
+    error,
+  };
+}
+
+/**
+ * Hook qui attend que l'hydratation soit terminée avant de retourner les données.
+ * Utile pour les composants qui ont besoin des données complètes dès le premier rendu.
+ * 
+ * @example
+ * ```tsx
+ * const favorites = useFavoritesWhenReady();
+ * // favorites sera [] pendant le chargement, puis les vraies données
+ * ```
+ */
+export function useFavoritesWhenReady(): BandSearchResult[] {
+  const { isHydrated } = useFavoritesHydration();
+  const favorites = useFavoriteBands();
+
+  if (!isHydrated) return [];
+  return favorites;
+}
