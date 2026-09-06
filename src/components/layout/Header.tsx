@@ -24,9 +24,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 backdrop-blur-md bg-metal-black/90 border-b border-metal-gray">
       <div className="container mx-auto px-4 py-3 md:py-4 max-w-7xl">
         
-        {/* ═══════════════════════════════════════════
-            LIGNE 1 : Logo + Actions (sur toutes les tailles d'écran)
-            ═══════════════════════════════════════════ */}
+        {/* LIGNE 1 : Logo + Actions */}
         <div className="flex items-center justify-between gap-4">
           
           {/* Logo et Titre */}
@@ -42,7 +40,7 @@ export default function Header() {
             </div>
           </Link>
 
-          {/* Actions utilisateur (Favoris, Profil/Connexion, Thème) */}
+          {/* Actions utilisateur */}
           <div className="flex items-center gap-1 md:gap-2">
             
             {/* LIEN FAVORIS */}
@@ -60,26 +58,28 @@ export default function Header() {
               )}
             </Link>
 
-            {/* SECTION UTILISATEUR */}
+            {/* 🆕 ICÔNE COMPTE : Toujours visible */}
+            <Link 
+              href="/profile" 
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-300 hover:text-metal-fire hover:bg-metal-gray/30 transition-all"
+              title={user ? "Mon Profil" : "Mon Compte"}
+            >
+              <span className="text-xl">👤</span>
+              <span className="hidden md:inline font-medium">
+                {user ? 'Profil' : 'Mon compte'}
+              </span>
+            </Link>
+
+            {/* Bouton Connexion / Déconnexion */}
             {user ? (
-              <>
-                <Link 
-                  href="/profile" 
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-300 hover:text-metal-fire hover:bg-metal-gray/30 transition-all"
-                  title="Mon Profil"
-                >
-                  <span className="text-xl">👤</span>
-                  <span className="hidden md:inline font-medium">Profil</span>
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  disabled={signOutMutation.isPending}
-                  className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-900/20 transition-all"
-                  title="Se déconnecter"
-                >
-                  <span className="text-xl">🚪</span>
-                </button>
-              </>
+              <button
+                onClick={handleLogout}
+                disabled={signOutMutation.isPending}
+                className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-900/20 transition-all"
+                title="Se déconnecter"
+              >
+                <span className="text-xl">🚪</span>
+              </button>
             ) : (
               <Link 
                 href="/login" 
@@ -94,9 +94,7 @@ export default function Header() {
           </div>
         </div>
 
-        {/* ═══════════════════════════════════════════
-            LIGNE 2 : Barre de recherche (pleine largeur sur mobile)
-            ═══════════════════════════════════════════ */}
+        {/* LIGNE 2 : Barre de recherche */}
         <div className="mt-3 md:mt-4">
           <SearchBar />
         </div>
