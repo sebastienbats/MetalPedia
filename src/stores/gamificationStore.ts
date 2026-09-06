@@ -11,13 +11,13 @@ import {
   createXPEvent,
   normalizeGenreForGamification,
   getLeastExploredPillar,
-  type GamificationPillar,
 } from '@/lib/gamification/engine';
 import { BADGES } from '@/lib/gamification/badges';
 import { QUESTS } from '@/lib/gamification/quests';
 import { getLevelFromXP } from '@/lib/gamification/lore';
 import { useClassStore } from './classStore';
 import { getClassMetadata } from '@/lib/gamification/classes';
+import { type GamificationPillar } from '@/types/api'; // 🛡️ CORRECTION : Importé depuis @/types/api
 
 const idbStore = createStore('metalpedia', 'gamification');
 
@@ -413,7 +413,7 @@ export const useGamificationStore = create<GamificationState>()(
             trialBonusRemaining: newTrialBonusRemaining,
           };
         });
-        return finalXp; // Retourne l'XP de base pour l'envoi à Supabase (le store a déjà appliqué le bonus)
+        return finalXp;
       },
 
       // 🆕 Actions pour les épreuves
