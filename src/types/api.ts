@@ -182,3 +182,68 @@ export interface GenrePillarStats {
   count: number;
   subgenres: SubgenreStats[];
 }
+
+// ═══════════════════════════════════════════════════════════
+// SYSTÈME DE CLASSES (Phase 1 - Gamification Avancée)
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Les 9 classes de personnages du Metalverse.
+ * Chaque classe correspond à un pilier de genre et possède un style de jeu unique.
+ */
+export type CharacterClass =
+  | 'necromancer'       // Black Metal
+  | 'executioner'       // Death Metal
+  | 'paladin'           // Heavy Metal
+  | 'berserker'         // Thrash Metal
+  | 'bard'              // Power Metal
+  | 'void_guardian'     // Doom Metal
+  | 'chaos_architect'   // Progressive Metal
+  | 'shaman'            // Folk Metal
+  | 'chain_breaker';    // Metalcore
+
+/**
+ * Types de bonus applicables par classe.
+ * Chaque bonus modifie les gains d'XP selon des critères spécifiques.
+ */
+export type ClassBonusType =
+  | 'low_listeners'     // Groupes peu connus
+  | 'reviews'           // Écriture d'avis
+  | 'all'               // Tous les gains d'XP
+  | 'vintage'           // Groupes anciens (avant une année)
+  | 'rare_country'      // Pays peu représentés
+  | 'active_bands'      // Groupes actifs
+  | 'favorites'         // Ajout de favoris
+  | 'biography'         // Lecture de biographies
+  | 'quiz';             // Réussite aux quiz
+
+/**
+ * Métadonnées complètes d'une classe de personnage.
+ */
+export interface ClassMetadata {
+  id: CharacterClass;
+  name: string;
+  icon: string;
+  pillar: GamificationPillar;
+  description: string;
+  lore: string;
+  color: string;
+  bonus: {
+    type: ClassBonusType;
+    multiplier: number; // ex: 1.5 = +50%
+    threshold?: number; // ex: 1000 listeners, année 1990
+  };
+  titles: { level: number; title: string }[];
+}
+
+/**
+ * Classe d'utilisateur telle que stockée en base de données.
+ */
+export interface UserClass {
+  id: string;
+  user_id: string;
+  class_id: CharacterClass;
+  class_level: number;
+  class_xp: number;
+  chosen_at: string;
+}
