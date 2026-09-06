@@ -163,8 +163,8 @@ export const useGamificationStore = create<GamificationState>()(
         const baseXp = calculateXP('VIEW_BAND');
         const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'view', { band });
         const event = createXPEvent('VIEW_BAND', band.name);
-
         const gamificationGenre = normalizeGenreForGamification(band.genre, band.genre_pillar);
+        const currentClass = useClassStore.getState().selectedClass;
 
         set((state) => {
           const newXP = state.stats.totalXP + finalXp;
@@ -191,6 +191,20 @@ export const useGamificationStore = create<GamificationState>()(
             newStats.badgesUnlocked = [...newStats.badgesUnlocked, ...newBadges];
           }
 
+          // 🆕 Vérification des quêtes lors d'une vue (ex: quêtes de classe basées sur totalViews)
+          const completedQuests = QUESTS.filter(
+            (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass)
+          );
+
+          if (completedQuests.length > 0) {
+            const questXP = completedQuests.reduce((sum, q) => sum + q.xpReward, 0);
+            newStats.totalXP += questXP;
+            newStats.questsCompleted = [
+              ...newStats.questsCompleted,
+              ...completedQuests.map((q) => q.id),
+            ];
+          }
+
           // 🎯 Bonus de classe : on ajoute aussi de l'XP à la classe elle-même
           if (bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
@@ -214,6 +228,7 @@ export const useGamificationStore = create<GamificationState>()(
         const action = isAdding ? 'ADD_FAVORITE' : 'REMOVE_FAVORITE';
         const baseXp = calculateXP(action);
         const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'favorite');
+        const currentClass = useClassStore.getState().selectedClass;
 
         set((state) => {
           const newXP = Math.max(0, state.stats.totalXP + finalXp);
@@ -228,6 +243,20 @@ export const useGamificationStore = create<GamificationState>()(
             totalXP: newXP,
             level: newLevel,
           };
+
+          // 🆕 Vérification des quêtes lors d'un favori (ex: quête du Barde)
+          const completedQuests = QUESTS.filter(
+            (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass)
+          );
+
+          if (completedQuests.length > 0) {
+            const questXP = completedQuests.reduce((sum, q) => sum + q.xpReward, 0);
+            newStats.totalXP += questXP;
+            newStats.questsCompleted = [
+              ...newStats.questsCompleted,
+              ...completedQuests.map((q) => q.id),
+            ];
+          }
 
           if (isAdding && bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
@@ -250,6 +279,7 @@ export const useGamificationStore = create<GamificationState>()(
         const baseXp = calculateXP('WRITE_REVIEW');
         const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'review');
         const event = createXPEvent('WRITE_REVIEW');
+        const currentClass = useClassStore.getState().selectedClass;
 
         set((state) => {
           const newXP = state.stats.totalXP + finalXp;
@@ -264,7 +294,7 @@ export const useGamificationStore = create<GamificationState>()(
           };
 
           const completedQuests = QUESTS.filter(
-            (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats)
+            (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass)
           );
 
           if (completedQuests.length > 0) {
@@ -296,6 +326,7 @@ export const useGamificationStore = create<GamificationState>()(
 
       recordGenreDiscovery: (genre) => {
         const gamificationGenre = normalizeGenreForGamification(genre);
+        const currentClass = useClassStore.getState().selectedClass;
 
         set((state) => {
           if (state.stats.genresExplored.includes(gamificationGenre)) return state;
@@ -309,6 +340,20 @@ export const useGamificationStore = create<GamificationState>()(
             genresExplored: [...state.stats.genresExplored, gamificationGenre],
             totalXP: state.stats.totalXP + finalXp,
           };
+
+          // 🆕 Vérification des quêtes lors de la découverte d'un genre (ex: quête du Paladin/Chaman)
+          const completedQuests = QUESTS.filter(
+            (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass)
+          );
+
+          if (completedQuests.length > 0) {
+            const questXP = completedQuests.reduce((sum, q) => sum + q.xpReward, 0);
+            newStats.totalXP += questXP;
+            newStats.questsCompleted = [
+              ...newStats.questsCompleted,
+              ...completedQuests.map((q) => q.id),
+            ];
+          }
 
           return {
             stats: newStats,
@@ -324,7 +369,6 @@ export const useGamificationStore = create<GamificationState>()(
         if (state.stats.lastDailyBonus === today) return;
 
         const baseXp = calculateXP('DAILY_LOGIN');
-        // Passe 'daily' comme actionType. Si la classe a le bonus 'all', isEligible sera true.
         const { finalXp } = applyClassBonus(baseXp, 'daily');
         const event = createXPEvent('DAILY_LOGIN');
 
@@ -357,8 +401,19 @@ export const useGamificationStore = create<GamificationState>()(
 
       getLevelProgress: () => getLevelProgress(get().stats.totalXP),
       getUnlockedBadges: () => BADGES.filter((b) => get().stats.badgesUnlocked.includes(b.id)),
-      getActiveQuests: () => QUESTS.filter((q) => !get().stats.questsCompleted.includes(q.id)),
-      getCompletedQuests: () => QUESTS.filter((q) => get().stats.questsCompleted.includes(q.id)),
+      
+      // 🆕 Filtrage des quêtes actives en fonction de la classe du joueur
+      getActiveQuests: () => {
+        const currentClass = useClassStore.getState().selectedClass;
+        return QUESTS.filter((q) => !get().stats.questsCompleted.includes(q.id) && checkQuestCompleted(q, get().stats, currentClass));
+      },
+      
+      // 🆕 Filtrage des quêtes complétées en fonction de la classe du joueur
+      getCompletedQuests: () => {
+        const currentClass = useClassStore.getState().selectedClass;
+        return QUESTS.filter((q) => get().stats.questsCompleted.includes(q.id) && checkQuestCompleted(q, get().stats, currentClass));
+      },
+      
       closeLevelUpModal: () => set({ showLevelUpModal: false, pendingLevelUp: null }),
     }),
     {
