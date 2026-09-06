@@ -23,11 +23,13 @@ export interface PlayerStats {
   totalFavorites: number;
   totalReviews: number;
   genresExplored: string[];
+  pillarVisits: Record<string, number>; // 🆕 Compteur de visites par pilier
   questsCompleted: string[];
   badgesUnlocked: string[];
   totalXP: number;
   level: number;
   lastDailyBonus: string | null;
+  trialsCompleted: number; // 🆕 Nombre d'épreuves réussies
 }
 
 export interface XPEvent {
@@ -332,11 +334,13 @@ export function createInitialStats(): PlayerStats {
     totalFavorites: 0,
     totalReviews: 0,
     genresExplored: [],
+    pillarVisits: {}, // 🆕
     questsCompleted: [],
     badgesUnlocked: [],
     totalXP: 0,
     level: 1,
     lastDailyBonus: null,
+    trialsCompleted: 0, // 🆕
   };
 }
 
@@ -425,7 +429,7 @@ export function analyzeXPHistory(history: XPEvent[]): {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🆕 NORMALISATION DES GENRES POUR LA GAMIFICATION
+// NORMALISATION DES GENRES POUR LA GAMIFICATION
 // ═══════════════════════════════════════════════════════════
 
 /**
@@ -466,4 +470,43 @@ export function normalizeGenreForGamification(
   
   // 4. Fallback : Heavy Metal
   return 'Heavy Metal';
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🆕 SYSTÈME D'ÉPREUVES (TRIALS)
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Détermine le pilier le moins exploré par le joueur.
+ * Utilise pillarVisits si disponible, sinon se base sur genresExplored.
+ * 
+ * @param stats - Les statistiques du joueur
+ * @returns Le pilier le moins exploré (pour les épreuves de passage)
+ */
+export function getLeastExploredPillar(stats: PlayerStats): GamificationPillar {
+  const pillars = GAMIFICATION_PILLARS as readonly GamificationPillar[];
+  
+  // Si on a des visites par pilier, on prend le moins visité
+  if (Object.keys(stats.pillarVisits).length > 0) {
+    let minPillar: GamificationPillar = pillars[0];
+    let minVisits = Infinity;
+    
+    for (const pillar of pillars) {
+      const visits = stats.pillarVisits[pillar] || 0;
+      if (visits < minVisits) {
+        minVisits = visits;
+        minPillar = pillar;
+      }
+    }
+    return minPillar;
+  }
+  
+  // Sinon, on prend un pilier qui n'a pas été exploré
+  const unexplored = pillars.filter(p => !stats.genresExplored.includes(p));
+  if (unexplored.length > 0) {
+    return unexplored[Math.floor(Math.random() * unexplored.length)];
+  }
+  
+  // Fallback : pilier aléatoire
+  return pillars[Math.floor(Math.random() * pillars.length)];
 }
