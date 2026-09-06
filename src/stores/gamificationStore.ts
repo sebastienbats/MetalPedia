@@ -10,6 +10,8 @@ import {
   getLevelProgress,
   createXPEvent,
   normalizeGenreForGamification,
+  getLeastExploredPillar,
+  type GamificationPillar,
 } from '@/lib/gamification/engine';
 import { BADGES } from '@/lib/gamification/badges';
 import { QUESTS } from '@/lib/gamification/quests';
@@ -23,9 +25,6 @@ const idbStore = createStore('metalpedia', 'gamification');
 // SYSTÈME DE BONUS DE CLASSE
 // ═══════════════════════════════════════════════════════════
 
-/**
- * Calcule l'XP final après application du bonus de classe.
- */
 function applyClassBonus(
   baseXp: number,
   actionType: 'view' | 'favorite' | 'review' | 'explore' | 'quest' | 'quiz' | 'daily',
@@ -43,57 +42,35 @@ function applyClassBonus(
 
   const classMeta = getClassMetadata(selectedClass);
   const bonus = classMeta.bonus;
-
   let isEligible = false;
 
-  // On évalue le TYPE de bonus de la classe
   switch (bonus.type) {
     case 'all':
-      // Le bonus 'all' s'applique à TOUTES les actions, y compris 'daily'
       isEligible = true;
       break;
     case 'low_listeners':
-      isEligible = !!(
-        actionType === 'view' && 
-        context?.band && 
-        typeof context.band.listeners === 'number' &&
-        context.band.listeners < (bonus.threshold || 1000)
-      );
+      isEligible = !!(actionType === 'view' && context?.band && typeof context.band.listeners === 'number' && context.band.listeners < (bonus.threshold || 1000));
       break;
     case 'reviews':
       isEligible = actionType === 'review';
       break;
     case 'vintage':
-      isEligible = !!(
-        actionType === 'view' && 
-        context?.band && 
-        typeof context.band.formed === 'number' &&
-        context.band.formed < (bonus.threshold || 1990)
-      );
+      isEligible = !!(actionType === 'view' && context?.band && typeof context.band.formed === 'number' && context.band.formed < (bonus.threshold || 1990));
       break;
     case 'favorites':
       isEligible = actionType === 'favorite';
       break;
     case 'active_bands':
-      isEligible = !!(
-        actionType === 'view' && 
-        context?.band && 
-        context.band.status === 'Active'
-      );
+      isEligible = !!(actionType === 'view' && context?.band && context.band.status === 'Active');
       break;
     case 'biography':
-      isEligible = !!(
-        actionType === 'view' && 
-        context?.band && 
-        typeof context.band.biography === 'string' && 
-        context.band.biography.split(/\s+/).length > (bonus.threshold || 500)
-      );
+      isEligible = !!(actionType === 'view' && context?.band && typeof context.band.biography === 'string' && context.band.biography.split(/\s+/).length > (bonus.threshold || 500));
       break;
     case 'quiz':
       isEligible = actionType === 'quiz';
       break;
     case 'rare_country':
-      isEligible = false; // À implémenter plus tard avec une liste de pays rares
+      isEligible = false;
       break;
   }
 
@@ -114,26 +91,26 @@ interface GamificationState {
   xpHistory: XPEvent[];
   showLevelUpModal: boolean;
   pendingLevelUp: number | null;
+  
+  // 🆕 États pour les Épreuves (Trials)
+  pendingTrial: { type: 'passage'; level: number; pillar: GamificationPillar } | null;
+  trialBonusRemaining: number;
+  trialsCompleted: number;
 
   recordView: (band: { 
-    id: number; 
-    name: string; 
-    genre: string; 
-    genre_pillar?: string | null; 
-    country: string;
-    listeners?: number | null;
-    formed?: number | null;
-    status?: string | null;
-    biography?: string | null;
+    id: number; name: string; genre: string; genre_pillar?: string | null; country: string;
+    listeners?: number | null; formed?: number | null; status?: string | null; biography?: string | null;
   }) => void;
   recordFavorite: (bandId: number, isAdding: boolean) => void;
   recordReview: () => void;
   recordGenreDiscovery: (genre: string) => void;
   claimDailyBonus: () => void;
   completeQuest: (questId: string) => void;
-  
-  // 🆕 Action pour enregistrer les gains d'XP des quiz (retourne l'XP finale gagnée)
   recordQuiz: (isCorrect: boolean, baseXp: number) => number;
+
+  // 🆕 Actions pour les épreuves
+  completeTrial: (success: boolean) => void;
+  dismissTrial: () => void;
 
   getLevelProgress: () => ReturnType<typeof getLevelProgress>;
   getUnlockedBadges: () => typeof BADGES;
@@ -142,16 +119,19 @@ interface GamificationState {
   closeLevelUpModal: () => void;
 }
 
+// 🛡️ CORRECTION : Ajout de pillarVisits et trialsCompleted ici
 const initialStats: PlayerStats = {
   totalViews: 0,
   totalFavorites: 0,
   totalReviews: 0,
   genresExplored: [],
+  pillarVisits: {}, // 🆕
   questsCompleted: [],
   badgesUnlocked: [],
   totalXP: 0,
   level: 1,
   lastDailyBonus: null,
+  trialsCompleted: 0, // 🆕
 };
 
 export const useGamificationStore = create<GamificationState>()(
@@ -161,6 +141,9 @@ export const useGamificationStore = create<GamificationState>()(
       xpHistory: [],
       showLevelUpModal: false,
       pendingLevelUp: null,
+      pendingTrial: null, // 🆕
+      trialBonusRemaining: 0, // 🆕
+      trialsCompleted: 0, // 🆕
 
       recordView: (band) => {
         const baseXp = calculateXP('VIEW_BAND');
@@ -170,7 +153,11 @@ export const useGamificationStore = create<GamificationState>()(
         const currentClass = useClassStore.getState().selectedClass;
 
         set((state) => {
-          const newXP = state.stats.totalXP + finalXp;
+          const trialMultiplier = state.trialBonusRemaining > 0 ? 2 : 1;
+          const finalXPWithTrial = Math.round(finalXp * trialMultiplier);
+          const newTrialBonusRemaining = state.trialBonusRemaining > 0 ? state.trialBonusRemaining - 1 : 0;
+
+          const newXP = state.stats.totalXP + finalXPWithTrial;
           const newLevel = getLevelFromXP(newXP);
           const oldLevel = state.stats.level;
 
@@ -178,37 +165,37 @@ export const useGamificationStore = create<GamificationState>()(
             ? state.stats.genresExplored
             : [...state.stats.genresExplored, gamificationGenre];
 
+          const newPillarVisits = {
+            ...state.stats.pillarVisits,
+            [gamificationGenre]: (state.stats.pillarVisits[gamificationGenre] || 0) + 1,
+          };
+
           const newStats: PlayerStats = {
             ...state.stats,
             totalViews: state.stats.totalViews + 1,
             genresExplored: newGenres,
+            pillarVisits: newPillarVisits,
             totalXP: newXP,
             level: newLevel,
           };
 
-          const newBadges = BADGES.filter(
-            (b) => !newStats.badgesUnlocked.includes(b.id) && checkBadgeUnlocked(b, newStats)
-          ).map((b) => b.id);
-
+          const newBadges = BADGES.filter((b) => !newStats.badgesUnlocked.includes(b.id) && checkBadgeUnlocked(b, newStats)).map((b) => b.id);
           if (newBadges.length > 0) {
             newStats.badgesUnlocked = [...newStats.badgesUnlocked, ...newBadges];
           }
 
-          // 🆕 Vérification des quêtes lors d'une vue
-          const completedQuests = QUESTS.filter(
-            (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass)
-          );
-
+          const completedQuests = QUESTS.filter((q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass));
           if (completedQuests.length > 0) {
             const questXP = completedQuests.reduce((sum, q) => sum + q.xpReward, 0);
             newStats.totalXP += questXP;
-            newStats.questsCompleted = [
-              ...newStats.questsCompleted,
-              ...completedQuests.map((q) => q.id),
-            ];
+            newStats.questsCompleted = [...newStats.questsCompleted, ...completedQuests.map((q) => q.id)];
           }
 
-          // 🎯 Bonus de classe : on ajoute aussi de l'XP à la classe elle-même
+          let pendingTrial = state.pendingTrial;
+          if (newLevel > oldLevel && newLevel % 5 === 0 && oldLevel % 5 !== 0) {
+            pendingTrial = { type: 'passage', level: newLevel, pillar: getLeastExploredPillar(newStats) };
+          }
+
           if (bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
             if (selectedClass) {
@@ -223,6 +210,8 @@ export const useGamificationStore = create<GamificationState>()(
             xpHistory: [event, ...state.xpHistory].slice(0, 100),
             showLevelUpModal: newLevel > oldLevel,
             pendingLevelUp: newLevel > oldLevel ? newLevel : null,
+            pendingTrial,
+            trialBonusRemaining: newTrialBonusRemaining,
           };
         });
       },
@@ -234,31 +223,26 @@ export const useGamificationStore = create<GamificationState>()(
         const currentClass = useClassStore.getState().selectedClass;
 
         set((state) => {
-          const newXP = Math.max(0, state.stats.totalXP + finalXp);
+          const trialMultiplier = state.trialBonusRemaining > 0 ? 2 : 1;
+          const finalXPWithTrial = Math.round(finalXp * trialMultiplier);
+          const newTrialBonusRemaining = state.trialBonusRemaining > 0 ? state.trialBonusRemaining - 1 : 0;
+
+          const newXP = Math.max(0, state.stats.totalXP + finalXPWithTrial);
           const newLevel = getLevelFromXP(newXP);
           const oldLevel = state.stats.level;
 
           const newStats: PlayerStats = {
             ...state.stats,
-            totalFavorites: isAdding
-              ? state.stats.totalFavorites + 1
-              : Math.max(0, state.stats.totalFavorites - 1),
+            totalFavorites: isAdding ? state.stats.totalFavorites + 1 : Math.max(0, state.stats.totalFavorites - 1),
             totalXP: newXP,
             level: newLevel,
           };
 
-          // 🆕 Vérification des quêtes lors d'un favori
-          const completedQuests = QUESTS.filter(
-            (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass)
-          );
-
+          const completedQuests = QUESTS.filter((q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass));
           if (completedQuests.length > 0) {
             const questXP = completedQuests.reduce((sum, q) => sum + q.xpReward, 0);
             newStats.totalXP += questXP;
-            newStats.questsCompleted = [
-              ...newStats.questsCompleted,
-              ...completedQuests.map((q) => q.id),
-            ];
+            newStats.questsCompleted = [...newStats.questsCompleted, ...completedQuests.map((q) => q.id)];
           }
 
           if (isAdding && bonusApplied) {
@@ -274,6 +258,7 @@ export const useGamificationStore = create<GamificationState>()(
             stats: newStats,
             showLevelUpModal: newLevel > oldLevel,
             pendingLevelUp: newLevel > oldLevel ? newLevel : null,
+            trialBonusRemaining: newTrialBonusRemaining,
           };
         });
       },
@@ -285,7 +270,11 @@ export const useGamificationStore = create<GamificationState>()(
         const currentClass = useClassStore.getState().selectedClass;
 
         set((state) => {
-          const newXP = state.stats.totalXP + finalXp;
+          const trialMultiplier = state.trialBonusRemaining > 0 ? 2 : 1;
+          const finalXPWithTrial = Math.round(finalXp * trialMultiplier);
+          const newTrialBonusRemaining = state.trialBonusRemaining > 0 ? state.trialBonusRemaining - 1 : 0;
+
+          const newXP = state.stats.totalXP + finalXPWithTrial;
           const newLevel = getLevelFromXP(newXP);
           const oldLevel = state.stats.level;
 
@@ -296,17 +285,11 @@ export const useGamificationStore = create<GamificationState>()(
             level: newLevel,
           };
 
-          const completedQuests = QUESTS.filter(
-            (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass)
-          );
-
+          const completedQuests = QUESTS.filter((q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass));
           if (completedQuests.length > 0) {
             const questXP = completedQuests.reduce((sum, q) => sum + q.xpReward, 0);
             newStats.totalXP += questXP;
-            newStats.questsCompleted = [
-              ...newStats.questsCompleted,
-              ...completedQuests.map((q) => q.id),
-            ];
+            newStats.questsCompleted = [...newStats.questsCompleted, ...completedQuests.map((q) => q.id)];
           }
 
           if (bonusApplied) {
@@ -323,6 +306,7 @@ export const useGamificationStore = create<GamificationState>()(
             xpHistory: [event, ...state.xpHistory].slice(0, 100),
             showLevelUpModal: newLevel > oldLevel,
             pendingLevelUp: newLevel > oldLevel ? newLevel : null,
+            trialBonusRemaining: newTrialBonusRemaining,
           };
         });
       },
@@ -338,29 +322,27 @@ export const useGamificationStore = create<GamificationState>()(
           const { finalXp } = applyClassBonus(baseXp, 'explore');
           const event = createXPEvent('DISCOVER_NEW_GENRE', gamificationGenre);
 
+          const trialMultiplier = state.trialBonusRemaining > 0 ? 2 : 1;
+          const finalXPWithTrial = Math.round(finalXp * trialMultiplier);
+          const newTrialBonusRemaining = state.trialBonusRemaining > 0 ? state.trialBonusRemaining - 1 : 0;
+
           const newStats: PlayerStats = {
             ...state.stats,
             genresExplored: [...state.stats.genresExplored, gamificationGenre],
-            totalXP: state.stats.totalXP + finalXp,
+            totalXP: state.stats.totalXP + finalXPWithTrial,
           };
 
-          // 🆕 Vérification des quêtes lors de la découverte d'un genre
-          const completedQuests = QUESTS.filter(
-            (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass)
-          );
-
+          const completedQuests = QUESTS.filter((q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass));
           if (completedQuests.length > 0) {
             const questXP = completedQuests.reduce((sum, q) => sum + q.xpReward, 0);
             newStats.totalXP += questXP;
-            newStats.questsCompleted = [
-              ...newStats.questsCompleted,
-              ...completedQuests.map((q) => q.id),
-            ];
+            newStats.questsCompleted = [...newStats.questsCompleted, ...completedQuests.map((q) => q.id)];
           }
 
           return {
             stats: newStats,
             xpHistory: [event, ...state.xpHistory].slice(0, 100),
+            trialBonusRemaining: newTrialBonusRemaining,
           };
         });
       },
@@ -368,7 +350,6 @@ export const useGamificationStore = create<GamificationState>()(
       claimDailyBonus: () => {
         const today = new Date().toDateString();
         const state = get();
-
         if (state.stats.lastDailyBonus === today) return;
 
         const baseXp = calculateXP('DAILY_LOGIN');
@@ -391,37 +372,30 @@ export const useGamificationStore = create<GamificationState>()(
 
         set((state) => {
           if (state.stats.questsCompleted.includes(questId)) return state;
-
-          const newStats: PlayerStats = {
-            ...state.stats,
-            questsCompleted: [...state.stats.questsCompleted, questId],
-            totalXP: state.stats.totalXP + quest.xpReward,
+          return {
+            stats: {
+              ...state.stats,
+              questsCompleted: [...state.stats.questsCompleted, questId],
+              totalXP: state.stats.totalXP + quest.xpReward,
+            }
           };
-
-          return { stats: newStats };
         });
       },
 
-      // 🆕 GESTION DES QUIZ
       recordQuiz: (isCorrect: boolean, baseXp: number): number => {
-        if (!isCorrect) return 0; // Pas d'XP si la réponse est fausse
-
+        if (!isCorrect) return 0;
         const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'quiz');
-        
-        // Création manuelle de l'événement pour éviter d'avoir à modifier XP_RULES dans engine.ts
-        const event: XPEvent = {
-          action: 'COMPLETE_QUEST',
-          amount: finalXp,
-          timestamp: Date.now(),
-          description: 'Savoir ancestral acquis (Quiz)',
-        };
+        const event: XPEvent = { action: 'COMPLETE_QUEST', amount: finalXp, timestamp: Date.now(), description: 'Savoir ancestral acquis (Quiz)' };
 
         set((state) => {
-          const newXP = state.stats.totalXP + finalXp;
+          const trialMultiplier = state.trialBonusRemaining > 0 ? 2 : 1;
+          const finalXPWithTrial = Math.round(finalXp * trialMultiplier);
+          const newTrialBonusRemaining = state.trialBonusRemaining > 0 ? state.trialBonusRemaining - 1 : 0;
+
+          const newXP = state.stats.totalXP + finalXPWithTrial;
           const newLevel = getLevelFromXP(newXP);
           const oldLevel = state.stats.level;
 
-          // 🎯 Bonus de classe : on ajoute aussi de l'XP à la classe elle-même
           if (bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
             if (selectedClass) {
@@ -436,27 +410,36 @@ export const useGamificationStore = create<GamificationState>()(
             xpHistory: [event, ...state.xpHistory].slice(0, 100),
             showLevelUpModal: newLevel > oldLevel,
             pendingLevelUp: newLevel > oldLevel ? newLevel : null,
+            trialBonusRemaining: newTrialBonusRemaining,
           };
         });
-
-        return finalXp; // Retourne l'XP réelle gagnée (avec bonus) pour l'envoyer à Supabase
+        return finalXp; // Retourne l'XP de base pour l'envoi à Supabase (le store a déjà appliqué le bonus)
       },
+
+      // 🆕 Actions pour les épreuves
+      completeTrial: (success: boolean) => {
+        set((state) => {
+          if (!state.pendingTrial) return state;
+          return {
+            pendingTrial: null,
+            trialBonusRemaining: success ? 10 : 0,
+            stats: { ...state.stats, trialsCompleted: state.stats.trialsCompleted + 1 },
+          };
+        });
+      },
+
+      dismissTrial: () => set({ pendingTrial: null }),
 
       getLevelProgress: () => getLevelProgress(get().stats.totalXP),
       getUnlockedBadges: () => BADGES.filter((b) => get().stats.badgesUnlocked.includes(b.id)),
-      
-      // 🆕 Filtrage des quêtes actives en fonction de la classe du joueur
       getActiveQuests: () => {
         const currentClass = useClassStore.getState().selectedClass;
         return QUESTS.filter((q) => !get().stats.questsCompleted.includes(q.id) && checkQuestCompleted(q, get().stats, currentClass));
       },
-      
-      // 🆕 Filtrage des quêtes complétées en fonction de la classe du joueur
       getCompletedQuests: () => {
         const currentClass = useClassStore.getState().selectedClass;
         return QUESTS.filter((q) => get().stats.questsCompleted.includes(q.id) && checkQuestCompleted(q, get().stats, currentClass));
       },
-      
       closeLevelUpModal: () => set({ showLevelUpModal: false, pendingLevelUp: null }),
     }),
     {
