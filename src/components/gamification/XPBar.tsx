@@ -1,7 +1,6 @@
 'use client';
 
 import { useGamificationStore } from '@/stores/gamificationStore';
-import { getRankForLevel } from '@/lib/gamification/lore';
 
 export default function XPBar() {
   const { stats } = useGamificationStore();
@@ -48,13 +47,7 @@ export default function XPBar() {
             </div>
           </div>
 
-          {/* Raccourci profil */}
-          <a
-            href="/profile"
-            className="metal-button text-sm px-3 py-2"
-          >
-            👤 Profil
-          </a>
+          {/* 🛡️ SUPPRIMÉ : Le bouton profil fait doublon avec l'icône 👤 du Header */}
         </div>
       </div>
     </div>
