@@ -131,6 +131,9 @@ interface GamificationState {
   recordGenreDiscovery: (genre: string) => void;
   claimDailyBonus: () => void;
   completeQuest: (questId: string) => void;
+  
+  // 🆕 Action pour enregistrer les gains d'XP des quiz (retourne l'XP finale gagnée)
+  recordQuiz: (isCorrect: boolean, baseXp: number) => number;
 
   getLevelProgress: () => ReturnType<typeof getLevelProgress>;
   getUnlockedBadges: () => typeof BADGES;
@@ -191,7 +194,7 @@ export const useGamificationStore = create<GamificationState>()(
             newStats.badgesUnlocked = [...newStats.badgesUnlocked, ...newBadges];
           }
 
-          // 🆕 Vérification des quêtes lors d'une vue (ex: quêtes de classe basées sur totalViews)
+          // 🆕 Vérification des quêtes lors d'une vue
           const completedQuests = QUESTS.filter(
             (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass)
           );
@@ -244,7 +247,7 @@ export const useGamificationStore = create<GamificationState>()(
             level: newLevel,
           };
 
-          // 🆕 Vérification des quêtes lors d'un favori (ex: quête du Barde)
+          // 🆕 Vérification des quêtes lors d'un favori
           const completedQuests = QUESTS.filter(
             (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass)
           );
@@ -341,7 +344,7 @@ export const useGamificationStore = create<GamificationState>()(
             totalXP: state.stats.totalXP + finalXp,
           };
 
-          // 🆕 Vérification des quêtes lors de la découverte d'un genre (ex: quête du Paladin/Chaman)
+          // 🆕 Vérification des quêtes lors de la découverte d'un genre
           const completedQuests = QUESTS.filter(
             (q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass)
           );
@@ -397,6 +400,46 @@ export const useGamificationStore = create<GamificationState>()(
 
           return { stats: newStats };
         });
+      },
+
+      // 🆕 GESTION DES QUIZ
+      recordQuiz: (isCorrect: boolean, baseXp: number): number => {
+        if (!isCorrect) return 0; // Pas d'XP si la réponse est fausse
+
+        const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'quiz');
+        
+        // Création manuelle de l'événement pour éviter d'avoir à modifier XP_RULES dans engine.ts
+        const event: XPEvent = {
+          action: 'COMPLETE_QUEST',
+          amount: finalXp,
+          timestamp: Date.now(),
+          description: 'Savoir ancestral acquis (Quiz)',
+        };
+
+        set((state) => {
+          const newXP = state.stats.totalXP + finalXp;
+          const newLevel = getLevelFromXP(newXP);
+          const oldLevel = state.stats.level;
+
+          // 🎯 Bonus de classe : on ajoute aussi de l'XP à la classe elle-même
+          if (bonusApplied) {
+            const selectedClass = useClassStore.getState().selectedClass;
+            if (selectedClass) {
+              const classMeta = getClassMetadata(selectedClass);
+              const classBonusXp = Math.round(5 * (classMeta.bonus.multiplier - 1));
+              useClassStore.getState().addClassXp(classBonusXp);
+            }
+          }
+
+          return {
+            stats: { ...state.stats, totalXP: newXP, level: newLevel },
+            xpHistory: [event, ...state.xpHistory].slice(0, 100),
+            showLevelUpModal: newLevel > oldLevel,
+            pendingLevelUp: newLevel > oldLevel ? newLevel : null,
+          };
+        });
+
+        return finalXp; // Retourne l'XP réelle gagnée (avec bonus) pour l'envoyer à Supabase
       },
 
       getLevelProgress: () => getLevelProgress(get().stats.totalXP),
