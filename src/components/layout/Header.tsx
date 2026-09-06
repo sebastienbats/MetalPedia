@@ -2,17 +2,15 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useFavoritesCount, useFavoritesHydrated } from '@/stores/favoritesStore';
+import { useFavoritesCount, useFavoritesHydration } from '@/stores/favoritesStore';
 import { useAuth, useSignOut } from '@/api/authApi';
 import SearchBar from '@/components/search/SearchBar';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 
 export default function Header() {
-  // État des favoris
   const favCount = useFavoritesCount();
-  const hydrated = useFavoritesHydrated(); // 🆕 Vérifie si le store est hydraté
+  const { isHydrated } = useFavoritesHydration(); // 🆕 Hook avancé
   
-  // État d'authentification
   const { data: user } = useAuth();
   const signOutMutation = useSignOut();
   const router = useRouter();
@@ -26,7 +24,6 @@ export default function Header() {
     <header className="sticky top-0 z-50 backdrop-blur-md bg-metal-black/90 border-b border-metal-gray">
       <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4 max-w-7xl">
         
-        {/* Logo et Titre */}
         <Link href="/" className="flex items-center gap-3 group">
           <span className="text-4xl animate-flame">🔥</span>
           <div>
@@ -39,13 +36,11 @@ export default function Header() {
           </div>
         </Link>
         
-        {/* Barre de recherche et Actions */}
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="flex-1 md:w-96">
             <SearchBar />
           </div>
           
-          {/* LIEN FAVORIS AVEC COMPTEUR DYNAMIQUE */}
           <Link 
             href="/favorites" 
             className="relative flex items-center justify-center w-10 h-10 rounded-lg text-gray-300 hover:text-metal-fire hover:bg-metal-gray/30 transition-all"
@@ -54,15 +49,14 @@ export default function Header() {
           >
             <span className="text-xl">❤️</span>
             
-            {/* 🛡️ CORRECTION : N'affiche le badge que SI le store est hydraté ET qu'il y a des favoris */}
-            {hydrated && favCount > 0 && (
+            {/* 🛡️ Utilise isHydrated du hook avancé */}
+            {isHydrated && favCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-metal-fire text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-metal-black">
                 {favCount > 99 ? '99+' : favCount}
               </span>
             )}
           </Link>
 
-          {/* SECTION UTILISATEUR (Connecté ou Non) */}
           {user ? (
             <div className="flex items-center gap-2">
               <Link 
