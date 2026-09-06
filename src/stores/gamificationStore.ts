@@ -28,7 +28,7 @@ const idbStore = createStore('metalpedia', 'gamification');
  */
 function applyClassBonus(
   baseXp: number,
-  actionType: 'view' | 'favorite' | 'review' | 'explore' | 'quest' | 'quiz',
+  actionType: 'view' | 'favorite' | 'review' | 'explore' | 'quest' | 'quiz' | 'daily',
   context?: { band?: {
     listeners?: number | null;
     formed?: number | null;
@@ -49,6 +49,10 @@ function applyClassBonus(
   switch (bonus.type) {
     case 'all':
       isEligible = true;
+      break;
+    case 'daily':
+      // Le bonus quotidien ne bénéficie du multiplicateur que si la classe a le bonus 'all'
+      isEligible = bonus.type === 'all';
       break;
     case 'low_listeners':
       isEligible = !!(
@@ -322,7 +326,8 @@ export const useGamificationStore = create<GamificationState>()(
         if (state.stats.lastDailyBonus === today) return;
 
         const baseXp = calculateXP('DAILY_LOGIN');
-        const { finalXp } = applyClassBonus(baseXp, 'all');
+        // 🛡️ CORRECTION : Utilisation de 'daily' au lieu de 'all' pour correspondre au type
+        const { finalXp } = applyClassBonus(baseXp, 'daily');
         const event = createXPEvent('DAILY_LOGIN');
 
         set((state) => ({
