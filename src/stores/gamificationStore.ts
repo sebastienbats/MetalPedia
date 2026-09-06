@@ -16,7 +16,6 @@ import { QUESTS } from '@/lib/gamification/quests';
 import { getLevelFromXP } from '@/lib/gamification/lore';
 import { useClassStore } from './classStore';
 import { getClassMetadata } from '@/lib/gamification/classes';
-import type { Band } from '@/types/api';
 
 const idbStore = createStore('metalpedia', 'gamification');
 
@@ -30,7 +29,12 @@ const idbStore = createStore('metalpedia', 'gamification');
 function applyClassBonus(
   baseXp: number,
   actionType: 'view' | 'favorite' | 'review' | 'explore' | 'quest' | 'quiz',
-  context?: { band?: Band }
+  context?: { band?: {
+    listeners?: number | null;
+    formed?: number | null;
+    status?: string | null;
+    biography?: string | null;
+  } }
 ): { finalXp: number; bonusApplied: boolean; multiplier: number } {
   const selectedClass = useClassStore.getState().selectedClass;
   if (!selectedClass) {
