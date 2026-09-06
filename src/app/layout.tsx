@@ -8,6 +8,7 @@ import OfflineIndicator from '@/components/ui/OfflineIndicator';
 import CommandPalette from '@/components/ui/CommandPalette';
 import XPBar from '@/components/gamification/XPBar';
 import LevelUpModal from '@/components/gamification/LevelUpModal';
+import TrialWatcher from '@/components/gamification/TrialWatcher'; // 🆕 Import du système d'épreuves
 import '@/i18n';
 import './globals.css';
 
@@ -210,6 +211,9 @@ export default function RootLayout({
           <XPBar />
           
           <LevelUpModal />
+          
+          {/* 🆕 SYSTÈME D'ÉPREUVES : Surveille pendingTrial et affiche le modal automatiquement */}
+          <TrialWatcher />
         </Providers>
       </body>
     </html>
