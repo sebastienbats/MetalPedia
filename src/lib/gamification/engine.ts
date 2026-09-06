@@ -12,7 +12,7 @@ import {
 } from './lore';
 import { BADGES, type Badge } from './badges';
 import { QUESTS, type Quest } from './quests';
-import { GAMIFICATION_PILLARS, type GamificationPillar } from '@/types/api';
+import { GAMIFICATION_PILLARS, type GamificationPillar, type CharacterClass } from '@/types/api';
 
 // ─────────────────────────────────────────
 // TYPES
@@ -141,9 +141,18 @@ export function checkAllBadges(stats: PlayerStats): BadgeUnlockResult[] {
 // ─────────────────────────────────────────
 
 /**
- * Vérifie si une quête est complétée
+ * Vérifie si une quête est complétée en fonction des stats ET de la classe du joueur.
  */
-export function checkQuestCompleted(quest: Quest, stats: PlayerStats): boolean {
+export function checkQuestCompleted(
+  quest: Quest,
+  stats: PlayerStats,
+  userClass?: CharacterClass | null
+): boolean {
+  // 🛡️ FILTRE DE CLASSE : Si la quête requiert une classe spécifique et que le joueur ne l'a pas, elle n'est pas complétable.
+  if (quest.requiredClass && quest.requiredClass !== userClass) {
+    return false;
+  }
+
   const { type, target } = quest.requirements;
 
   switch (type) {
@@ -170,12 +179,12 @@ export function checkQuestCompleted(quest: Quest, stats: PlayerStats): boolean {
 /**
  * Vérifie toutes les quêtes actives et retourne celles complétées
  */
-export function checkAllQuests(stats: PlayerStats): QuestCompletionResult[] {
+export function checkAllQuests(stats: PlayerStats, userClass?: CharacterClass | null): QuestCompletionResult[] {
   const results: QuestCompletionResult[] = [];
 
   for (const quest of QUESTS) {
     const isAlreadyCompleted = stats.questsCompleted.includes(quest.id);
-    const isCompleted = checkQuestCompleted(quest, stats);
+    const isCompleted = checkQuestCompleted(quest, stats, userClass);
 
     if (isCompleted && !isAlreadyCompleted) {
       results.push({ quest, xpEarned: quest.xpReward });
@@ -190,8 +199,14 @@ export function checkAllQuests(stats: PlayerStats): QuestCompletionResult[] {
  */
 export function getQuestProgress(
   quest: Quest,
-  stats: PlayerStats
+  stats: PlayerStats,
+  userClass?: CharacterClass | null
 ): { current: number; target: number; percent: number } {
+  // Si la quête est réservée à une autre classe, on retourne 0%
+  if (quest.requiredClass && quest.requiredClass !== userClass) {
+    return { current: 0, target: quest.requirements.target, percent: 0 };
+  }
+
   const { type, target } = quest.requirements;
   let current = 0;
 
