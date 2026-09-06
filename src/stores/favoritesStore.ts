@@ -4,12 +4,12 @@ import { createStore, set as idbSet, get as idbGet, del as idbDel } from 'idb-ke
 import type { BandSearchResult } from '@/types/api';
 import { offlineSync } from '@/lib/offline-sync';
 import { useGamificationStore } from './gamificationStore';
-import { useStore } from 'zustand';
 
 const idbStore = createStore('metalpedia', 'favorites');
 
 interface FavoritesState {
   favorites: Record<number, BandSearchResult>;
+  hydrated: boolean; // 🆕 Indicateur de chargement depuis IndexedDB
 
   // Actions
   add: (band: BandSearchResult) => void;
@@ -18,6 +18,7 @@ interface FavoritesState {
   isFavorite: (id: number) => boolean;
   clearAll: () => void;
   syncToCloud: () => Promise<void>;
+  setHydrated: () => void; // 🆕 Action pour marquer l'hydratation comme terminée
 
   // Getters
   getCount: () => number;
@@ -28,16 +29,17 @@ export const useFavoritesStore = create<FavoritesState>()(
   persist(
     (set, get) => ({
       favorites: {},
+      hydrated: false, // 🆕 État initial : pas encore chargé depuis IndexedDB
+
+      setHydrated: () => set({ hydrated: true }), // 🆕 Action
 
       add: (band) => {
         set((state) => ({
           favorites: { ...state.favorites, [band.id]: band },
         }));
 
-        // Gamification : XP pour ajout de favori
         useGamificationStore.getState().recordFavorite(band.id, true);
 
-        // Offline sync : si hors ligne, enregistrer l'opération
         if (!offlineSync.isCurrentlyOnline()) {
           offlineSync.addPendingOperation({
             type: 'favorite_add',
@@ -52,10 +54,8 @@ export const useFavoritesStore = create<FavoritesState>()(
           return { favorites: rest };
         });
 
-        // Gamification : XP retiré
         useGamificationStore.getState().recordFavorite(id, false);
 
-        // Offline sync
         if (!offlineSync.isCurrentlyOnline()) {
           offlineSync.addPendingOperation({
             type: 'favorite_remove',
@@ -74,17 +74,13 @@ export const useFavoritesStore = create<FavoritesState>()(
       },
 
       isFavorite: (id) => !!get().favorites[id],
-
       clearAll: () => set({ favorites: {} }),
 
       syncToCloud: async () => {
-        // Sync avec Supabase si user connecté
-        // Implémentation à connecter avec authApi
         console.log('Sync favorites to cloud...');
       },
 
       getCount: () => Object.keys(get().favorites).length,
-
       getAll: () => Object.values(get().favorites),
     }),
     {
@@ -113,13 +109,28 @@ export const useFavoritesStore = create<FavoritesState>()(
           }
         },
       })),
+      // 🆕 Hook Zustand appelé automatiquement quand la réhydratation est terminée
+      onRehydrateStorage: () => {
+        return (state, error) => {
+          if (state) {
+            state.setHydrated();
+          }
+        };
+      },
     }
   )
 );
 
-// Sélecteurs optimisés
+// ═══════════════════════════════════════════════════════════
+// SÉLECTEURS OPTIMISÉS
+// ═══════════════════════════════════════════════════════════
+
 export const useFavoritesCount = () =>
   useFavoritesStore((s) => Object.keys(s.favorites).length);
 
 export const useFavoriteBands = () =>
   useFavoritesStore((s) => Object.values(s.favorites));
+
+// 🆕 Sélecteur pour savoir si le store a fini de charger depuis IndexedDB
+export const useFavoritesHydrated = () =>
+  useFavoritesStore((s) => s.hydrated);
