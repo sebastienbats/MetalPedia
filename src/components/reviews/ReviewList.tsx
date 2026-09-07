@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image'; // 🆕 Import du composant Image optimisé de Next.js
 import { useAuth } from '@/api/authApi';
 import { useBandReviews, useBandAverageRating, useDeleteReview } from '@/api/reviewsApi';
 import { ReviewWithAuthor } from '@/types/supabase';
@@ -35,7 +36,6 @@ function StarRating({ rating }: { rating: number }) {
 export default function ReviewList({ bandId }: Props) {
   const { data: user } = useAuth();
   
-  // 🆕 Utilisation des hooks React Query au lieu de metalServerApi
   const { data: reviews = [], isLoading } = useBandReviews(bandId);
   const { averageRating, reviewCount } = useBandAverageRating(bandId);
   const deleteReview = useDeleteReview();
@@ -68,12 +68,13 @@ export default function ReviewList({ bandId }: Props) {
         <div className="flex items-center gap-4 bg-metal-gray/20 px-6 py-3 rounded-lg border border-metal-gray/50">
           <div className="text-center">
             <div className="text-3xl font-black text-white">
-              {averageRating > 0 ? averageRating.toFixed(1) : '-'}
+              {/* 🛡️ CORRECTION TYPE : Vérification explicite que averageRating n'est pas null */}
+              {averageRating !== null && averageRating > 0 ? averageRating.toFixed(1) : '-'}
             </div>
             <div className="text-[10px] uppercase tracking-wider text-gray-400">/ 5</div>
           </div>
           <div className="h-10 w-px bg-metal-gray/50" />
-          <StarRating rating={Math.round(averageRating)} />
+          <StarRating rating={averageRating !== null ? Math.round(averageRating) : 0} />
         </div>
       </div>
 
@@ -134,9 +135,13 @@ function ReviewItem({ review, isOwner, onDelete, isDeleting }: ReviewItemProps) 
         {/* Avatar ou Initiale */}
         <div className="shrink-0">
           {avatarUrl ? (
-            <img 
+            // 🆕 Utilisation de next/image pour de meilleures performances LCP et suppression du warning Vercel
+            <Image 
               src={avatarUrl} 
               alt={username} 
+              width={40}
+              height={40}
+              unoptimized // Nécessaire pour les URLs d'avatar externes (ex: GitHub, Google, Supabase Storage)
               className="w-10 h-10 rounded-full border border-metal-gray object-cover"
             />
           ) : (
@@ -157,12 +162,12 @@ function ReviewItem({ review, isOwner, onDelete, isDeleting }: ReviewItemProps) 
             <StarRating rating={review.rating} />
           </div>
 
-          {/* 🆕 Titre de l'avis (aligné avec le schéma DB) */}
+          {/* Titre de l'avis */}
           <h4 className="font-bold text-metal-rust text-lg mb-2">
             {review.title}
           </h4>
 
-          {/* 🆕 Contenu de l'avis (aligné avec le schéma DB) */}
+          {/* Contenu de l'avis */}
           <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap mb-3">
             {review.content}
           </p>
