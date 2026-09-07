@@ -10,9 +10,10 @@ interface Props {
   targetClass: CharacterClass;
   onSuccess: () => void;
   onFail: () => void;
+  onBack: () => void; // 🆕 Pour revenir à la sélection en cas d'indisponibilité
 }
 
-export default function ClassInitiationQuiz({ targetClass, onSuccess, onFail }: Props) {
+export default function ClassInitiationQuiz({ targetClass, onSuccess, onFail, onBack }: Props) {
   const recordQuiz = useGamificationStore((s) => s.recordQuiz);
   const classMeta = getClassMetadata(targetClass);
   
@@ -23,11 +24,18 @@ export default function ClassInitiationQuiz({ targetClass, onSuccess, onFail }: 
   const [correctCount, setCorrectCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isFinished, setIsFinished] = useState(false);
+  const [isUnavailable, setIsUnavailable] = useState(false); // 🆕
 
   useEffect(() => {
     const fetchQuestions = async () => {
-      // On demande 3 questions spécifiques au pilier de la classe
       const data = await metalServerApi.getQuizQuestions(classMeta.pillar, 3);
+      
+      // 🆕 Si aucune question n'est disponible pour ce pilier
+      if (!data || data.length === 0) {
+        setIsUnavailable(true);
+        setIsLoading(false);
+        return;
+      }
       
       const formatted = data.map((q: QuizQuestion) => {
         const uniqueOptions = Array.from(new Set([q.correct_answer, ...q.wrong_answers]));
@@ -65,15 +73,36 @@ export default function ClassInitiationQuiz({ targetClass, onSuccess, onFail }: 
   };
 
   const handleFinalize = () => {
-    // Seuil de réussite : 2 bonnes réponses sur 3 (66%)
     if (correctCount >= 2) {
-      // On accorde un petit bonus d'XP pour l'adoubement réussi
       recordQuiz(true, 50); 
       onSuccess();
     } else {
       onFail();
     }
   };
+
+  // ─────────────────────────────────────────────────────
+  // 🆕 ÉCRAN D'INDISPONIBILITÉ (Lore)
+  // ─────────────────────────────────────────────────────
+  if (isUnavailable) {
+    return (
+      <div className="text-center py-12 space-y-6 animate-fade-in">
+        <div className="text-6xl">📜</div>
+        <h3 className="font-metal text-2xl text-yellow-500">Archives Incomplètes</h3>
+        <p className="text-sm text-gray-400 italic max-w-md mx-auto leading-relaxed">
+          « Les Tables du Savoir concernant la voie du <strong className="text-gray-200">{classMeta.name}</strong> sont encore fragmentées. 
+          <br /><br />
+          Le Conseil des Anciens ne peut pas encore t'éprouver sur ce pilier. Continue d'explorer le Metalverse, et reviens lorsque les Archives auront été restaurées. »
+        </p>
+        <button
+          onClick={onBack}
+          className="px-8 py-3 bg-metal-gray text-gray-300 font-bold rounded-lg hover:bg-metal-gray/80 transition-all"
+        >
+          Revenir à la sélection
+        </button>
+      </div>
+    );
+  }
 
   // ─────────────────────────────────────────────────────
   // ÉCRAN DE RÉSULTAT
@@ -115,7 +144,7 @@ export default function ClassInitiationQuiz({ targetClass, onSuccess, onFail }: 
   // ─────────────────────────────────────────────────────
   // ÉCRAN DE CHARGEMENT
   // ─────────────────────────────────────────────────────
-  if (isLoading || questions.length === 0) {
+  if (isLoading) {
     return (
       <div className="text-center py-12 animate-pulse">
         <div className="text-5xl mb-4">🧠</div>
@@ -137,7 +166,6 @@ export default function ClassInitiationQuiz({ targetClass, onSuccess, onFail }: 
         <p className="text-xs text-gray-500">Prouve ta valeur au Conseil des Neuf Genres</p>
       </div>
 
-      {/* Progression */}
       <div className="flex justify-between text-xs text-gray-400 mb-1">
         <span>Question {currentIndex + 1} / {questions.length}</span>
         <span className="text-metal-fire">Score: {correctCount}</span>
@@ -149,12 +177,10 @@ export default function ClassInitiationQuiz({ targetClass, onSuccess, onFail }: 
         />
       </div>
 
-      {/* Question */}
       <h4 className="font-serif text-lg text-gray-100 text-center min-h-[60px] flex items-center justify-center">
         {currentQ.question_text}
       </h4>
 
-      {/* Options */}
       <div className="space-y-3">
         {currentQ.options.map((option, idx) => {
           let buttonClass = "w-full p-3 text-left rounded-lg border-2 transition-all font-medium flex items-center gap-3 ";
@@ -182,7 +208,6 @@ export default function ClassInitiationQuiz({ targetClass, onSuccess, onFail }: 
         })}
       </div>
 
-      {/* Feedback */}
       {isAnswered && (
         <div className="pt-4 border-t border-metal-gray flex flex-col items-center animate-fade-in">
           <p className={`text-sm font-bold mb-3 ${selectedAnswer === currentQ.correct_answer ? 'text-green-400' : 'text-red-400'}`}>
