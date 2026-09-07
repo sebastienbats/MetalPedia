@@ -6,7 +6,8 @@ import { useAuth } from '@/api/authApi';
 import { useClassStore, useClassMetadata, useClassProgress } from '@/stores/classStore';
 import { getClassTitle } from '@/lib/gamification/classes';
 import ClassSelectionModal from '@/components/gamification/ClassSelectionModal';
-import PantheonSection from '@/components/gamification/PantheonSection'; // 🆕 Import du Panthéon
+import ClassMilestones from '@/components/gamification/ClassMilestones'; // 🆕 Import des titres visuels
+import PantheonSection from '@/components/gamification/PantheonSection';
 import PlayerCard from '@/components/gamification/PlayerCard';
 import BadgesPanel from '@/components/gamification/BadgesPanel';
 import QuestsPanel from '@/components/gamification/QuestsPanel';
@@ -90,8 +91,15 @@ export default function ProfilePage() {
                 <h2 className="font-metal text-3xl mb-1" style={{ color: classMeta.color }}>
                   {classMeta.name}
                 </h2>
-                <p className="text-sm text-gray-400 italic mb-4">
-                  "{getClassTitle(classMeta.id, classProgress.currentLevel)}"
+                
+                {/* 🆕 BADGE DE TITRE ACTUEL TRÈS VISIBLE */}
+                <p className="text-sm font-semibold mb-4 inline-block px-3 py-1 rounded-full border" 
+                   style={{ 
+                     backgroundColor: `${classMeta.color}15`, 
+                     borderColor: classMeta.color, 
+                     color: classMeta.color 
+                   }}>
+                  🏆 {getClassTitle(classMeta.id, classProgress.currentLevel)}
                 </p>
 
                 {/* Barre d'XP de classe */}
@@ -166,6 +174,11 @@ export default function ProfilePage() {
       </div>
 
       <ClassSelectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+      {/* ═══════════════════════════════════════════
+          🎖️ VOIE DE L'ASCENSION (TITRES DE CLASSE)
+      ═══════════════════════════════════════════ */}
+      {selectedClass && <ClassMilestones />}
 
       {/* ═══════════════════════════════════════════
           🏛️ PANTHÉON DES ANCIENS
