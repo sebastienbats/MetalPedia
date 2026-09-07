@@ -6,6 +6,7 @@ import { useAuth } from '@/api/authApi';
 import { useClassStore, useClassMetadata, useClassProgress } from '@/stores/classStore';
 import { getClassTitle } from '@/lib/gamification/classes';
 import ClassSelectionModal from '@/components/gamification/ClassSelectionModal';
+import PantheonSection from '@/components/gamification/PantheonSection'; // 🆕 Import du Panthéon
 import PlayerCard from '@/components/gamification/PlayerCard';
 import BadgesPanel from '@/components/gamification/BadgesPanel';
 import QuestsPanel from '@/components/gamification/QuestsPanel';
@@ -37,7 +38,7 @@ export default function ProfilePage() {
         <h1 className="font-metal text-4xl md:text-5xl text-metal-rust mb-3">⚔️ Ta Légende</h1>
         <p className="text-gray-400 font-serif mb-4">Le Conseil des Neuf Genres observe ta progression</p>
         
-        {/* 🆕 Boîte d'information explicative */}
+        {/* Boîte d'information explicative */}
         <div className="max-w-2xl mx-auto bg-metal-fire/5 border border-metal-fire/20 rounded-lg p-4 text-left flex gap-3 items-start">
           <span className="text-2xl shrink-0">💡</span>
           <div className="text-sm text-gray-300">
@@ -78,7 +79,7 @@ export default function ProfilePage() {
 
               {/* Infos de classe */}
               <div className="flex-1 w-full text-center md:text-left">
-                {/* 🆕 Badge de distinction Classe */}
+                {/* Badge de distinction Classe */}
                 <div className="mb-3 flex flex-col sm:flex-row sm:items-center gap-2 justify-center md:justify-start">
                   <span className="px-2 py-1 bg-metal-fire/10 text-metal-fire text-[10px] font-bold rounded uppercase tracking-wider border border-metal-fire/30">
                     ⚔️ Maîtrise de Classe
@@ -166,6 +167,15 @@ export default function ProfilePage() {
 
       <ClassSelectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
+      {/* ═══════════════════════════════════════════
+          🏛️ PANTHÉON DES ANCIENS
+          Affiche le niveau MAX atteint pour chaque classe
+      ═══════════════════════════════════════════ */}
+      <PantheonSection />
+
+      {/* ═══════════════════════════════════════════
+          BANNIÈRE D'INVITATION (Non connectés)
+      ═══════════════════════════════════════════ */}
       {!user && (
         <div className="metal-card p-6 border-2 border-metal-fire/50 bg-gradient-to-r from-metal-fire/10 to-transparent">
           <div className="flex flex-col md:flex-row items-center gap-4">
@@ -199,6 +209,9 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* ═══════════════════════════════════════════
+          PIED DE PAGE INFO (Non connectés)
+      ═══════════════════════════════════════════ */}
       {!user && (
         <div className="text-center py-8 border-t border-metal-gray">
           <p className="text-gray-500 text-sm">
