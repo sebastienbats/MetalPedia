@@ -18,7 +18,7 @@ export const REVIEW_QUERY_KEYS = {
 // ═══════════════════════════════════════════════════════════
 
 /**
- * Récupère toutes les reviews d'un groupe
+ * Récupère toutes les reviews d'un groupe avec les infos du profil utilisateur
  */
 export function useBandReviews(bandId: number) {
   return useQuery({
@@ -45,16 +45,18 @@ export function useBandReviews(bandId: number) {
 }
 
 /**
- * Récupère toutes les reviews d'un utilisateur
+ * Récupère toutes les reviews d'un utilisateur spécifique
  */
 export function useUserReviews(userId: string | undefined) {
   return useQuery({
     queryKey: REVIEW_QUERY_KEYS.byUser(userId!),
     queryFn: async () => {
+      if (!userId) return [];
+      
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
-        .eq('user_id', userId!)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -66,7 +68,7 @@ export function useUserReviews(userId: string | undefined) {
 }
 
 /**
- * Récupère une review spécifique
+ * Récupère une review spécifique par son ID
  */
 export function useReview(reviewId: string | undefined) {
   return useQuery({
@@ -97,9 +99,7 @@ export function useReview(reviewId: string | undefined) {
 
 /**
  * Soumet une nouvelle review
- * 
- * ✅ Les types Supabase sont maintenant parfaitement alignés avec le schéma DB,
- * aucun cast explicite n'est nécessaire.
+ * ✅ Parfaitement aligné avec le schéma DB (title + content)
  */
 export function useSubmitReview() {
   const queryClient = useQueryClient();
@@ -120,23 +120,28 @@ export function useSubmitReview() {
           band_id: review.band_id,
           album_id: review.album_id ?? null,
           rating: review.rating,
-          title: review.title,
-          content: review.content,
+          title: review.title.trim(), // 🛡️ Sécurité : évite les titres vides ou espaces
+          content: review.content.trim(), // 🛡️ Sécurité : évite les contenus vides ou espaces
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[useSubmitReview] Erreur Supabase:', error);
+        throw error;
+      }
       return data as Review;
     },
     onSuccess: (_, variables) => {
-      // Invalider le cache des reviews du groupe
+      // Invalider le cache pour un rafraîchissement instantané de l'UI
       queryClient.invalidateQueries({
         queryKey: REVIEW_QUERY_KEYS.byBand(variables.band_id),
       });
-      // Invalider les reviews de l'utilisateur
       queryClient.invalidateQueries({
         queryKey: REVIEW_QUERY_KEYS.byUser(variables.user_id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: REVIEW_QUERY_KEYS.all,
       });
     },
   });
@@ -144,9 +149,6 @@ export function useSubmitReview() {
 
 /**
  * Met à jour une review existante
- * 
- * ✅ Les types Supabase sont maintenant parfaitement alignés avec le schéma DB,
- * aucun cast explicite n'est nécessaire.
  */
 export function useUpdateReview() {
   const queryClient = useQueryClient();
@@ -184,9 +186,6 @@ export function useUpdateReview() {
 
 /**
  * Supprime une review
- * 
- * ✅ Les types Supabase sont maintenant parfaitement alignés avec le schéma DB,
- * aucun cast explicite n'est nécessaire.
  */
 export function useDeleteReview() {
   const queryClient = useQueryClient();
@@ -201,7 +200,6 @@ export function useDeleteReview() {
       if (error) throw error;
     },
     onSuccess: () => {
-      // Invalider toutes les reviews (on ne connaît pas le band_id)
       queryClient.invalidateQueries({
         queryKey: REVIEW_QUERY_KEYS.all,
       });
@@ -214,13 +212,13 @@ export function useDeleteReview() {
 // ═══════════════════════════════════════════════════════════
 
 /**
- * Calcule la note moyenne d'un groupe
+ * Calcule la note moyenne d'un groupe (arrondie à 1 décimale)
  */
 export function useBandAverageRating(bandId: number) {
   const { data: reviews, isLoading } = useBandReviews(bandId);
 
   const averageRating = reviews && reviews.length > 0
-    ? Math.round(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length)
+    ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length) * 10) / 10
     : null;
 
   return {
