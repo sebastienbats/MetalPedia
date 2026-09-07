@@ -30,7 +30,7 @@ function applyClassBonus(
   actionType: 'view' | 'favorite' | 'review' | 'explore' | 'quest' | 'quiz' | 'daily',
   context?: { band?: {
     listeners?: number | null;
-    formed?: number | null;
+    formed?: number | string | null; // 🛡️ Accepte string ou number pour une robustesse maximale
     status?: string | null;
     biography?: string | null;
   } }
@@ -54,9 +54,17 @@ function applyClassBonus(
     case 'reviews':
       isEligible = actionType === 'review';
       break;
+    
+    // 🛡️ CORRECTION ROBUSTE : Gestion de l'année (string ou number)
     case 'vintage':
-      isEligible = !!(actionType === 'view' && context?.band && typeof context.band.formed === 'number' && context.band.formed < (bonus.threshold || 1990));
+      if (actionType === 'view' && context?.band && context.band.formed) {
+        const formedYear = Number(context.band.formed);
+        if (!isNaN(formedYear) && formedYear < (bonus.threshold || 1990)) {
+          isEligible = true;
+        }
+      }
       break;
+
     case 'favorites':
       isEligible = actionType === 'favorite';
       break;
@@ -98,7 +106,7 @@ interface GamificationState {
 
   recordView: (band: { 
     id: number; name: string; genre: string; genre_pillar?: string | null; country: string;
-    listeners?: number | null; formed?: number | null; status?: string | null; biography?: string | null;
+    listeners?: number | null; formed?: number | string | null; status?: string | null; biography?: string | null;
   }) => void;
   recordFavorite: (bandId: number, isAdding: boolean) => void;
   recordReview: () => void;
@@ -194,7 +202,7 @@ export const useGamificationStore = create<GamificationState>()(
             pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar(newStats) };
           }
 
-          // 🛡️ CORRECTION : Bonus proportionnel à l'XP gagnée pour une progression visible
+          // 🛡️ Bonus proportionnel à l'XP gagnée pour une progression visible
           if (bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
             if (selectedClass) {
@@ -250,7 +258,6 @@ export const useGamificationStore = create<GamificationState>()(
             pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar(newStats) };
           }
 
-          // 🛡️ CORRECTION : Bonus proportionnel à l'XP gagnée pour une progression visible
           if (isAdding && bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
             if (selectedClass) {
@@ -305,7 +312,6 @@ export const useGamificationStore = create<GamificationState>()(
             pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar(newStats) };
           }
 
-          // 🛡️ CORRECTION : Bonus proportionnel à l'XP gagnée pour une progression visible
           if (bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
             if (selectedClass) {
@@ -365,7 +371,6 @@ export const useGamificationStore = create<GamificationState>()(
             pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar(newStats) };
           }
 
-          // 🛡️ CORRECTION : Bonus proportionnel à l'XP gagnée pour une progression visible (ajouté pour cohérence)
           if (bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
             if (selectedClass) {
@@ -457,7 +462,6 @@ export const useGamificationStore = create<GamificationState>()(
             pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar({ ...state.stats, totalXP: newXP, level: newLevel }) };
           }
 
-          // 🛡️ CORRECTION : Bonus proportionnel à l'XP gagnée pour une progression visible
           if (bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
             if (selectedClass) {
