@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image'; // 🆕 Import du composant Image optimisé de Next.js
+import Image from 'next/image';
 import { useAuth } from '@/api/authApi';
 import { useBandReviews, useBandAverageRating, useDeleteReview } from '@/api/reviewsApi';
 import { ReviewWithAuthor } from '@/types/supabase';
@@ -120,11 +120,14 @@ interface ReviewItemProps {
 }
 
 function ReviewItem({ review, isOwner, onDelete, isDeleting }: ReviewItemProps) {
-  const formattedDate = new Date(review.created_at).toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  // 🛡️ CORRECTION TYPE : Gestion du cas où created_at est null pour éviter l'erreur de build
+  const formattedDate = review.created_at 
+    ? new Date(review.created_at).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : 'Date inconnue';
 
   const username = review.profiles?.username || 'Métalleux Anonyme';
   const avatarUrl = review.profiles?.avatar_url;
@@ -135,13 +138,12 @@ function ReviewItem({ review, isOwner, onDelete, isDeleting }: ReviewItemProps) 
         {/* Avatar ou Initiale */}
         <div className="shrink-0">
           {avatarUrl ? (
-            // 🆕 Utilisation de next/image pour de meilleures performances LCP et suppression du warning Vercel
             <Image 
               src={avatarUrl} 
               alt={username} 
               width={40}
               height={40}
-              unoptimized // Nécessaire pour les URLs d'avatar externes (ex: GitHub, Google, Supabase Storage)
+              unoptimized // Nécessaire pour les URLs d'avatar externes
               className="w-10 h-10 rounded-full border border-metal-gray object-cover"
             />
           ) : (
