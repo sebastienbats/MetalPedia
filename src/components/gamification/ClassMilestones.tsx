@@ -15,23 +15,46 @@ export default function ClassMilestones() {
 
   return (
     <div className="metal-card p-6 border-2 border-metal-gray relative overflow-hidden">
+      {/* Lueur d'arrière-plan subtile de la couleur de la classe */}
       <div 
         className="absolute -top-10 -right-10 w-40 h-40 opacity-10 pointer-events-none rounded-full blur-2xl"
         style={{ background: `radial-gradient(circle, ${classMeta.color} 0%, transparent 70%)` }} 
       />
 
       <div className="relative z-10">
-        <h3 className="font-metal text-xl text-gray-200 mb-4 flex items-center gap-2">
-          <span>🎖️</span> Voie de l'Ascension
-        </h3>
+        {/* 🆕 EN-TÊTE EXPLICITE */}
+        <div className="mb-6 pb-4 border-b border-metal-gray/50">
+          <h3 className="font-metal text-2xl text-gray-100 mb-2 flex items-center gap-2">
+            🎖️ Grades de Maîtrise
+          </h3>
+          <p className="text-sm text-gray-400 leading-relaxed">
+            Chaque fois que tu déclenches le <span className="text-metal-fire font-semibold">bonus de ta classe</span>, 
+            tu gagnes de l'XP de maîtrise. Gravis les échelons pour débloquer des <strong className="text-gray-200">titres légendaires</strong>.
+          </p>
+        </div>
 
+        {/* LISTE DES GRADES */}
         <div className="space-y-4">
-          {classMeta.titles.map((titleObj) => {
+          {classMeta.titles.map((titleObj, index) => {
             const isUnlocked = currentLevel >= titleObj.level;
-            // Le "prochain" est le premier titre qui n'est pas encore débloqué
+            
+            // Identifier le prochain grade à débloquer
             const allUnlockedSoFar = classMeta.titles.filter(t => currentLevel >= t.level);
             const nextTitleLevel = classMeta.titles[allUnlockedSoFar.length]?.level || 999;
             const isNext = titleObj.level === nextTitleLevel;
+            
+            // Calcul de la progression pour le grade en cours
+            let progress = 0;
+            if (isNext) {
+              const prevLevel = index > 0 ? classMeta.titles[index - 1].level : 0;
+              const totalLevelsToGain = titleObj.level - prevLevel;
+              const levelsGained = currentLevel - prevLevel;
+              progress = Math.min(100, Math.max(0, (levelsGained / totalLevelsToGain) * 100));
+            } else if (isUnlocked) {
+              progress = 100;
+            }
+
+            const state = isUnlocked ? 'unlocked' : isNext ? 'current' : 'locked';
 
             return (
               <MilestoneItem 
@@ -39,10 +62,8 @@ export default function ClassMilestones() {
                 level={titleObj.level}
                 title={titleObj.title}
                 color={classMeta.color}
-                isUnlocked={isUnlocked}
-                isNext={isNext}
-                currentLevel={currentLevel}
-                totalLevelsForThisTitle={titleObj.level} // Simplifié pour l'exemple
+                state={state}
+                progress={progress}
               />
             );
           })}
@@ -52,55 +73,101 @@ export default function ClassMilestones() {
   );
 }
 
+// ═══════════════════════════════════════════════════════════
+// COMPOSANT INTERNE : UN GRADE (MILESTONE)
+// ═══════════════════════════════════════════════════════════
+
 interface MilestoneItemProps {
   level: number;
   title: string;
   color: string;
-  isUnlocked: boolean;
-  isNext: boolean;
-  currentLevel: number;
-  totalLevelsForThisTitle: number;
+  state: 'unlocked' | 'current' | 'locked';
+  progress: number;
 }
 
-function MilestoneItem({ level, title, color, isUnlocked, isNext, currentLevel }: MilestoneItemProps) {
-  // Calcul approximatif de la progression vers ce niveau spécifique pour la barre
-  // (Niveau actuel - Niveau précédent) / (Niveau cible - Niveau précédent)
-  const prevLevel = level - 10 > 0 ? level - 10 : 1;
-  const progress = isNext ? Math.min(100, ((currentLevel - prevLevel) / (level - prevLevel)) * 100) : (isUnlocked ? 100 : 0);
+function MilestoneItem({ level, title, color, state, progress }: MilestoneItemProps) {
+  
+  // Styles adaptés à l'état du grade (utilisation de styles en ligne pour les couleurs dynamiques)
+  const styles = {
+    unlocked: {
+      icon: '🏆',
+      iconStyle: { backgroundColor: `${color}20`, borderColor: color, color: color },
+      titleColor: 'text-gray-100',
+      badge: '✅ Obtenu',
+      badgeStyle: { backgroundColor: 'rgba(34, 197, 94, 0.2)', borderColor: 'rgba(34, 197, 94, 0.5)', color: '#4ade80' },
+    },
+    current: {
+      icon: '🎯',
+      iconStyle: { backgroundColor: 'rgba(239, 68, 68, 0.2)', borderColor: '#ef4444', color: '#ef4444' },
+      titleColor: 'text-gray-100',
+      badge: `En cours (${Math.round(progress)}%)`,
+      badgeStyle: { backgroundColor: 'rgba(239, 68, 68, 0.2)', borderColor: 'rgba(239, 68, 68, 0.5)', color: '#ef4444' },
+    },
+    locked: {
+      icon: '🔒',
+      iconStyle: { backgroundColor: 'rgba(75, 85, 99, 0.3)', borderColor: 'rgba(75, 85, 99, 1)', color: '#6b7280' },
+      titleColor: 'text-gray-500',
+      badge: `Verrouillé (Niv. ${level})`,
+      badgeStyle: { backgroundColor: 'rgba(75, 85, 99, 0.2)', borderColor: 'rgba(75, 85, 99, 0.5)', color: '#6b7280' },
+    }
+  };
+
+  const currentStyle = styles[state];
 
   return (
-    <div className="flex items-center gap-4 group">
+    <div 
+      className={`
+        flex items-start gap-4 p-4 rounded-lg border transition-all duration-300
+        ${state === 'current' ? 'bg-metal-fire/5 border-metal-fire/30 shadow-md' : 'bg-metal-black/30 border-metal-gray/50'}
+      `}
+    >
+      {/* Icône d'état */}
       <div 
-        className={`
-          w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 border-2 transition-all duration-500
-          ${isUnlocked 
-            ? 'bg-metal-fire/20 border-metal-fire text-metal-fire shadow-[0_0_10px_rgba(239,68,68,0.3)]' 
-            : isNext 
-              ? 'bg-metal-gray/30 border-gray-400 text-gray-300 animate-pulse' 
-              : 'bg-metal-black border-metal-gray/50 text-gray-600'}
-        `}
+        className="w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0 border-2"
+        style={currentStyle.iconStyle}
       >
-        {isUnlocked ? '🏆' : level}
+        {currentStyle.icon}
       </div>
 
-      <div className="flex-1 flex flex-col">
-        <div className="flex items-center justify-between">
+      {/* Contenu */}
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <div>
+            <h4 className={`font-bold text-lg transition-colors ${currentStyle.titleColor}`}>
+              {title}
+            </h4>
+            <p className="text-xs text-gray-500 font-mono">
+              Requis : Niveau de classe {level}
+            </p>
+          </div>
+          
+          {/* Badge d'état */}
           <span 
-            className={`font-semibold transition-colors duration-500 ${
-              isUnlocked ? 'text-gray-100' : isNext ? 'text-gray-300' : 'text-gray-600'
-            }`}
+            className="px-2 py-1 text-[10px] font-bold rounded-full border whitespace-nowrap"
+            style={currentStyle.badgeStyle}
           >
-            {title}
+            {currentStyle.badge}
           </span>
-          <span className="text-xs text-gray-500 font-mono">Niv. {level}</span>
         </div>
-        
-        {isNext && (
-          <div className="mt-1.5 w-full h-1.5 bg-metal-gray rounded-full overflow-hidden">
-            <div 
-              className="h-full rounded-full transition-all duration-1000"
-              style={{ width: `${progress}%`, background: color }}
-            />
+
+        {/* Barre de progression (visible uniquement pour le grade en cours) */}
+        {state === 'current' && (
+          <div className="mt-2">
+            <div className="w-full h-2.5 bg-metal-gray rounded-full overflow-hidden">
+              <div 
+                className="h-full rounded-full transition-all duration-1000 relative overflow-hidden"
+                style={{ 
+                  width: `${progress}%`, 
+                  background: `linear-gradient(to right, ${color}, ${color}dd)` 
+                }}
+              >
+                {/* Effet de brillance animé */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
+              </div>
+            </div>
+            <p className="text-[11px] text-gray-400 mt-1 text-right italic">
+              Continue d'explorer les groupes qui correspondent à ta classe !
+            </p>
           </div>
         )}
       </div>
