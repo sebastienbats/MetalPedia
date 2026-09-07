@@ -2,9 +2,27 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { createStore, set as idbSet, get as idbGet, del as idbDel } from 'idb-keyval';
 import type { CharacterClass } from '@/types/api';
-import { getClassLevelProgress, getClassMetadata, getClassTitle } from '@/lib/gamification/classes';
+import { getClassLevelProgress, getClassMetadata, getClassTitle, ALL_CLASSES } from '@/lib/gamification/classes';
 
 const idbStore = createStore('metalpedia', 'user-class');
+
+// ═══════════════════════════════════════════════════════════
+// TYPES & HELPERS
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Le Panthéon enregistre le niveau MAX atteint pour chaque classe.
+ * Il n'est JAMAIS réinitialisé, même lors d'un changement de classe.
+ */
+type Pantheon = Record<CharacterClass, number>;
+
+const createEmptyPantheon = (): Pantheon => {
+  const pantheon = {} as Pantheon;
+  ALL_CLASSES.forEach((c) => {
+    pantheon[c.id] = 0;
+  });
+  return pantheon;
+};
 
 interface ClassState {
   // État principal
@@ -12,6 +30,9 @@ interface ClassState {
   classXp: number;
   hydrated: boolean;
   hydrationError: string | null;
+
+  // 🏛️ Panthéon des Anciens
+  pantheon: Pantheon;
 
   // Actions
   selectClass: (classId: CharacterClass) => void;
@@ -25,6 +46,7 @@ interface ClassState {
   getCurrentTitle: () => string | null;
   getClassProgress: () => ReturnType<typeof getClassLevelProgress> | null;
   getClassMeta: () => ReturnType<typeof getClassMetadata> | null;
+  getPantheonLevel: (classId: CharacterClass) => number;
 }
 
 export const useClassStore = create<ClassState>()(
@@ -34,21 +56,44 @@ export const useClassStore = create<ClassState>()(
       classXp: 0,
       hydrated: false,
       hydrationError: null,
+      pantheon: createEmptyPantheon(), // 🆕 Initialisation du Panthéon
 
       setHydrated: () => set({ hydrated: true }),
       setHydrationError: (error) => set({ hydrationError: error }),
 
       selectClass: (classId) => {
+        // 🛡️ IMPORTANT : On NE réinitialise PAS le panthéon lors du changement de classe.
+        // Seul l'XP de la classe active est réinitialisé.
         set({ selectedClass: classId, classXp: 0 });
       },
 
       addClassXp: (xp) => {
-        set((state) => ({
-          classXp: state.classXp + xp,
-        }));
+        const state = get();
+        const newClassXp = state.classXp + xp;
+        const selectedClass = state.selectedClass;
+
+        // 🏛️ Mise à jour du Panthéon si nouveau record de niveau
+        let newPantheon = state.pantheon;
+        if (selectedClass) {
+          const newLevel = getClassLevelProgress(newClassXp).currentLevel;
+          const currentMax = state.pantheon[selectedClass];
+          
+          if (newLevel > currentMax) {
+            newPantheon = {
+              ...state.pantheon,
+              [selectedClass]: newLevel,
+            };
+          }
+        }
+
+        set({
+          classXp: newClassXp,
+          pantheon: newPantheon,
+        });
       },
 
       resetClass: () => {
+        // 🛡️ resetClass NE touche PAS au panthéon
         set({ selectedClass: null, classXp: 0 });
       },
 
@@ -72,6 +117,10 @@ export const useClassStore = create<ClassState>()(
         if (!selectedClass) return null;
         return getClassMetadata(selectedClass);
       },
+
+      getPantheonLevel: (classId) => {
+        return get().pantheon[classId] || 0;
+      },
     }),
     {
       name: 'metalpedia-user-class',
@@ -79,7 +128,16 @@ export const useClassStore = create<ClassState>()(
         getItem: async (name) => {
           try {
             const value = await idbGet(name, idbStore);
-            return value ? JSON.parse(value) : null;
+            if (!value) return null;
+            
+            const parsed = JSON.parse(value);
+            
+            // 🛡️ Migration : s'assurer que le panthéon existe pour les anciens utilisateurs
+            if (!parsed.state.pantheon) {
+              parsed.state.pantheon = createEmptyPantheon();
+            }
+            
+            return parsed;
           } catch (error) {
             console.error('Failed to read class from IndexedDB:', error);
             throw error;
@@ -139,3 +197,11 @@ export const useClassMetadata = () =>
     if (!s.selectedClass) return null;
     return getClassMetadata(s.selectedClass);
   });
+
+// 🏛️ Hook pour accéder au Panthéon complet
+export const usePantheon = () =>
+  useClassStore((s) => s.pantheon);
+
+// 🏛️ Hook pour accéder au niveau max d'une classe spécifique
+export const usePantheonLevel = (classId: CharacterClass) =>
+  useClassStore((s) => s.pantheon[classId] || 0);
