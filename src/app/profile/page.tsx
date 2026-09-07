@@ -19,31 +19,41 @@ export default function ProfilePage() {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Ouvrir automatiquement le modal de sélection si l'utilisateur n'a pas encore de classe
   useEffect(() => {
     const timer = setTimeout(() => {
       if (!selectedClass) {
         setIsModalOpen(true);
       }
-    }, 800); // Petit délai pour laisser le store s'hydrater proprement
+    }, 800);
     return () => clearTimeout(timer);
   }, [selectedClass]);
 
   return (
     <div className="space-y-8 pb-12">
       {/* ═══════════════════════════════════════════
-          EN-TÊTE
+          EN-TÊTE & INFO DOUBLE PROGRESSION
       ═══════════════════════════════════════════ */}
       <header className="text-center border-b border-metal-gray pb-6">
         <h1 className="font-metal text-4xl md:text-5xl text-metal-rust mb-3">⚔️ Ta Légende</h1>
-        <p className="text-gray-400 font-serif">Le Conseil des Neuf Genres observe ta progression</p>
+        <p className="text-gray-400 font-serif mb-4">Le Conseil des Neuf Genres observe ta progression</p>
+        
+        {/* 🆕 Boîte d'information explicative */}
+        <div className="max-w-2xl mx-auto bg-metal-fire/5 border border-metal-fire/20 rounded-lg p-4 text-left flex gap-3 items-start">
+          <span className="text-2xl shrink-0">💡</span>
+          <div className="text-sm text-gray-300">
+            <p className="font-bold text-metal-fire mb-1">Système de Double Progression :</p>
+            <ul className="list-disc list-inside space-y-1 text-gray-400">
+              <li><span className="text-gray-200">Progression Globale</span> : Monte avec <strong>toutes</strong> tes actions (vues, favoris, reviews).</li>
+              <li><span className="text-gray-200">Maîtrise de Classe</span> : Monte <strong>uniquement</strong> lorsque tu déclenches ton bonus de classe spécifique (ex: explorer des groupes obscurs pour le Nécromancien).</li>
+            </ul>
+          </div>
+        </div>
       </header>
 
       {/* ═══════════════════════════════════════════
           SECTION CLASSE DE PERSONNAGE
       ═══════════════════════════════════════════ */}
       <div className="metal-card p-6 border-2 border-metal-gray relative overflow-hidden">
-        {/* Effet de lueur d'arrière-plan basé sur la couleur de la classe */}
         {classMeta && (
           <div 
             className="absolute -top-10 -right-10 w-64 h-64 opacity-10 pointer-events-none rounded-full blur-3xl"
@@ -68,9 +78,14 @@ export default function ProfilePage() {
 
               {/* Infos de classe */}
               <div className="flex-1 w-full text-center md:text-left">
-                <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">
-                  Classe de personnage
+                {/* 🆕 Badge de distinction Classe */}
+                <div className="mb-3 flex flex-col sm:flex-row sm:items-center gap-2 justify-center md:justify-start">
+                  <span className="px-2 py-1 bg-metal-fire/10 text-metal-fire text-[10px] font-bold rounded uppercase tracking-wider border border-metal-fire/30">
+                    ⚔️ Maîtrise de Classe
+                  </span>
+                  <span className="text-xs text-gray-500 italic">Augmente uniquement via ton bonus de classe</span>
                 </div>
+
                 <h2 className="font-metal text-3xl mb-1" style={{ color: classMeta.color }}>
                   {classMeta.name}
                 </h2>
@@ -81,14 +96,14 @@ export default function ProfilePage() {
                 {/* Barre d'XP de classe */}
                 <div className="max-w-md mx-auto md:mx-0">
                   <div className="flex justify-between text-xs text-gray-400 mb-1">
-                    <span>Niveau {classProgress.currentLevel}</span>
+                    <span className="font-semibold text-gray-300">Niveau {classProgress.currentLevel}</span>
                     <span>
                       {classProgress.nextLevelXp === Infinity 
                         ? 'MAX' 
                         : `${classProgress.nextLevelXp.toLocaleString()} XP`}
                     </span>
                   </div>
-                  <div className="h-2.5 bg-metal-gray rounded-full overflow-hidden">
+                  <div className="h-3 bg-metal-gray rounded-full overflow-hidden">
                     <div
                       className="h-full transition-all duration-500 rounded-full"
                       style={{
@@ -101,8 +116,9 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Description du bonus actif */}
-                <div className="mt-4 text-xs text-gray-500 bg-metal-black/50 p-3 rounded-lg border border-metal-gray/50 inline-block">
-                  ✨ Bonus actif : <span className="text-metal-fire font-bold">
+                <div className="mt-4 text-xs text-gray-400 bg-metal-black/50 p-3 rounded-lg border border-metal-gray/50 inline-block">
+                  ✨ <span className="text-gray-200 font-semibold">Bonus actif :</span>{' '}
+                  <span className="text-metal-fire font-bold">
                     +{Math.round((classMeta.bonus.multiplier - 1) * 100)}% XP
                   </span>
                   {' '}
@@ -148,17 +164,8 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════
-          MODAL DE SÉLECTION DE CLASSE
-      ═══════════════════════════════════════════ */}
-      <ClassSelectionModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      <ClassSelectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
-      {/* ═══════════════════════════════════════════
-          BANNIÈRE D'INVITATION (Non connectés)
-      ═══════════════════════════════════════════ */}
       {!user && (
         <div className="metal-card p-6 border-2 border-metal-fire/50 bg-gradient-to-r from-metal-fire/10 to-transparent">
           <div className="flex flex-col md:flex-row items-center gap-4">
@@ -169,13 +176,9 @@ export default function ProfilePage() {
               </h2>
               <p className="text-gray-300 text-sm">
                 Crée un compte pour synchroniser ton XP, tes badges, ta classe et tes favoris sur tous tes appareils. 
-                Ta légende mérite d'être immortalisée !
               </p>
             </div>
-            <Link
-              href="/login"
-              className="shrink-0 px-6 py-3 bg-metal-fire text-white font-bold rounded-lg hover:bg-metal-fire/80 transition-all shadow-lg shadow-metal-fire/20 whitespace-nowrap"
-            >
+            <Link href="/login" className="shrink-0 px-6 py-3 bg-metal-fire text-white font-bold rounded-lg hover:bg-metal-fire/80 transition-all shadow-lg shadow-metal-fire/20 whitespace-nowrap">
               Se connecter
             </Link>
           </div>
@@ -196,9 +199,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════
-          PIED DE PAGE INFO (Non connectés)
-      ═══════════════════════════════════════════ */}
       {!user && (
         <div className="text-center py-8 border-t border-metal-gray">
           <p className="text-gray-500 text-sm">
