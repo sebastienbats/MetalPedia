@@ -8,7 +8,7 @@ import { PILLAR_METADATA } from '@/types/api';
 import Loader from '@/components/ui/Loader';
 import FavoriteButton from '@/components/bands/FavoriteButton';
 import ConcertsWidget from '@/components/widgets/ConcertsWidget';
-import ReviewList from '@/components/reviews/ReviewList'; // 🆕 Import du système d'avis
+import ReviewList from '@/components/reviews/ReviewList';
 
 // ═══════════════════════════════════════════════════════════
 // PROPS
@@ -32,7 +32,6 @@ export default function BandDetailClient({
   const { data: user } = useAuth();
   const { recordView } = useGamificationStore();
   
-  // 🆕 Ajout de 'reviews' aux types d'onglets
   const [activeTab, setActiveTab] = useState<'about' | 'albums' | 'members' | 'reviews'>('about');
 
   // Récupérer les métadonnées du pilier pour l'affichage (couleur, icône)
@@ -47,6 +46,11 @@ export default function BandDetailClient({
         genre: band.genre,
         genre_pillar: band.genre_pillar,
         country: band.country,
+        // 🛡️ CORRECTION : Ajout des propriétés manquantes pour déclencher les bonus de classe (ex: vintage)
+        formed: band.formed,
+        listeners: band.listeners,
+        status: band.status,
+        biography: band.biography,
       });
     }
   }, [band, recordView]);
@@ -64,7 +68,7 @@ export default function BandDetailClient({
     return configs[statusKey];
   }, [band.status]);
 
-  // 3. Définition des onglets (🆕 Ajout de l'onglet Avis)
+  // 3. Définition des onglets
   const tabs = useMemo(() => [
     { id: 'about', label: 'Biographie' },
     { id: 'albums', label: `Discographie (${albums.length})` },
