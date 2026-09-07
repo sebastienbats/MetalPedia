@@ -176,7 +176,8 @@ export default function ClassSelectionModal({ isOpen, onClose }: Props) {
             <ClassInitiationQuiz 
               targetClass={selectedPreview} 
               onSuccess={handleQuizSuccess} 
-              onFail={handleQuizFail} 
+              onFail={handleQuizFail}
+              onBack={handleBackToSelection} // 🛡️ Ajout de la prop onBack pour gérer l'indisponibilité des questions
             />
           )}
 
