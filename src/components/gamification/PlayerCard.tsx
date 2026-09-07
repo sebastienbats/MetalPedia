@@ -11,7 +11,15 @@ export default function PlayerCard() {
   const nextRank = RANKS.find((r) => r.level > stats.level);
 
   return (
-    <div className="metal-card p-6">
+    <div className="metal-card p-6 border-2 border-metal-gray">
+      {/* 🆕 Badge de distinction */}
+      <div className="mb-4 flex items-center gap-2">
+        <span className="px-2 py-1 bg-metal-gray/30 text-gray-300 text-[10px] font-bold rounded uppercase tracking-wider border border-metal-gray">
+          🌍 Progression Globale
+        </span>
+        <span className="text-xs text-gray-500 italic">Augmente avec toutes tes actions</span>
+      </div>
+
       <div className="flex items-center gap-4 mb-6">
         <div
           className="w-20 h-20 rounded-full flex items-center justify-center text-4xl border-4"
@@ -27,7 +35,7 @@ export default function PlayerCard() {
           <h2 className="font-metal text-2xl" style={{ color: progress.currentRank.color }}>
             {progress.currentRank.title}
           </h2>
-          <p className="text-gray-400">Niveau {stats.level}</p>
+          <p className="text-gray-400 font-semibold">Niveau {stats.level}</p>
           {nextRank && (
             <p className="text-xs text-gray-500 mt-1">
               Prochain rang : {nextRank.title} (Niv. {nextRank.level})
@@ -38,19 +46,19 @@ export default function PlayerCard() {
 
       {/* Stats rapides */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <div className="bg-metal-black/50 rounded-lg p-3 text-center">
+        <div className="bg-metal-black/50 rounded-lg p-3 text-center border border-metal-gray/30">
           <div className="text-2xl font-bold text-metal-fire">{stats.totalViews}</div>
           <div className="text-xs text-gray-400">Groupes vus</div>
         </div>
-        <div className="bg-metal-black/50 rounded-lg p-3 text-center">
+        <div className="bg-metal-black/50 rounded-lg p-3 text-center border border-metal-gray/30">
           <div className="text-2xl font-bold text-metal-fire">{stats.totalFavorites}</div>
           <div className="text-xs text-gray-400">Favoris</div>
         </div>
-        <div className="bg-metal-black/50 rounded-lg p-3 text-center">
+        <div className="bg-metal-black/50 rounded-lg p-3 text-center border border-metal-gray/30">
           <div className="text-2xl font-bold text-metal-fire">{stats.totalReviews}</div>
           <div className="text-xs text-gray-400">Reviews</div>
         </div>
-        <div className="bg-metal-black/50 rounded-lg p-3 text-center">
+        <div className="bg-metal-black/50 rounded-lg p-3 text-center border border-metal-gray/30">
           <div className="text-2xl font-bold text-metal-fire">{unlockedBadges.length}</div>
           <div className="text-xs text-gray-400">Reliques</div>
         </div>
@@ -60,7 +68,7 @@ export default function PlayerCard() {
       <div>
         <div className="flex justify-between text-sm mb-2">
           <span className="text-gray-400">XP Total : {stats.totalXP.toLocaleString()}</span>
-          <span className="text-metal-fire">
+          <span className="text-metal-fire font-medium">
             {progress.nextLevelXP === Infinity
               ? 'NIVEAU MAX'
               : `Prochain niveau : ${progress.nextLevelXP.toLocaleString()} XP`
