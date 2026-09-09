@@ -38,6 +38,7 @@ export default function ProfilePage() {
           EN-TÊTE & INFO DOUBLE PROGRESSION
       ═══════════════════════════════════════════ */}
       <header className="text-center border-b border-metal-gray pb-6">
+        <h3 className="font-metal text-4xl md:text-5xl text-metal-rust mb-3">🪶 Le Metalverse</h3>
         {/* 📖 GRIMOIRE DES ANCIENS */}
         <div className="p-6">
           {/* 🌌 CALQUE D'ARRIÈRE-PLAN : Les Runes Flottantes */}
@@ -48,7 +49,6 @@ export default function ProfilePage() {
             colorClass="text-amber-400" 
             opacityFactor={0.08} // Légèrement plus transparent car c'est derrière le titre aussi
           />
-        <h3 className="font-metal text-4xl md:text-5xl text-metal-rust mb-3">🪶 Le Metalverse</h3>
         <LoreGrimoire />
         </div>  
         <h3 className="font-metal text-4xl md:text-5xl text-metal-rust mb-3">⚔️ Ta Légende</h3>
