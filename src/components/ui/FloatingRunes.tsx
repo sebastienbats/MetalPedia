@@ -3,10 +3,6 @@
 import { motion } from 'framer-motion';
 import { useMemo, useRef, useEffect, useState } from 'react';
 
-// ═══════════════════════════════════════════════════════════
-// FAMILLES DE SYMBOLES
-// ═══════════════════════════════════════════════════════════
-
 export const SYMBOL_FAMILIES = {
   nordic: ['ᚠ', 'ᚢ', 'ᚦ', 'ᚨ', 'ᚱ', 'ᚲ', 'ᚷ', 'ᚹ', 'ᚺ', 'ᚾ', 'ᛁ', 'ᛃ', 'ᛇ', 'ᛈ', 'ᛉ', 'ᛊ', 'ᛏ', 'ᛒ', 'ᛖ', 'ᛗ', 'ᛚ', 'ᛜ', 'ᛞ', 'ᛟ'],
   musical: ['♩', '♪', '♫', '♬', '♭', '♮', '♯', '𝄞', '𝄢', '𝄡', '𝄦', '𝄩', '𝄪', '𝄫'],
@@ -25,10 +21,6 @@ export const SYMBOL_FAMILIES = {
 
 export type SymbolFamily = keyof typeof SYMBOL_FAMILIES;
 
-// ═══════════════════════════════════════════════════════════
-// PROFILS PRÊTS À L'EMPLOI
-// ═══════════════════════════════════════════════════════════
-
 export const RUNE_PRESETS = {
   rain: { count: 60, maxScale: 5, baseDuration: 8, colorClass: 'text-amber-400', opacityFactor: 0.10, boundaryFactor: 0.95, family: 'mixed' as SymbolFamily },
   vortex: { count: 30, maxScale: 10, baseDuration: 20, colorClass: 'text-amber-300', opacityFactor: 0.15, boundaryFactor: 0.85, family: 'cosmic' as SymbolFamily },
@@ -45,10 +37,6 @@ export const RUNE_PRESETS = {
 
 export type PresetName = keyof typeof RUNE_PRESETS;
 
-// ═══════════════════════════════════════════════════════════
-// INTERFACE DU COMPOSANT
-// ═══════════════════════════════════════════════════════════
-
 interface FloatingRunesProps {
   preset?: PresetName;
   family?: SymbolFamily;
@@ -59,10 +47,6 @@ interface FloatingRunesProps {
   opacityFactor?: number;
   boundaryFactor?: number;
 }
-
-// ═══════════════════════════════════════════════════════════
-// COMPOSANT PRINCIPAL
-// ═══════════════════════════════════════════════════════════
 
 export default function FloatingRunes({
   preset,
@@ -75,11 +59,8 @@ export default function FloatingRunes({
   boundaryFactor,
 }: FloatingRunesProps) {
   
-  // 🛡️ CORRECTION : useMemo pour finalConfig afin d'éviter le warning exhaustive-deps
-  // et optional chaining (?.) pour éviter l'erreur TypeScript sur les propriétés inexistantes
   const finalConfig = useMemo(() => {
     const presetConfig = preset ? RUNE_PRESETS[preset] : undefined;
-    
     return {
       count: count ?? presetConfig?.count ?? 25,
       maxScale: maxScale ?? presetConfig?.maxScale ?? 7,
@@ -92,18 +73,20 @@ export default function FloatingRunes({
   }, [preset, family, count, maxScale, baseDuration, colorClass, opacityFactor, boundaryFactor]);
 
   const symbols = SYMBOL_FAMILIES[finalConfig.family];
-
   const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  
+  // 🛡️ CORRECTION CRUCIALE : Utiliser window.innerWidth comme fallback immédiat
+  const [dimensions, setDimensions] = useState({ 
+    width: typeof window !== 'undefined' ? window.innerWidth : 1000, 
+    height: typeof window !== 'undefined' ? window.innerHeight : 1000 
+  });
 
   useEffect(() => {
     const updateDimensions = () => {
-      if (containerRef.current) {
-        setDimensions({
-          width: containerRef.current.offsetWidth,
-          height: containerRef.current.offsetHeight,
-        });
-      }
+      // On prend les dimensions du conteneur, OU celles de la fenêtre si le conteneur est à 0
+      const width = containerRef.current?.offsetWidth || window.innerWidth;
+      const height = containerRef.current?.offsetHeight || window.innerHeight;
+      setDimensions({ width, height });
     };
 
     updateDimensions();
@@ -133,6 +116,11 @@ export default function FloatingRunes({
       };
     });
   }, [finalConfig, dimensions, symbols]);
+
+  // 🐍 LOG DE DÉBOGAGE : Ouvre la console (F12) pour vérifier que les particules sont générées
+  useEffect(() => {
+    console.log(`[FloatingRunes] Dimensions: ${dimensions.width}x${dimensions.height}, Particules: ${particles.length}`);
+  }, [dimensions.width, dimensions.height, particles.length]);
 
   return (
     <div 
