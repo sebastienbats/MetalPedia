@@ -1,12 +1,23 @@
 import PillarCard from './PillarCard';
-import type { GenrePillarStats } from '@/types/api';
+import { GAMIFICATION_PILLARS } from '@/types/api';
+import type { GenrePillarStats, GamificationPillar } from '@/types/api';
 
 interface Props {
   pillarsStats: GenrePillarStats[];
 }
 
 export default function PillarsGrid({ pillarsStats }: Props) {
-  const totalBands = pillarsStats.reduce((sum, p) => sum + p.count, 0);
+  // 🛡️ Garantir l'affichage des 9 piliers même si l'API n'en renvoie que 8
+  const guaranteedPillarsStats: GenrePillarStats[] = GAMIFICATION_PILLARS.map((pillarName) => {
+    const found = pillarsStats.find((p) => p.pillar === pillarName);
+    return {
+      pillar: pillarName as GamificationPillar,
+      count: found ? found.count : 0,
+      subgenres: found ? found.subgenres : [],
+    };
+  });
+
+  const totalBands = guaranteedPillarsStats.reduce((sum, p) => sum + p.count, 0);
 
   return (
     <div>
@@ -18,7 +29,7 @@ export default function PillarsGrid({ pillarsStats }: Props) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {pillarsStats.map((stats) => (
+        {guaranteedPillarsStats.map((stats) => (
           <PillarCard
             key={stats.pillar}
             pillar={stats.pillar}
