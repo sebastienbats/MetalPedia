@@ -16,8 +16,8 @@ export default async function GenresPage() {
 
   return (
     <div className="container mx-auto px-4 py-12">
+      <FloatingRunes preset="storm" family="musical" colorClass="text-yellow-200" />
       <div className="text-center mb-12">
-        <FloatingRunes family="musical" preset="rain" />
         <h1 className="font-metal text-5xl md:text-6xl text-metal-fire mb-4">
           Les 9 Piliers du Metal
         </h1>
