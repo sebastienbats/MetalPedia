@@ -11,34 +11,33 @@ const NORDIC_RUNES = [
 ];
 
 interface FloatingRunesProps {
-  count?: number;          // Nombre de runes actives simultanément (défaut: 15)
-  maxScale?: number;       // Facteur de grossissement max (défaut: 5)
-  baseDuration?: number;   // Durée de base de l'animation en secondes (défaut: 8)
-  colorClass?: string;     // Classe Tailwind pour la couleur (défaut: 'text-amber-500')
-  opacityFactor?: number;  // Opacité de base (défaut: 0.08 pour un effet filigrane)
+  count?: number;          // Nombre de runes actives simultanément (défaut: 25)
+  maxScale?: number;       // Facteur de grossissement max (défaut: 7)
+  baseDuration?: number;   // Durée de base de l'animation en secondes (défaut: 12)
+  colorClass?: string;     // Classe Tailwind pour la couleur (défaut: 'text-amber-400')
+  opacityFactor?: number;  // Opacité de base (défaut: 0.12 pour un effet filigrane visible)
 }
 
 export default function FloatingRunes({
-  count = 15,
-  maxScale = 5,
-  baseDuration = 8,
-  colorClass = 'text-amber-500',
-  opacityFactor = 0.08,
+  count = 25,
+  maxScale = 7,
+  baseDuration = 12,
+  colorClass = 'text-amber-400',
+  opacityFactor = 0.12,
 }: FloatingRunesProps) {
   
-  // Génération mémorisée des particules pour éviter les re-rendus inutiles
   const particles = useMemo(() => {
     return Array.from({ length: count }).map((_, i) => {
-      // Direction aléatoire depuis le centre (entre -120% et +120% pour sortir du cadre)
-      const endX = (Math.random() - 0.5) * 240; 
-      const endY = (Math.random() - 0.5) * 240;
+      // 🚀 Distance étendue : entre -150% et +150% pour traverser largement le cadre
+      const endX = (Math.random() - 0.5) * 300; 
+      const endY = (Math.random() - 0.5) * 300;
       
-      // Échelle aléatoire entre 0.1 (départ) et maxScale (arrivée)
-      const targetScale = 0.1 + Math.random() * (maxScale - 0.1);
+      // 📏 Échelle plus agressive : commence à 0.4 (visible) et va jusqu'à maxScale
+      const targetScale = 0.4 + Math.random() * (maxScale - 0.4);
       
-      // Durée et délai aléatoires pour créer des "vagues" organiques
-      const duration = baseDuration + Math.random() * 6; // ex: entre 8s et 14s
-      const delay = Math.random() * 10; // Décalage initial aléatoire
+      // ⏱️ Durée plus lente et majestueuse
+      const duration = baseDuration + Math.random() * 8; // ex: entre 12s et 20s
+      const delay = Math.random() * 15; // Décalage initial pour éviter les vagues synchronisées
 
       return {
         id: i,
@@ -57,32 +56,35 @@ export default function FloatingRunes({
       {particles.map((p) => (
         <motion.div
           key={p.id}
-          // Position de départ : centre exact
           initial={{ 
             x: '0%', 
             y: '0%', 
-            scale: 0.1, 
+            scale: 0.4, // Départ visible
             opacity: 0 
           }}
-          // Position d'arrivée : bords aléatoires avec grossissement
           animate={{ 
             x: `${p.endX}%`, 
             y: `${p.endY}%`, 
             scale: p.targetScale,
-            // L'opacité monte vite, reste stable, puis disparaît à la fin pour un effet de fondu propre
+            // 🎭 Keyframes d'opacité optimisées : 
+            // 0%: invisible (centre)
+            // 10%: visible (commence à grossir)
+            // 80%: encore visible (proche du bord)
+            // 100%: disparaît (hors du cadre)
             opacity: [0, opacityFactor, opacityFactor, 0] 
           }}
           transition={{
             duration: p.duration,
             delay: p.delay,
             repeat: Infinity,
-            // L'astuce pour le mouvement non-rectiligne : des courbes de bézier différentes pour X et Y
-            // ou utiliser "easeInOut" qui crée naturellement une accélération/décélération douce
-            ease: "easeInOut", 
+            ease: "easeInOut",
+            // On peut aussi ajouter des keyframes pour l'opacité si besoin, 
+            // mais le tableau ci-dessus gère déjà les étapes.
+            // Pour un contrôle total des étapes d'opacité, on utilise times:
+            times: [0, 0.1, 0.8, 1] 
           }}
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-serif font-bold ${colorClass}`}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-serif font-bold text-4xl md:text-5xl ${colorClass}`}
           style={{
-            // Optimisation des performances GPU
             willChange: 'transform, opacity',
           }}
         >
