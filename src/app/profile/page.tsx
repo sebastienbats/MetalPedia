@@ -50,7 +50,7 @@ export default function ProfilePage() {
             maxScale={8}
             baseDuration={15}
             colorClass="text-amber-400"
-            opacityFactor={0.08}
+            opacityFactor={0.18}
           />
           
           {/* 📜 CALQUE DE PREMIER PLAN : Le Grimoire (z-10 garantit qu'il passe AU-DESSUS des runes) */}
