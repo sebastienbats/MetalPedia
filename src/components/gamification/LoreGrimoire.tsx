@@ -137,8 +137,8 @@ export default function LoreGrimoire() {
     <div
       className="metal-card border-2 border-amber-900/60 relative overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #1a1208 0%, #2a1a0e 30%, #1a1208 60%, #0d0a05 100%)',
-      }}
+  background: 'linear-gradient(135deg, rgba(26, 18, 8, 0.88) 0%, rgba(42, 26, 14, 0.88) 30%, rgba(26, 18, 8, 0.88) 60%, rgba(13, 10, 5, 0.88) 100%)',
+}}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
