@@ -15,15 +15,20 @@ export default async function GenresPage() {
   const pillarsStats = await metalServerApi.getGenrePillarsStats();
 
   return (
-    // 🌌 1. Wrapper principal : 'relative' pour contenir les runes, 'min-h-screen' pour couvrir toute la hauteur
-    <div className="relative min-h-screen">
+    <>
+      {/* 🌌 1. CALQUE D'ARRIÈRE-PLAN GLOBAL (Fixed pour couvrir TOUT l'écran) */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-metal-black">
+        <FloatingRunes 
+          preset="vortex"        // Lent et majestueux (mieux que storm pour la lisibilité)
+          family="musical"       // Notes de musique
+          colorClass="text-yellow-300" // Or lumineux (meilleur contraste que yellow-200)
+          opacityFactor={0.15}   // Assez visible sans être agressif
+          count={40}             // Densité confortable
+        />
+      </div>
       
-      {/* 🎵 CALQUE D'ARRIÈRE-PLAN : Les Runes Flottantes (couvre tout l'écran) */}
-      <FloatingRunes preset="vortex" family="musical" colorClass="text-red-500" />
-      
-      {/* 📜 2. CALQUE DE PREMIER PLAN : Le contenu ('relative z-10' pour passer AU-DESSUS des runes) */}
+      {/* 📜 2. CALQUE DE PREMIER PLAN (z-10 pour passer AU-DESSUS des runes) */}
       <div className="relative z-10 container mx-auto px-4 py-12">
-        
         <div className="text-center mb-12">
           <h1 className="font-metal text-5xl md:text-6xl text-metal-fire mb-4 drop-shadow-lg">
             Les 9 Piliers du Metal
@@ -37,8 +42,7 @@ export default async function GenresPage() {
         <Suspense fallback={<Loader text="Chargement des piliers..." />}>
           <PillarsGrid pillarsStats={pillarsStats} />
         </Suspense>
-        
       </div>
-    </div>
+    </>
   );
 }
