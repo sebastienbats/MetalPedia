@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import FloatingRunes from '@/components/ui/FloatingRunes';
 
 // ═══════════════════════════════════════════════════════════
 // DONNÉES NARRATIVES : LES 5 CHAPITRES DU METALVERSE
@@ -142,6 +143,14 @@ export default function LoreGrimoire() {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
+      {/* 🆕 AJOUT : Calque de runes flottantes en filigrane */}
+     <FloatingRunes 
+       count={20} 
+       maxScale={6} 
+       baseDuration={10} 
+       colorClass="text-amber-400" 
+       opacityFactor={0.06} 
+     />
       {/* ── Texture parchemin (overlay CSS) ── */}
       <div
         className="absolute inset-0 opacity-[0.04] pointer-events-none"
