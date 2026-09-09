@@ -5,13 +5,39 @@ import { metalServerApi } from '@/lib/metal-api';
 import SubgenreFilter from '@/components/genres/SubgenreFilter';
 import BandCard from '@/components/bands/BandCard';
 import Loader from '@/components/ui/Loader';
-import FloatingRunes, { type SymbolFamily } from '@/components/ui/FloatingRunes'; // 🆕 Import
+import FloatingRunes, { type SymbolFamily } from '@/components/ui/FloatingRunes';
 import { PILLAR_METADATA, type GamificationPillar } from '@/types/api';
 
 interface Props {
   params: Promise<{ pillar: string }>;
   searchParams: Promise<{ subgenre?: string }>;
 }
+
+// ═══════════════════════════════════════════════════════════
+// 🗺️ MAPPING ROBUSTE DES SLUGS URL VERS LES NOMS EXACTS
+// (Résout le problème "folk-metal" vs "Folk Metal")
+// ═══════════════════════════════════════════════════════════
+const SLUG_TO_PILLAR: Record<string, GamificationPillar> = {
+  'black-metal': 'Black Metal',
+  'death-metal': 'Death Metal',
+  'heavy-metal': 'Heavy Metal',
+  'thrash-metal': 'Thrash Metal',
+  'power-metal': 'Power Metal',
+  'doom-metal': 'Doom Metal',
+  'progressive-metal': 'Progressive Metal',
+  'folk-metal': 'Folk Metal',       // ← La clé magique pour Folk Metal
+  'metalcore': 'Metalcore',
+  // Fallbacks pour les espaces encodés (ex: /genres/Folk%20Metal)
+  'Black Metal': 'Black Metal',
+  'Death Metal': 'Death Metal',
+  'Heavy Metal': 'Heavy Metal',
+  'Thrash Metal': 'Thrash Metal',
+  'Power Metal': 'Power Metal',
+  'Doom Metal': 'Doom Metal',
+  'Progressive Metal': 'Progressive Metal',
+  'Folk Metal': 'Folk Metal',
+  'Metalcore': 'Metalcore',
+};
 
 // ═══════════════════════════════════════════════════════════
 // 🎨 CONFIGURATION DES RUNES PAR PILIER (Ambiance Adaptative)
@@ -23,33 +49,15 @@ const PILLAR_RUNES_CONFIG: Record<GamificationPillar, {
   baseDuration: number;
   count: number;
 }> = {
-  'Black Metal': { 
-    family: 'black', colorClass: 'text-slate-300', opacityFactor: 0.08, baseDuration: 22, count: 20 
-  }, // Froid, occulte, lent et rare (cendre/lune)
-  'Death Metal': { 
-    family: 'death', colorClass: 'text-red-900', opacityFactor: 0.10, baseDuration: 18, count: 25 
-  }, // Sombre, lourd, menaçant (sang séché)
-  'Heavy Metal': { 
-    family: 'medieval', colorClass: 'text-amber-400', opacityFactor: 0.12, baseDuration: 15, count: 30 
-  }, // Épique, classique, chevaleresque (or/fer)
-  'Thrash Metal': { 
-    family: 'thrash', colorClass: 'text-orange-500', opacityFactor: 0.15, baseDuration: 8, count: 50 
-  }, // Rapide, agressif, chaotique (feu/éclairs)
-  'Power Metal': { 
-    family: 'celestial', colorClass: 'text-yellow-200', opacityFactor: 0.12, baseDuration: 14, count: 35 
-  }, // Lumineux, fantastique, céleste (étoiles)
-  'Doom Metal': { 
-    family: 'elements', colorClass: 'text-gray-500', opacityFactor: 0.08, baseDuration: 25, count: 15 
-  }, // Extrêmement lent, lourd, géométrique (pierre/brume)
-  'Progressive Metal': { 
-    family: 'alchemical', colorClass: 'text-purple-300', opacityFactor: 0.10, baseDuration: 18, count: 25 
-  }, // Complexe, mystique, intellectuel (symboles alchimiques)
-  'Folk Metal': { 
-    family: 'folk', colorClass: 'text-green-400', opacityFactor: 0.10, baseDuration: 16, count: 30 
-  }, // Naturel, organique, vivant (feuilles/rune)
-  'Metalcore': { 
-    family: 'mixed', colorClass: 'text-rose-400', opacityFactor: 0.12, baseDuration: 10, count: 40 
-  }, // Moderne, intense, mélange de styles
+  'Black Metal': { family: 'black', colorClass: 'text-slate-300', opacityFactor: 0.08, baseDuration: 22, count: 20 },
+  'Death Metal': { family: 'death', colorClass: 'text-red-900', opacityFactor: 0.10, baseDuration: 18, count: 25 },
+  'Heavy Metal': { family: 'medieval', colorClass: 'text-amber-400', opacityFactor: 0.12, baseDuration: 15, count: 30 },
+  'Thrash Metal': { family: 'thrash', colorClass: 'text-orange-500', opacityFactor: 0.15, baseDuration: 8, count: 50 },
+  'Power Metal': { family: 'celestial', colorClass: 'text-yellow-200', opacityFactor: 0.12, baseDuration: 14, count: 35 },
+  'Doom Metal': { family: 'elements', colorClass: 'text-gray-500', opacityFactor: 0.08, baseDuration: 25, count: 15 },
+  'Progressive Metal': { family: 'alchemical', colorClass: 'text-purple-300', opacityFactor: 0.10, baseDuration: 18, count: 25 },
+  'Folk Metal': { family: 'folk', colorClass: 'text-green-400', opacityFactor: 0.10, baseDuration: 16, count: 30 },
+  'Metalcore': { family: 'mixed', colorClass: 'text-rose-400', opacityFactor: 0.12, baseDuration: 10, count: 40 },
 };
 
 export async function generateStaticParams() {
@@ -66,10 +74,11 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props) {
   const { pillar } = await params;
   const decodedPillar = decodeURIComponent(pillar);
+  const validPillar = SLUG_TO_PILLAR[decodedPillar] || (decodedPillar as GamificationPillar);
 
   return {
-    title: `${decodedPillar} | MetalPedia`,
-    description: `Découvrez les groupes de ${decodedPillar} et explorez les sous-genres de ce pilier du metal.`,
+    title: `${validPillar} | MetalPedia`,
+    description: `Découvrez les groupes de ${validPillar} et explorez les sous-genres de ce pilier du metal.`,
   };
 }
 
@@ -78,18 +87,22 @@ export default async function PillarPage({ params, searchParams }: Props) {
   const { subgenre } = await searchParams;
   
   const decodedPillar = decodeURIComponent(pillar);
-  const pillarMetadata = PILLAR_METADATA[decodedPillar as GamificationPillar];
   
-  if (!pillarMetadata) {
+  // 🛡️ RÉSOLUTION SÉCURISÉE : On traduit le slug URL en nom exact de pilier
+  const validPillar = SLUG_TO_PILLAR[decodedPillar];
+  
+  // Si le pilier n'existe pas dans le mapping ou les métadonnées, on affiche 404
+  if (!validPillar || !PILLAR_METADATA[validPillar]) {
     notFound();
   }
 
-  // Récupération de la configuration des runes pour ce pilier spécifique
-  const runesConfig = PILLAR_RUNES_CONFIG[decodedPillar as GamificationPillar];
+  const pillarMetadata = PILLAR_METADATA[validPillar];
+  const runesConfig = PILLAR_RUNES_CONFIG[validPillar];
 
-  const bands = await metalServerApi.getBandsByPillar(decodedPillar, subgenre);
+  // On utilise validPillar (ex: "Folk Metal") pour tous les appels API et la logique
+  const bands = await metalServerApi.getBandsByPillar(validPillar, subgenre);
   const pillarsStats = await metalServerApi.getGenrePillarsStats();
-  const currentPillar = pillarsStats.find(p => p.pillar === decodedPillar);
+  const currentPillar = pillarsStats.find(p => p.pillar === validPillar);
 
   return (
     <>
@@ -113,7 +126,7 @@ export default async function PillarPage({ params, searchParams }: Props) {
               Piliers
             </Link>
             <span>→</span>
-            <span className="text-gray-300">{decodedPillar}</span>
+            <span className="text-gray-300">{validPillar}</span>
             {subgenre && (
               <>
                 <span>→</span>
@@ -139,7 +152,7 @@ export default async function PillarPage({ params, searchParams }: Props) {
                 className="font-metal text-4xl md:text-5xl drop-shadow-lg"
                 style={{ color: pillarMetadata.color }}
               >
-                {decodedPillar}
+                {validPillar}
               </h1>
               <p className="text-gray-400 mt-1 drop-shadow-md">
                 {pillarMetadata.description}
@@ -161,7 +174,7 @@ export default async function PillarPage({ params, searchParams }: Props) {
 
         {currentPillar && currentPillar.subgenres.length > 1 && (
           <SubgenreFilter
-            pillar={decodedPillar}
+            pillar={validPillar}
             subgenres={currentPillar.subgenres}
           />
         )}
@@ -181,7 +194,7 @@ export default async function PillarPage({ params, searchParams }: Props) {
               </p>
               {subgenre && (
                 <Link
-                  href={`/genres/${encodeURIComponent(decodedPillar)}`}
+                  href={`/genres/${encodeURIComponent(validPillar)}`}
                   className="mt-4 inline-block text-metal-fire hover:underline"
                 >
                   Voir tous les groupes du pilier →
