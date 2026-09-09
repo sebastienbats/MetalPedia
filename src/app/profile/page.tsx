@@ -45,13 +45,7 @@ export default function ProfilePage() {
         <div className="relative p-6 md:p-8 overflow-hidden rounded-xl bg-metal-black/20">
           
           {/* 🌌 CALQUE D'ARRIÈRE-PLAN : Les Runes Flottantes */}
-          <FloatingRunes 
-            count={35}
-            maxScale={8}
-            baseDuration={15}
-            colorClass="text-amber-300"
-            opacityFactor={0.50}
-          />
+          <FloatingRunes preset="parchment" />
           
           {/* 📜 CALQUE DE PREMIER PLAN : Le Grimoire (z-10 garantit qu'il passe AU-DESSUS des runes) */}
           <div className="relative z-10">
