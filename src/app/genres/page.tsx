@@ -15,21 +15,30 @@ export default async function GenresPage() {
   const pillarsStats = await metalServerApi.getGenrePillarsStats();
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <FloatingRunes preset="storm" family="musical" colorClass="text-yellow-200" />
-      <div className="text-center mb-12">
-        <h1 className="font-metal text-5xl md:text-6xl text-metal-fire mb-4">
-          Les 9 Piliers du Metal
-        </h1>
-        <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-          Explorez les grands courants du metal et découvrez des milliers de groupes 
-          classés par sous-genre. Chaque pilier représente une tradition unique du metal.
-        </p>
-      </div>
+    // 🌌 1. Wrapper principal : 'relative' pour contenir les runes, 'min-h-screen' pour couvrir toute la hauteur
+    <div className="relative min-h-screen">
+      
+      {/* 🎵 CALQUE D'ARRIÈRE-PLAN : Les Runes Flottantes (couvre tout l'écran) */}
+      <FloatingRunes preset="vortex" family="musical" colorClass="text-yellow-200" />
+      
+      {/* 📜 2. CALQUE DE PREMIER PLAN : Le contenu ('relative z-10' pour passer AU-DESSUS des runes) */}
+      <div className="relative z-10 container mx-auto px-4 py-12">
+        
+        <div className="text-center mb-12">
+          <h1 className="font-metal text-5xl md:text-6xl text-metal-fire mb-4 drop-shadow-lg">
+            Les 9 Piliers du Metal
+          </h1>
+          <p className="text-gray-300 text-lg max-w-2xl mx-auto drop-shadow-md">
+            Explorez les grands courants du metal et découvrez des milliers de groupes 
+            classés par sous-genre. Chaque pilier représente une tradition unique du metal.
+          </p>
+        </div>
 
-      <Suspense fallback={<Loader text="Chargement des piliers..." />}>
-        <PillarsGrid pillarsStats={pillarsStats} />
-      </Suspense>
+        <Suspense fallback={<Loader text="Chargement des piliers..." />}>
+          <PillarsGrid pillarsStats={pillarsStats} />
+        </Suspense>
+        
+      </div>
     </div>
   );
 }
