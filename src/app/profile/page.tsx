@@ -38,7 +38,7 @@ export default function ProfilePage() {
       ═══════════════════════════════════════════ */}
       <header className="text-center border-b border-metal-gray pb-6">
         {/* 📖 GRIMOIRE DES ANCIENS */}
-        <div className="metal-card p-6 border-2 relative overflow-hidden">
+        <div className="p-6">
         <h3 className="font-metal text-4xl md:text-5xl text-metal-rust mb-3">🪶 Le Metalverse</h3>
         <LoreGrimoire />
         </div>  
