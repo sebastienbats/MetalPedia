@@ -12,6 +12,7 @@ import PlayerCard from '@/components/gamification/PlayerCard';
 import BadgesPanel from '@/components/gamification/BadgesPanel';
 import QuestsPanel from '@/components/gamification/QuestsPanel';
 import LoreGrimoire from '@/components/gamification/LoreGrimoire';
+import FloatingRunes from '@/components/ui/FloatingRunes';
 import StatsPanel from '@/components/visual/StatsPanel';
 
 export default function ProfilePage() {
@@ -39,6 +40,14 @@ export default function ProfilePage() {
       <header className="text-center border-b border-metal-gray pb-6">
         {/* 📖 GRIMOIRE DES ANCIENS */}
         <div className="p-6">
+          {/* 🌌 CALQUE D'ARRIÈRE-PLAN : Les Runes Flottantes */}
+          <FloatingRunes 
+            count={35}         // Un peu plus dense pour bien remplir la zone
+            maxScale={8}       // Grossissement spectaculaire
+            baseDuration={15}  // Mouvement lent et majestueux
+            colorClass="text-amber-400" 
+            opacityFactor={0.08} // Légèrement plus transparent car c'est derrière le titre aussi
+          />
         <h3 className="font-metal text-4xl md:text-5xl text-metal-rust mb-3">🪶 Le Metalverse</h3>
         <LoreGrimoire />
         </div>  
