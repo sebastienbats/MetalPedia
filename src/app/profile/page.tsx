@@ -6,7 +6,7 @@ import { useAuth } from '@/api/authApi';
 import { useClassStore, useClassMetadata, useClassProgress } from '@/stores/classStore';
 import { getClassTitle } from '@/lib/gamification/classes';
 import ClassSelectionModal from '@/components/gamification/ClassSelectionModal';
-import ClassMilestones from '@/components/gamification/ClassMilestones'; // 🆕 Import des titres visuels
+import ClassMilestones from '@/components/gamification/ClassMilestones';
 import PantheonSection from '@/components/gamification/PantheonSection';
 import PlayerCard from '@/components/gamification/PlayerCard';
 import BadgesPanel from '@/components/gamification/BadgesPanel';
@@ -39,19 +39,28 @@ export default function ProfilePage() {
       ═══════════════════════════════════════════ */}
       <header className="text-center border-b border-metal-gray pb-6">
         <h3 className="font-metal text-4xl md:text-5xl text-metal-rust mb-3">🪶 Le Metalverse</h3>
-        {/* 📖 GRIMOIRE DES ANCIENS */}
-        <div className="p-6">
+        
+        {/* 📖 ZONE IMMERSIVE : GRIMOIRE + RUNES EN ARRIÈRE-PLAN */}
+        {/* relative + overflow-hidden contiennent les runes à l'intérieur de cette zone */}
+        <div className="relative p-6 md:p-8 overflow-hidden rounded-xl bg-metal-black/20">
+          
           {/* 🌌 CALQUE D'ARRIÈRE-PLAN : Les Runes Flottantes */}
           <FloatingRunes 
-            count={35}         // Un peu plus dense pour bien remplir la zone
-            maxScale={8}       // Grossissement spectaculaire
-            baseDuration={15}  // Mouvement lent et majestueux
-            colorClass="text-amber-400" 
-            opacityFactor={0.08} // Légèrement plus transparent car c'est derrière le titre aussi
+            count={35}
+            maxScale={8}
+            baseDuration={15}
+            colorClass="text-amber-400"
+            opacityFactor={0.08}
           />
-        <LoreGrimoire />
+          
+          {/* 📜 CALQUE DE PREMIER PLAN : Le Grimoire (z-10 garantit qu'il passe AU-DESSUS des runes) */}
+          <div className="relative z-10">
+            <LoreGrimoire />
+          </div>
+          
         </div>  
-        <h3 className="font-metal text-4xl md:text-5xl text-metal-rust mb-3">⚔️ Ta Légende</h3>
+
+        <h3 className="font-metal text-4xl md:text-5xl text-metal-rust mb-3 mt-8">⚔️ Ta Légende</h3>
         <p className="text-gray-400 font-serif mb-4">Le Conseil des Neuf Genres observe ta progression</p>
         
         {/* Boîte d'information explicative */}
