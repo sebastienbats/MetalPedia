@@ -11,6 +11,7 @@ import PantheonSection from '@/components/gamification/PantheonSection';
 import PlayerCard from '@/components/gamification/PlayerCard';
 import BadgesPanel from '@/components/gamification/BadgesPanel';
 import QuestsPanel from '@/components/gamification/QuestsPanel';
+import LoreGrimoire from '@/components/gamification/LoreGrimoire';
 import StatsPanel from '@/components/visual/StatsPanel';
 
 export default function ProfilePage() {
@@ -36,6 +37,9 @@ export default function ProfilePage() {
           EN-TÊTE & INFO DOUBLE PROGRESSION
       ═══════════════════════════════════════════ */}
       <header className="text-center border-b border-metal-gray pb-6">
+        <h1 className="font-metal text-4xl md:text-5xl text-metal-rust mb-3">📖 Le Grimoire des Anciens</h1>
+        {/* 📖 GRIMOIRE DES ANCIENS */}
+        <LoreGrimoire />
         <h1 className="font-metal text-4xl md:text-5xl text-metal-rust mb-3">⚔️ Ta Légende</h1>
         <p className="text-gray-400 font-serif mb-4">Le Conseil des Neuf Genres observe ta progression</p>
         
