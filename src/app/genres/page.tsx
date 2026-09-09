@@ -19,7 +19,7 @@ export default async function GenresPage() {
     <div className="relative min-h-screen">
       
       {/* 🎵 CALQUE D'ARRIÈRE-PLAN : Les Runes Flottantes (couvre tout l'écran) */}
-      <FloatingRunes preset="vortex" family="musical" colorClass="text-yellow-200" />
+      <FloatingRunes preset="vortex" family="musical" colorClass="text-red-500" />
       
       {/* 📜 2. CALQUE DE PREMIER PLAN : Le contenu ('relative z-10' pour passer AU-DESSUS des runes) */}
       <div className="relative z-10 container mx-auto px-4 py-12">
