@@ -16,18 +16,18 @@ export default async function GenresPage() {
 
   return (
     <>
-      {/* 🌌 1. CALQUE D'ARRIÈRE-PLAN GLOBAL (Fixed pour couvrir TOUT l'écran) */}
+      {/* 🚨 MODE DÉBOGAGE : Rouge vif, opacité 80%, 15 notes seulement pour bien les voir */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-metal-black">
         <FloatingRunes 
-          preset="vortex"        // Lent et majestueux (mieux que storm pour la lisibilité)
-          family="musical"       // Notes de musique
-          colorClass="text-yellow-300" // Or lumineux (meilleur contraste que yellow-200)
-          opacityFactor={0.15}   // Assez visible sans être agressif
-          count={40}             // Densité confortable
+          preset="storm" 
+          family="musical" 
+          colorClass="text-red-500" 
+          opacityFactor={0.8} 
+          count={15}
+          maxScale={5}
         />
       </div>
       
-      {/* 📜 2. CALQUE DE PREMIER PLAN (z-10 pour passer AU-DESSUS des runes) */}
       <div className="relative z-10 container mx-auto px-4 py-12">
         <div className="text-center mb-12">
           <h1 className="font-metal text-5xl md:text-6xl text-metal-fire mb-4 drop-shadow-lg">
