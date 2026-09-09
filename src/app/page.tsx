@@ -24,8 +24,8 @@ export default async function HomePage() {
       {/* z-10 : AU-DESSUS du fond opaque du body, mais DERRIÈRE le contenu */}
       <div className="fixed inset-0 z-10 pointer-events-none overflow-hidden">
         <FloatingRunes 
-          preset="breeze" 
-          family="cosmic" 
+          preset="vortex" 
+          family="musical" 
           colorClass="text-amber-300"
           opacityFactor={0.10} // Très subtil pour l'accueil
         />
