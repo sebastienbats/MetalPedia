@@ -160,23 +160,16 @@
 }
 
 /* ═══════════════════════════════════════════
-   ANNOTATIONS MANUSCRITES (Événements & Périodes)
+   ICÔNES COMPACTES SUR PARCHEMIN
    ═══════════════════════════════════════════ */
 
-/* Style de base pour tous les événements sur parchemin */
-.vis-item[class^="tp-"] {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* Annotation manuscrite (icône dans un cercle de parchemin) */
-.parchment-annotation {
+/* Icône compacte sur parchemin */
+.parchment-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: radial-gradient(
     circle at 30% 30%,
@@ -184,7 +177,7 @@
     rgba(180, 140, 100, 0.9) 70%,
     rgba(139, 90, 43, 0.85) 100%
   );
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   cursor: pointer;
   transition: all 0.3s ease;
   border: 2px solid var(--pillar-color, #3e2723);
@@ -196,8 +189,8 @@
   z-index: 3;
 }
 
-/* Effet d'encre au hover */
-.parchment-annotation:hover {
+/* Hover sur l'icône */
+.parchment-icon:hover {
   transform: scale(1.2) rotate(-5deg);
   box-shadow: 
     0 0 0 2px var(--pillar-color, #3e2723),
@@ -206,70 +199,26 @@
   filter: brightness(1.1);
 }
 
-/* Taille des conteneurs d'événements ponctuels */
-.vis-item[class^="tp-"]:not(.vis-range) {
-  width: 50px !important;
-  min-width: 50px !important;
-  max-width: 50px !important;
-  height: 50px !important;
-  padding: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  overflow: visible !important;
-}
-
-.vis-item[class^="tp-"]:not(.vis-range) .vis-item-content {
-  padding: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  height: 100% !important;
-}
-
-/* ═══════════════════════════════════════════
-   PÉRIODES (Ranges) sur Parchemin
-   ═══════════════════════════════════════════ */
-
-.vis-item.vis-range {
-  border-radius: 50% !important;
+/* Forcer la taille des conteneurs d'événements */
+.vis-item[class^="tp-"] {
+  width: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+  height: 40px !important;
+  background: transparent !important;
   border: none !important;
-  width: 50px !important;
-  min-width: 50px !important;
-  max-width: 50px !important;
-  height: 50px !important;
-  padding: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative;
-  overflow: visible !important;
+  box-shadow: none !important;
 }
 
-/* Couleurs des sceaux pour chaque pilier (périodes) */
-.vis-item.vis-range.tp-heavy .parchment-annotation { border-color: #c9a227; box-shadow: 0 0 12px rgba(201, 162, 39, 0.5); }
-.vis-item.vis-range.tp-thrash .parchment-annotation { border-color: #ff6f00; box-shadow: 0 0 12px rgba(255, 111, 0, 0.5); }
-.vis-item.vis-range.tp-death .parchment-annotation { border-color: #8b0000; box-shadow: 0 0 12px rgba(139, 0, 0, 0.5); }
-.vis-item.vis-range.tp-black .parchment-annotation { border-color: #4a148c; box-shadow: 0 0 12px rgba(74, 20, 140, 0.5); }
-.vis-item.vis-range.tp-power .parchment-annotation { border-color: #d63031; box-shadow: 0 0 12px rgba(214, 48, 49, 0.5); }
-.vis-item.vis-range.tp-doom .parchment-annotation { border-color: #2d3436; box-shadow: 0 0 12px rgba(45, 52, 54, 0.5); }
-.vis-item.vis-range.tp-progressive .parchment-annotation { border-color: #0277bd; box-shadow: 0 0 12px rgba(2, 119, 189, 0.5); }
-.vis-item.vis-range.tp-folk .parchment-annotation { border-color: #2e7d32; box-shadow: 0 0 12px rgba(46, 125, 50, 0.5); }
-.vis-item.vis-range.tp-metalcore .parchment-annotation { border-color: #6a1b9a; box-shadow: 0 0 12px rgba(106, 27, 154, 0.5); }
-
-.vis-item.vis-range .vis-item-content {
+/* Centrer le contenu */
+.vis-item[class^="tp-"] .vis-item-content {
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   width: 100% !important;
   height: 100% !important;
-}
-
-.vis-item.vis-range:hover .parchment-annotation {
-  transform: scale(1.2) rotate(5deg);
-  filter: brightness(1.2);
+  background: transparent !important;
 }
 
 /* ═══════════════════════════════════════════
@@ -283,10 +232,17 @@
   overflow: visible !important;
 }
 
+/* Lignes verticales discrètes */
 .vis-item .vis-line {
-  border-left: 2px dashed rgba(62, 39, 35, 0.6) !important;
+  border-left: 1px dashed rgba(62, 39, 35, 0.3) !important;
+  opacity: 0.5 !important;
   z-index: 1 !important;
   pointer-events: none;
+}
+
+/* Masquer les lignes des custom times (sceaux) */
+.vis-custom-time .vis-line {
+  display: none !important;
 }
 
 .vis-panel.vis-center::before {
@@ -342,7 +298,7 @@
    SÉLECTION & HOVER
    ═══════════════════════════════════════════ */
 
-.vis-item.vis-selected .parchment-annotation {
+.vis-item.vis-selected .parchment-icon {
   box-shadow: 
     0 0 0 3px #8b0000,
     0 0 20px rgba(139, 0, 0, 0.8),
@@ -350,7 +306,7 @@
   transform: scale(1.15);
 }
 
-/* ═══════════════════════════════════════════
+/* ══════════════════════════════════════════
    ANIMATIONS & UTILITAIRES
    ═══════════════════════════════════════════ */
 @keyframes fade-in {
