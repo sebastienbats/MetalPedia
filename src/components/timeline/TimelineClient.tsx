@@ -98,7 +98,7 @@ export default function TimelineClient() {
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
         const options = {
-          height: isMobile ? '600px' : '500px',
+          height: isMobile ? '500px' : '600px',
           start: '1975-01-01',
           end: '2010-01-01',
           min: '1965-01-01',
@@ -112,24 +112,37 @@ export default function TimelineClient() {
           zoomable: !isMobile,
           moveable: true,
           
-          // 🎨 TEMPLATE : Icône uniquement pour TOUS les événements (ponctuels ET périodes)
+          // 🎨 TEMPLATE : Annotations manuscrites sur parchemin
           template: (item: TimelineEvent) => {
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
             const icon = pillarData?.icon || '🎸';
+            const color = pillarData?.color || '#8b0000';
             
-            // Pour TOUS les événements, juste l'icône
-            return `<span class="timeline-icon-large">${icon}</span>`;
+            return `<span class="parchment-annotation" style="--pillar-color: ${color};">${icon}</span>`;
           },
         };
 
         timelineRef.current = new Timeline(container, initialItems, options);
+
+        // 🕯️ AJOUT DES SCEAUX DE CIRE aux décennies clés
+        const sealDates = [
+          { date: '1970-01-01', id: 'seal-1970' },
+          { date: '1980-01-01', id: 'seal-1980' },
+          { date: '1990-01-01', id: 'seal-1990' },
+          { date: '2000-01-01', id: 'seal-2000' },
+          { date: '2010-01-01', id: 'seal-2010' },
+          { date: '2020-01-01', id: 'seal-2020' },
+        ];
+
+        sealDates.forEach(seal => {
+          timelineRef.current.addCustomTime(seal.date, seal.id);
+        });
 
         // 🆕 Écouteur de clic pour afficher le tooltip dans le panneau Lore
         timelineRef.current.on('click', (properties: any) => {
           if (properties.item) {
             const event = METAL_EVENTS.find(e => e.id === properties.item);
             if (event) {
-              // Pour les périodes, ajouter les dates de début et fin
               let tooltipContent = event.content;
               
               if (event.type === 'range' && event.end) {
@@ -138,7 +151,6 @@ export default function TimelineClient() {
                 tooltipContent = `${event.content} (${startYear} - ${endYear})`;
               }
               
-              // Ajouter le lore si présent
               if (event.loreSnippet) {
                 tooltipContent += `\n\n📜 ${event.loreSnippet}`;
               }
@@ -255,7 +267,7 @@ export default function TimelineClient() {
         </div>
       )}
 
-      {/* Timeline */}
+      {/* Timeline (La classe 'timeline-container' déclenche l'effet parchemin CSS) */}
       <div className="metal-card p-4 relative">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-metal-black/80 z-10 rounded-lg">
