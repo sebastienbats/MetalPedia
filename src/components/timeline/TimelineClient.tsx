@@ -5,6 +5,10 @@ import Loader from '@/components/ui/Loader';
 import { PILLAR_METADATA, type GamificationPillar } from '@/types/api';
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
 
+// ═══════════════════════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════════════════════
+
 interface TimelineEvent {
   id: number;
   content: string;
@@ -12,9 +16,13 @@ interface TimelineEvent {
   end?: string;
   type?: 'point' | 'range';
   pillar?: GamificationPillar;
-  className?: string; // 🆕 Ajouté pour le ciblage CSS natif vis-timeline
+  className?: string;
   loreSnippet?: string;
 }
+
+// ═══════════════════════════════════════════════════════════
+// DONNÉES HISTORIQUES (Enrichies avec Piliers & Lore)
+// ═══════════════════════════════════════════════════════════
 
 const METAL_EVENTS: TimelineEvent[] = [
   { id: 1, content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le Premier Riff résonne. Le Silence Primordial est brisé.' },
@@ -61,6 +69,10 @@ const METAL_EVENTS: TimelineEvent[] = [
   { id: 35, content: 'Ghost - "Meliora"', start: '2015-08-21', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le clergé satirique bénit les foules.' },
 ];
 
+// ═══════════════════════════════════════════════════════════
+// COMPOSANT PRINCIPAL
+// ═══════════════════════════════════════════════════════════
+
 export default function TimelineClient() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<any>(null);
@@ -69,7 +81,9 @@ export default function TimelineClient() {
   const [activeLore, setActiveLore] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<GamificationPillar[]>([]);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!mounted) return;
@@ -79,41 +93,58 @@ export default function TimelineClient() {
     const initTimeline = async () => {
       try {
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
+        
         const initialItems = new DataSet(METAL_EVENTS);
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
         const options = {
-          height: isMobile ? '400px' : '500px',
+          height: isMobile ? '600px' : '500px',
           start: '1975-01-01',
           end: '2010-01-01',
           min: '1965-01-01',
           max: '2030-12-31',
           zoomMin: 1000 * 60 * 60 * 24 * 365,
           zoomMax: 1000 * 60 * 60 * 24 * 365 * 40,
-          margin: { item: 15, axis: 5 },
+          margin: { item: 20, axis: 10 },
           orientation: 'top',
           stack: true,
           showCurrentTime: false,
           zoomable: !isMobile,
           moveable: true,
-          // 🎨 Template simplifié : on injecte juste l'icône et le texte. 
-          // La classe (ex: tp-heavy) est déjà sur la boîte parente grâce à la propriété `className` des données.
+          
+          // 🎨 TEMPLATE : Icône uniquement pour TOUS les événements (ponctuels ET périodes)
           template: (item: TimelineEvent) => {
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
             const icon = pillarData?.icon || '🎸';
-            return `<span class="timeline-icon">${icon}</span> <span>${item.content}</span>`;
+            
+            // Pour TOUS les événements, juste l'icône
+            return `<span class="timeline-icon-large">${icon}</span>`;
           },
         };
 
         timelineRef.current = new Timeline(container, initialItems, options);
 
-        timelineRef.current.on('select', (properties: any) => {
-          if (properties.items.length > 0) {
-            const itemId = properties.items[0];
-            const event = METAL_EVENTS.find(e => e.id === itemId);
-            if (event?.loreSnippet) setActiveLore(event.loreSnippet);
-          } else {
-            setActiveLore(null);
+        // 🆕 Écouteur de clic pour afficher le tooltip dans le panneau Lore
+        timelineRef.current.on('click', (properties: any) => {
+          if (properties.item) {
+            const event = METAL_EVENTS.find(e => e.id === properties.item);
+            if (event) {
+              // Pour les périodes, ajouter les dates de début et fin
+              let tooltipContent = event.content;
+              
+              if (event.type === 'range' && event.end) {
+                const startYear = new Date(event.start).getFullYear();
+                const endYear = new Date(event.end).getFullYear();
+                tooltipContent = `${event.content} (${startYear} - ${endYear})`;
+              }
+              
+              // Ajouter le lore si présent
+              if (event.loreSnippet) {
+                tooltipContent += `\n\n📜 ${event.loreSnippet}`;
+              }
+              
+              setActiveLore(tooltipContent);
+            }
           }
         });
 
@@ -125,6 +156,7 @@ export default function TimelineClient() {
     };
 
     initTimeline();
+
     return () => {
       if (timelineRef.current) {
         timelineRef.current.destroy();
@@ -135,10 +167,12 @@ export default function TimelineClient() {
 
   useEffect(() => {
     if (!timelineRef.current) return;
+
     import('vis-timeline/standalone').then(({ DataSet }) => {
       const filteredEvents = activeFilters.length > 0
         ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!))
         : METAL_EVENTS;
+
       timelineRef.current.setItems(new DataSet(filteredEvents));
       setActiveLore(null);
     });
@@ -152,71 +186,140 @@ export default function TimelineClient() {
   };
 
   const toggleFilter = (pillar: GamificationPillar) => {
-    setActiveFilters(prev => prev.includes(pillar) ? prev.filter(p => p !== pillar) : [...prev, pillar]);
+    setActiveFilters(prev =>
+      prev.includes(pillar)
+        ? prev.filter(p => p !== pillar)
+        : [...prev, pillar]
+    );
   };
 
   if (!mounted) return <Loader text="Invocation de la chronologie..." />;
 
   return (
     <div className="space-y-6" suppressHydrationWarning>
+      {/* CHIPS DE FILTRAGE PAR PILIER */}
       <div className="metal-card p-4">
-        <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">🔍 Filtrer par pilier</h3>
+        <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">
+          🔍 Filtrer par pilier
+        </h3>
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-metal-gray scrollbar-track-transparent">
-          <button onClick={() => setActiveFilters([])} className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${activeFilters.length === 0 ? 'bg-metal-fire text-white border-metal-fire shadow-lg shadow-metal-fire/50 scale-105' : 'bg-metal-fire/20 text-white border-metal-fire/40 hover:bg-metal-fire/40'}`}>
+          <button
+            onClick={() => setActiveFilters([])}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${
+              activeFilters.length === 0
+                ? 'bg-metal-fire text-white border-metal-fire shadow-lg shadow-metal-fire/50 scale-105'
+                : 'bg-metal-fire/20 text-white border-metal-fire/40 hover:bg-metal-fire/40'
+            }`}
+          >
             🌍 Tout voir
           </button>
+          
           {Object.entries(PILLAR_METADATA).map(([key, data]) => {
             const isActive = activeFilters.includes(key as GamificationPillar);
             return (
-              <button key={key} onClick={() => toggleFilter(key as GamificationPillar)} className="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border flex items-center gap-1.5 shrink-0 text-white hover:scale-105" style={{ backgroundColor: isActive ? `${data.color}d9` : `${data.color}4d`, borderColor: isActive ? data.color : `${data.color}80`, boxShadow: isActive ? `0 0 12px ${data.color}90, 0 0 24px ${data.color}50` : '0 2px 4px rgba(0,0,0,0.3)' }}>
+              <button
+                key={key}
+                onClick={() => toggleFilter(key as GamificationPillar)}
+                className="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border flex items-center gap-1.5 shrink-0 text-white hover:scale-105"
+                style={{
+                  backgroundColor: isActive ? `${data.color}d9` : `${data.color}4d`,
+                  borderColor: isActive ? data.color : `${data.color}80`,
+                  boxShadow: isActive ? `0 0 12px ${data.color}90, 0 0 24px ${data.color}50` : '0 2px 4px rgba(0,0,0,0.3)',
+                }}
+              >
                 <span>{data.icon}</span>
-                <span className="hidden sm:inline">{key === 'Progressive Metal' ? 'Prog' : key.replace(' Metal', '')}</span>
+                <span className="hidden sm:inline">
+                  {key === 'Progressive Metal' ? 'Prog' : key.replace(' Metal', '')}
+                </span>
               </button>
             );
           })}
         </div>
         {activeFilters.length > 0 && (
-          <p className="text-xs text-gray-500 mt-2 italic">✨ Affichage de {METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length} événement{METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length > 1 ? 's' : ''}</p>
+          <p className="text-xs text-gray-500 mt-2 italic">
+            ✨ Affichage de {METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length} événement{METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length > 1 ? 's' : ''}
+          </p>
         )}
       </div>
 
+      {/* 🆕 PANNEAU DE LORE/TOOLTIP ACTIF */}
       {activeLore && (
         <div className="metal-card p-4 border-l-4 border-metal-fire bg-metal-fire/5 animate-fade-in">
-          <p className="text-gray-200 font-serif italic text-center">📜 <span className="text-metal-fire font-bold">Écho du Lore :</span> {activeLore}</p>
+          <div className="text-gray-200 font-serif whitespace-pre-line">
+            {activeLore.split('\n\n').map((part, index) => (
+              <p key={index} className={index === 0 ? 'text-lg font-bold mb-2' : 'text-sm italic text-gray-300'}>
+                {part}
+              </p>
+            ))}
+          </div>
         </div>
       )}
 
+      {/* Timeline */}
       <div className="metal-card p-4 relative">
-        {isLoading && <div className="absolute inset-0 flex items-center justify-center bg-metal-black/80 z-10 rounded-lg"><Loader text="Tissage de la chronologie..." /></div>}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-metal-black/80 z-10 rounded-lg">
+            <Loader text="Tissage de la chronologie..." />
+          </div>
+        )}
         <div ref={containerRef} className="rounded-lg overflow-hidden timeline-container" style={{ minHeight: '400px' }} />
       </div>
 
+      {/* CONTRÔLES DE NAVIGATION RAPIDE */}
       <div className="flex flex-wrap justify-center gap-2">
         {['1970', '1985', '2000', '2015'].map((year) => (
-          <button key={year} onClick={() => handleGoToYear(year)} className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-metal-fire hover:border-metal-fire hover:bg-metal-fire/10 transition-all active:scale-95">⏳ Aller à {year}</button>
+          <button
+            key={year}
+            onClick={() => handleGoToYear(year)}
+            className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-metal-fire hover:border-metal-fire hover:bg-metal-fire/10 transition-all active:scale-95"
+          >
+            ⏳ Aller à {year}
+          </button>
         ))}
-        <button onClick={() => handleGoToYear('1975')} className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-white hover:border-white transition-all active:scale-95">↺ Reset</button>
+        <button
+          onClick={() => handleGoToYear('1975')}
+          className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-white hover:border-white transition-all active:scale-95"
+        >
+          ↺ Reset
+        </button>
       </div>
 
+      {/* Légende dynamique */}
       <div className="metal-card p-5">
         <h3 className="font-serif text-lg mb-3 text-metal-rust">🎨 Légende des Piliers</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
           {Object.entries(PILLAR_METADATA).map(([key, data]) => (
             <div key={key} className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-sm inline-block shadow-sm" style={{ backgroundColor: data.color }} />
+              <span
+                className="w-3 h-3 rounded-sm inline-block shadow-sm"
+                style={{ backgroundColor: data.color }}
+              />
               <span className="text-gray-400">{data.icon} {key}</span>
             </div>
           ))}
         </div>
       </div>
 
+      {/* Conseils d'utilisation */}
       <div className="metal-card p-5">
         <h3 className="font-serif text-lg mb-3 text-metal-rust">💡 Navigation</h3>
         <ul className="text-sm text-gray-400 space-y-2">
-          <li className="flex items-start gap-2"><span className="text-metal-fire mt-0.5">•</span><span><strong>Filtres :</strong> Cliquez sur un ou plusieurs piliers pour isoler leur histoire.</span></li>
-          <li className="flex items-start gap-2"><span className="text-metal-fire mt-0.5">•</span><span><strong>Desktop :</strong> Molette pour zoomer, glisser pour naviguer.</span></li>
-          <li className="flex items-start gap-2"><span className="text-metal-fire mt-0.5">•</span><span><strong>Mobile :</strong> Glissez horizontalement. Utilisez les boutons d'années pour voyager rapidement.</span></li>
-          <li className="flex items-start gap-2"><span className="text-metal-fire mt-0.5">•</span><span><strong>Lore :</strong> Cliquez sur un événement pour révéler un fragment de l'histoire du Metalverse.</span></li>
+          <li className="flex items-start gap-2">
+            <span className="text-metal-fire mt-0.5">•</span>
+            <span><strong>Clic :</strong> Cliquez sur une icône pour révéler le contenu complet et le lore de l'événement.</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-metal-fire mt-0.5">•</span>
+            <span><strong>Filtres :</strong> Cliquez sur un ou plusieurs piliers pour isoler leur histoire.</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-metal-fire mt-0.5">•</span>
+            <span><strong>Desktop :</strong> Molette pour zoomer, glisser pour naviguer.</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-metal-fire mt-0.5">•</span>
+            <span><strong>Mobile :</strong> Glissez horizontalement. Utilisez les boutons d'années pour voyager rapidement.</span>
+          </li>
         </ul>
       </div>
     </div>
