@@ -105,20 +105,24 @@ export default function TimelineClient() {
           max: '2030-12-31',
           zoomMin: 1000 * 60 * 60 * 24 * 365,
           zoomMax: 1000 * 60 * 60 * 24 * 365 * 40,
-          margin: { item: 20, axis: 10 },
+          margin: { 
+            item: 30,
+            axis: 15 
+          },
           orientation: 'top',
           stack: true,
           showCurrentTime: false,
           zoomable: !isMobile,
           moveable: true,
+          cluster: false,
           
-          // 🎨 TEMPLATE : Annotations manuscrites sur parchemin
+          // 🎨 TEMPLATE : Icônes compactes sur parchemin
           template: (item: TimelineEvent) => {
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
             const icon = pillarData?.icon || '🎸';
             const color = pillarData?.color || '#8b0000';
             
-            return `<span class="parchment-annotation" style="--pillar-color: ${color};">${icon}</span>`;
+            return `<div class="parchment-icon" style="--pillar-color: ${color}">${icon}</div>`;
           },
         };
 
@@ -138,7 +142,7 @@ export default function TimelineClient() {
           timelineRef.current.addCustomTime(seal.date, seal.id);
         });
 
-        // 🆕 Écouteur de clic pour afficher le tooltip dans le panneau Lore
+        //  Écouteur de clic pour afficher le tooltip dans le panneau Lore
         timelineRef.current.on('click', (properties: any) => {
           if (properties.item) {
             const event = METAL_EVENTS.find(e => e.id === properties.item);
