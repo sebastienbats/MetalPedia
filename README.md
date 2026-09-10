@@ -38,7 +38,7 @@
 
 **MetalPedia** est bien plus qu'une simple base de données. C'est une **encyclopédie vivante** qui transforme l'exploration musicale en une aventure RPG. 
 
-Grâce à un pipeline d'ingestion de données robuste et une architecture moderne, MetalPedia offre une expérience fluide, fonctionnant même hors ligne, avec des visualisations de données avancées et un système de progression profondément immersif.
+Grâce à une base de données Supabase robuste et une architecture moderne, MetalPedia offre une expérience fluide, fonctionnant même hors ligne, avec des visualisations de données avancées et un système de progression profondément immersif.
 
 ---
 
@@ -130,7 +130,7 @@ Grâce à un pipeline d'ingestion de données robuste et une architecture modern
 |-----------|--------------|
 | **Frontend** | Next.js 15 (App Router), React 18, TypeScript, Tailwind CSS |
 | **State & Cache** | Zustand, TanStack Query, IndexedDB (`idb-keyval`) |
-| **Backend / DB** | Supabase (PostgreSQL, Auth, RLS), Python 3.12 (Scripts d'ingestion) |
+| **Backend / DB** | Supabase (PostgreSQL, Auth, RLS, Source de données principale), Python 3.12 (Scripts d'ingestion) |
 | **Visualisation** | `react-globe.gl`, D3.js, Recharts, `vis-timeline` |
 | **APIs Externes** | Last.fm, MusicBrainz, Spotify Web API (ML Service) |
 | **DevOps** | Vercel, Docker, GitHub Actions (CI/CD), ESLint, Prettier, Husky |
@@ -141,7 +141,7 @@ Grâce à un pipeline d'ingestion de données robuste et une architecture modern
 
 ### Flux de données
 
-1. **Recherche/Consultation** : Next.js → Supabase Database
+1. **Recherche/Consultation** : Supabase Database (Données maîtrisées)
 2. **Recommandations ML** : Next.js → ML Service → Spotify API → Embeddings
 3. **Authentification** : Next.js → Supabase Auth → JWT
 4. **Reviews/Favoris** : Next.js → Supabase Database (RLS)
