@@ -8,7 +8,7 @@ import OfflineIndicator from '@/components/ui/OfflineIndicator';
 import CommandPalette from '@/components/ui/CommandPalette';
 import XPBar from '@/components/gamification/XPBar';
 import LevelUpModal from '@/components/gamification/LevelUpModal';
-import TrialWatcher from '@/components/gamification/TrialWatcher'; // 🆕 Import du système d'épreuves
+import TrialWatcher from '@/components/gamification/TrialWatcher';
 import '@/i18n';
 import './globals.css';
 
@@ -162,11 +162,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: themeInitializer }}
         />
 
-        <link rel="preconnect" href="https://www.metal-api.dev" />
+        {/* 🧹 NETTOYÉ : Suppression des preconnect/dns-prefetch vers metal-api.dev */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
-
-        <link rel="dns-prefetch" href="https://www.metal-api.dev" />
         <link rel="dns-prefetch" href="https://open.spotify.com" />
       </head>
 
