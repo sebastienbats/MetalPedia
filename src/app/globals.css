@@ -4,7 +4,7 @@
 
 /* ═══════════════════════════════════════════
    THÈMES (Variables CSS)
-   ═══════════════════════════════════════════ */
+   ══════════════════════════════════════════ */
 :root,
 [data-theme="forge"] {
   --color-primary: #8b0000;
@@ -91,7 +91,6 @@
   overflow: visible !important;
 }
 
-/* Texture papier subtile - z-index négatif pour rester DERRIÈRE le contenu */
 .timeline-container::before {
   content: '';
   position: absolute;
@@ -104,7 +103,6 @@
   border-radius: 8px;
 }
 
-/* Bords brûlés du parchemin - z-index négatif pour rester DERRIÈRE le contenu */
 .timeline-container::after {
   content: '';
   position: absolute;
@@ -123,7 +121,6 @@
    AXE CHRONOLOGIQUE (Dates & Grilles)
    ═══════════════════════════════════════════ */
 
-/* Dates de l'axe - style parchemin */
 .vis-time-axis .vis-text {
   color: #3e2723 !important;
   font-family: var(--font-medieval), serif !important;
@@ -132,26 +129,22 @@
   font-weight: 600;
 }
 
-/* Grilles mineures (lignes verticales discrètes) */
 .vis-time-axis .vis-grid.vis-minor {
   border-color: rgba(101, 67, 33, 0.15) !important;
   border-style: dashed !important;
 }
 
-/* Grilles majeures (décennies) */
 .vis-time-axis .vis-grid.vis-major {
   border-color: rgba(62, 39, 35, 0.4) !important;
   border-width: 2px !important;
 }
 
-/* Bordures des panneaux transparentes */
 .vis-panel.vis-center,
 .vis-panel.vis-bottom,
 .vis-panel.vis-top {
   border-color: transparent !important;
 }
 
-/* Hauteur fixe du panneau des dates pour un alignement parfait */
 .vis-panel.vis-top {
   height: 40px !important;
   min-height: 40px !important;
@@ -161,7 +154,6 @@
    LIGNE D'ENCRE SÉPIA (Axe du temps)
    ═══════════════════════════════════════════ */
 
-/* ✅ Ligne repositionnée en haut du panneau central (juste sous les dates) */
 .vis-panel.vis-center::before {
   content: '';
   position: absolute;
@@ -184,50 +176,69 @@
   filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='rough'><feTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2'/><feDisplacementMap in='SourceGraphic' scale='2'/></filter></svg>#rough");
 }
 
-/* Espace entre la ligne d'encre et le début des icônes */
 .vis-panel.vis-center {
   padding-top: 10px !important;
 }
 
 /* ═══════════════════════════════════════════
-   ICÔNES COMPACTES SUR PARCHEMIN
+   GOUTTES D'ENCRE (Lignes verticales)
    ═══════════════════════════════════════════ */
 
+/* ✅ Forcer l'affichage des lignes verticales */
+.vis-item .vis-line {
+  border-left: 2px dashed rgba(62, 39, 35, 0.5) !important;
+  opacity: 1 !important;
+  z-index: 1 !important;
+  pointer-events: none;
+  display: block !important;
+}
+
+/* Ligne plus épaisse pour les périodes */
+.vis-item.vis-range .vis-line {
+  border-left: 3px solid rgba(139, 0, 0, 0.4) !important;
+}
+
+/* ═══════════════════════════════════════════
+   ICÔNES COMPACTES SUR PARCHEMIN (Annotations manuscrites)
+   ═══════════════════════════════════════════ */
+
+/* ✅ Cercle coloré avec l'icône du pilier */
 .parchment-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
   background: radial-gradient(
     circle at 30% 30%,
     rgba(212, 184, 150, 0.95) 0%,
     rgba(180, 140, 100, 0.9) 70%,
     rgba(139, 90, 43, 0.85) 100%
-  );
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid var(--pillar-color, #3e2723);
+  ) !important;
+  font-size: 1.2rem !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  border: 2px solid var(--pillar-color, #3e2723) !important;
   box-shadow: 
     0 0 0 1px rgba(62, 39, 35, 0.3),
     0 2px 6px rgba(62, 39, 35, 0.4),
-    inset 0 1px 2px rgba(255, 255, 255, 0.3);
-  position: relative;
-  z-index: 3;
+    inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+  position: relative !important;
+  z-index: 3 !important;
+  overflow: visible !important;
 }
 
 .parchment-icon:hover {
-  transform: scale(1.2) rotate(-5deg);
+  transform: scale(1.2) rotate(-5deg) !important;
   box-shadow: 
     0 0 0 2px var(--pillar-color, #3e2723),
     0 4px 12px rgba(62, 39, 35, 0.6),
-    0 0 20px var(--pillar-color, #3e2723);
-  filter: brightness(1.1);
+    0 0 20px var(--pillar-color, #3e2723) !important;
+  filter: brightness(1.1) !important;
 }
 
-/* Forcer la taille des conteneurs d'événements */
+/* ✅ Forcer les conteneurs d'événements en cercles transparents */
 .vis-item[class^="tp-"] {
   width: 40px !important;
   min-width: 40px !important;
@@ -237,6 +248,7 @@
   border: none !important;
   box-shadow: none !important;
   overflow: visible !important;
+  border-radius: 50% !important;
 }
 
 .vis-item[class^="tp-"] .vis-item-content {
@@ -250,10 +262,7 @@
   overflow: visible !important;
 }
 
-/* ═══════════════════════════════════════════
-   CORRECTION : Supprimer les divs vis-item-overflow
-   ══════════════════════════════════════════ */
-
+/* ✅ Supprimer les divs vis-item-overflow */
 .vis-item-overflow {
   overflow: visible !important;
   width: 100% !important;
@@ -264,10 +273,7 @@
   display: none !important;
 }
 
-/* ═══════════════════════════════════════════
-   LIGNES VERTICALES (Gouttes d'Encre)
-   ═══════════════════════════════════════════ */
-
+/* ✅ Tous les conteneurs en overflow visible */
 .vis-item,
 .vis-item.vis-point,
 .vis-item.vis-range,
@@ -275,22 +281,10 @@
   overflow: visible !important;
 }
 
-.vis-item .vis-line {
-  border-left: 1px dashed rgba(62, 39, 35, 0.3) !important;
-  opacity: 0.5 !important;
-  z-index: 1 !important;
-  pointer-events: none;
-}
-
-.vis-panel.vis-center::before {
-  z-index: 0 !important;
-}
-
 /* ═══════════════════════════════════════════
    SCEAUX DE CIRE (Décennies Clés)
    ═══════════════════════════════════════════ */
 
-/* Conteneur du custom time */
 .vis-custom-time {
   background: transparent !important;
   border-left: none !important;
@@ -300,19 +294,21 @@
   overflow: visible !important;
 }
 
-/* Masquer la ligne verticale par défaut du custom time */
 .vis-custom-time .vis-line {
   display: none !important;
 }
 
-/* Dessiner le Sceau de Cire via un pseudo-élément avec z-index élevé */
+/* ✅ Sceau de cire complet avec intérieur texturé */
 .vis-custom-time::before {
-  content: '';
+  content: '🔴';
   position: absolute;
   top: -15px;
   left: 0;
   width: 40px;
   height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%);
   border: 2px solid #3e0000;
   border-radius: 50%;
@@ -326,9 +322,10 @@
     radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.3) 0%, transparent 40%);
   z-index: 10;
   pointer-events: none;
+  font-size: 1.5rem;
+  line-height: 1;
 }
 
-/* Style du label (l'année) */
 .vis-custom-time .vis-custom-time-label {
   position: absolute;
   top: 30px;
@@ -354,7 +351,7 @@
     0 0 0 3px #8b0000,
     0 0 20px rgba(139, 0, 0, 0.8),
     inset 0 0 10px rgba(139, 0, 0, 0.3) !important;
-  transform: scale(1.15);
+  transform: scale(1.15) !important;
 }
 
 /* ══════════════════════════════════════════
@@ -369,7 +366,6 @@
   animation: fade-in 0.4s ease-out forwards;
 }
 
-/* Scrollbar cachée pour les chips */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
