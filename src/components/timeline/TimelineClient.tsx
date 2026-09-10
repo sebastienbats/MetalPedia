@@ -45,7 +45,7 @@ const METAL_EVENTS: TimelineEvent[] = [
   { id: 16, content: 'Cannibal Corpse - Formation', start: '1988-12-01', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Le cadavre cannibale prend vie à Buffalo.' },
 
   { id: 17, content: 'Première vague Black Metal', start: '1982-01-01', end: '1990-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'Les ténèbres s\'éveillent en Europe.' },
-  { id: 18, content: 'Seconde vague Black Metal norvégien', start: '1991-01-01', end: '1996-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: '🌑 Les forêts de Norvège s\'embrasent. Le froid est absolu.' },
+  { id: 18, content: 'Seconde vague Black Metal norvégien', start: '1991-01-01', end: '1996-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: ' Les forêts de Norvège s\'embrasent. Le froid est absolu.' },
   { id: 19, content: 'Darkthrone - "A Blaze in the Northern Sky"', start: '1992-02-26', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'Un brasier s\'allume dans le ciel du Nord.' },
   { id: 20, content: 'Mayhem - "De Mysteriis Dom Sathanas"', start: '1994-05-24', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'L\'opus maudit scelle le pacte avec l\'Oubli.' },
   { id: 21, content: 'Burzum - "Filosofem"', start: '1996-01-01', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'La philosophie du son devient incantation.' },
@@ -97,7 +97,6 @@ export default function TimelineClient() {
         const initialItems = new DataSet(METAL_EVENTS);
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-        // ✅ Options typées en 'any' pour éviter les conflits TypeScript avec vis-timeline
         const options: any = {
           height: isMobile ? '500px' : '600px',
           start: '1975-01-01',
@@ -116,20 +115,19 @@ export default function TimelineClient() {
           zoomable: !isMobile,
           moveable: true,
           
-          //  TEMPLATE : Cercles colorés avec icônes des piliers (Annotations manuscrites)
+          // 🎨 TEMPLATE : Cercles colorés avec icônes des piliers
           template: (item: TimelineEvent) => {
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
             const icon = pillarData?.icon || '🎸';
             const color = pillarData?.color || '#8b0000';
             
-            // Le CSS .parchment-icon utilise --pillar-color pour la bordure et le glow
             return `<div class="parchment-icon" style="--pillar-color: ${color};">${icon}</div>`;
           },
         };
 
         timelineRef.current = new Timeline(container, initialItems, options);
 
-        // 🕯️ AJOUT DES SCEAUX DE CIRE aux décennies clés
+        // 🕯️ SCEAUX DE CIRE aux décennies clés
         const sealDates = [
           { date: '1970-01-01', id: 'seal-1970' },
           { date: '1980-01-01', id: 'seal-1980' },
@@ -143,7 +141,7 @@ export default function TimelineClient() {
           timelineRef.current.addCustomTime(seal.date, seal.id);
         });
 
-        //  Écouteur de clic pour afficher le lore dans le panneau
+        // 📜 Écouteur de clic pour le lore
         timelineRef.current.on('click', (properties: any) => {
           if (properties.item) {
             const event = METAL_EVENTS.find(e => e.id === properties.item);
@@ -210,114 +208,141 @@ export default function TimelineClient() {
     );
   };
 
+  // 🧮 Calcul du nombre d'événements filtrés (une seule fois)
+  const filteredCount = activeFilters.length > 0
+    ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length
+    : METAL_EVENTS.length;
+
   if (!mounted) return <Loader text="Invocation de la chronologie..." />;
 
   return (
     <div className="space-y-6" suppressHydrationWarning>
-      {/* CHIPS DE FILTRAGE PAR PILIER */}
-      <div className="metal-card p-4">
-        <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">
-          🔍 Filtrer par pilier
-        </h3>
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-metal-gray scrollbar-track-transparent">
-          <button
-            onClick={() => setActiveFilters([])}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${
-              activeFilters.length === 0
-                ? 'bg-metal-fire text-white border-metal-fire shadow-lg shadow-metal-fire/50 scale-105'
-                : 'bg-metal-fire/20 text-white border-metal-fire/40 hover:bg-metal-fire/40'
-            }`}
-          >
-            🌍 Tout voir
-          </button>
-          
-          {Object.entries(PILLAR_METADATA).map(([key, data]) => {
-            const isActive = activeFilters.includes(key as GamificationPillar);
-            return (
-              <button
-                key={key}
-                onClick={() => toggleFilter(key as GamificationPillar)}
-                className="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border flex items-center gap-1.5 shrink-0 text-white hover:scale-105"
-                style={{
-                  backgroundColor: isActive ? `${data.color}d9` : `${data.color}4d`,
-                  borderColor: isActive ? data.color : `${data.color}80`,
-                  boxShadow: isActive ? `0 0 12px ${data.color}90, 0 0 24px ${data.color}50` : '0 2px 4px rgba(0,0,0,0.3)',
-                }}
-              >
-                <span>{data.icon}</span>
-                <span className="hidden sm:inline">
-                  {key === 'Progressive Metal' ? 'Prog' : key.replace(' Metal', '')}
-                </span>
-              </button>
-            );
-          })}
+      
+      {/* ═══════════════════════════════════════════════════════════
+          BLOC 1 : LE PARCHMIN PRINCIPAL (Interactif)
+          Contient : Filtres + Lore + Timeline
+          ═══════════════════════════════════════════════════════════ */}
+      <div className="metal-card p-4 space-y-4">
+        
+        {/* 🔍 FILTRES PAR PILIER */}
+        <div>
+          <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">
+            🔍 Filtrer par pilier
+          </h3>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-metal-gray scrollbar-track-transparent">
+            <button
+              onClick={() => setActiveFilters([])}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${
+                activeFilters.length === 0
+                  ? 'bg-metal-fire text-white border-metal-fire shadow-lg shadow-metal-fire/50 scale-105'
+                  : 'bg-metal-fire/20 text-white border-metal-fire/40 hover:bg-metal-fire/40'
+              }`}
+            >
+              🌍 Tout voir
+            </button>
+            
+            {Object.entries(PILLAR_METADATA).map(([key, data]) => {
+              const isActive = activeFilters.includes(key as GamificationPillar);
+              return (
+                <button
+                  key={key}
+                  onClick={() => toggleFilter(key as GamificationPillar)}
+                  className="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border flex items-center gap-1.5 shrink-0 text-white hover:scale-105"
+                  style={{
+                    backgroundColor: isActive ? `${data.color}d9` : `${data.color}4d`,
+                    borderColor: isActive ? data.color : `${data.color}80`,
+                    boxShadow: isActive ? `0 0 12px ${data.color}90, 0 0 24px ${data.color}50` : '0 2px 4px rgba(0,0,0,0.3)',
+                  }}
+                >
+                  <span>{data.icon}</span>
+                  <span className="hidden sm:inline">
+                    {key === 'Progressive Metal' ? 'Prog' : key.replace(' Metal', '')}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {activeFilters.length > 0 && (
+            <p className="text-xs text-gray-500 mt-2 italic">
+              ✨ Affichage de {filteredCount} événement{filteredCount > 1 ? 's' : ''}
+            </p>
+          )}
         </div>
-        {activeFilters.length > 0 && (
-          <p className="text-xs text-gray-500 mt-2 italic">
-            ✨ Affichage de {METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length} événement{METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length > 1 ? 's' : ''}
-          </p>
+
+        {/* 📜 PANNEAU DE LORE ACTIF (collé à la timeline) */}
+        {activeLore && (
+          <div className="border-l-4 border-metal-fire bg-metal-fire/5 p-3 animate-fade-in rounded-r-lg">
+            <div className="text-gray-200 font-serif whitespace-pre-line">
+              {activeLore.split('\n\n').map((part, index) => (
+                <p key={index} className={index === 0 ? 'text-lg font-bold mb-2' : 'text-sm italic text-gray-300'}>
+                  {part}
+                </p>
+              ))}
+            </div>
+          </div>
         )}
+
+        {/* ️ TIMELINE (cœur du parchemin) */}
+        <div className="relative">
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-metal-black/80 z-10 rounded-lg">
+              <Loader text="Tissage de la chronologie..." />
+            </div>
+          )}
+          <div ref={containerRef} className="rounded-lg overflow-hidden timeline-container" style={{ minHeight: '400px' }} />
+        </div>
+
       </div>
 
-      {/* 📜 PANNEAU DE LORE/TOOLTIP ACTIF */}
-      {activeLore && (
-        <div className="metal-card p-4 border-l-4 border-metal-fire bg-metal-fire/5 animate-fade-in">
-          <div className="text-gray-200 font-serif whitespace-pre-line">
-            {activeLore.split('\n\n').map((part, index) => (
-              <p key={index} className={index === 0 ? 'text-lg font-bold mb-2' : 'text-sm italic text-gray-300'}>
-                {part}
-              </p>
+      {/* ═══════════════════════════════════════════════════════════
+          BLOC 2 : LE GRIMOIRE D'AIDE (Navigation & Légende)
+          Grille 2 colonnes sur desktop, empilée sur mobile
+          ═══════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        {/*  NAVIGATION RAPIDE */}
+        <div className="metal-card p-5">
+          <h3 className="font-serif text-lg mb-3 text-metal-rust">⏳ Navigation Rapide</h3>
+          <div className="flex flex-wrap justify-center gap-2">
+            {['1970', '1985', '2000', '2015'].map((year) => (
+              <button
+                key={year}
+                onClick={() => handleGoToYear(year)}
+                className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-metal-fire hover:border-metal-fire hover:bg-metal-fire/10 transition-all active:scale-95"
+              >
+                 Aller à {year}
+              </button>
+            ))}
+            <button
+              onClick={() => handleGoToYear('1975')}
+              className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-white hover:border-white transition-all active:scale-95"
+            >
+              ↺ Reset
+            </button>
+          </div>
+        </div>
+
+        {/* 🎨 LÉGENDE DES PILIERS */}
+        <div className="metal-card p-5">
+          <h3 className="font-serif text-lg mb-3 text-metal-rust">🎨 Légende des Piliers</h3>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {Object.entries(PILLAR_METADATA).map(([key, data]) => (
+              <div key={key} className="flex items-center gap-2">
+                <span
+                  className="w-3 h-3 rounded-sm inline-block shadow-sm"
+                  style={{ backgroundColor: data.color }}
+                />
+                <span className="text-gray-400">{data.icon} {key}</span>
+              </div>
             ))}
           </div>
         </div>
-      )}
 
-      {/* Timeline (La classe 'timeline-container' déclenche l'effet parchemin CSS) */}
-      <div className="metal-card p-4 relative">
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-metal-black/80 z-10 rounded-lg">
-            <Loader text="Tissage de la chronologie..." />
-          </div>
-        )}
-        <div ref={containerRef} className="rounded-lg overflow-hidden timeline-container" style={{ minHeight: '400px' }} />
       </div>
 
-      {/* CONTRÔLES DE NAVIGATION RAPIDE */}
-      <div className="flex flex-wrap justify-center gap-2">
-        {['1970', '1985', '2000', '2015'].map((year) => (
-          <button
-            key={year}
-            onClick={() => handleGoToYear(year)}
-            className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-metal-fire hover:border-metal-fire hover:bg-metal-fire/10 transition-all active:scale-95"
-          >
-            ⏳ Aller à {year}
-          </button>
-        ))}
-        <button
-          onClick={() => handleGoToYear('1975')}
-          className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-white hover:border-white transition-all active:scale-95"
-        >
-          ↺ Reset
-        </button>
-      </div>
-
-      {/* Légende dynamique */}
-      <div className="metal-card p-5">
-        <h3 className="font-serif text-lg mb-3 text-metal-rust"> Légende des Piliers</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-          {Object.entries(PILLAR_METADATA).map(([key, data]) => (
-            <div key={key} className="flex items-center gap-2">
-              <span
-                className="w-3 h-3 rounded-sm inline-block shadow-sm"
-                style={{ backgroundColor: data.color }}
-              />
-              <span className="text-gray-400">{data.icon} {key}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Conseils d'utilisation */}
+      {/* ══════════════════════════════════════════════════════════
+          CARTE 3 : CONSEILS D'UTILISATION
+          ═══════════════════════════════════════════════════════════ */}
       <div className="metal-card p-5">
         <h3 className="font-serif text-lg mb-3 text-metal-rust">💡 Navigation</h3>
         <ul className="text-sm text-gray-400 space-y-2">
@@ -339,6 +364,7 @@ export default function TimelineClient() {
           </li>
         </ul>
       </div>
+
     </div>
   );
 }
