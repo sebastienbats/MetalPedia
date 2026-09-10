@@ -114,44 +114,17 @@ export default function TimelineClient() {
           zoomable: !isMobile,
           moveable: true,
           
-          // 🎨 TEMPLATE AVEC STYLES EN LIGNE (Garantit l'application des couleurs)
+          // 🎨 TEMPLATE UTILISANT LES CLASSES CSS ROBUSTES (Plus de styles en ligne)
           template: (item: TimelineEvent) => {
+            // Conversion du nom du pilier en slug CSS (ex: "Heavy Metal" -> "heavy")
+            const pillarSlug = item.pillar ? item.pillar.toLowerCase().replace(' ', '-') : 'heavy';
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
-            const color = pillarData?.color || '#c9a227'; // Fallback Heavy Metal
             const icon = pillarData?.icon || '🎸';
             
             return `
-              <div style="
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 8px 12px;
-                border-radius: 6px;
-                background-color: ${color}e6; /* 90% d'opacité de la couleur du pilier */
-                border: 1px solid ${color};
-                color: #ffffff !important;
-                font-family: ui-sans-serif, system-ui, sans-serif;
-                font-size: 0.875rem;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-                cursor: pointer;
-                transition: transform 0.2s ease;
-              " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                <span style="
-                  display: inline-flex;
-                  align-items: center;
-                  justify-content: center;
-                  width: 26px;
-                  height: 26px;
-                  border-radius: 50%;
-                  background: rgba(255,255,255,0.2);
-                  font-size: 0.9rem;
-                  flex-shrink: 0;
-                ">${icon}</span>
-                <span style="
-                  color: #ffffff !important;
-                  font-weight: 600;
-                  line-height: 1.3;
-                ">${item.content}</span>
+              <div class="timeline-custom-item timeline-event-${pillarSlug}">
+                <span class="timeline-icon-circle">${icon}</span>
+                <span class="timeline-text-content">${item.content}</span>
               </div>
             `;
           },
@@ -199,7 +172,7 @@ export default function TimelineClient() {
 
       const newDataSet = new DataSet(filteredEvents);
       timelineRef.current.setItems(newDataSet);
-      setActiveLore(null);
+      setActiveLore(null); // Reset du lore quand on filtre
     });
   }, [activeFilters]);
 
@@ -220,8 +193,9 @@ export default function TimelineClient() {
 
   if (!mounted) return <Loader text="Invocation de la chronologie..." />;
 
+  // 🛡️ suppressHydrationWarning empêche les fausses erreurs causées par les extensions de navigateur
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" suppressHydrationWarning>
       {/* CHIPS DE FILTRAGE PAR PILIER */}
       <div className="metal-card p-4">
         <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">
