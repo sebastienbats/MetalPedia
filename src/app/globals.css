@@ -65,10 +65,9 @@
 }
 
 /* ═══════════════════════════════════════════
-   TIMELINE - LE PARCHMIN DU TEMPS
+   TIMELINE - LE PARCHMIN DU TEMPS (Conteneur)
    ═══════════════════════════════════════════ */
 
-/* Conteneur principal transformé en parchemin */
 .timeline-container {
   background: 
     radial-gradient(ellipse at 20% 30%, rgba(139, 90, 43, 0.15) 0%, transparent 50%),
@@ -92,7 +91,7 @@
   overflow: hidden;
 }
 
-/* Effet de texture papier (subtil) */
+/* Texture papier subtile */
 .timeline-container::before {
   content: '';
   position: absolute;
@@ -163,7 +162,6 @@
    ICÔNES COMPACTES SUR PARCHEMIN
    ═══════════════════════════════════════════ */
 
-/* Icône compacte sur parchemin */
 .parchment-icon {
   display: inline-flex;
   align-items: center;
@@ -189,7 +187,6 @@
   z-index: 3;
 }
 
-/* Hover sur l'icône */
 .parchment-icon:hover {
   transform: scale(1.2) rotate(-5deg);
   box-shadow: 
@@ -210,7 +207,6 @@
   box-shadow: none !important;
 }
 
-/* Centrer le contenu */
 .vis-item[class^="tp-"] .vis-item-content {
   padding: 0 !important;
   display: flex !important;
@@ -219,6 +215,22 @@
   width: 100% !important;
   height: 100% !important;
   background: transparent !important;
+}
+
+/* ═══════════════════════════════════════════
+   CORRECTION : Supprimer les divs vis-item-overflow
+   ═══════════════════════════════════════════ */
+
+/* Forcer l'affichage correct des items sans overflow caché */
+.vis-item-overflow {
+  overflow: visible !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* S'assurer que les ranges n'ont pas de conteneur overflow qui coupe le design */
+.vis-item.vis-range .vis-item-overflow {
+  display: none !important;
 }
 
 /* ═══════════════════════════════════════════
@@ -232,17 +244,11 @@
   overflow: visible !important;
 }
 
-/* Lignes verticales discrètes */
 .vis-item .vis-line {
   border-left: 1px dashed rgba(62, 39, 35, 0.3) !important;
   opacity: 0.5 !important;
   z-index: 1 !important;
   pointer-events: none;
-}
-
-/* Masquer les lignes des custom times (sceaux) */
-.vis-custom-time .vis-line {
-  display: none !important;
 }
 
 .vis-panel.vis-center::before {
@@ -253,45 +259,58 @@
    SCEAUX DE CIRE (Décennies Clés)
    ═══════════════════════════════════════════ */
 
+/* Conteneur du custom time (on le centre et on enlève la ligne par défaut) */
 .vis-custom-time {
-  background-color: transparent !important;
-  pointer-events: none;
+  background: transparent !important;
+  border-left: none !important;
+  width: 40px !important;
+  margin-left: -20px !important; /* Centre le sceau de 40px */
   z-index: 5 !important;
 }
 
-.vis-custom-time .vis-custom-time-marker {
-  width: 40px !important;
-  height: 40px !important;
-  background: radial-gradient(
-    circle at 35% 35%,
-    #c62828 0%,
-    #8b0000 50%,
-    #5d0000 100%
-  ) !important;
-  border: 2px solid #3e0000 !important;
-  border-radius: 50% !important;
-  box-shadow: 
+/* Masquer la ligne verticale par défaut du custom time */
+.vis-custom-time .vis-line {
+  display: none !important;
+}
+
+/* Dessiner le Sceau de Cire via un pseudo-élément */
+.vis-custom-time::before {
+  content: '';
+  position: absolute;
+  top: -15px; /* Ajuste la position verticale par rapport à l'axe */
+  left: 0;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%);
+  border: 2px solid #3e0000;
+  border-radius: 50%;
+  box-shadow:
     0 0 0 2px rgba(62, 0, 0, 0.4),
     0 4px 12px rgba(139, 0, 0, 0.6),
     inset 0 -3px 6px rgba(0, 0, 0, 0.4),
-    inset 0 2px 4px rgba(255, 100, 100, 0.3) !important;
-  top: -20px !important;
-  left: -20px !important;
-  background-image: 
+    inset 0 2px 4px rgba(255, 100, 100, 0.3);
+  background-image:
     radial-gradient(circle at 20% 20%, rgba(255, 200, 200, 0.3) 0%, transparent 30%),
-    radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.3) 0%, transparent 40%) !important;
+    radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.3) 0%, transparent 40%);
+  z-index: 10;
+  pointer-events: none;
 }
 
-.vis-custom-time::after {
-  content: '';
+/* Style du label (l'année) s'il est généré par vis-timeline */
+.vis-custom-time .vis-custom-time-label {
   position: absolute;
+  top: 30px;
   left: 50%;
-  top: 20px;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(180deg, rgba(139, 0, 0, 0.8) 0%, rgba(62, 39, 35, 0.4) 100%);
   transform: translateX(-50%);
-  pointer-events: none;
+  font-family: var(--font-medieval), serif !important;
+  font-size: 0.75rem !important;
+  color: #3e2723 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5) !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 2px 4px !important;
+  white-space: nowrap !important;
+  z-index: 11;
 }
 
 /* ═══════════════════════════════════════════
@@ -306,7 +325,7 @@
   transform: scale(1.15);
 }
 
-/* ══════════════════════════════════════════
+/* ═══════════════════════════════════════════
    ANIMATIONS & UTILITAIRES
    ═══════════════════════════════════════════ */
 @keyframes fade-in {
