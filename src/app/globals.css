@@ -81,7 +81,8 @@
       #c9a876 100%
     );
   border-radius: 8px;
-  padding: 10px;
+  border: 0px; 
+  padding: 0px;
   position: relative;
   box-shadow: 
     inset 0 0 60px rgba(101, 67, 33, 0.4),
