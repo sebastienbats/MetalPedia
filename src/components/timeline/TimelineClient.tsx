@@ -81,6 +81,7 @@ export default function TimelineClient() {
   const [activeLore, setActiveLore] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<GamificationPillar[]>([]);
 
+  // 🛡️ Empêche l'erreur d'hydratation React #418 en attendant le montage client
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -112,15 +113,45 @@ export default function TimelineClient() {
           showCurrentTime: false,
           zoomable: !isMobile,
           moveable: true,
+          
+          // 🎨 TEMPLATE AVEC STYLES EN LIGNE (Garantit l'application des couleurs)
           template: (item: TimelineEvent) => {
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
-            const color = pillarData?.color || '#c9a227';
+            const color = pillarData?.color || '#c9a227'; // Fallback Heavy Metal
             const icon = pillarData?.icon || '🎸';
             
             return `
-              <div class="timeline-custom-item" style="border-left: 3px solid ${color}; background: ${color}20;">
-                <span class="timeline-icon" style="background: ${color}40; color: white;">${icon}</span>
-                <span class="timeline-content" style="color: #f3f4f6;">${item.content}</span>
+              <div style="
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 12px;
+                border-radius: 6px;
+                background-color: ${color}e6; /* 90% d'opacité de la couleur du pilier */
+                border: 1px solid ${color};
+                color: #ffffff !important;
+                font-family: ui-sans-serif, system-ui, sans-serif;
+                font-size: 0.875rem;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+                cursor: pointer;
+                transition: transform 0.2s ease;
+              " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <span style="
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  width: 26px;
+                  height: 26px;
+                  border-radius: 50%;
+                  background: rgba(255,255,255,0.2);
+                  font-size: 0.9rem;
+                  flex-shrink: 0;
+                ">${icon}</span>
+                <span style="
+                  color: #ffffff !important;
+                  font-weight: 600;
+                  line-height: 1.3;
+                ">${item.content}</span>
               </div>
             `;
           },
@@ -157,7 +188,7 @@ export default function TimelineClient() {
     };
   }, [mounted]);
 
-  // 🆕 Mise à jour des items quand les filtres changent
+  // Mise à jour des items quand les filtres changent
   useEffect(() => {
     if (!timelineRef.current) return;
 
@@ -168,7 +199,7 @@ export default function TimelineClient() {
 
       const newDataSet = new DataSet(filteredEvents);
       timelineRef.current.setItems(newDataSet);
-      setActiveLore(null); // Reset du lore quand on filtre
+      setActiveLore(null);
     });
   }, [activeFilters]);
 
@@ -191,7 +222,7 @@ export default function TimelineClient() {
 
   return (
     <div className="space-y-6">
-      {/* 🎨 CHIPS DE FILTRAGE PAR PILIER (Fond coloré permanent + Texte blanc pur) */}
+      {/* CHIPS DE FILTRAGE PAR PILIER */}
       <div className="metal-card p-4">
         <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">
           🔍 Filtrer par pilier
@@ -214,14 +245,10 @@ export default function TimelineClient() {
               <button
                 key={key}
                 onClick={() => toggleFilter(key as GamificationPillar)}
-                // 🎯 Texte TOUJOURS blanc pur (text-white), sans opacité
                 className="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border flex items-center gap-1.5 shrink-0 text-white hover:scale-105"
                 style={{
-                  // 🎯 Fond TOUJOURS coloré : 30% d'opacité si inactif, 85% si actif
                   backgroundColor: isActive ? `${data.color}d9` : `${data.color}4d`,
-                  // 🎯 Bordure TOUJOURS colorée : 50% si inactif, 100% si actif
                   borderColor: isActive ? data.color : `${data.color}80`,
-                  // 🎯 Glow lumineux uniquement quand actif
                   boxShadow: isActive ? `0 0 12px ${data.color}90, 0 0 24px ${data.color}50` : '0 2px 4px rgba(0,0,0,0.3)',
                 }}
               >
