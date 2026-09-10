@@ -6,6 +6,7 @@ import { useFavoritesCount, useFavoritesHydration } from '@/stores/favoritesStor
 import { useAuth, useSignOut } from '@/api/authApi';
 import SearchBar from '@/components/search/SearchBar';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
+import { PILLAR_METADATA, GAMIFICATION_PILLARS } from '@/types/api';
 
 export default function Header() {
   const favCount = useFavoritesCount();
@@ -58,7 +59,7 @@ export default function Header() {
               )}
             </Link>
 
-            {/* 🆕 ICÔNE COMPTE : Toujours visible */}
+            {/* ICÔNE COMPTE */}
             <Link 
               href="/profile" 
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-300 hover:text-metal-fire hover:bg-metal-gray/30 transition-all"
@@ -97,6 +98,34 @@ export default function Header() {
         {/* LIGNE 2 : Barre de recherche */}
         <div className="mt-3 md:mt-4">
           <SearchBar />
+        </div>
+
+        {/* LIGNE 3 : Accès rapides aux 9 Piliers */}
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-metal-gray scrollbar-track-transparent">
+          {GAMIFICATION_PILLARS.map((pillar) => {
+            const metadata = PILLAR_METADATA[pillar];
+            return (
+              <Link
+                key={pillar}
+                href={`/genres/${encodeURIComponent(pillar)}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-l-2 transition-all hover:scale-105 shrink-0 group"
+                style={{
+                  borderColor: metadata.color,
+                  backgroundColor: `${metadata.color}10`,
+                }}
+                title={pillar}
+              >
+                <span className="text-sm">{metadata.icon}</span>
+                <span 
+                  className="hidden sm:inline text-xs font-medium text-gray-300 group-hover:text-white transition-colors whitespace-nowrap"
+                >
+                  {pillar === 'Progressive Metal' ? 'Prog' : 
+                   pillar === 'Metalcore' ? 'Core' : 
+                   pillar.replace(' Metal', '')}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </header>
