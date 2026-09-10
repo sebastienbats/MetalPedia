@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Cinzel, Inter, Metal_Mania } from 'next/font/google';
+import { Cinzel, Inter, Metal_Mania, MedievalSharp } from 'next/font/google';
 import Script from 'next/script';
 import { Providers } from './providers';
 import Header from '@/components/layout/Header';
@@ -32,6 +32,14 @@ const fontMetalMania = Metal_Mania({
   subsets: ['latin'],
   weight: '400',
   variable: '--font-metal-mania',
+  display: 'swap',
+});
+
+// 🆕 Police manuscrite pour le Parchemin du Temps (Timeline)
+const fontMedievalSharp = MedievalSharp({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-medieval',
   display: 'swap',
 });
 
@@ -152,7 +160,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${fontInter.variable} ${fontCinzel.variable} ${fontMetalMania.variable}`}
+      className={`${fontInter.variable} ${fontCinzel.variable} ${fontMetalMania.variable} ${fontMedievalSharp.variable}`}
       suppressHydrationWarning
     >
       <head>
