@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════
+   THÈMES (Variables CSS)
+   ═══════════════════════════════════════════ */
 :root,
 [data-theme="forge"] {
   --color-primary: #8b0000;
@@ -61,8 +64,54 @@
   z-index: 1000;
 }
 
-.vis-item.event-black { background: #000; border-color: #4a148c; }
-.vis-item.event-heavy { background: #1a0a0a; border-color: #d63031; }
+/* ═══════════════════════════════════════════
+   TIMELINE - COULEURS DES PILIERS (Infaillible)
+   ═══════════════════════════════════════════ */
+.timeline-event-heavy { 
+  background-color: rgba(201, 162, 39, 0.9) !important; 
+  border: 1px solid #c9a227 !important; 
+  color: #ffffff !important; 
+}
+.timeline-event-thrash { 
+  background-color: rgba(255, 111, 0, 0.9) !important; 
+  border: 1px solid #ff6f00 !important; 
+  color: #ffffff !important; 
+}
+.timeline-event-death { 
+  background-color: rgba(139, 0, 0, 0.9) !important; 
+  border: 1px solid #8b0000 !important; 
+  color: #ffffff !important; 
+}
+.timeline-event-black { 
+  background-color: rgba(74, 20, 140, 0.9) !important; 
+  border: 1px solid #4a148c !important; 
+  color: #ffffff !important; 
+}
+.timeline-event-power { 
+  background-color: rgba(214, 48, 49, 0.9) !important; 
+  border: 1px solid #d63031 !important; 
+  color: #ffffff !important; 
+}
+.timeline-event-doom { 
+  background-color: rgba(45, 52, 54, 0.9) !important; 
+  border: 1px solid #2d3436 !important; 
+  color: #ffffff !important; 
+}
+.timeline-event-progressive { 
+  background-color: rgba(2, 119, 189, 0.9) !important; 
+  border: 1px solid #0277bd !important; 
+  color: #ffffff !important; 
+}
+.timeline-event-folk { 
+  background-color: rgba(46, 125, 50, 0.9) !important; 
+  border: 1px solid #2e7d32 !important; 
+  color: #ffffff !important; 
+}
+.timeline-event-metalcore { 
+  background-color: rgba(106, 27, 154, 0.9) !important; 
+  border: 1px solid #6a1b9a !important; 
+  color: #ffffff !important; 
+}
 
 /* ═══════════════════════════════════════════
    TIMELINE - CORDE DE GUITARE (Axe central)
@@ -114,37 +163,37 @@
 .timeline-custom-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 8px 12px;
-  border-radius: 8px;
-  font-family: var(--font-inter), sans-serif;
+  border-radius: 6px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
   font-size: 0.875rem;
-  color: #e5e7eb;
-  transition: all 0.2s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .timeline-custom-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
-  filter: brightness(1.15);
 }
 
-.timeline-icon {
+.timeline-icon-circle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
   font-size: 0.9rem;
   flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white !important;
 }
 
-.timeline-content {
-  font-weight: 500;
+.timeline-text-content {
+  color: #ffffff !important;
+  font-weight: 600;
   line-height: 1.3;
 }
 
@@ -165,16 +214,14 @@
   z-index: 10 !important;
 }
 
-/* Lignes décennales en filigrane */
-.vis-time-axis .vis-grid.vis-major {
-  position: relative;
-}
-
-/* Animation d'apparition du Lore */
+/* ═══════════════════════════════════════════
+   ANIMATIONS & UTILITAIRES
+   ═══════════════════════════════════════════ */
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
 .animate-fade-in {
   animation: fade-in 0.4s ease-out forwards;
 }
@@ -183,6 +230,7 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
