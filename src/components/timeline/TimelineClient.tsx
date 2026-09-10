@@ -161,14 +161,16 @@ export default function TimelineClient() {
   useEffect(() => {
     if (!timelineRef.current) return;
 
-    const { DataSet } = require('vis-timeline/standalone');
-    const filteredEvents = activeFilters.length > 0
-      ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!))
-      : METAL_EVENTS;
+    // Utilisation dynamique de l'import pour éviter les erreurs de build Next.js
+    import('vis-timeline/standalone').then(({ DataSet }) => {
+      const filteredEvents = activeFilters.length > 0
+        ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!))
+        : METAL_EVENTS;
 
-    const newDataSet = new DataSet(filteredEvents);
-    timelineRef.current.setItems(newDataSet);
-    setActiveLore(null); // Reset du lore quand on filtre
+      const newDataSet = new DataSet(filteredEvents);
+      timelineRef.current.setItems(newDataSet);
+      setActiveLore(null); // Reset du lore quand on filtre
+    });
   }, [activeFilters]);
 
   const handleGoToYear = (year: string) => {
@@ -190,7 +192,7 @@ export default function TimelineClient() {
 
   return (
     <div className="space-y-6">
-      {/* 🆕 CHIPS DE FILTRAGE PAR PILIER */}
+      {/* 🆕 CHIPS DE FILTRAGE PAR PILIER (Couleurs permanentes + Texte blanc) */}
       <div className="metal-card p-4">
         <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">
           🔍 Filtrer par pilier
@@ -200,8 +202,8 @@ export default function TimelineClient() {
             onClick={() => setActiveFilters([])}
             className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${
               activeFilters.length === 0
-                ? 'bg-metal-fire text-white border-metal-fire shadow-lg shadow-metal-fire/30'
-                : 'bg-metal-black/50 text-gray-400 border-metal-gray hover:border-metal-fire hover:text-metal-fire'
+                ? 'bg-metal-fire text-white border-metal-fire shadow-lg shadow-metal-fire/50 scale-105'
+                : 'bg-metal-fire/30 text-white/80 border-metal-fire/50 hover:bg-metal-fire/50 hover:text-white'
             }`}
           >
             🌍 Tout voir
@@ -214,13 +216,18 @@ export default function TimelineClient() {
                 onClick={() => toggleFilter(key as GamificationPillar)}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border flex items-center gap-1.5 shrink-0 ${
                   isActive
-                    ? 'text-white scale-105 shadow-lg'
-                    : 'bg-metal-black/50 text-gray-400 border-metal-gray hover:border-gray-500'
+                    ? 'text-white scale-105'
+                    : 'text-white/80 hover:text-white hover:scale-105'
                 }`}
                 style={{
-                  borderColor: isActive ? data.color : undefined,
-                  backgroundColor: isActive ? `${data.color}40` : undefined,
-                  boxShadow: isActive ? `0 4px 12px ${data.color}40` : undefined,
+                  // 🎨 Fond TOUJOURS coloré avec la couleur du pilier
+                  backgroundColor: isActive ? `${data.color}90` : `${data.color}35`,
+                  // 🎨 Bordure TOUJOURS colorée
+                  borderColor: isActive ? data.color : `${data.color}60`,
+                  // 🎨 Glow lumineux quand actif, ombre subtile sinon
+                  boxShadow: isActive 
+                    ? `0 0 12px ${data.color}60, 0 0 24px ${data.color}30` 
+                    : `0 2px 4px rgba(0,0,0,0.3)`,
                 }}
               >
                 <span>{data.icon}</span>
