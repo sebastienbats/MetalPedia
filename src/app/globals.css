@@ -199,7 +199,7 @@
 }
 
 /* ═══════════════════════════════════════════
-   ICÔNES COMPACTES SUR PARCHEMIN
+   ICÔNES COMPACTES SUR PARCHEMIN (Annotations manuscrites)
    ═══════════════════════════════════════════ */
 
 .parchment-icon {
@@ -261,7 +261,7 @@
   overflow: visible !important;
 }
 
-/* ═══════════════════════════════════════════
+/* ══════════════════════════════════════════
    CORRECTION OVERFLOW (Suppression des reliquats)
    ═══════════════════════════════════════════ */
 
@@ -283,64 +283,77 @@
 }
 
 /* ═══════════════════════════════════════════
-   SCEAUX DE CIRE (Décennies Clés) - ALIGNÉS
+   SCEAUX DE CIRE (Décennies Clés) - VERSION ITEMS
    ═══════════════════════════════════════════ */
 
-/* Conteneur du custom time : largeur 0 pour centrer parfaitement sur le tick */
-.vis-custom-time {
+/* Conteneur de l'item sceau - même système de coordonnées que les événements */
+.vis-item.tp-wax-seal {
+  width: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+  height: 40px !important;
   background: transparent !important;
-  border-left: none !important;
-  width: 0 !important;
-  margin-left: 0 !important;
-  z-index: 5 !important;
+  border: none !important;
+  box-shadow: none !important;
   overflow: visible !important;
-  position: absolute !important;
+  border-radius: 50% !important;
+  z-index: 4 !important;
 }
 
-/* Masquer la ligne verticale par défaut */
-.vis-custom-time .vis-line {
-  display: none !important;
+.vis-item.tp-wax-seal .vis-item-content {
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+  overflow: visible !important;
 }
 
-/* Sceau de cire dessiné via pseudo-élément, décalé de -20px pour centrer */
-.vis-custom-time::before {
-  content: '';
-  position: absolute;
-  top: -15px;
-  left: -20px; 
-  width: 40px;
-  height: 40px;
-  background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%);
-  border: 2px solid #3e0000;
-  border-radius: 50%;
+/* Icône du sceau de cire (cercle rouge avec année inscrite) */
+.wax-seal-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
+  border: 2px solid #3e0000 !important;
+  font-family: var(--font-medieval), serif !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  color: #fff3e0 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
   box-shadow:
     0 0 0 2px rgba(62, 0, 0, 0.4),
     0 4px 12px rgba(139, 0, 0, 0.6),
     inset 0 -3px 6px rgba(0, 0, 0, 0.4),
-    inset 0 2px 4px rgba(255, 100, 100, 0.3);
+    inset 0 2px 4px rgba(255, 100, 100, 0.3) !important;
   background-image:
     radial-gradient(circle at 20% 20%, rgba(255, 200, 200, 0.3) 0%, transparent 30%),
-    radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.3) 0%, transparent 40%);
-  z-index: 10;
-  pointer-events: none;
+    radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.3) 0%, transparent 40%) !important;
+  position: relative !important;
+  z-index: 4 !important;
 }
 
-/* Label de l'année centré sous le sceau */
-.vis-custom-time .vis-custom-time-label {
-  position: absolute;
-  top: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-medieval), serif !important;
-  font-size: 0.75rem !important;
-  color: #3e2723 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5) !important;
-  background: transparent !important;
-  border: none !important;
-  padding: 2px 4px !important;
-  white-space: nowrap !important;
-  z-index: 11;
-  text-align: center !important;
+.wax-seal-icon:hover {
+  transform: scale(1.25) !important;
+  box-shadow:
+    0 0 0 3px rgba(198, 40, 40, 0.8),
+    0 6px 20px rgba(139, 0, 0, 0.8),
+    0 0 30px rgba(198, 40, 40, 0.5) !important;
+  filter: brightness(1.2) !important;
+}
+
+/* Ligne verticale des sceaux (plus épaisse et rouge) */
+.vis-item.tp-wax-seal .vis-line {
+  border-left: 3px solid rgba(139, 0, 0, 0.7) !important;
+  opacity: 0.8 !important;
+  z-index: 3 !important;
 }
 
 /* ═══════════════════════════════════════════
@@ -357,7 +370,7 @@
 
 /* ═══════════════════════════════════════════
    ANIMATIONS & UTILITAIRES
-   ═══════════════════════════════════════════ */
+   ══════════════════════════════════════════ */
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
