@@ -97,8 +97,8 @@ export default function TimelineClient() {
         const initialItems = new DataSet(METAL_EVENTS);
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-        // ✅ CORRECTION : Suppression de 'cluster: false' qui causait l'erreur de type TypeScript
-        const options = {
+        // ✅ Options typées correctement (sans cluster: false)
+        const options: any = {
           height: isMobile ? '500px' : '600px',
           start: '1975-01-01',
           end: '2010-01-01',
@@ -142,7 +142,7 @@ export default function TimelineClient() {
           timelineRef.current.addCustomTime(seal.date, seal.id);
         });
 
-        //  Écouteur de clic pour afficher le tooltip dans le panneau Lore
+        //  Écouteur de clic pour afficher le lore dans le panneau
         timelineRef.current.on('click', (properties: any) => {
           if (properties.item) {
             const event = METAL_EVENTS.find(e => e.id === properties.item);
@@ -156,7 +156,7 @@ export default function TimelineClient() {
               }
               
               if (event.loreSnippet) {
-                tooltipContent += `\n\n📜 ${event.loreSnippet}`;
+                tooltipContent += `\n\n ${event.loreSnippet}`;
               }
               
               setActiveLore(tooltipContent);
@@ -253,12 +253,12 @@ export default function TimelineClient() {
         </div>
         {activeFilters.length > 0 && (
           <p className="text-xs text-gray-500 mt-2 italic">
-            ✨ Affichage de {METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length} événement{METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length > 1 ? 's' : ''}
+             Affichage de {METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length} événement{METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length > 1 ? 's' : ''}
           </p>
         )}
       </div>
 
-      {/* 🆕 PANNEAU DE LORE/TOOLTIP ACTIF */}
+      {/* 📜 PANNEAU DE LORE/TOOLTIP ACTIF */}
       {activeLore && (
         <div className="metal-card p-4 border-l-4 border-metal-fire bg-metal-fire/5 animate-fade-in">
           <div className="text-gray-200 font-serif whitespace-pre-line">
@@ -289,7 +289,7 @@ export default function TimelineClient() {
             onClick={() => handleGoToYear(year)}
             className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-metal-fire hover:border-metal-fire hover:bg-metal-fire/10 transition-all active:scale-95"
           >
-            ⏳ Aller à {year}
+             Aller à {year}
           </button>
         ))}
         <button
