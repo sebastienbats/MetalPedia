@@ -97,6 +97,7 @@ export default function TimelineClient() {
         const initialItems = new DataSet(METAL_EVENTS);
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
+        // ✅ CORRECTION : Suppression de 'cluster: false' qui causait l'erreur de type TypeScript
         const options = {
           height: isMobile ? '500px' : '600px',
           start: '1975-01-01',
@@ -114,7 +115,6 @@ export default function TimelineClient() {
           showCurrentTime: false,
           zoomable: !isMobile,
           moveable: true,
-          cluster: false,
           
           // 🎨 TEMPLATE : Icônes compactes sur parchemin
           template: (item: TimelineEvent) => {
