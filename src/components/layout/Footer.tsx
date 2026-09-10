@@ -12,9 +12,9 @@ export default function Footer() {
           <Link href="/timeline" className="hover:text-metal-fire">Timeline</Link>
         </nav>
         <p>
-          🤘 MetalPedia © 2026 — Propulsé par{' '}
-          <a href="https://www.metal-api.dev" target="_blank" rel="noopener noreferrer" className="text-metal-fire">
-            metal-api.dev
+          🤘 MetalPedia © 2026 — Base de données propulsée par{' '}
+          <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="text-metal-fire hover:underline">
+            Supabase
           </a>
         </p>
       </div>
