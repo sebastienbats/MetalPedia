@@ -65,52 +65,83 @@
 }
 
 /* ═══════════════════════════════════════════
-   TIMELINE - COULEURS DES PILIERS (Infaillible)
+   TIMELINE - COULEURS DES PILIERS (Méthode Native vis-timeline)
    ═══════════════════════════════════════════ */
-.timeline-event-heavy { 
+
+/* Heavy Metal */
+.vis-item.tp-heavy { 
   background-color: rgba(201, 162, 39, 0.9) !important; 
   border: 1px solid #c9a227 !important; 
-  color: #ffffff !important; 
 }
-.timeline-event-thrash { 
+/* Thrash Metal */
+.vis-item.tp-thrash { 
   background-color: rgba(255, 111, 0, 0.9) !important; 
   border: 1px solid #ff6f00 !important; 
-  color: #ffffff !important; 
 }
-.timeline-event-death { 
+/* Death Metal */
+.vis-item.tp-death { 
   background-color: rgba(139, 0, 0, 0.9) !important; 
   border: 1px solid #8b0000 !important; 
-  color: #ffffff !important; 
 }
-.timeline-event-black { 
+/* Black Metal */
+.vis-item.tp-black { 
   background-color: rgba(74, 20, 140, 0.9) !important; 
   border: 1px solid #4a148c !important; 
-  color: #ffffff !important; 
 }
-.timeline-event-power { 
+/* Power Metal */
+.vis-item.tp-power { 
   background-color: rgba(214, 48, 49, 0.9) !important; 
   border: 1px solid #d63031 !important; 
-  color: #ffffff !important; 
 }
-.timeline-event-doom { 
+/* Doom Metal */
+.vis-item.tp-doom { 
   background-color: rgba(45, 52, 54, 0.9) !important; 
   border: 1px solid #2d3436 !important; 
-  color: #ffffff !important; 
 }
-.timeline-event-progressive { 
+/* Progressive Metal */
+.vis-item.tp-progressive { 
   background-color: rgba(2, 119, 189, 0.9) !important; 
   border: 1px solid #0277bd !important; 
-  color: #ffffff !important; 
 }
-.timeline-event-folk { 
+/* Folk Metal */
+.vis-item.tp-folk { 
   background-color: rgba(46, 125, 50, 0.9) !important; 
   border: 1px solid #2e7d32 !important; 
-  color: #ffffff !important; 
 }
-.timeline-event-metalcore { 
+/* Metalcore */
+.vis-item.tp-metalcore { 
   background-color: rgba(106, 27, 154, 0.9) !important; 
   border: 1px solid #6a1b9a !important; 
-  color: #ffffff !important; 
+}
+
+/* Force le texte en blanc à l'intérieur de la boîte vis-timeline */
+.vis-item[class^="tp-"] .vis-item-content {
+  color: #ffffff !important;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+}
+
+/* Style de l'icône à l'intérieur du contenu */
+.vis-item[class^="tp-"] .timeline-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+/* Hover effect sur les boîtes */
+.vis-item[class^="tp-"]:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+  z-index: 5 !important;
 }
 
 /* ═══════════════════════════════════════════
@@ -131,7 +162,6 @@
   border-width: 2px !important;
 }
 
-/* Ligne horizontale principale transformée en "corde de guitare" */
 .vis-panel.vis-center,
 .vis-panel.vis-bottom {
   border-color: transparent !important;
@@ -144,74 +174,10 @@
   right: 0;
   top: 50%;
   height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    #8b0000 10%,
-    #c9a227 50%,
-    #8b0000 90%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, #8b0000 10%, #c9a227 50%, #8b0000 90%, transparent 100%);
   box-shadow: 0 0 8px rgba(139, 0, 0, 0.4);
   z-index: 0;
   pointer-events: none;
-}
-
-/* ═══════════════════════════════════════════
-   TIMELINE - ITEMS CUSTOM
-   ═══════════════════════════════════════════ */
-.timeline-custom-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 0.875rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.timeline-custom-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
-}
-
-.timeline-icon-circle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  font-size: 0.9rem;
-  flex-shrink: 0;
-  color: white !important;
-}
-
-.timeline-text-content {
-  color: #ffffff !important;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-/* Style des périodes (ranges) */
-.vis-item.vis-range {
-  border-radius: 6px !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.2) 100%) !important;
-}
-
-.vis-item.vis-point .vis-dot {
-  border-color: #8b0000 !important;
-  border-width: 3px !important;
-}
-
-.vis-item.vis-selected {
-  box-shadow: 0 0 0 2px #8b0000, 0 0 20px rgba(139, 0, 0, 0.6) !important;
-  z-index: 10 !important;
 }
 
 /* ═══════════════════════════════════════════
