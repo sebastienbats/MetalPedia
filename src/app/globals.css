@@ -4,7 +4,7 @@
 
 /* ═══════════════════════════════════════════
    THÈMES (Variables CSS)
-   ══════════════════════════════════════════ */
+   ═══════════════════════════════════════════ */
 :root,
 [data-theme="forge"] {
   --color-primary: #8b0000;
@@ -81,8 +81,7 @@
       #c9a876 100%
     );
   border-radius: 8px;
-  border: 0px; 
-  padding: 0px;
+  padding: 10px;
   position: relative;
   box-shadow: 
     inset 0 0 60px rgba(101, 67, 33, 0.4),
@@ -92,6 +91,7 @@
   overflow: visible !important;
 }
 
+/* Texture papier subtile */
 .timeline-container::before {
   content: '';
   position: absolute;
@@ -104,6 +104,7 @@
   border-radius: 8px;
 }
 
+/* Bords brûlés du parchemin */
 .timeline-container::after {
   content: '';
   position: absolute;
@@ -155,6 +156,10 @@
    LIGNE D'ENCRE SÉPIA (Axe du temps)
    ═══════════════════════════════════════════ */
 
+.vis-panel.vis-center {
+  padding-top: 10px !important;
+}
+
 .vis-panel.vis-center::before {
   content: '';
   position: absolute;
@@ -172,20 +177,15 @@
     transparent 100%
   );
   box-shadow: 0 0 4px rgba(62, 39, 35, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
-  z-index: 0;
+  z-index: 0 !important;
   pointer-events: none;
   filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='rough'><feTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2'/><feDisplacementMap in='SourceGraphic' scale='2'/></filter></svg>#rough");
-}
-
-.vis-panel.vis-center {
-  padding-top: 10px !important;
 }
 
 /* ═══════════════════════════════════════════
    GOUTTES D'ENCRE (Lignes verticales)
    ═══════════════════════════════════════════ */
 
-/* ✅ Forcer l'affichage des lignes verticales */
 .vis-item .vis-line {
   border-left: 2px dashed rgba(62, 39, 35, 0.5) !important;
   opacity: 1 !important;
@@ -194,16 +194,14 @@
   display: block !important;
 }
 
-/* Ligne plus épaisse pour les périodes */
 .vis-item.vis-range .vis-line {
   border-left: 3px solid rgba(139, 0, 0, 0.4) !important;
 }
 
 /* ═══════════════════════════════════════════
-   ICÔNES COMPACTES SUR PARCHEMIN (Annotations manuscrites)
+   ICÔNES COMPACTES SUR PARCHEMIN
    ═══════════════════════════════════════════ */
 
-/* ✅ Cercle coloré avec l'icône du pilier */
 .parchment-icon {
   display: inline-flex !important;
   align-items: center !important;
@@ -239,7 +237,7 @@
   filter: brightness(1.1) !important;
 }
 
-/* ✅ Forcer les conteneurs d'événements en cercles transparents */
+/* Conteneurs d'événements forcés en cercles transparents */
 .vis-item[class^="tp-"] {
   width: 40px !important;
   min-width: 40px !important;
@@ -263,7 +261,10 @@
   overflow: visible !important;
 }
 
-/* ✅ Supprimer les divs vis-item-overflow */
+/* ═══════════════════════════════════════════
+   CORRECTION OVERFLOW (Suppression des reliquats)
+   ═══════════════════════════════════════════ */
+
 .vis-item-overflow {
   overflow: visible !important;
   width: 100% !important;
@@ -274,7 +275,6 @@
   display: none !important;
 }
 
-/* ✅ Tous les conteneurs en overflow visible */
 .vis-item,
 .vis-item.vis-point,
 .vis-item.vis-range,
@@ -283,33 +283,33 @@
 }
 
 /* ═══════════════════════════════════════════
-   SCEAUX DE CIRE (Décennies Clés)
+   SCEAUX DE CIRE (Décennies Clés) - ALIGNÉS
    ═══════════════════════════════════════════ */
 
+/* Conteneur du custom time : largeur 0 pour centrer parfaitement sur le tick */
 .vis-custom-time {
   background: transparent !important;
   border-left: none !important;
-  width: 40px !important;
-  margin-left: -20px !important;
+  width: 0 !important;
+  margin-left: 0 !important;
   z-index: 5 !important;
   overflow: visible !important;
+  position: absolute !important;
 }
 
+/* Masquer la ligne verticale par défaut */
 .vis-custom-time .vis-line {
   display: none !important;
 }
 
-/* ✅ Sceau de cire complet avec intérieur texturé */
+/* Sceau de cire dessiné via pseudo-élément, décalé de -20px pour centrer */
 .vis-custom-time::before {
-  content: '🔴';
+  content: '';
   position: absolute;
   top: -15px;
-  left: 0;
+  left: -20px; 
   width: 40px;
   height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%);
   border: 2px solid #3e0000;
   border-radius: 50%;
@@ -323,10 +323,9 @@
     radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.3) 0%, transparent 40%);
   z-index: 10;
   pointer-events: none;
-  font-size: 1.5rem;
-  line-height: 1;
 }
 
+/* Label de l'année centré sous le sceau */
 .vis-custom-time .vis-custom-time-label {
   position: absolute;
   top: 30px;
@@ -341,6 +340,7 @@
   padding: 2px 4px !important;
   white-space: nowrap !important;
   z-index: 11;
+  text-align: center !important;
 }
 
 /* ═══════════════════════════════════════════
@@ -355,7 +355,7 @@
   transform: scale(1.15) !important;
 }
 
-/* ══════════════════════════════════════════
+/* ═══════════════════════════════════════════
    ANIMATIONS & UTILITAIRES
    ═══════════════════════════════════════════ */
 @keyframes fade-in {
@@ -367,6 +367,7 @@
   animation: fade-in 0.4s ease-out forwards;
 }
 
+/* Scrollbar cachée pour les chips */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
