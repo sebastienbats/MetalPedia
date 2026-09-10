@@ -118,9 +118,9 @@ export default function TimelineClient() {
             const icon = pillarData?.icon || '🎸';
             
             return `
-              <div class="timeline-custom-item" style="border-left: 3px solid ${color}; background: ${color}15;">
-                <span class="timeline-icon" style="background: ${color}30;">${icon}</span>
-                <span class="timeline-content">${item.content}</span>
+              <div class="timeline-custom-item" style="border-left: 3px solid ${color}; background: ${color}20;">
+                <span class="timeline-icon" style="background: ${color}40; color: white;">${icon}</span>
+                <span class="timeline-content" style="color: #f3f4f6;">${item.content}</span>
               </div>
             `;
           },
@@ -161,7 +161,6 @@ export default function TimelineClient() {
   useEffect(() => {
     if (!timelineRef.current) return;
 
-    // Utilisation dynamique de l'import pour éviter les erreurs de build Next.js
     import('vis-timeline/standalone').then(({ DataSet }) => {
       const filteredEvents = activeFilters.length > 0
         ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!))
@@ -192,7 +191,7 @@ export default function TimelineClient() {
 
   return (
     <div className="space-y-6">
-      {/* 🆕 CHIPS DE FILTRAGE PAR PILIER (Couleurs permanentes + Texte blanc) */}
+      {/* 🎨 CHIPS DE FILTRAGE PAR PILIER (Fond coloré permanent + Texte blanc pur) */}
       <div className="metal-card p-4">
         <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">
           🔍 Filtrer par pilier
@@ -203,31 +202,27 @@ export default function TimelineClient() {
             className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${
               activeFilters.length === 0
                 ? 'bg-metal-fire text-white border-metal-fire shadow-lg shadow-metal-fire/50 scale-105'
-                : 'bg-metal-fire/30 text-white/80 border-metal-fire/50 hover:bg-metal-fire/50 hover:text-white'
+                : 'bg-metal-fire/20 text-white border-metal-fire/40 hover:bg-metal-fire/40'
             }`}
           >
             🌍 Tout voir
           </button>
+          
           {Object.entries(PILLAR_METADATA).map(([key, data]) => {
             const isActive = activeFilters.includes(key as GamificationPillar);
             return (
               <button
                 key={key}
                 onClick={() => toggleFilter(key as GamificationPillar)}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border flex items-center gap-1.5 shrink-0 ${
-                  isActive
-                    ? 'text-white scale-105'
-                    : 'text-white/80 hover:text-white hover:scale-105'
-                }`}
+                // 🎯 Texte TOUJOURS blanc pur (text-white), sans opacité
+                className="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border flex items-center gap-1.5 shrink-0 text-white hover:scale-105"
                 style={{
-                  // 🎨 Fond TOUJOURS coloré avec la couleur du pilier
-                  backgroundColor: isActive ? `${data.color}90` : `${data.color}35`,
-                  // 🎨 Bordure TOUJOURS colorée
-                  borderColor: isActive ? data.color : `${data.color}60`,
-                  // 🎨 Glow lumineux quand actif, ombre subtile sinon
-                  boxShadow: isActive 
-                    ? `0 0 12px ${data.color}60, 0 0 24px ${data.color}30` 
-                    : `0 2px 4px rgba(0,0,0,0.3)`,
+                  // 🎯 Fond TOUJOURS coloré : 30% d'opacité si inactif, 85% si actif
+                  backgroundColor: isActive ? `${data.color}d9` : `${data.color}4d`,
+                  // 🎯 Bordure TOUJOURS colorée : 50% si inactif, 100% si actif
+                  borderColor: isActive ? data.color : `${data.color}80`,
+                  // 🎯 Glow lumineux uniquement quand actif
+                  boxShadow: isActive ? `0 0 12px ${data.color}90, 0 0 24px ${data.color}50` : '0 2px 4px rgba(0,0,0,0.3)',
                 }}
               >
                 <span>{data.icon}</span>
