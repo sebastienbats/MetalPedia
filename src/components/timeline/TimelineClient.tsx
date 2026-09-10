@@ -97,7 +97,7 @@ export default function TimelineClient() {
         const initialItems = new DataSet(METAL_EVENTS);
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-        // ✅ Options typées correctement (sans cluster: false)
+        // ✅ Options typées en 'any' pour éviter les conflits TypeScript avec vis-timeline
         const options: any = {
           height: isMobile ? '500px' : '600px',
           start: '1975-01-01',
@@ -116,13 +116,14 @@ export default function TimelineClient() {
           zoomable: !isMobile,
           moveable: true,
           
-          // 🎨 TEMPLATE : Icônes compactes sur parchemin
+          //  TEMPLATE : Cercles colorés avec icônes des piliers (Annotations manuscrites)
           template: (item: TimelineEvent) => {
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
             const icon = pillarData?.icon || '🎸';
             const color = pillarData?.color || '#8b0000';
             
-            return `<div class="parchment-icon" style="--pillar-color: ${color}">${icon}</div>`;
+            // Le CSS .parchment-icon utilise --pillar-color pour la bordure et le glow
+            return `<div class="parchment-icon" style="--pillar-color: ${color};">${icon}</div>`;
           },
         };
 
@@ -156,7 +157,7 @@ export default function TimelineClient() {
               }
               
               if (event.loreSnippet) {
-                tooltipContent += `\n\n ${event.loreSnippet}`;
+                tooltipContent += `\n\n📜 ${event.loreSnippet}`;
               }
               
               setActiveLore(tooltipContent);
@@ -253,7 +254,7 @@ export default function TimelineClient() {
         </div>
         {activeFilters.length > 0 && (
           <p className="text-xs text-gray-500 mt-2 italic">
-             Affichage de {METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length} événement{METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length > 1 ? 's' : ''}
+            ✨ Affichage de {METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length} événement{METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length > 1 ? 's' : ''}
           </p>
         )}
       </div>
@@ -289,7 +290,7 @@ export default function TimelineClient() {
             onClick={() => handleGoToYear(year)}
             className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-metal-fire hover:border-metal-fire hover:bg-metal-fire/10 transition-all active:scale-95"
           >
-             Aller à {year}
+            ⏳ Aller à {year}
           </button>
         ))}
         <button
@@ -302,7 +303,7 @@ export default function TimelineClient() {
 
       {/* Légende dynamique */}
       <div className="metal-card p-5">
-        <h3 className="font-serif text-lg mb-3 text-metal-rust">🎨 Légende des Piliers</h3>
+        <h3 className="font-serif text-lg mb-3 text-metal-rust"> Légende des Piliers</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
           {Object.entries(PILLAR_METADATA).map(([key, data]) => (
             <div key={key} className="flex items-center gap-2">
