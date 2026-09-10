@@ -69,7 +69,6 @@
    ═══════════════════════════════════════════ */
 
 .timeline-container {
-  /* Fond parchemin en une seule couche de background */
   background: 
     radial-gradient(ellipse at 20% 30%, rgba(139, 90, 43, 0.15) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 70%, rgba(101, 67, 33, 0.15) 0%, transparent 50%),
@@ -89,7 +88,6 @@
     inset 0 0 20px rgba(139, 90, 43, 0.3),
     0 10px 40px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(101, 67, 33, 0.5);
-  /* ✅ overflow visible pour ne pas couper les icônes qui débordent */
   overflow: visible !important;
 }
 
@@ -122,43 +120,73 @@
 }
 
 /* ═══════════════════════════════════════════
-   AXE CHRONOLOGIQUE (Ligne d'Encre Sépia)
+   AXE CHRONOLOGIQUE (Dates & Grilles)
    ═══════════════════════════════════════════ */
 
+/* Dates de l'axe - style parchemin */
 .vis-time-axis .vis-text {
   color: #3e2723 !important;
   font-family: var(--font-medieval), serif !important;
   font-size: 0.85rem !important;
-  text-shadow: 0 1px 2px rgba(139, 90, 43, 0.3);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  font-weight: 600;
 }
 
+/* Grilles mineures (lignes verticales discrètes) */
 .vis-time-axis .vis-grid.vis-minor {
-  border-color: rgba(101, 67, 33, 0.2) !important;
+  border-color: rgba(101, 67, 33, 0.15) !important;
   border-style: dashed !important;
 }
 
+/* Grilles majeures (décennies) */
 .vis-time-axis .vis-grid.vis-major {
-  border-color: rgba(62, 39, 35, 0.5) !important;
+  border-color: rgba(62, 39, 35, 0.4) !important;
   border-width: 2px !important;
 }
 
+/* Bordures des panneaux transparentes */
 .vis-panel.vis-center,
-.vis-panel.vis-bottom {
+.vis-panel.vis-bottom,
+.vis-panel.vis-top {
   border-color: transparent !important;
 }
 
+/* Hauteur fixe du panneau des dates pour un alignement parfait */
+.vis-panel.vis-top {
+  height: 40px !important;
+  min-height: 40px !important;
+}
+
+/* ═══════════════════════════════════════════
+   LIGNE D'ENCRE SÉPIA (Axe du temps)
+   ═══════════════════════════════════════════ */
+
+/* ✅ Ligne repositionnée en haut du panneau central (juste sous les dates) */
 .vis-panel.vis-center::before {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
-  top: 50%;
+  top: 0; 
   height: 3px;
-  background: linear-gradient(90deg, transparent 0%, #3e2723 5%, #5d4037 20%, #3e2723 50%, #5d4037 80%, #3e2723 95%, transparent 100%);
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    #3e2723 5%, 
+    #5d4037 20%, 
+    #3e2723 50%, 
+    #5d4037 80%, 
+    #3e2723 95%, 
+    transparent 100%
+  );
   box-shadow: 0 0 4px rgba(62, 39, 35, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
   z-index: 0;
   pointer-events: none;
   filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='rough'><feTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2'/><feDisplacementMap in='SourceGraphic' scale='2'/></filter></svg>#rough");
+}
+
+/* Espace entre la ligne d'encre et le début des icônes */
+.vis-panel.vis-center {
+  padding-top: 10px !important;
 }
 
 /* ═══════════════════════════════════════════
@@ -208,7 +236,6 @@
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  /* ✅ overflow visible pour les icônes */
   overflow: visible !important;
 }
 
@@ -225,16 +252,14 @@
 
 /* ═══════════════════════════════════════════
    CORRECTION : Supprimer les divs vis-item-overflow
-   ═══════════════════════════════════════════ */
+   ══════════════════════════════════════════ */
 
-/* ✅ Forcer l'affichage correct sans overflow caché */
 .vis-item-overflow {
   overflow: visible !important;
   width: 100% !important;
   height: 100% !important;
 }
 
-/* ✅ Masquer le conteneur overflow des ranges qui coupe le design */
 .vis-item.vis-range .vis-item-overflow {
   display: none !important;
 }
@@ -280,7 +305,7 @@
   display: none !important;
 }
 
-/* ✅ Dessiner le Sceau de Cire via un pseudo-élément avec z-index élevé */
+/* Dessiner le Sceau de Cire via un pseudo-élément avec z-index élevé */
 .vis-custom-time::before {
   content: '';
   position: absolute;
@@ -332,7 +357,7 @@
   transform: scale(1.15);
 }
 
-/* ═══════════════════════════════════════════
+/* ══════════════════════════════════════════
    ANIMATIONS & UTILITAIRES
    ═══════════════════════════════════════════ */
 @keyframes fade-in {
