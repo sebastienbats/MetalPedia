@@ -119,12 +119,19 @@
    ═══════════════════════════════════════════ */
 
 /* Style de base pour toutes les périodes */
-.vis-item.vis-range {
-  border-radius: 20px !important;
-  border: none !important;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5) !important;
-  position: relative;
-  overflow: visible !important;
+/* Texte centré avec police réduite et padding pour éviter les flèches */
+.vis-item.vis-range .vis-item-content {
+  text-align: center !important;
+  padding: 6px 40px !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.75rem !important;
+  line-height: 1.2 !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Dégradé avec glow pour chaque pilier (périodes uniquement) */
