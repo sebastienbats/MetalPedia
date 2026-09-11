@@ -34,7 +34,7 @@ const METAL_EVENTS: TimelineEvent[] = [
   { id: 15, content: 'Morbid Angel - "Altars of Madness"', start: '1989-05-12', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Les autels de la folie sont érigés.' },
   { id: 16, content: 'Cannibal Corpse - Formation', start: '1988-12-01', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Le cadavre cannibale prend vie à Buffalo.' },
   { id: 17, content: 'Première vague Black Metal', start: '1982-01-01', end: '1990-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'Les ténèbres s\'éveillent en Europe.' },
-  { id: 18, content: 'Seconde vague Black Metal norvégien', start: '1991-01-01', end: '1996-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: '🌑 Les forêts de Norvège s\'embrasent. Le froid est absolu.' },
+  { id: 18, content: 'Seconde vague Black Metal norvégien', start: '1991-01-01', end: '1996-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: ' Les forêts de Norvège s\'embrasent. Le froid est absolu.' },
   { id: 19, content: 'Darkthrone - "A Blaze in the Northern Sky"', start: '1992-02-26', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'Un brasier s\'allume dans le ciel du Nord.' },
   { id: 20, content: 'Mayhem - "De Mysteriis Dom Sathanas"', start: '1994-05-24', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'L\'opus maudit scelle le pacte avec l\'Oubli.' },
   { id: 21, content: 'Burzum - "Filosofem"', start: '1996-01-01', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'La philosophie du son devient incantation.' },
@@ -54,41 +54,25 @@ const METAL_EVENTS: TimelineEvent[] = [
   { id: 35, content: 'Ghost - "Meliora"', start: '2015-08-21', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le clergé satirique bénit les foules.' },
 ];
 
-// 🕯️ SCEAUX DE CIRE avec IDs POSITIFS UNIQUES pour éviter tout bug de DataSet
-const WAX_SEALS: TimelineEvent[] = [
-  { id: 1001, content: '1970', start: '1970-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
-  { id: 1002, content: '1980', start: '1980-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
-  { id: 1003, content: '1990', start: '1990-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
-  { id: 1004, content: '2000', start: '2000-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
-  { id: 1005, content: '2010', start: '2010-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
-  { id: 1006, content: '2020', start: '2020-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
-];
-
-const ALL_TIMELINE_ITEMS = [...METAL_EVENTS, ...WAX_SEALS];
-
 export default function TimelineClient() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<any>(null);
   const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeLore, setActiveLore] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<GamificationPillar[]>([]);
 
-  useEffect(() => { 
-    setMounted(true); 
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    if (!mounted || typeof window === 'undefined' || !containerRef.current) return;
+    if (!mounted || typeof window === 'undefined') return;
+    const container = containerRef.current;
+    if (!container) return;
 
     const initTimeline = async () => {
       try {
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
-        const container = containerRef.current!;
-        
-        // Nettoyage radical du conteneur avant initialisation
-        container.innerHTML = '';
-        
-        const initialItems = new DataSet(ALL_TIMELINE_ITEMS);
+        const initialItems = new DataSet(METAL_EVENTS);
         const isMobile = window.innerWidth < 768;
 
         const options: any = {
@@ -105,30 +89,7 @@ export default function TimelineClient() {
           showCurrentTime: false,
           zoomable: !isMobile,
           moveable: true,
-          
           template: (item: TimelineEvent) => {
-            // 🚨 TEST ULTIME : CSS Inline + Bordure Jaune pour forcer la visibilité
-            if (item.className === 'tp-wax-seal') {
-              console.log('🔴 [DEBUG] Génération du sceau:', item.content, 'ID:', item.id);
-              return `<div style="
-                display: inline-flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                width: 40px !important;
-                height: 40px !important;
-                border-radius: 50% !important;
-                background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
-                border: 3px solid yellow !important;
-                font-family: serif !important;
-                font-size: 0.75rem !important;
-                font-weight: 700 !important;
-                color: #fff3e0 !important;
-                cursor: pointer !important;
-                z-index: 9999 !important;
-                box-shadow: 0 0 0 2px rgba(62, 0, 0, 0.4), 0 4px 12px rgba(139, 0, 0, 0.6) !important;
-              ">${item.content}</div>`;
-            }
-            
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
             const icon = pillarData?.icon || '🎸';
             const color = pillarData?.color || '#8b0000';
@@ -140,12 +101,8 @@ export default function TimelineClient() {
 
         timelineRef.current.on('click', (properties: any) => {
           if (properties.item) {
-            const event = ALL_TIMELINE_ITEMS.find(e => e.id === properties.item);
+            const event = METAL_EVENTS.find(e => e.id === properties.item);
             if (event) {
-              if (event.className === 'tp-wax-seal') {
-                setActiveLore(`🔴 Sceau de la décennie ${event.content}`);
-                return;
-              }
               let tooltipContent = event.content;
               if (event.type === 'range' && event.end) {
                 const startYear = new Date(event.start).getFullYear();
@@ -160,8 +117,10 @@ export default function TimelineClient() {
           }
         });
 
+        setIsLoading(false);
       } catch (error) {
         console.error('Erreur initialisation timeline:', error);
+        setIsLoading(false);
       }
     };
 
@@ -181,8 +140,7 @@ export default function TimelineClient() {
       const filteredEvents = activeFilters.length > 0
         ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!))
         : METAL_EVENTS;
-      const itemsToShow = [...filteredEvents, ...WAX_SEALS];
-      timelineRef.current.setItems(new DataSet(itemsToShow));
+      timelineRef.current.setItems(new DataSet(filteredEvents));
       setActiveLore(null);
     });
   }, [activeFilters]);
@@ -204,21 +162,10 @@ export default function TimelineClient() {
     ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length
     : METAL_EVENTS.length;
 
-  if (!mounted) {
-    return (
-      <div className="space-y-6">
-        <div className="metal-card p-4 space-y-4">
-          <div className="h-12 bg-metal-black/50 rounded animate-pulse" />
-          <div className="h-[500px] bg-metal-black/50 rounded animate-pulse flex items-center justify-center text-gray-500">
-            Chargement de la chronologie...
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (!mounted) return <Loader text="Invocation de la chronologie..." />;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" suppressHydrationWarning>
       <div className="metal-card p-4 space-y-4">
         <div>
           <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">🔍 Filtrer par pilier</h3>
@@ -268,11 +215,12 @@ export default function TimelineClient() {
         )}
 
         <div className="relative">
-          <div 
-            ref={containerRef} 
-            className="rounded-lg overflow-hidden timeline-container" 
-            style={{ minHeight: '500px' }}
-          />
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-metal-black/80 z-10 rounded-lg">
+              <Loader text="Tissage de la chronologie..." />
+            </div>
+          )}
+          <div ref={containerRef} className="rounded-lg overflow-hidden timeline-container" style={{ minHeight: '400px' }} />
         </div>
       </div>
 
@@ -281,13 +229,13 @@ export default function TimelineClient() {
           <h3 className="font-serif text-lg mb-3 text-metal-rust">⏳ Navigation Rapide</h3>
           <div className="flex flex-wrap justify-center gap-2">
             {['1970', '1985', '2000', '2015'].map((year) => (
-              <button key={year} onClick={() => handleGoToYear(year)} className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-metal-fire hover:border-metal-fire hover:bg-metal-fire/10 transition-all active:scale-95"> Aller à {year}</button>
+              <button key={year} onClick={() => handleGoToYear(year)} className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-metal-fire hover:border-metal-fire hover:bg-metal-fire/10 transition-all active:scale-95">⏳ Aller à {year}</button>
             ))}
-            <button onClick={() => handleGoToYear('1975')} className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-white hover:border-white transition-all active:scale-95">↺ Reset</button>
+            <button onClick={() => handleGoToYear('1975')} className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-white hover:border-white transition-all active:scale-95"> Reset</button>
           </div>
         </div>
         <div className="metal-card p-5">
-          <h3 className="font-serif text-lg mb-3 text-metal-rust">🎨 Légende des Piliers</h3>
+          <h3 className="font-serif text-lg mb-3 text-metal-rust"> Légende des Piliers</h3>
           <div className="grid grid-cols-2 gap-3 text-sm">
             {Object.entries(PILLAR_METADATA).map(([key, data]) => (
               <div key={key} className="flex items-center gap-2">
