@@ -122,24 +122,17 @@
    MOTEUR D'ALIGNEMENT UNIFIÉ (Dates + Gouttes + Sceaux)
    ═══════════════════════════════════════════ */
 
-/* 🛡️ MASQUER TOUT SAUF L'AXE DU HAUT */
+/* 🛡️ MASQUER L'AXE DU BAS (source des doublons) */
 .vis-panel.vis-bottom,
-.vis-time-axis.vis-bottom,
-.vis-time-axis.vis-foreground {
+.vis-time-axis.vis-bottom {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
   overflow: hidden !important;
 }
 
-/* Masquer les labels de niveau secondaire (mois, jours, etc.) */
-.vis-time-axis .vis-text.vis-minor,
-.vis-time-axis .vis-text:not(.vis-major) {
-  display: none !important;
-}
-
-/* 1. Dates de l'axe : UNIQUEMENT les labels majeurs (décennies) */
-.vis-time-axis.vis-top .vis-text.vis-major {
+/* 1. Dates de l'axe du HAUT : appliquer les styles à TOUS les labels */
+.vis-time-axis.vis-top .vis-text {
   color: #3e2723 !important;
   font-family: var(--font-medieval), serif !important;
   font-size: 0.85rem !important;
@@ -170,7 +163,7 @@
   border-left-style: solid !important;
 }
 
-/* 3. Grilles mineures : masquées pour éviter la confusion */
+/* 3. Grilles mineures : masquées pour éviter la confusion visuelle */
 .vis-time-axis .vis-grid.vis-minor {
   display: none !important;
 }
