@@ -122,31 +122,42 @@
    MOTEUR D'ALIGNEMENT UNIFIÉ (Dates + Gouttes + Sceaux)
    ═══════════════════════════════════════════ */
 
-/* 1. Dates de l'axe : centrées sur leur ligne de grille */
+/* 1. Dates de l'axe : centrées EXACTEMENT sur leur ligne de grille */
 .vis-time-axis .vis-text {
   color: #3e2723 !important;
   font-family: var(--font-medieval), serif !important;
   font-size: 0.85rem !important;
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
-  text-align: center !important;
+  
+  /* 🛡️ ANTI-SUPERPOSITION : Force la largeur au contenu réel */
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  padding: 0 4px !important;
+  
+  /* 🎯 CENTRAGE : Décale le texte de la moitié de sa propre largeur pour l'aligner sur la ligne */
   transform: translateX(-50%) !important;
+  text-align: center !important;
 }
 
-/* 2. Grilles majeures (décennies) : gouttes d'encre principales */
+/* 2. Grilles majeures (décennies : 1960, 1970, 1980...) : Lignes d'encre pleines */
 .vis-time-axis .vis-grid.vis-major {
-  border-color: rgba(62, 39, 35, 0.5) !important;
+  border-color: rgba(62, 39, 35, 0.6) !important;
   border-width: 2px !important;
   border-left-style: solid !important;
 }
 
-/* 3. Grilles mineures : plus discrètes */
+/* 3. Grilles mineures : pointillés discrets */
 .vis-time-axis .vis-grid.vis-minor {
-  border-color: rgba(101, 67, 33, 0.15) !important;
+  border-color: rgba(101, 67, 33, 0.2) !important;
   border-style: dashed !important;
+  border-left-style: dashed !important;
 }
 
-/* 4. Panneaux : hauteurs et bordures fixes pour l'alignement */
+/* 4. Panneaux : hauteurs fixes pour un alignement vertical stable */
 .vis-panel.vis-center,
 .vis-panel.vis-bottom,
 .vis-panel.vis-top {
