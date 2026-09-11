@@ -53,13 +53,14 @@ const METAL_EVENTS: TimelineEvent[] = [
   { id: 35, content: 'Ghost - "Meliora"', start: '2015-08-21', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le clergé satirique bénit les foules.' },
 ];
 
+// 🕯️ SCEAUX DE CIRE avec IDs POSITIFS UNIQUES pour éviter tout bug de DataSet
 const WAX_SEALS: TimelineEvent[] = [
-  { id: -1, content: '1970', start: '1970-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
-  { id: -2, content: '1980', start: '1980-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
-  { id: -3, content: '1990', start: '1990-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
-  { id: -4, content: '2000', start: '2000-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
-  { id: -5, content: '2010', start: '2010-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
-  { id: -6, content: '2020', start: '2020-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
+  { id: 1001, content: '1970', start: '1970-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
+  { id: 1002, content: '1980', start: '1980-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
+  { id: 1003, content: '1990', start: '1990-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
+  { id: 1004, content: '2000', start: '2000-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
+  { id: 1005, content: '2010', start: '2010-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
+  { id: 1006, content: '2020', start: '2020-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
 ];
 
 const ALL_TIMELINE_ITEMS = [...METAL_EVENTS, ...WAX_SEALS];
@@ -71,13 +72,11 @@ export default function TimelineClient() {
   const [activeLore, setActiveLore] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<GamificationPillar[]>([]);
 
-  // 1. On active le montage UNIQUEMENT côté client
   useEffect(() => { 
     setMounted(true); 
   }, []);
 
   useEffect(() => {
-    // 2. Sécurité absolue : on ne fait RIEN si on n'est pas dans le navigateur
     if (!mounted || typeof window === 'undefined' || !containerRef.current) return;
 
     const initTimeline = async () => {
@@ -85,7 +84,7 @@ export default function TimelineClient() {
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
         const container = containerRef.current!;
         
-        // Nettoyer le conteneur au cas où React aurait laissé des traces
+        // Nettoyage radical du conteneur avant initialisation
         container.innerHTML = '';
         
         const initialItems = new DataSet(ALL_TIMELINE_ITEMS);
@@ -107,11 +106,26 @@ export default function TimelineClient() {
           moveable: true,
           
           template: (item: TimelineEvent) => {
-            // 🚨 DEBUG : Si tu vois ça dans la console, le JS fonctionne !
+            // 🚨 TEST ULTIME : CSS Inline + Bordure Jaune pour forcer la visibilité
             if (item.className === 'tp-wax-seal') {
-              console.log('🔴 GÉNÉRATION DU SCEAU:', item.content);
-              // On ajoute une bordure jaune temporaire pour FORCER la visibilité et prouver qu'il est là
-              return `<div class="wax-seal-icon" style="border: 3px solid yellow !important; z-index: 9999 !important;">${item.content}</div>`;
+              console.log('🔴 [DEBUG] Génération du sceau:', item.content, 'ID:', item.id);
+              return `<div style="
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 40px !important;
+                height: 40px !important;
+                border-radius: 50% !important;
+                background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
+                border: 3px solid yellow !important;
+                font-family: serif !important;
+                font-size: 0.75rem !important;
+                font-weight: 700 !important;
+                color: #fff3e0 !important;
+                cursor: pointer !important;
+                z-index: 9999 !important;
+                box-shadow: 0 0 0 2px rgba(62, 0, 0, 0.4), 0 4px 12px rgba(139, 0, 0, 0.6) !important;
+              ">${item.content}</div>`;
             }
             
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
@@ -189,7 +203,6 @@ export default function TimelineClient() {
     ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length
     : METAL_EVENTS.length;
 
-  // 🛡️ RETOURNE NULL CÔTÉ SERVEUR POUR ÉVITER TOUTE HYDRATATION MISMATCH
   if (!mounted) {
     return (
       <div className="space-y-6">
@@ -254,7 +267,6 @@ export default function TimelineClient() {
         )}
 
         <div className="relative">
-          {/* Plus de Loader ici, vis-timeline prend le contrôle directement */}
           <div 
             ref={containerRef} 
             className="rounded-lg overflow-hidden timeline-container" 
