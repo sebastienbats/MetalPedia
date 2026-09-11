@@ -127,13 +127,17 @@
   font-size: 0.85rem !important;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
   font-weight: 600;
-  /* ✅ Centre verticalement les dates */
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  height: 100% !important;
-  padding: 0 !important;
-  margin: 0 !important; 
+}
+
+/* ═══════════════════════════════════════════
+   ALIGNEMENT DATES DÉCENNIES / GOUTTES D'ENCRE
+   ═══════════════════════════════════════════ */
+
+/* Centre les dates sur les lignes de grille majeures */
+.vis-time-axis .vis-text.vis-major {
+  text-align: center !important;
+  transform: translateX(-50%) !important;
+  margin-left: 50% !important;
 }
 
 .vis-time-axis .vis-grid.vis-minor {
