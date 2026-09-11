@@ -143,10 +143,6 @@
   
   /* ✅ Point d'origine du transform à gauche pour un centrage précis */
   transform-origin: left center !important;
-
-  /* ✅ CORRECTION DU DÉCALAGE : Décale légèrement vers la gauche pour centrer sur la ligne */
-  transform: translateX(-6px) !important;
-  transform-origin: left center !important; 
 }
 
 /* 2. Grilles majeures (décennies : 1960, 1970, 1980...) : Lignes d'encre pleines */
