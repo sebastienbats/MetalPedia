@@ -56,12 +56,12 @@ const METAL_EVENTS: TimelineEvent[] = [
 
 // 🕯️ SCEAUX DE CIRE ajoutés comme items normaux
 const WAX_SEALS: TimelineEvent[] = [
-  { id: 1001, content: '1970', start: '1970-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
-  { id: 1002, content: '1980', start: '1980-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
-  { id: 1003, content: '1990', start: '1990-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
-  { id: 1004, content: '2000', start: '2000-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
-  { id: 1005, content: '2010', start: '2010-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
-  { id: 1006, content: '2020', start: '2020-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
+  { id: 1001, content: '1970', start: '1970-01-01', type: 'point', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
+  { id: 1002, content: '1980', start: '1980-01-01', type: 'point', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
+  { id: 1003, content: '1990', start: '1990-01-01', type: 'point', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
+  { id: 1004, content: '2000', start: '2000-01-01', type: 'point', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
+  { id: 1005, content: '2010', start: '2010-01-01', type: 'point', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
+  { id: 1006, content: '2020', start: '2020-01-01', type: 'point', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
 ];
 
 // Fusion des événements et des sceaux
@@ -84,6 +84,9 @@ export default function TimelineClient() {
 
     const initTimeline = async () => {
       try {
+        // 🛡️ SÉCURITÉ : Empêche la création d'une 2ème timeline
+        if (timelineRef.current) return;
+
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
         
         // ✅ Utilisation du tableau fusionné (événements + sceaux)
@@ -123,9 +126,9 @@ export default function TimelineClient() {
           zoomable: true,
           
           template: (item: TimelineEvent) => {
-            // ✅ Gestion de l'affichage des sceaux
+            // ✅ Gestion de l'affichage des sceaux - CSS INLINE GARANTI
             if (item.className === 'tp-wax-seal') {
-              return `<div class="wax-seal-icon">${item.content}</div>`;
+              return `<div style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%);border:2px solid #3e0000;font-family:'MedievalSharp',cursive;font-size:0.7rem;font-weight:700;color:#fff3e0;text-shadow:0 1px 2px rgba(0,0,0,0.8);cursor:pointer;box-shadow:0 0 0 2px rgba(62,0,0,0.4),0 4px 12px rgba(139,0,0,0.6),inset 0 -3px 6px rgba(0,0,0,0.4);z-index:2;">${item.content}</div>`;
             }
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
             const icon = pillarData?.icon || '🎸';
@@ -152,7 +155,7 @@ export default function TimelineClient() {
                 tooltipContent = `${event.content} (${startYear} - ${endYear})`;
               }
               if (event.loreSnippet) {
-                tooltipContent += `\n\n📜 ${event.loreSnippet}`;
+                tooltipContent += `\n\n ${event.loreSnippet}`;
               }
               setActiveLore(tooltipContent);
             }
