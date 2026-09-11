@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Loader from '@/components/ui/Loader';
 import { PILLAR_METADATA, type GamificationPillar } from '@/types/api';
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
 
