@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ══════════════════════════════════════════
+/* ═══════════════════════════════════════════
    THÈMES (Variables CSS)
-   ══════════════════════════════════════════ */
+   ═══════════════════════════════════════════ */
 :root,
 [data-theme="forge"] {
   --color-primary: #8b0000;
@@ -119,10 +119,18 @@
 }
 
 /* ═══════════════════════════════════════════
-   MOTEUR D'ALIGNEMENT UNIFIÉ (Dates + Gouttes + Sceaux)
+   MOTEUR D'ALIGNEMENT UNIFIÉ (Dates + Gouttes d'encre)
    ═══════════════════════════════════════════ */
 
-/* 1. Dates de l'axe du HAUT - POLICE MEDIEVALSHARP FORCÉE */
+/* 1. MASQUER L'AXE DU BAS */
+.vis-panel.vis-bottom,
+.vis-time-axis.vis-bottom {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+}
+
+/* 2. DATES DE L'AXE DU HAUT */
 .vis-time-axis.vis-top .vis-text {
   color: #3e2723 !important;
   font-family: var(--font-medieval), serif !important;
@@ -137,49 +145,24 @@
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  z-index: 3 !important; /* ✅ Explicite */
-}
-.vis-panel.vis-top .vis-text {
-  color: #3e2723 !important;
-  font-family: 'MedievalSharp', var(--font-medieval), serif !important;
-  font-size: 0.85rem !important;
-  font-weight: 600 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3) !important;
-  white-space: nowrap !important;
-  margin: 0 !important;
-  padding: 0 4px !important;
-  text-align: center !important;
-  margin-left: -25px !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+  z-index: 3 !important;
 }
 
-/* 2. MOBILE : Reset du décalage */
-@media (max-width: 767px) {
-  .vis-time-axis.vis-top .vis-text,
-  .vis-panel.vis-top .vis-text {
-    font-size: 0.7rem !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-  }
-}
-
-/* 3. Grilles majeures (décennies) */
+/* 3. GRILLES MAJEURES (Décennies) */
 .vis-time-axis .vis-grid.vis-major {
   border-color: rgba(62, 39, 35, 0.6) !important;
   border-width: 2px !important;
   border-left-style: solid !important;
 }
 
-/* 4. Grilles mineures */
+/* 4. GRILLES MINEURES */
 .vis-time-axis .vis-grid.vis-minor {
   border-color: rgba(101, 67, 33, 0.15) !important;
   border-style: dashed !important;
   border-left-style: dashed !important;
 }
 
-/* 5. Panneaux */
+/* 5. PANNEAUX */
 .vis-panel.vis-center,
 .vis-panel.vis-bottom,
 .vis-panel.vis-top {
@@ -196,8 +179,51 @@
 }
 
 /* ═══════════════════════════════════════════
-   SCEAUX DE CIRE (Centrés entre les décennies)
-   ══════════════════════════════════════════ */
+   LIGNE D'ENCRE SÉPIA (Axe horizontal)
+   ═══════════════════════════════════════════ */
+
+.vis-panel.vis-center::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0; 
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    #3e2723 5%, 
+    #5d4037 20%, 
+    #3e2723 50%, 
+    #5d4037 80%, 
+    #3e2723 95%, 
+    transparent 100%
+  );
+  box-shadow: 0 0 4px rgba(62, 39, 35, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
+  z-index: 2 !important;
+  pointer-events: none;
+  filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='rough'><feTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2'/><feDisplacementMap in='SourceGraphic' scale='2'/></filter></svg>#rough");
+}
+
+/* ═══════════════════════════════════════════
+   GOUTTES D'ENCRE (Lignes verticales des événements)
+   ═══════════════════════════════════════════ */
+
+.vis-item .vis-line {
+  border-left: 2px dashed rgba(62, 39, 35, 0.5) !important;
+  opacity: 1 !important;
+  z-index: 1 !important;
+  pointer-events: none;
+  display: block !important;
+  color: #660000 !important;
+}
+
+.vis-item.vis-range .vis-line {
+  border-left: 3px solid rgba(139, 0, 0, 0.4) !important;
+}
+
+/* ═══════════════════════════════════════════
+   SCEAUX DE CIRE (Éléments indépendants - Milieu des décennies)
+   ═══════════════════════════════════════════ */
 
 .vis-item.tp-wax-seal {
   width: 40px !important;
@@ -207,15 +233,9 @@
   background: transparent !important;
   border: none !important;
   overflow: visible !important;
-  
-  /* ✅ Centre le sceau sur sa ligne médiane (40px / 2 = 20px de décalage) */
-  margin-left: -20px !important; 
-  
-  /* ✅ Remonte le sceau pour qu'il chevauche l'axe sépia */
-  margin-top: -20px !important; 
-  
-  /* ✅ Z-index élevé pour passer au-dessus de l'axe et des gouttes */
-  z-index: 10 !important;
+  margin-left: -20px !important;
+  margin-top: -20px !important;
+  z-index: 1 !important;
 }
 
 .vis-item.tp-wax-seal .vis-item-content {
@@ -245,7 +265,7 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
   cursor: pointer !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-  z-index: 10 !important;
+  z-index: 1 !important;
 }
 
 .wax-seal-icon:hover {
@@ -254,47 +274,10 @@
   filter: brightness(1.2) !important;
 }
 
-/* ═══════════════════════════════════════════
-   LIGNE D'ENCRE SÉPIA (Axe horizontal)
-   ═══════════════════════════════════════════ */
-
-.vis-panel.vis-center::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0; 
-  height: 3px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    #3e2723 5%, 
-    #5d4037 20%, 
-    #3e2723 50%, 
-    #5d4037 80%, 
-    #3e2723 95%, 
-    transparent 100%
-  );
-  box-shadow: 0 0 4px rgba(62, 39, 35, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
-  z-index: 0 !important;
-  pointer-events: none;
-  filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='rough'><feTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2'/><feDisplacementMap in='SourceGraphic' scale='2'/></filter></svg>#rough");
-}
-
-/* ═══════════════════════════════════════════
-   GOUTTES D'ENCRE (Lignes verticales des événements)
-   ══════════════════════════════════════════ */
-
-.vis-item .vis-line {
-  border-left: 2px dashed rgba(62, 39, 35, 0.5) !important;
-  opacity: 1 !important;
+.vis-item.tp-wax-seal .vis-line {
+  border-left: 3px solid rgba(139, 0, 0, 0.7) !important;
+  opacity: 0.8 !important;
   z-index: 1 !important;
-  pointer-events: none;
-  display: block !important;
-  color: #660000 !important;
-}
-
-.vis-item.vis-range .vis-line {
-  border-left: 3px solid rgba(139, 0, 0, 0.4) !important;
 }
 
 /* ═══════════════════════════════════════════
@@ -318,12 +301,12 @@
   cursor: pointer !important;
   transition: all 0.3s ease !important;
   border: 2px solid var(--pillar-color, #3e2723) !important;
-  box-shadow:
+  box-shadow: 
     0 0 0 1px rgba(62, 39, 35, 0.3),
     0 2px 6px rgba(62, 39, 35, 0.4),
     inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
   position: relative !important;
-  z-index: 3 !important;
+  z-index: 4 !important;
   overflow: visible !important;
 }
 
@@ -383,7 +366,7 @@
 
 /* ═══════════════════════════════════════════
    SÉLECTION & HOVER
-   ══════════════════════════════════════════ */
+   ═══════════════════════════════════════════ */
 
 .vis-item.vis-selected .parchment-icon {
   box-shadow: 
@@ -470,7 +453,7 @@
   }
 }
 
-/* ═══════════════════════════════════════════
+/* ══════════════════════════════════════════
    OPTIMISATION TRÈS PETITS ÉCRANS (< 480px)
    ═══════════════════════════════════════════ */
 
