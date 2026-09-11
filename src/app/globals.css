@@ -403,3 +403,21 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+/* ═══════════════════════════════════════════
+   SÉCURITÉ ABSOLUE : EMPÊCHER LA COUPURE DES SCEAUX
+   ═══════════════════════════════════════════ */
+.vis-panel.vis-center,
+.vis-panel.vis-top,
+.vis-panel.vis-bottom,
+.vis-foreground,
+.vis-group,
+.vis-itemset {
+  overflow: visible !important;
+}
+
+/* Force l'affichage des items sceaux même si vis-timeline tente de les cacher */
+.vis-item.tp-wax-seal {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
