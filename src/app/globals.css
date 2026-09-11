@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ═══════════════════════════════════════════
+/* ══════════════════════════════════════════
    THÈMES (Variables CSS)
-   ═══════════════════════════════════════════ */
+   ══════════════════════════════════════════ */
 :root,
 [data-theme="forge"] {
   --color-primary: #8b0000;
@@ -122,85 +122,49 @@
    MOTEUR D'ALIGNEMENT UNIFIÉ (Dates + Gouttes + Sceaux)
    ═══════════════════════════════════════════ */
 
-/* 1. MASQUER L'AXE DU BAS (source principale des doublons visuels) */
-.vis-panel.vis-bottom,
-.vis-time-axis.vis-bottom {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-}
-
-/* 2. STYLISER TOUTES LES DATES DE L'AXE DU HAUT (sans filtre .vis-major instable) */
-.vis-time-axis.vis-top .vis-text {
+/* 1. Dates de l'axe du HAUT - POLICE MEDIEVALSHARP FORCÉE */
+.vis-time-axis.vis-top .vis-text,
+.vis-panel.vis-top .vis-text {
   color: #3e2723 !important;
-  font-family: var(--font-medieval), serif !important;
+  font-family: 'MedievalSharp', var(--font-medieval), serif !important;
   font-size: 0.85rem !important;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3) !important;
   white-space: nowrap !important;
   margin: 0 !important;
   padding: 0 4px !important;
   text-align: center !important;
-  
-  /* ✅ TON DÉCALAGE VALIDÉ POUR LE DESKTOP */
-  margin-left: -25px !important; 
-  
+  margin-left: -25px !important;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-/* 3. MOBILE : Annulation propre du décalage pour un centrage naturel au scroll/zoom */
+/* 2. MOBILE : Reset du décalage */
 @media (max-width: 767px) {
-  .vis-time-axis.vis-top .vis-text {
+  .vis-time-axis.vis-top .vis-text,
+  .vis-panel.vis-top .vis-text {
     font-size: 0.7rem !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
 }
 
-/* 4. GRILLES : Uniquement les majeures (décennies) bien visibles */
+/* 3. Grilles majeures (décennies) */
 .vis-time-axis .vis-grid.vis-major {
   border-color: rgba(62, 39, 35, 0.6) !important;
   border-width: 2px !important;
   border-left-style: solid !important;
 }
 
-/* Les grilles mineures restent discrètes pour guider l'œil sans polluer */
+/* 4. Grilles mineures */
 .vis-time-axis .vis-grid.vis-minor {
   border-color: rgba(101, 67, 33, 0.15) !important;
   border-style: dashed !important;
   border-left-style: dashed !important;
 }
 
-/* 5. SCEAUX DE CIRE : S'assurer qu'ils sont bien stylisés et ne ressemblent pas à du texte brut */
-.vis-item.tp-wax-seal {
-  width: 40px !important;
-  height: 40px !important;
-  background: transparent !important;
-  border: none !important;
-  overflow: visible !important;
-  z-index: 2 !important;
-}
-
-.wax-seal-icon {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
-  background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
-  border: 2px solid #3e0000 !important;
-  font-family: 'MedievalSharp', var(--font-medieval), cursive !important;
-  font-size: 0.7rem !important;
-  font-weight: 700 !important;
-  color: #fff3e0 !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
-  z-index: 2 !important;
-}
-
-/* 4. Panneaux : hauteurs fixes */
+/* 5. Panneaux */
 .vis-panel.vis-center,
 .vis-panel.vis-bottom,
 .vis-panel.vis-top {
@@ -215,6 +179,60 @@
 .vis-panel.vis-center {
   padding-top: 5px !important;
 }
+
+/* 6. SCEAUX DE CIRE - RENDU FORCÉ EN CERCLES ROUGES */
+.vis-item.tp-wax-seal {
+  width: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+  height: 40px !important;
+  background: transparent !important;
+  border: none !important;
+  overflow: visible !important;
+  border-radius: 50% !important;
+  z-index: 2 !important;
+}
+
+.vis-item.tp-wax-seal .vis-item-content {
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+/* FORCE LE RENDU EN CERCLE ROUGE */
+.wax-seal-icon,
+.vis-item.tp-wax-seal .vis-item-content > div {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
+  border: 2px solid #3e0000 !important;
+  font-family: 'MedievalSharp', var(--font-medieval), cursive !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  color: #fff3e0 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+  cursor: pointer !important;
+  box-shadow: 0 0 0 2px rgba(62, 0, 0, 0.4), 0 4px 12px rgba(139, 0, 0, 0.6), inset 0 -3px 6px rgba(0, 0, 0, 0.4) !important;
+  position: relative !important;
+  z-index: 2 !important;
+  line-height: 1 !important;
+}
+
+.wax-seal-icon:hover {
+  transform: scale(1.25) !important;
+  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.8), 0 6px 20px rgba(139, 0, 0, 0.8), 0 0 30px rgba(198, 40, 40, 0.5) !important;
+  filter: brightness(1.2) !important;
+}
+
 /* ═══════════════════════════════════════════
    LIGNE D'ENCRE SÉPIA (Axe horizontal)
    ═══════════════════════════════════════════ */
@@ -243,7 +261,7 @@
 
 /* ═══════════════════════════════════════════
    GOUTTES D'ENCRE (Lignes verticales des événements)
-   ═══════════════════════════════════════════ */
+   ══════════════════════════════════════════ */
 
 .vis-item .vis-line {
   border-left: 2px dashed rgba(62, 39, 35, 0.5) !important;
@@ -251,67 +269,11 @@
   z-index: 1 !important;
   pointer-events: none;
   display: block !important;
-  color: #660000 !important; /* couleur sang */
+  color: #660000 !important;
 }
 
 .vis-item.vis-range .vis-line {
   border-left: 3px solid rgba(139, 0, 0, 0.4) !important;
-}
-
-/* ═══════════════════════════════════════════
-   SCEAUX DE CIRE (Décennies Clés)
-   ═══════════════════════════════════════════ */
-/* 5. SCEAUX DE CIRE : S'assurer qu'ils sont bien stylisés et ne ressemblent pas à du texte brut */
-.vis-item.tp-wax-seal {
-  width: 40px !important;
-  height: 40px !important;
-  background: transparent !important;
-  border: none !important;
-  overflow: visible !important;
-  z-index: 2 !important;
-}
-
-.vis-item.tp-wax-seal .vis-item-content {
-  padding: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: transparent !important;
-  overflow: visible !important;
-}
-
-.wax-seal-icon {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
-  background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
-  border: 2px solid #3e0000 !important;
-  font-family: 'MedievalSharp', var(--font-medieval), cursive !important;
-  font-size: 0.7rem !important;
-  font-weight: 700 !important;
-  color: #fff3e0 !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
-  z-index: 2 !important;
-}
-
-.wax-seal-icon:hover {
-  transform: scale(1.25) !important;
-  box-shadow:
-    0 0 0 3px rgba(198, 40, 40, 0.8),
-    0 6px 20px rgba(139, 0, 0, 0.8),
-    0 0 30px rgba(198, 40, 40, 0.5) !important;
-  filter: brightness(1.2) !important;
-}
-
-.vis-item.tp-wax-seal .vis-line {
-  border-left: 3px solid rgba(139, 0, 0, 0.7) !important;
-  opacity: 0.8 !important;
-  z-index: 1 !important;
 }
 
 /* ═══════════════════════════════════════════
@@ -400,7 +362,7 @@
 
 /* ═══════════════════════════════════════════
    SÉLECTION & HOVER
-   ═══════════════════════════════════════════ */
+   ══════════════════════════════════════════ */
 
 .vis-item.vis-selected .parchment-icon {
   box-shadow: 
@@ -424,7 +386,6 @@
     min-height: 35px !important;
   }
 
-  /* ✅ SÉCURITÉ MAXIMALE : Annule le -25px du desktop pour un centrage naturel au scroll/zoom */
   .vis-time-axis .vis-text {
     font-size: 0.7rem !important;
     margin-left: 0 !important;
@@ -484,7 +445,7 @@
 
   .parchment-icon:hover,
   .wax-seal-icon:hover {
-    transform: scale(1.1) !important; /* Pas de rotation sur tactile */
+    transform: scale(1.1) !important;
   }
 }
 
