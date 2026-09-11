@@ -127,17 +127,8 @@
   font-size: 0.85rem !important;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
   font-weight: 600;
-}
-
-/* ═══════════════════════════════════════════
-   ALIGNEMENT DATES DÉCENNIES / GOUTTES D'ENCRE
-   ═══════════════════════════════════════════ */
-
-/* Centre les dates sur les lignes de grille majeures */
-.vis-time-axis .vis-text.vis-major {
-  text-align: center !important;
-  transform: translateX(-50%) !important;
-  margin-left: 50% !important;
+  /* Centre les dates sur leur ligne de grille (alignement avec les gouttes d'encre) */ 
+  transform: translateX(-50%) !important; 
 }
 
 .vis-time-axis .vis-grid.vis-minor {
