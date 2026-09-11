@@ -34,7 +34,7 @@ const METAL_EVENTS: TimelineEvent[] = [
   { id: 15, content: 'Morbid Angel - "Altars of Madness"', start: '1989-05-12', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Les autels de la folie sont érigés.' },
   { id: 16, content: 'Cannibal Corpse - Formation', start: '1988-12-01', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Le cadavre cannibale prend vie à Buffalo.' },
   { id: 17, content: 'Première vague Black Metal', start: '1982-01-01', end: '1990-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'Les ténèbres s\'éveillent en Europe.' },
-  { id: 18, content: 'Seconde vague Black Metal norvégien', start: '1991-01-01', end: '1996-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: ' Les forêts de Norvège s\'embrasent. Le froid est absolu.' },
+  { id: 18, content: 'Seconde vague Black Metal norvégien', start: '1991-01-01', end: '1996-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: '🌑 Les forêts de Norvège s\'embrasent. Le froid est absolu.' },
   { id: 19, content: 'Darkthrone - "A Blaze in the Northern Sky"', start: '1992-02-26', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'Un brasier s\'allume dans le ciel du Nord.' },
   { id: 20, content: 'Mayhem - "De Mysteriis Dom Sathanas"', start: '1994-05-24', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'L\'opus maudit scelle le pacte avec l\'Oubli.' },
   { id: 21, content: 'Burzum - "Filosofem"', start: '1996-01-01', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'La philosophie du son devient incantation.' },
@@ -54,6 +54,19 @@ const METAL_EVENTS: TimelineEvent[] = [
   { id: 35, content: 'Ghost - "Meliora"', start: '2015-08-21', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le clergé satirique bénit les foules.' },
 ];
 
+// 🕯️ SCEAUX DE CIRE ajoutés comme items normaux
+const WAX_SEALS: TimelineEvent[] = [
+  { id: 1001, content: '1970', start: '1970-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
+  { id: 1002, content: '1980', start: '1980-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
+  { id: 1003, content: '1990', start: '1990-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
+  { id: 1004, content: '2000', start: '2000-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
+  { id: 1005, content: '2010', start: '2010-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
+  { id: 1006, content: '2020', start: '2020-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
+];
+
+// Fusion des événements et des sceaux
+const ALL_TIMELINE_ITEMS = [...METAL_EVENTS, ...WAX_SEALS];
+
 export default function TimelineClient() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<any>(null);
@@ -72,24 +85,48 @@ export default function TimelineClient() {
     const initTimeline = async () => {
       try {
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
-        const initialItems = new DataSet(METAL_EVENTS);
+        
+        // ✅ Utilisation du tableau fusionné (événements + sceaux)
+        const initialItems = new DataSet(ALL_TIMELINE_ITEMS);
+        
         const isMobile = window.innerWidth < 768;
+        const isSmall = window.innerWidth < 480;
 
         const options: any = {
-          height: isMobile ? '500px' : '600px',
-          start: '1975-01-01',
-          end: '2010-01-01',
+          // ✅ Hauteur adaptative
+          height: isSmall ? '400px' : isMobile ? '450px' : '600px',
+          
+          // ✅ Vue initiale : 15 ans sur mobile, 35 ans sur desktop
+          start: isMobile ? '1985-01-01' : '1975-01-01',
+          end: isMobile ? '2000-01-01' : '2010-01-01',
+          
+          // ✅ Limites de navigation : toute la chronologie (1965-2030)
           min: '1965-01-01',
           max: '2030-12-31',
+          
+          // ✅ Zoom : de 1 an à 40 ans
           zoomMin: 1000 * 60 * 60 * 24 * 365,
           zoomMax: 1000 * 60 * 60 * 24 * 365 * 40,
-          margin: { item: 30, axis: 15 },
+          
+          // ✅ Marges réduites sur mobile pour mieux utiliser l'espace
+          margin: { 
+            item: isMobile ? 15 : 30, 
+            axis: isMobile ? 8 : 15 
+          },
+          
           orientation: 'top',
           stack: true,
           showCurrentTime: false,
-          zoomable: !isMobile,
+          
+          // ✅ GLISSER et ZOOMER activés sur TOUS les écrans
           moveable: true,
+          zoomable: true,
+          
           template: (item: TimelineEvent) => {
+            // ✅ Gestion de l'affichage des sceaux
+            if (item.className === 'tp-wax-seal') {
+              return `<div class="wax-seal-icon">${item.content}</div>`;
+            }
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
             const icon = pillarData?.icon || '🎸';
             const color = pillarData?.color || '#8b0000';
@@ -101,8 +138,13 @@ export default function TimelineClient() {
 
         timelineRef.current.on('click', (properties: any) => {
           if (properties.item) {
-            const event = METAL_EVENTS.find(e => e.id === properties.item);
+            const event = ALL_TIMELINE_ITEMS.find(e => e.id === properties.item);
             if (event) {
+              // ✅ Gestion du clic sur les sceaux
+              if (event.className === 'tp-wax-seal') {
+                setActiveLore(`🔴 Sceau de la décennie ${event.content}`);
+                return;
+              }
               let tooltipContent = event.content;
               if (event.type === 'range' && event.end) {
                 const startYear = new Date(event.start).getFullYear();
@@ -140,7 +182,10 @@ export default function TimelineClient() {
       const filteredEvents = activeFilters.length > 0
         ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!))
         : METAL_EVENTS;
-      timelineRef.current.setItems(new DataSet(filteredEvents));
+      
+      // ✅ Important : toujours inclure les sceaux même lors du filtrage
+      const itemsToShow = [...filteredEvents, ...WAX_SEALS];
+      timelineRef.current.setItems(new DataSet(itemsToShow));
       setActiveLore(null);
     });
   }, [activeFilters]);
@@ -169,16 +214,17 @@ export default function TimelineClient() {
       <div className="metal-card p-4 space-y-4">
         <div>
           <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">🔍 Filtrer par pilier</h3>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-metal-gray scrollbar-track-transparent">
+          {/* ✅ scroll-hide et snap-x pour un défilement tactile fluide */}
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
             <button
               onClick={() => setActiveFilters([])}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border shrink-0 ${
+              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border shrink-0 snap-start ${
                 activeFilters.length === 0
                   ? 'bg-metal-fire text-white border-metal-fire shadow-lg shadow-metal-fire/50 scale-105'
                   : 'bg-metal-fire/20 text-white border-metal-fire/40 hover:bg-metal-fire/40'
               }`}
             >
-              🌍 Tout voir
+              🌍 Tout
             </button>
             {Object.entries(PILLAR_METADATA).map(([key, data]) => {
               const isActive = activeFilters.includes(key as GamificationPillar);
@@ -186,7 +232,7 @@ export default function TimelineClient() {
                 <button
                   key={key}
                   onClick={() => toggleFilter(key as GamificationPillar)}
-                  className="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border flex items-center gap-1.5 shrink-0 text-white hover:scale-105"
+                  className="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border flex items-center gap-1.5 shrink-0 text-white hover:scale-105 snap-start"
                   style={{
                     backgroundColor: isActive ? `${data.color}d9` : `${data.color}4d`,
                     borderColor: isActive ? data.color : `${data.color}80`,
@@ -200,7 +246,7 @@ export default function TimelineClient() {
             })}
           </div>
           {activeFilters.length > 0 && (
-            <p className="text-xs text-gray-500 mt-2 italic">✨ Affichage de {filteredCount} événement{filteredCount > 1 ? 's' : ''}</p>
+            <p className="text-xs text-gray-500 mt-2 italic">✨ {filteredCount} événement{filteredCount > 1 ? 's' : ''}</p>
           )}
         </div>
 
@@ -225,17 +271,22 @@ export default function TimelineClient() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="metal-card p-5">
-          <h3 className="font-serif text-lg mb-3 text-metal-rust">⏳ Navigation Rapide</h3>
+        {/* ✅ Padding adaptatif (p-4 sur mobile, p-5 sur desktop) */}
+        <div className="metal-card p-4 sm:p-5">
+          <h3 className="font-serif text-base sm:text-lg mb-3 text-metal-rust">⏳ Navigation Rapide</h3>
           <div className="flex flex-wrap justify-center gap-2">
             {['1970', '1985', '2000', '2015'].map((year) => (
-              <button key={year} onClick={() => handleGoToYear(year)} className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-metal-fire hover:border-metal-fire hover:bg-metal-fire/10 transition-all active:scale-95">⏳ Aller à {year}</button>
+              <button key={year} onClick={() => handleGoToYear(year)} className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-metal-fire hover:border-metal-fire hover:bg-metal-fire/10 transition-all active:scale-95">
+                {year}
+              </button>
             ))}
-            <button onClick={() => handleGoToYear('1975')} className="px-4 py-2 text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-white hover:border-white transition-all active:scale-95"> Reset</button>
+            <button onClick={() => handleGoToYear('1975')} className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-white hover:border-white transition-all active:scale-95">
+              ↺
+            </button>
           </div>
         </div>
-        <div className="metal-card p-5">
-          <h3 className="font-serif text-lg mb-3 text-metal-rust"> Légende des Piliers</h3>
+        <div className="metal-card p-4 sm:p-5">
+          <h3 className="font-serif text-base sm:text-lg mb-3 text-metal-rust">🎨 Légende des Piliers</h3>
           <div className="grid grid-cols-2 gap-3 text-sm">
             {Object.entries(PILLAR_METADATA).map(([key, data]) => (
               <div key={key} className="flex items-center gap-2">
@@ -247,13 +298,13 @@ export default function TimelineClient() {
         </div>
       </div>
 
-      <div className="metal-card p-5">
-        <h3 className="font-serif text-lg mb-3 text-metal-rust">💡 Navigation</h3>
+      <div className="metal-card p-4 sm:p-5">
+        <h3 className="font-serif text-base sm:text-lg mb-3 text-metal-rust">💡 Navigation</h3>
         <ul className="text-sm text-gray-400 space-y-2">
           <li className="flex items-start gap-2"><span className="text-metal-fire mt-0.5">•</span><span><strong>Clic :</strong> Cliquez sur une icône pour révéler le contenu complet et le lore de l'événement.</span></li>
           <li className="flex items-start gap-2"><span className="text-metal-fire mt-0.5">•</span><span><strong>Filtres :</strong> Cliquez sur un ou plusieurs piliers pour isoler leur histoire.</span></li>
           <li className="flex items-start gap-2"><span className="text-metal-fire mt-0.5">•</span><span><strong>Desktop :</strong> Molette pour zoomer, glisser pour naviguer.</span></li>
-          <li className="flex items-start gap-2"><span className="text-metal-fire mt-0.5">•</span><span><strong>Mobile :</strong> Glissez horizontalement. Utilisez les boutons d'années pour voyager rapidement.</span></li>
+          <li className="flex items-start gap-2"><span className="text-metal-fire mt-0.5">•</span><span><strong>Mobile :</strong> Glissez horizontalement. Pincez pour zoomer. Utilisez les boutons d'années pour voyager rapidement.</span></li>
         </ul>
       </div>
     </div>
