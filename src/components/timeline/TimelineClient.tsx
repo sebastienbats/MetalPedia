@@ -54,7 +54,7 @@ const METAL_EVENTS: TimelineEvent[] = [
   { id: 35, content: 'Ghost - "Meliora"', start: '2015-08-21', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le clergé satirique bénit les foules.' },
 ];
 
-//  SCEAUX DE CIRE ajoutés comme items normaux (IDs négatifs pour éviter les conflits)
+// 🕯️ SCEAUX DE CIRE ajoutés comme items normaux (IDs négatifs pour éviter les conflits)
 const WAX_SEALS: TimelineEvent[] = [
   { id: -1, content: '1970', start: '1970-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
   { id: -2, content: '1980', start: '1980-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
@@ -75,7 +75,9 @@ export default function TimelineClient() {
   const [activeLore, setActiveLore] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<GamificationPillar[]>([]);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { 
+    setMounted(true); 
+  }, []);
 
   useEffect(() => {
     if (!mounted) return;
@@ -139,7 +141,7 @@ export default function TimelineClient() {
                 tooltipContent = `${event.content} (${startYear} - ${endYear})`;
               }
               if (event.loreSnippet) {
-                tooltipContent += `\n\n ${event.loreSnippet}`;
+                tooltipContent += `\n\n📜 ${event.loreSnippet}`;
               }
               setActiveLore(tooltipContent);
             }
@@ -171,7 +173,7 @@ export default function TimelineClient() {
         ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!))
         : METAL_EVENTS;
       
-      // ️ IMPORTANT : Toujours inclure les sceaux, même avec des filtres
+      // ✅ IMPORTANT : Toujours inclure les sceaux, même avec des filtres actifs
       const itemsToShow = [...filteredEvents, ...WAX_SEALS];
       timelineRef.current.setItems(new DataSet(itemsToShow));
       setActiveLore(null);
