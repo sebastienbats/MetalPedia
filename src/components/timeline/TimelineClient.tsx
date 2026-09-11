@@ -140,27 +140,45 @@ export default function TimelineClient() {
         timelineRef.current = new Timeline(container, initialItems, options);
 
         timelineRef.current.on('click', (properties: any) => {
-          if (properties.item) {
-            const event = ALL_TIMELINE_ITEMS.find(e => e.id === properties.item);
-            if (event) {
-              // ✅ Gestion du clic sur les sceaux
-              if (event.className === 'tp-wax-seal') {
-                setActiveLore(`🔴 Sceau de la décennie ${event.content}`);
-                return;
-              }
-              let tooltipContent = event.content;
-              if (event.type === 'range' && event.end) {
-                const startYear = new Date(event.start).getFullYear();
-                const endYear = new Date(event.end).getFullYear();
-                tooltipContent = `${event.content} (${startYear} - ${endYear})`;
-              }
-              if (event.loreSnippet) {
-                tooltipContent += `\n\n ${event.loreSnippet}`;
-              }
-              setActiveLore(tooltipContent);
-            }
-          }
-        });
+  if (properties.item) {
+    const event = ALL_TIMELINE_ITEMS.find(e => e.id === properties.item);
+    if (event) {
+      // ✅ Gestion du clic sur les sceaux
+      if (event.className === 'tp-wax-seal') {
+        setActiveLore(`🔴 Sceau de la décennie ${event.content}`);
+        return;
+      }
+
+      // ✅ Construction du contenu avec date/période
+      let tooltipContent = event.content;
+      
+      // Ajout de la date ou période
+      const startYear = new Date(event.start).getFullYear();
+      
+      if (event.type === 'range' && event.end) {
+        const endYear = new Date(event.end).getFullYear();
+        tooltipContent += `\n📅 Période : ${startYear} - ${endYear}`;
+      } else {
+        // Pour les événements ponctuels, formater la date complète
+        const dateObj = new Date(event.start);
+        const options: Intl.DateTimeFormatOptions = { 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        };
+        const formattedDate = dateObj.toLocaleDateString('fr-FR', options);
+        tooltipContent += `\n📅 Date : ${formattedDate}`;
+      }
+      
+      // Ajout du lore
+      if (event.loreSnippet) {
+        tooltipContent += `\n\n📜 ${event.loreSnippet}`;
+      }
+      
+      setActiveLore(tooltipContent);
+    }
+  }
+});
 
         setIsLoading(false);
       } catch (error) {
