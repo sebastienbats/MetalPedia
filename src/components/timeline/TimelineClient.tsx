@@ -115,10 +115,6 @@ export default function TimelineClient() {
           },
           
           orientation: 'top',
-          timeAxis: {
-            scale: 'year',
-            step: 10
-          },
           stack: true,
           showCurrentTime: false,
           
