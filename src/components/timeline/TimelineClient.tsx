@@ -5,6 +5,10 @@ import Loader from '@/components/ui/Loader';
 import { PILLAR_METADATA, type GamificationPillar } from '@/types/api';
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
 
+// ═══════════════════════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════════════════════
+
 interface TimelineEvent {
   id: number;
   content: string;
@@ -15,6 +19,10 @@ interface TimelineEvent {
   className?: string;
   loreSnippet?: string;
 }
+
+// ═══════════════════════════════════════════════════════════
+// DONNÉES HISTORIQUES (Enrichies avec Piliers & Lore)
+// ═══════════════════════════════════════════════════════════
 
 const METAL_EVENTS: TimelineEvent[] = [
   { id: 1, content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le Premier Riff résonne. Le Silence Primordial est brisé.' },
@@ -67,6 +75,10 @@ const WAX_SEALS: TimelineEvent[] = [
 // Fusion des événements et des sceaux
 const ALL_TIMELINE_ITEMS = [...METAL_EVENTS, ...WAX_SEALS];
 
+// ═══════════════════════════════════════════════════════════
+// COMPOSANT PRINCIPAL
+// ═══════════════════════════════════════════════════════════
+
 export default function TimelineClient() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<any>(null);
@@ -75,12 +87,14 @@ export default function TimelineClient() {
   const [activeLore, setActiveLore] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<GamificationPillar[]>([]);
 
+  // 🛡️ Empêche l'erreur d'hydratation React #418
   useEffect(() => { 
     setMounted(true); 
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    // ✅ Sécurité absolue : ne jamais exécuter vis-timeline côté serveur
+    if (!mounted || typeof window === 'undefined') return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -108,12 +122,9 @@ export default function TimelineClient() {
           
           // 🎨 TEMPLATE : Gère à la fois les événements ET les sceaux
           template: (item: TimelineEvent) => {
-            // ✅ Détection des sceaux de cire
             if (item.className === 'tp-wax-seal') {
               return `<div class="wax-seal-icon">${item.content}</div>`;
             }
-            
-            // ✅ Événements normaux (groupes/périodes)
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
             const icon = pillarData?.icon || '🎸';
             const color = pillarData?.color || '#8b0000';
@@ -128,7 +139,6 @@ export default function TimelineClient() {
           if (properties.item) {
             const event = ALL_TIMELINE_ITEMS.find(e => e.id === properties.item);
             if (event) {
-              // Si c'est un sceau, on affiche juste l'année
               if (event.className === 'tp-wax-seal') {
                 setActiveLore(`🔴 Sceau de la décennie ${event.content}`);
                 return;
@@ -200,7 +210,12 @@ export default function TimelineClient() {
   if (!mounted) return <Loader text="Invocation de la chronologie..." />;
 
   return (
+    // 🛡️ suppressHydrationWarning global pour éviter les erreurs de mismatch SSR/CSR
     <div className="space-y-6" suppressHydrationWarning>
+      
+      {/* ═══════════════════════════════════════════════════════════
+          BLOC 1 : LE PARCHMIN PRINCIPAL (Interactif)
+          ═══════════════════════════════════════════════════════════ */}
       <div className="metal-card p-4 space-y-4">
         <div>
           <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">🔍 Filtrer par pilier</h3>
@@ -255,10 +270,19 @@ export default function TimelineClient() {
               <Loader text="Tissage de la chronologie..." />
             </div>
           )}
-          <div ref={containerRef} className="rounded-lg overflow-hidden timeline-container" style={{ minHeight: '400px' }} />
+          {/* 🛡️ suppressHydrationWarning sur le conteneur vis-timeline */}
+          <div 
+            ref={containerRef} 
+            className="rounded-lg overflow-hidden timeline-container" 
+            style={{ minHeight: '400px' }}
+            suppressHydrationWarning
+          />
         </div>
       </div>
 
+      {/* ═══════════════════════════════════════════════════════════
+          BLOC 2 : LE GRIMOIRE D'AIDE (Navigation & Légende)
+          ═══════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="metal-card p-5">
           <h3 className="font-serif text-lg mb-3 text-metal-rust">⏳ Navigation Rapide</h3>
@@ -282,6 +306,9 @@ export default function TimelineClient() {
         </div>
       </div>
 
+      {/* ═══════════════════════════════════════════════════════════
+          CARTE 3 : CONSEILS D'UTILISATION
+          ═══════════════════════════════════════════════════════════ */}
       <div className="metal-card p-5">
         <h3 className="font-serif text-lg mb-3 text-metal-rust">💡 Navigation</h3>
         <ul className="text-sm text-gray-400 space-y-2">
