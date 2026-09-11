@@ -252,6 +252,21 @@ export interface UserClass {
 // MÉTADONNÉES DES DÉCENNIES (Pour les Sceaux)
 // ═══════════════════════════════════════════
 
+// ═══════════════════════════════════════════
+// TYPES DE LA TIMELINE
+// ═══════════════════════════════════════════
+
+export interface TimelineEvent {
+  id: number;
+  content: string;
+  start: string;
+  end?: string;
+  type?: 'point' | 'range';
+  pillar?: GamificationPillar;
+  className?: string;
+  loreSnippet?: string;
+}
+
 export interface DecadeMetadata {
   year: string;
   epicTitle: string;
