@@ -122,50 +122,82 @@
    MOTEUR D'ALIGNEMENT UNIFIÉ (Dates + Gouttes + Sceaux)
    ═══════════════════════════════════════════ */
 
-/* 🛡️ MASQUER L'AXE DU BAS (source des doublons) */
+/* 1. MASQUER L'AXE DU BAS (source principale des doublons visuels) */
 .vis-panel.vis-bottom,
 .vis-time-axis.vis-bottom {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
-  overflow: hidden !important;
 }
 
-/* 1. Dates de l'axe du HAUT : appliquer les styles à TOUS les labels */
+/* 2. STYLISER TOUTES LES DATES DE L'AXE DU HAUT (sans filtre .vis-major instable) */
 .vis-time-axis.vis-top .vis-text {
   color: #3e2723 !important;
   font-family: var(--font-medieval), serif !important;
   font-size: 0.85rem !important;
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
-  
-  width: auto !important;
-  min-width: auto !important;
-  max-width: none !important;
   white-space: nowrap !important;
   margin: 0 !important;
-  padding: 0 8px !important;
+  padding: 0 4px !important;
   text-align: center !important;
-  transform-origin: left center !important;
-
-  /* ✅ CORRECTION DU DÉCALAGE (conservée pour le desktop) */
-  margin-left: -25px !important;
+  
+  /* ✅ TON DÉCALAGE VALIDÉ POUR LE DESKTOP */
+  margin-left: -25px !important; 
   
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
 
-/* 2. Grilles majeures (décennies) : Lignes d'encre pleines */
+/* 3. MOBILE : Annulation propre du décalage pour un centrage naturel au scroll/zoom */
+@media (max-width: 767px) {
+  .vis-time-axis.vis-top .vis-text {
+    font-size: 0.7rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* 4. GRILLES : Uniquement les majeures (décennies) bien visibles */
 .vis-time-axis .vis-grid.vis-major {
   border-color: rgba(62, 39, 35, 0.6) !important;
   border-width: 2px !important;
   border-left-style: solid !important;
 }
 
-/* 3. Grilles mineures : masquées pour éviter la confusion visuelle */
+/* Les grilles mineures restent discrètes pour guider l'œil sans polluer */
 .vis-time-axis .vis-grid.vis-minor {
-  display: none !important;
+  border-color: rgba(101, 67, 33, 0.15) !important;
+  border-style: dashed !important;
+  border-left-style: dashed !important;
+}
+
+/* 5. SCEAUX DE CIRE : S'assurer qu'ils sont bien stylisés et ne ressemblent pas à du texte brut */
+.vis-item.tp-wax-seal {
+  width: 40px !important;
+  height: 40px !important;
+  background: transparent !important;
+  border: none !important;
+  overflow: visible !important;
+  z-index: 2 !important;
+}
+
+.wax-seal-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
+  border: 2px solid #3e0000 !important;
+  font-family: 'MedievalSharp', var(--font-medieval), cursive !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  color: #fff3e0 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+  z-index: 2 !important;
 }
 
 /* 4. Panneaux : hauteurs fixes */
@@ -229,17 +261,13 @@
 /* ═══════════════════════════════════════════
    SCEAUX DE CIRE (Décennies Clés)
    ═══════════════════════════════════════════ */
-
+/* 5. SCEAUX DE CIRE : S'assurer qu'ils sont bien stylisés et ne ressemblent pas à du texte brut */
 .vis-item.tp-wax-seal {
   width: 40px !important;
-  min-width: 40px !important;
-  max-width: 40px !important;
   height: 40px !important;
   background: transparent !important;
   border: none !important;
-  box-shadow: none !important;
   overflow: visible !important;
-  border-radius: 50% !important;
   z-index: 2 !important;
 }
 
@@ -268,17 +296,6 @@
   font-weight: 700 !important;
   color: #fff3e0 !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
-  cursor: pointer !important;
-  transition: all 0.3s ease !important;
-  box-shadow:
-    0 0 0 2px rgba(62, 0, 0, 0.4),
-    0 4px 12px rgba(139, 0, 0, 0.6),
-    inset 0 -3px 6px rgba(0, 0, 0, 0.4),
-    inset 0 2px 4px rgba(255, 100, 100, 0.3) !important;
-  background-image:
-    radial-gradient(circle at 20% 20%, rgba(255, 200, 200, 0.3) 0%, transparent 30%),
-    radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.3) 0%, transparent 40%) !important;
-  position: relative !important;
   z-index: 2 !important;
 }
 
