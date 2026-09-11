@@ -114,9 +114,10 @@ export default function TimelineClient() {
             axis: isMobile ? 8 : 15 
           },
           
-          orientation: {
-            axis: 'top',
-            item: 'top'
+          orientation: 'top',
+          timeAxis: {
+            scale: 'year',
+            step: 10
           },
           stack: true,
           showCurrentTime: false,
