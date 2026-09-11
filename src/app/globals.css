@@ -122,6 +122,14 @@
    MOTEUR D'ALIGNEMENT UNIFIÉ (Dates + Gouttes + Sceaux)
    ═══════════════════════════════════════════ */
 
+/* 🛡️ MASQUER TOUS LES AXES SAUF CELUI DU HAUT */
+.vis-panel.vis-bottom,
+.vis-time-axis.vis-bottom {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
 /* 1. Dates de l'axe : positionnement naturel + correction via margin-left */
 .vis-time-axis .vis-text {
   color: #3e2723 !important;
@@ -164,6 +172,14 @@
   border-color: transparent !important;
 }
 
+.vis-panel.vis-top {
+  height: 45px !important;
+  min-height: 45px !important;
+}
+
+.vis-panel.vis-center {
+  padding-top: 5px !important;
+}
 .vis-panel.vis-top {
   height: 45px !important;
   min-height: 45px !important;
