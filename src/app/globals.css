@@ -180,7 +180,10 @@
   padding-top: 5px !important;
 }
 
-/* 6. SCEAUX DE CIRE - RENDU FORCÉ EN CERCLES ROUGES */
+/* ═══════════════════════════════════════════
+   SCEAUX DE CIRE (Centrés entre les décennies)
+   ══════════════════════════════════════════ */
+
 .vis-item.tp-wax-seal {
   width: 40px !important;
   min-width: 40px !important;
@@ -189,8 +192,15 @@
   background: transparent !important;
   border: none !important;
   overflow: visible !important;
-  border-radius: 50% !important;
-  z-index: 2 !important;
+  
+  /* ✅ Centre le sceau sur sa ligne médiane (40px / 2 = 20px de décalage) */
+  margin-left: -20px !important; 
+  
+  /* ✅ Remonte le sceau pour qu'il chevauche l'axe sépia */
+  margin-top: -20px !important; 
+  
+  /* ✅ Z-index élevé pour passer au-dessus de l'axe et des gouttes */
+  z-index: 10 !important;
 }
 
 .vis-item.tp-wax-seal .vis-item-content {
@@ -204,9 +214,7 @@
   overflow: visible !important;
 }
 
-/* FORCE LE RENDU EN CERCLE ROUGE */
-.wax-seal-icon,
-.vis-item.tp-wax-seal .vis-item-content > div {
+.wax-seal-icon {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -221,10 +229,8 @@
   color: #fff3e0 !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
   cursor: pointer !important;
-  box-shadow: 0 0 0 2px rgba(62, 0, 0, 0.4), 0 4px 12px rgba(139, 0, 0, 0.6), inset 0 -3px 6px rgba(0, 0, 0, 0.4) !important;
-  position: relative !important;
-  z-index: 2 !important;
-  line-height: 1 !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  z-index: 10 !important;
 }
 
 .wax-seal-icon:hover {
