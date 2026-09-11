@@ -1,13 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import Loader from '@/components/ui/Loader';
 import { PILLAR_METADATA, type GamificationPillar } from '@/types/api';
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
-
-// ═══════════════════════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════════════════════
 
 interface TimelineEvent {
   id: number;
@@ -19,10 +14,6 @@ interface TimelineEvent {
   className?: string;
   loreSnippet?: string;
 }
-
-// ═══════════════════════════════════════════════════════════
-// DONNÉES HISTORIQUES (Enrichies avec Piliers & Lore)
-// ═══════════════════════════════════════════════════════════
 
 const METAL_EVENTS: TimelineEvent[] = [
   { id: 1, content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le Premier Riff résonne. Le Silence Primordial est brisé.' },
@@ -62,7 +53,6 @@ const METAL_EVENTS: TimelineEvent[] = [
   { id: 35, content: 'Ghost - "Meliora"', start: '2015-08-21', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le clergé satirique bénit les foules.' },
 ];
 
-// 🕯️ SCEAUX DE CIRE ajoutés comme items normaux (IDs négatifs pour éviter les conflits)
 const WAX_SEALS: TimelineEvent[] = [
   { id: -1, content: '1970', start: '1970-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
   { id: -2, content: '1980', start: '1980-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
@@ -72,38 +62,34 @@ const WAX_SEALS: TimelineEvent[] = [
   { id: -6, content: '2020', start: '2020-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
 ];
 
-// Fusion des événements et des sceaux
 const ALL_TIMELINE_ITEMS = [...METAL_EVENTS, ...WAX_SEALS];
-
-// ═══════════════════════════════════════════════════════════
-// COMPOSANT PRINCIPAL
-// ═══════════════════════════════════════════════════════════
 
 export default function TimelineClient() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<any>(null);
   const [mounted, setMounted] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [activeLore, setActiveLore] = useState<string | null>(null);
   const [activeFilters, setActiveFilters] = useState<GamificationPillar[]>([]);
 
-  // 🛡️ Empêche l'erreur d'hydratation React #418
+  // 1. On active le montage UNIQUEMENT côté client
   useEffect(() => { 
     setMounted(true); 
   }, []);
 
   useEffect(() => {
-    // ✅ Sécurité absolue : ne jamais exécuter vis-timeline côté serveur
-    if (!mounted || typeof window === 'undefined') return;
-    const container = containerRef.current;
-    if (!container) return;
+    // 2. Sécurité absolue : on ne fait RIEN si on n'est pas dans le navigateur
+    if (!mounted || typeof window === 'undefined' || !containerRef.current) return;
 
     const initTimeline = async () => {
       try {
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
+        const container = containerRef.current!;
+        
+        // Nettoyer le conteneur au cas où React aurait laissé des traces
+        container.innerHTML = '';
         
         const initialItems = new DataSet(ALL_TIMELINE_ITEMS);
-        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        const isMobile = window.innerWidth < 768;
 
         const options: any = {
           height: isMobile ? '500px' : '600px',
@@ -120,11 +106,14 @@ export default function TimelineClient() {
           zoomable: !isMobile,
           moveable: true,
           
-          // 🎨 TEMPLATE : Gère à la fois les événements ET les sceaux
           template: (item: TimelineEvent) => {
+            // 🚨 DEBUG : Si tu vois ça dans la console, le JS fonctionne !
             if (item.className === 'tp-wax-seal') {
-              return `<div class="wax-seal-icon">${item.content}</div>`;
+              console.log('🔴 GÉNÉRATION DU SCEAU:', item.content);
+              // On ajoute une bordure jaune temporaire pour FORCER la visibilité et prouver qu'il est là
+              return `<div class="wax-seal-icon" style="border: 3px solid yellow !important; z-index: 9999 !important;">${item.content}</div>`;
             }
+            
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
             const icon = pillarData?.icon || '🎸';
             const color = pillarData?.color || '#8b0000';
@@ -134,7 +123,6 @@ export default function TimelineClient() {
 
         timelineRef.current = new Timeline(container, initialItems, options);
 
-        // 📜 Écouteur de clic pour le lore
         timelineRef.current.on('click', (properties: any) => {
           if (properties.item) {
             const event = ALL_TIMELINE_ITEMS.find(e => e.id === properties.item);
@@ -143,7 +131,6 @@ export default function TimelineClient() {
                 setActiveLore(`🔴 Sceau de la décennie ${event.content}`);
                 return;
               }
-              
               let tooltipContent = event.content;
               if (event.type === 'range' && event.end) {
                 const startYear = new Date(event.start).getFullYear();
@@ -158,10 +145,8 @@ export default function TimelineClient() {
           }
         });
 
-        setIsLoading(false);
       } catch (error) {
         console.error('Erreur initialisation timeline:', error);
-        setIsLoading(false);
       }
     };
 
@@ -177,13 +162,10 @@ export default function TimelineClient() {
 
   useEffect(() => {
     if (!timelineRef.current) return;
-
     import('vis-timeline/standalone').then(({ DataSet }) => {
       const filteredEvents = activeFilters.length > 0
         ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!))
         : METAL_EVENTS;
-      
-      // ✅ IMPORTANT : Toujours inclure les sceaux, même avec des filtres actifs
       const itemsToShow = [...filteredEvents, ...WAX_SEALS];
       timelineRef.current.setItems(new DataSet(itemsToShow));
       setActiveLore(null);
@@ -207,15 +189,22 @@ export default function TimelineClient() {
     ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!)).length
     : METAL_EVENTS.length;
 
-  if (!mounted) return <Loader text="Invocation de la chronologie..." />;
+  // 🛡️ RETOURNE NULL CÔTÉ SERVEUR POUR ÉVITER TOUTE HYDRATATION MISMATCH
+  if (!mounted) {
+    return (
+      <div className="space-y-6">
+        <div className="metal-card p-4 space-y-4">
+          <div className="h-12 bg-metal-black/50 rounded animate-pulse" />
+          <div className="h-[500px] bg-metal-black/50 rounded animate-pulse flex items-center justify-center text-gray-500">
+            Chargement de la chronologie...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    // 🛡️ suppressHydrationWarning global pour éviter les erreurs de mismatch SSR/CSR
-    <div className="space-y-6" suppressHydrationWarning>
-      
-      {/* ═══════════════════════════════════════════════════════════
-          BLOC 1 : LE PARCHMIN PRINCIPAL (Interactif)
-          ═══════════════════════════════════════════════════════════ */}
+    <div className="space-y-6">
       <div className="metal-card p-4 space-y-4">
         <div>
           <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">🔍 Filtrer par pilier</h3>
@@ -265,24 +254,15 @@ export default function TimelineClient() {
         )}
 
         <div className="relative">
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-metal-black/80 z-10 rounded-lg">
-              <Loader text="Tissage de la chronologie..." />
-            </div>
-          )}
-          {/* 🛡️ suppressHydrationWarning sur le conteneur vis-timeline */}
+          {/* Plus de Loader ici, vis-timeline prend le contrôle directement */}
           <div 
             ref={containerRef} 
             className="rounded-lg overflow-hidden timeline-container" 
-            style={{ minHeight: '400px' }}
-            suppressHydrationWarning
+            style={{ minHeight: '500px' }}
           />
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-          BLOC 2 : LE GRIMOIRE D'AIDE (Navigation & Légende)
-          ═══════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="metal-card p-5">
           <h3 className="font-serif text-lg mb-3 text-metal-rust">⏳ Navigation Rapide</h3>
@@ -306,9 +286,6 @@ export default function TimelineClient() {
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-          CARTE 3 : CONSEILS D'UTILISATION
-          ═══════════════════════════════════════════════════════════ */}
       <div className="metal-card p-5">
         <h3 className="font-serif text-lg mb-3 text-metal-rust">💡 Navigation</h3>
         <ul className="text-sm text-gray-400 space-y-2">
