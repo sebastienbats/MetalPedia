@@ -145,7 +145,7 @@
   transform-origin: left center !important;
 
   /* ✅ CORRECTION DU DÉCALAGE via margin-left (n'interfère pas avec les transforms internes) */
-  margin-left: -4px !important;
+  margin-left: -10px !important;
 }
 
 /* 2. Grilles majeures (décennies : 1960, 1970, 1980...) : Lignes d'encre pleines */
