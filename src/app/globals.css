@@ -214,7 +214,7 @@
   z-index: 1 !important;
   pointer-events: none;
   display: block !important;
-  color: #660000 !important; /* couleur sang/*
+  color: #660000 !important; /* couleur sang */
 }
 
 .vis-item.vis-range .vis-line {
