@@ -122,7 +122,7 @@
    MOTEUR D'ALIGNEMENT UNIFIÉ (Dates + Gouttes + Sceaux)
    ═══════════════════════════════════════════ */
 
-/* 1. Dates de l'axe : positionnement naturel par vis-timeline */
+/* 1. Dates de l'axe : positionnement naturel + correction via margin-left */
 .vis-time-axis .vis-text {
   color: #3e2723 !important;
   font-family: var(--font-medieval), serif !important;
@@ -130,25 +130,20 @@
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
   
-  /* ✅ Laisse vis-timeline gérer le positionnement */
   width: auto !important;
   min-width: auto !important;
   max-width: none !important;
   white-space: nowrap !important;
   margin: 0 !important;
   padding: 0 8px !important;
-  
-  /* ✅ Centrage du texte dans son conteneur */
   text-align: center !important;
-  
-  /* ✅ Point d'origine du transform à gauche pour un centrage précis */
   transform-origin: left center !important;
 
-  /* ✅ CORRECTION DU DÉCALAGE via margin-left (n'interfère pas avec les transforms internes) */
+  /* ✅ CORRECTION DU DÉCALAGE (conservée pour le desktop) */
   margin-left: -25px !important;
 }
 
-/* 2. Grilles majeures (décennies : 1960, 1970, 1980...) : Lignes d'encre pleines */
+/* 2. Grilles majeures (décennies) : Lignes d'encre pleines */
 .vis-time-axis .vis-grid.vis-major {
   border-color: rgba(62, 39, 35, 0.6) !important;
   border-width: 2px !important;
@@ -162,7 +157,7 @@
   border-left-style: dashed !important;
 }
 
-/* 4. Panneaux : hauteurs fixes pour un alignement vertical stable */
+/* 4. Panneaux : hauteurs fixes */
 .vis-panel.vis-center,
 .vis-panel.vis-bottom,
 .vis-panel.vis-top {
@@ -222,10 +217,9 @@
 }
 
 /* ═══════════════════════════════════════════
-   SCEAUX DE CIRE (Décennies Clés) - Moteur unifié
-   ══════════════════════════════════════════ */
+   SCEAUX DE CIRE (Décennies Clés)
+   ═══════════════════════════════════════════ */
 
-/* Conteneur de l'item sceau : z-index 2 (derrière les événements, devant le fond) */
 .vis-item.tp-wax-seal {
   width: 40px !important;
   min-width: 40px !important;
@@ -250,7 +244,6 @@
   overflow: visible !important;
 }
 
-/* Icône du sceau de cire */
 .wax-seal-icon {
   display: inline-flex !important;
   align-items: center !important;
@@ -288,18 +281,16 @@
   filter: brightness(1.2) !important;
 }
 
-/* Ligne verticale du sceau (même moteur que les gouttes) */
 .vis-item.tp-wax-seal .vis-line {
   border-left: 3px solid rgba(139, 0, 0, 0.7) !important;
   opacity: 0.8 !important;
   z-index: 1 !important;
 }
 
-/* ══════════════════════════════════════════
+/* ═══════════════════════════════════════════
    ICÔNES COMPACTES SUR PARCHEMIN (Événements)
    ═══════════════════════════════════════════ */
 
-/* z-index 3 : AU-DESSUS des sceaux et des gouttes */
 .parchment-icon {
   display: inline-flex !important;
   align-items: center !important;
@@ -335,7 +326,6 @@
   filter: brightness(1.1) !important;
 }
 
-/* Conteneurs d'événements forcés en cercles transparents */
 .vis-item[class^="tp-"]:not(.tp-wax-seal) {
   width: 40px !important;
   min-width: 40px !important;
@@ -361,7 +351,7 @@
 }
 
 /* ═══════════════════════════════════════════
-   CORRECTION OVERFLOW (Suppression des reliquats)
+   CORRECTION OVERFLOW
    ═══════════════════════════════════════════ */
 
 .vis-item-overflow {
@@ -394,6 +384,120 @@
 }
 
 /* ═══════════════════════════════════════════
+   OPTIMISATION MOBILE (< 768px)
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  .timeline-container {
+    padding: 5px !important;
+  }
+
+  .vis-panel.vis-top {
+    height: 35px !important;
+    min-height: 35px !important;
+  }
+
+  /* ✅ SÉCURITÉ MAXIMALE : Annule le -25px du desktop pour un centrage naturel au scroll/zoom */
+  .vis-time-axis .vis-text {
+    font-size: 0.7rem !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+
+  .vis-time-axis .vis-grid.vis-major {
+    border-left-width: 1px !important;
+    margin-left: -0.5px !important;
+  }
+
+  .vis-time-axis .vis-grid.vis-minor {
+    border-width: 1px !important;
+    opacity: 0.5 !important;
+  }
+
+  .parchment-icon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.9rem !important;
+  }
+
+  .vis-item[class^="tp-"]:not(.tp-wax-seal) {
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    height: 32px !important;
+  }
+
+  .vis-item.tp-wax-seal {
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    height: 32px !important;
+  }
+
+  .wax-seal-icon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.6rem !important;
+  }
+
+  .vis-item .vis-line {
+    border-left-width: 1px !important;
+  }
+
+  .vis-item.tp-wax-seal .vis-line {
+    border-left-width: 2px !important;
+  }
+
+  .vis-panel.vis-center::before {
+    height: 2px !important;
+  }
+
+  .parchment-icon:hover,
+  .wax-seal-icon:hover {
+    transform: scale(1.1) !important; /* Pas de rotation sur tactile */
+  }
+}
+
+/* ═══════════════════════════════════════════
+   OPTIMISATION TRÈS PETITS ÉCRANS (< 480px)
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 479px) {
+  .vis-time-axis .vis-text {
+    font-size: 0.65rem !important;
+  }
+
+  .parchment-icon {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .vis-item[class^="tp-"]:not(.tp-wax-seal) {
+    width: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
+    height: 28px !important;
+  }
+
+  .vis-item.tp-wax-seal {
+    width: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
+    height: 28px !important;
+  }
+
+  .wax-seal-icon {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.55rem !important;
+  }
+}
+
+/* ═══════════════════════════════════════════
    ANIMATIONS & UTILITAIRES
    ═══════════════════════════════════════════ */
 @keyframes fade-in {
@@ -405,7 +509,6 @@
   animation: fade-in 0.4s ease-out forwards;
 }
 
-/* Scrollbar cachée pour les chips */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
