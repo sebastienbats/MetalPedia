@@ -145,7 +145,7 @@
   transform-origin: left center !important;
 
   /* ✅ CORRECTION DU DÉCALAGE : Décale légèrement vers la gauche pour centrer sur la ligne */
-  transform: translateX(-4px) !important;
+  transform: translateX(-6px) !important;
   transform-origin: left center !important; 
 }
 
