@@ -261,7 +261,7 @@
   overflow: visible !important;
 }
 
-/* ══════════════════════════════════════════
+/* ═══════════════════════════════════════════
    CORRECTION OVERFLOW (Suppression des reliquats)
    ═══════════════════════════════════════════ */
 
@@ -286,7 +286,7 @@
    SCEAUX DE CIRE (Décennies Clés) - VERSION ITEMS
    ═══════════════════════════════════════════ */
 
-/* Conteneur de l'item sceau - même système de coordonnées que les événements */
+/* Conteneur de l'item sceau - Forcé en haut du panneau (sur l'axe) */
 .vis-item.tp-wax-seal {
   width: 40px !important;
   min-width: 40px !important;
@@ -297,7 +297,10 @@
   box-shadow: none !important;
   overflow: visible !important;
   border-radius: 50% !important;
-  z-index: 4 !important;
+  /* ✅ Force la position verticale en haut, collé à l'axe chronologique */
+  top: -10px !important;
+  margin-top: 0 !important;
+  z-index: 100 !important;
 }
 
 .vis-item.tp-wax-seal .vis-item-content {
@@ -309,9 +312,10 @@
   height: 100% !important;
   background: transparent !important;
   overflow: visible !important;
+  z-index: 101 !important;
 }
 
-/* Icône du sceau de cire (cercle rouge avec année inscrite) */
+/* Icône du sceau de cire avec police MedievalSharp */
 .wax-seal-icon {
   display: inline-flex !important;
   align-items: center !important;
@@ -321,8 +325,9 @@
   border-radius: 50% !important;
   background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
   border: 2px solid #3e0000 !important;
-  font-family: var(--font-medieval), serif !important;
-  font-size: 0.7rem !important;
+  /* ✅ Police MedievalSharp forcée */
+  font-family: 'MedievalSharp', var(--font-medieval), cursive !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
   color: #fff3e0 !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
@@ -337,7 +342,7 @@
     radial-gradient(circle at 20% 20%, rgba(255, 200, 200, 0.3) 0%, transparent 30%),
     radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.3) 0%, transparent 40%) !important;
   position: relative !important;
-  z-index: 4 !important;
+  z-index: 102 !important;
 }
 
 .wax-seal-icon:hover {
@@ -349,11 +354,20 @@
   filter: brightness(1.2) !important;
 }
 
-/* Ligne verticale des sceaux (plus épaisse et rouge) */
+/* Ligne verticale des sceaux (rouge, part de l'axe vers le bas) */
 .vis-item.tp-wax-seal .vis-line {
   border-left: 3px solid rgba(139, 0, 0, 0.7) !important;
   opacity: 0.8 !important;
   z-index: 3 !important;
+}
+
+/* ✅ SUPPRESSION TOTALE ET DÉFINITIVE DES RELIQUATS addCustomTime */
+.vis-custom-time,
+.vis-custom-time-marker,
+.vis-custom-time-label {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
 }
 
 /* ═══════════════════════════════════════════
@@ -370,7 +384,7 @@
 
 /* ═══════════════════════════════════════════
    ANIMATIONS & UTILITAIRES
-   ══════════════════════════════════════════ */
+   ═══════════════════════════════════════════ */
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
