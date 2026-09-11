@@ -122,16 +122,24 @@
    MOTEUR D'ALIGNEMENT UNIFIÉ (Dates + Gouttes + Sceaux)
    ═══════════════════════════════════════════ */
 
-/* 🛡️ MASQUER TOUS LES AXES SAUF CELUI DU HAUT */
+/* 🛡️ MASQUER TOUT SAUF L'AXE DU HAUT */
 .vis-panel.vis-bottom,
-.vis-time-axis.vis-bottom {
+.vis-time-axis.vis-bottom,
+.vis-time-axis.vis-foreground {
   display: none !important;
   visibility: hidden !important;
-  opacity: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
 }
 
-/* 1. Dates de l'axe : positionnement naturel + correction via margin-left */
-.vis-time-axis .vis-text {
+/* Masquer les labels de niveau secondaire (mois, jours, etc.) */
+.vis-time-axis .vis-text.vis-minor,
+.vis-time-axis .vis-text:not(.vis-major) {
+  display: none !important;
+}
+
+/* 1. Dates de l'axe : UNIQUEMENT les labels majeurs (décennies) */
+.vis-time-axis.vis-top .vis-text.vis-major {
   color: #3e2723 !important;
   font-family: var(--font-medieval), serif !important;
   font-size: 0.85rem !important;
@@ -149,6 +157,10 @@
 
   /* ✅ CORRECTION DU DÉCALAGE (conservée pour le desktop) */
   margin-left: -25px !important;
+  
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* 2. Grilles majeures (décennies) : Lignes d'encre pleines */
@@ -158,11 +170,9 @@
   border-left-style: solid !important;
 }
 
-/* 3. Grilles mineures : pointillés discrets */
+/* 3. Grilles mineures : masquées pour éviter la confusion */
 .vis-time-axis .vis-grid.vis-minor {
-  border-color: rgba(101, 67, 33, 0.2) !important;
-  border-style: dashed !important;
-  border-left-style: dashed !important;
+  display: none !important;
 }
 
 /* 4. Panneaux : hauteurs fixes */
@@ -180,15 +190,6 @@
 .vis-panel.vis-center {
   padding-top: 5px !important;
 }
-.vis-panel.vis-top {
-  height: 45px !important;
-  min-height: 45px !important;
-}
-
-.vis-panel.vis-center {
-  padding-top: 5px !important;
-}
-
 /* ═══════════════════════════════════════════
    LIGNE D'ENCRE SÉPIA (Axe horizontal)
    ═══════════════════════════════════════════ */
