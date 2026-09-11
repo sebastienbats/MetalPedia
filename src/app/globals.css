@@ -89,6 +89,7 @@
     0 10px 40px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(101, 67, 33, 0.5);
   overflow: visible !important;
+  z-index: 0;
 }
 
 .timeline-container::before {
@@ -118,29 +119,34 @@
 }
 
 /* ═══════════════════════════════════════════
-   AXE CHRONOLOGIQUE (Dates & Grilles)
+   MOTEUR D'ALIGNEMENT UNIFIÉ (Dates + Gouttes + Sceaux)
    ═══════════════════════════════════════════ */
 
+/* 1. Dates de l'axe : centrées sur leur ligne de grille */
 .vis-time-axis .vis-text {
   color: #3e2723 !important;
   font-family: var(--font-medieval), serif !important;
   font-size: 0.85rem !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
   font-weight: 600;
-  /* Centre les dates sur leur ligne de grille (alignement avec les gouttes d'encre) */ 
-  transform: translateX(-50%) !important; 
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  text-align: center !important;
+  transform: translateX(-50%) !important;
 }
 
+/* 2. Grilles majeures (décennies) : gouttes d'encre principales */
+.vis-time-axis .vis-grid.vis-major {
+  border-color: rgba(62, 39, 35, 0.5) !important;
+  border-width: 2px !important;
+  border-left-style: solid !important;
+}
+
+/* 3. Grilles mineures : plus discrètes */
 .vis-time-axis .vis-grid.vis-minor {
   border-color: rgba(101, 67, 33, 0.15) !important;
   border-style: dashed !important;
 }
 
-.vis-time-axis .vis-grid.vis-major {
-  border-color: rgba(62, 39, 35, 0.4) !important;
-  border-width: 2px !important;
-}
-
+/* 4. Panneaux : hauteurs et bordures fixes pour l'alignement */
 .vis-panel.vis-center,
 .vis-panel.vis-bottom,
 .vis-panel.vis-top {
@@ -148,17 +154,17 @@
 }
 
 .vis-panel.vis-top {
-  height: 40px !important;
-  min-height: 40px !important;
+  height: 45px !important;
+  min-height: 45px !important;
+}
+
+.vis-panel.vis-center {
+  padding-top: 5px !important;
 }
 
 /* ═══════════════════════════════════════════
-   LIGNE D'ENCRE SÉPIA (Axe du temps)
+   LIGNE D'ENCRE SÉPIA (Axe horizontal)
    ═══════════════════════════════════════════ */
-
-.vis-panel.vis-center {
-  padding-top: 10px !important;
-}
 
 .vis-panel.vis-center::before {
   content: '';
@@ -183,7 +189,7 @@
 }
 
 /* ═══════════════════════════════════════════
-   GOUTTES D'ENCRE (Lignes verticales)
+   GOUTTES D'ENCRE (Lignes verticales des événements)
    ═══════════════════════════════════════════ */
 
 .vis-item .vis-line {
@@ -199,9 +205,84 @@
 }
 
 /* ═══════════════════════════════════════════
-   ICÔNES COMPACTES SUR PARCHEMIN (Annotations manuscrites)
+   SCEAUX DE CIRE (Décennies Clés) - Moteur unifié
    ═══════════════════════════════════════════ */
 
+/* Conteneur de l'item sceau : z-index 2 (derrière les événements, devant le fond) */
+.vis-item.tp-wax-seal {
+  width: 40px !important;
+  min-width: 40px !important;
+  max-width: 40px !important;
+  height: 40px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  border-radius: 50% !important;
+  z-index: 2 !important;
+}
+
+.vis-item.tp-wax-seal .vis-item-content {
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+/* Icône du sceau de cire */
+.wax-seal-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
+  border: 2px solid #3e0000 !important;
+  font-family: 'MedievalSharp', var(--font-medieval), cursive !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  color: #fff3e0 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow:
+    0 0 0 2px rgba(62, 0, 0, 0.4),
+    0 4px 12px rgba(139, 0, 0, 0.6),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.4),
+    inset 0 2px 4px rgba(255, 100, 100, 0.3) !important;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255, 200, 200, 0.3) 0%, transparent 30%),
+    radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.3) 0%, transparent 40%) !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.wax-seal-icon:hover {
+  transform: scale(1.25) !important;
+  box-shadow:
+    0 0 0 3px rgba(198, 40, 40, 0.8),
+    0 6px 20px rgba(139, 0, 0, 0.8),
+    0 0 30px rgba(198, 40, 40, 0.5) !important;
+  filter: brightness(1.2) !important;
+}
+
+/* Ligne verticale du sceau (même moteur que les gouttes) */
+.vis-item.tp-wax-seal .vis-line {
+  border-left: 3px solid rgba(139, 0, 0, 0.7) !important;
+  opacity: 0.8 !important;
+  z-index: 1 !important;
+}
+
+/* ═══════════════════════════════════════════
+   ICÔNES COMPACTES SUR PARCHEMIN (Événements)
+   ═══════════════════════════════════════════ */
+
+/* z-index 3 : AU-DESSUS des sceaux et des gouttes */
 .parchment-icon {
   display: inline-flex !important;
   align-items: center !important;
@@ -238,7 +319,7 @@
 }
 
 /* Conteneurs d'événements forcés en cercles transparents */
-.vis-item[class^="tp-"] {
+.vis-item[class^="tp-"]:not(.tp-wax-seal) {
   width: 40px !important;
   min-width: 40px !important;
   max-width: 40px !important;
@@ -248,9 +329,10 @@
   box-shadow: none !important;
   overflow: visible !important;
   border-radius: 50% !important;
+  z-index: 3 !important;
 }
 
-.vis-item[class^="tp-"] .vis-item-content {
+.vis-item[class^="tp-"]:not(.tp-wax-seal) .vis-item-content {
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
@@ -306,6 +388,7 @@
   animation: fade-in 0.4s ease-out forwards;
 }
 
+/* Scrollbar cachée pour les chips */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
