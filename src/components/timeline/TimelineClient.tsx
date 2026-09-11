@@ -10,17 +10,6 @@ import {
   getActivePillarsInDecade 
 } from '@/utils/timelineStats';
 
-interface TimelineEvent {
-  id: number;
-  content: string;
-  start: string;
-  end?: string;
-  type?: 'point' | 'range';
-  pillar?: GamificationPillar;
-  className?: string;
-  loreSnippet?: string;
-}
-
 const METAL_EVENTS: TimelineEvent[] = [
   { id: 1, content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le Premier Riff résonne. Le Silence Primordial est brisé.' },
   { id: 2, content: 'Sortie de "Paranoid"', start: '1970-09-18', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Les Tables du Savoir enregistrent leur premier chapitre.' },
