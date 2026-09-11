@@ -272,15 +272,34 @@ export default function TimelineClient() {
         </div>
 
         {activeLore && (
-          <div className="border-l-4 border-metal-fire bg-metal-fire/5 p-3 animate-fade-in rounded-r-lg">
-            <div className="text-gray-200 font-serif whitespace-pre-line">
-              {activeLore.split('\n\n').map((part, index) => (
-                <p key={index} className={index === 0 ? 'text-lg font-bold mb-2' : 'text-sm italic text-gray-300'}>{part}</p>
-              ))}
-            </div>
+  <div className="border-l-4 border-metal-fire bg-metal-fire/5 p-3 animate-fade-in rounded-r-lg">
+    <div className="text-gray-200 font-serif whitespace-pre-line">
+      {activeLore.split('\n\n').map((section, sectionIndex) => {
+        // Séparer les lignes au sein de chaque section
+        const lines = section.split('\n');
+        return (
+          <div key={sectionIndex} className={sectionIndex > 0 ? 'mt-3' : ''}>
+            {lines.map((line, lineIndex) => {
+              // Première ligne = titre de l'événement
+              if (lineIndex === 0 && sectionIndex === 0) {
+                return <p key={lineIndex} className="text-lg font-bold mb-1">{line}</p>;
+              }
+              // Lignes avec emoji = métadonnées (date/période)
+              if (line.startsWith('📅')) {
+                return <p key={lineIndex} className="text-sm font-semibold text-metal-rust mb-1">{line}</p>;
+              }
+              // Lignes avec parchemin = lore
+              if (line.startsWith('📜')) {
+                return <p key={lineIndex} className="text-sm italic text-gray-300">{line}</p>;
+              }
+              return <p key={lineIndex} className="text-sm text-gray-300">{line}</p>;
+            })}
           </div>
-        )}
-
+        );
+      })}
+    </div>
+  </div>
+)}
         <div className="relative">
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-metal-black/80 z-10 rounded-lg">
