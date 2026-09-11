@@ -4,6 +4,11 @@ import { useEffect, useRef, useState } from 'react';
 import Loader from '@/components/ui/Loader';
 import { PILLAR_METADATA, type GamificationPillar } from '@/types/api';
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
+import { DECADES_METADATA } from '@/data/decades';
+import { 
+  countEventsInDecade, 
+  getActivePillarsInDecade 
+} from '@/utils/timelineStats';
 
 interface TimelineEvent {
   id: number;
@@ -143,22 +148,56 @@ export default function TimelineClient() {
   if (properties.item) {
     const event = ALL_TIMELINE_ITEMS.find(e => e.id === properties.item);
     if (event) {
-      // ✅ Gestion du clic sur les sceaux
-      if (event.className === 'tp-wax-seal') {
-        setActiveLore(`🔴 Sceau de la décennie ${event.content}`);
-        return;
-      }
+      // ✅ Gestion du clic sur les sceaux - VERSION ENRICHIE
+        if (event.className === 'tp-wax-seal') {
+            const decade = event.content; // Ex: "1970"
+            const metadata = DECADES_METADATA[decade];
+  
+        if (!metadata) {
+            setActiveLore(` Sceau de la décennie ${decade}`);
+            return;
+            }
+  
+          // Calculer les stats dynamiques
+          const decadeStart = metadata.period.start;
+          const decadeEnd = metadata.period.end;
+          const eventCount = countEventsInDecade(METAL_EVENTS, decadeStart, decadeEnd);
+          const activePillars = getActivePillarsInDecade(METAL_EVENTS, decadeStart, decadeEnd);
+  
+          // Formater les piliers avec leurs icônes
+          const pillarsDisplay = activePillars
+          .map(pillar => {
+          const pillarData = PILLAR_METADATA[pillar as GamificationPillar];
+          return pillarData ? `${pillarData.icon} ${pillar}` : pillar;
+          })
+          .join(', ');
+          // Construire le lore enrichi
+          const richLore = `🔴 ${metadata.epicTitle}
 
-      // ✅ Construction du contenu avec date/période
-      let tooltipContent = event.content;
+          📅 Période : ${decadeStart} - ${decadeEnd}
+
+          📜 ${metadata.narrative}
+
+          ✨ Statistiques de la décennie :
+          • ${eventCount} événements majeurs
+          • Piliers actifs : ${pillarsDisplay}
+
+          🏆 Événement marquant : ${metadata.keyEvent || 'N/A'}`;
+
+          setActiveLore(richLore);
+          return;
+          }
+
+          // ✅ Construction du contenu avec date/période
+          let tooltipContent = event.content;
       
-      // Ajout de la date ou période
-      const startYear = new Date(event.start).getFullYear();
+          // Ajout de la date ou période
+            const startYear = new Date(event.start).getFullYear();
       
-      if (event.type === 'range' && event.end) {
-        const endYear = new Date(event.end).getFullYear();
-        tooltipContent += `\n📅 Période : ${startYear} - ${endYear}`;
-      } else {
+          if (event.type === 'range' && event.end) {
+            const endYear = new Date(event.end).getFullYear();
+          tooltipContent += `\n📅 Période : ${startYear} - ${endYear}`;
+          } else {
         // Pour les événements ponctuels, formater la date complète
         const dateObj = new Date(event.start);
         const options: Intl.DateTimeFormatOptions = { 
@@ -272,29 +311,74 @@ export default function TimelineClient() {
         </div>
 
         {activeLore && (
-  <div className="border-l-4 border-metal-fire bg-metal-fire/5 p-3 animate-fade-in rounded-r-lg">
-    <div className="text-gray-200 font-serif whitespace-pre-line">
+  <div className="border-l-4 border-metal-fire bg-metal-fire/5 p-4 animate-fade-in rounded-r-lg">
+    <div className="text-gray-200 font-serif space-y-3">
       {activeLore.split('\n\n').map((section, sectionIndex) => {
-        // Séparer les lignes au sein de chaque section
-        const lines = section.split('\n');
+        // Titre principal (première section)
+        if (sectionIndex === 0 && section.startsWith('🔴')) {
+          return (
+            <h3 key={sectionIndex} className="text-xl font-bold text-metal-fire mb-4">
+              {section.replace(' ', '')}
+            </h3>
+          );
+        }
+        
+        // Période
+        if (section.startsWith('📅')) {
+          return (
+            <p key={sectionIndex} className="text-sm font-semibold text-metal-rust">
+              {section}
+            </p>
+          );
+        }
+        
+        // Lore narratif
+        if (section.startsWith('📜')) {
+          return (
+            <p key={sectionIndex} className="text-sm leading-relaxed text-gray-300 italic">
+              {section.replace('📜 ', '')}
+            </p>
+          );
+        }
+        
+        // Statistiques
+        if (section.startsWith('✨')) {
+          return (
+            <div key={sectionIndex} className="mt-4 pt-3 border-t border-metal-fire/30">
+              <p className="text-sm font-semibold text-metal-fire mb-2">{section}</p>
+            </div>
+          );
+        }
+        
+        // Détails des stats (lignes commençant par •)
+        if (section.includes('•')) {
+          const lines = section.split('\n').filter(line => line.trim());
+          return (
+            <ul key={sectionIndex} className="space-y-1">
+              {lines.map((line, lineIndex) => (
+                <li key={lineIndex} className="text-sm text-gray-400 pl-2">
+                  {line.replace('• ', '')}
+                </li>
+              ))}
+            </ul>
+          );
+        }
+        
+        // Événement marquant
+        if (section.startsWith('🏆')) {
+          return (
+            <div key={sectionIndex} className="mt-3 p-3 bg-metal-fire/10 rounded-lg border border-metal-fire/30">
+              <p className="text-sm font-semibold text-metal-fire mb-1">{section.split(':')[0]}</p>
+              <p className="text-sm text-gray-300">{section.split(':')[1]?.trim()}</p>
+            </div>
+          );
+        }
+        
+        // Fallback
         return (
-          <div key={sectionIndex} className={sectionIndex > 0 ? 'mt-3' : ''}>
-            {lines.map((line, lineIndex) => {
-              // Première ligne = titre de l'événement
-              if (lineIndex === 0 && sectionIndex === 0) {
-                return <p key={lineIndex} className="text-lg font-bold mb-1">{line}</p>;
-              }
-              // Lignes avec emoji = métadonnées (date/période)
-              if (line.startsWith('📅')) {
-                return <p key={lineIndex} className="text-sm font-semibold text-metal-rust mb-1">{line}</p>;
-              }
-              // Lignes avec parchemin = lore
-              if (line.startsWith('📜')) {
-                return <p key={lineIndex} className="text-sm italic text-gray-300">{line}</p>;
-              }
-              return <p key={lineIndex} className="text-sm text-gray-300">{line}</p>;
-            })}
-          </div>
+          <p key={sectionIndex} className="text-sm text-gray-300">
+            {section}
+          </p>
         );
       })}
     </div>
