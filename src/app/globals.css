@@ -145,7 +145,7 @@
   transform-origin: left center !important;
 
   /* ✅ CORRECTION DU DÉCALAGE via margin-left (n'interfère pas avec les transforms internes) */
-  margin-left: -20px !important;
+  margin-left: -25px !important;
 }
 
 /* 2. Grilles majeures (décennies : 1960, 1970, 1980...) : Lignes d'encre pleines */
@@ -214,6 +214,7 @@
   z-index: 1 !important;
   pointer-events: none;
   display: block !important;
+  color: #660000 !important; /* couleur sang/*
 }
 
 .vis-item.vis-range .vis-line {
