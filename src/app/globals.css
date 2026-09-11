@@ -123,7 +123,22 @@
    ═══════════════════════════════════════════ */
 
 /* 1. Dates de l'axe du HAUT - POLICE MEDIEVALSHARP FORCÉE */
-.vis-time-axis.vis-top .vis-text,
+.vis-time-axis.vis-top .vis-text {
+  color: #3e2723 !important;
+  font-family: var(--font-medieval), serif !important;
+  font-size: 0.85rem !important;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  white-space: nowrap !important;
+  margin: 0 !important;
+  padding: 0 4px !important;
+  text-align: center !important;
+  margin-left: -25px !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 3 !important; /* ✅ Explicite */
+}
 .vis-panel.vis-top .vis-text {
   color: #3e2723 !important;
   font-family: 'MedievalSharp', var(--font-medieval), serif !important;
@@ -303,7 +318,7 @@
   cursor: pointer !important;
   transition: all 0.3s ease !important;
   border: 2px solid var(--pillar-color, #3e2723) !important;
-  box-shadow: 
+  box-shadow:
     0 0 0 1px rgba(62, 39, 35, 0.3),
     0 2px 6px rgba(62, 39, 35, 0.4),
     inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
@@ -331,7 +346,7 @@
   box-shadow: none !important;
   overflow: visible !important;
   border-radius: 50% !important;
-  z-index: 3 !important;
+  z-index: 4 !important;
 }
 
 .vis-item[class^="tp-"]:not(.tp-wax-seal) .vis-item-content {
