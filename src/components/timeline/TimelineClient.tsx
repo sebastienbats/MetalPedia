@@ -4,11 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import Loader from '@/components/ui/Loader';
 import { PILLAR_METADATA, type GamificationPillar, type TimelineEvent } from '@/types/api';
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
-import { DECADES_METADATA } from '@/data/decades';
-import { 
-  countEventsInDecade, 
-  getActivePillarsInDecade 
-} from '@/utils/timelineStats';
 
 const METAL_EVENTS: TimelineEvent[] = [
   { id: 1, content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le Premier Riff résonne. Le Silence Primordial est brisé.' },
@@ -48,17 +43,16 @@ const METAL_EVENTS: TimelineEvent[] = [
   { id: 35, content: 'Ghost - "Meliora"', start: '2015-08-21', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le clergé satirique bénit les foules.' },
 ];
 
-// 🕯️ SCEAUX DE CIRE placés au milieu de chaque décennie
+// 🕯️ SCEAUX DE CIRE placés au milieu de chaque décennie (Dates corrigées)
 const WAX_SEALS: TimelineEvent[] = [
   { id: 1001, content: '1970', start: '1975-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
   { id: 1002, content: '1980', start: '1985-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
   { id: 1003, content: '1990', start: '1995-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
-  { id: 1004, content: '2000', start: '2005-01-01', className: 'tp-wax-seal', loreSnippet: ' Sceau de la décennie 2000' },
+  { id: 1004, content: '2000', start: '2005-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
   { id: 1005, content: '2010', start: '2015-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
   { id: 1006, content: '2020', start: '2025-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
 ];
 
-// Fusion des événements et des sceaux
 const ALL_TIMELINE_ITEMS = [...METAL_EVENTS, ...WAX_SEALS];
 
 export default function TimelineClient() {
@@ -78,51 +72,30 @@ export default function TimelineClient() {
 
     const initTimeline = async () => {
       try {
-        // 🛡️ SÉCURITÉ : Empêche la création d'une 2ème timeline
         if (timelineRef.current) return;
-
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
-        
-        // ✅ Utilisation du tableau fusionné (événements + sceaux)
         const initialItems = new DataSet(ALL_TIMELINE_ITEMS);
         
         const isMobile = window.innerWidth < 768;
         const isSmall = window.innerWidth < 480;
 
         const options: any = {
-          // ✅ Hauteur adaptative
           height: isSmall ? '400px' : isMobile ? '450px' : '600px',
-          
-          // ✅ Vue initiale : 15 ans sur mobile, 35 ans sur desktop
           start: isMobile ? '1985-01-01' : '1975-01-01',
           end: isMobile ? '2000-01-01' : '2010-01-01',
-          
-          // ✅ Limites de navigation : toute la chronologie (1965-2030)
           min: '1965-01-01',
           max: '2030-12-31',
-          
-          // ✅ Zoom : de 1 an à 40 ans
           zoomMin: 1000 * 60 * 60 * 24 * 365,
           zoomMax: 1000 * 60 * 60 * 24 * 365 * 40,
-          
-          // ✅ Marges réduites sur mobile pour mieux utiliser l'espace
-          margin: { 
-            item: isMobile ? 15 : 30, 
-            axis: isMobile ? 8 : 15 
-          },
-          
-          orientation: 'top', // ✅ C'est la configuration parfaite et stable
+          margin: { item: isMobile ? 15 : 30, axis: isMobile ? 8 : 15 },
+          orientation: 'top',
           stack: true,
           showCurrentTime: false,
-          
-          // ✅ GLISSER et ZOOMER activés sur TOUS les écrans
           moveable: true,
           zoomable: true,
-          
           template: (item: TimelineEvent) => {
-            // ✅ Gestion de l'affichage des sceaux - CSS INLINE GARANTI
             if (item.className === 'tp-wax-seal') {
-              return `<div style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%);border:2px solid #3e0000;font-family:'MedievalSharp',cursive;font-size:0.7rem;font-weight:700;color:#fff3e0;text-shadow:0 1px 2px rgba(0,0,0,0.8);cursor:pointer;box-shadow:0 0 0 2px rgba(62,0,0,0.4),0 4px 12px rgba(139,0,0,0.6),inset 0 -3px 6px rgba(0,0,0,0.4);z-index:2;">${item.content}</div>`;
+              return `<div class="wax-seal-icon">${item.content}</div>`;
             }
             const pillarData = item.pillar ? PILLAR_METADATA[item.pillar] : null;
             const icon = pillarData?.icon || '🎸';
@@ -134,79 +107,26 @@ export default function TimelineClient() {
         timelineRef.current = new Timeline(container, initialItems, options);
 
         timelineRef.current.on('click', (properties: any) => {
-  if (properties.item) {
-    const event = ALL_TIMELINE_ITEMS.find(e => e.id === properties.item);
-    if (event) {
-      // ✅ Gestion du clic sur les sceaux - VERSION ENRICHIE
-        if (event.className === 'tp-wax-seal') {
-            const decade = event.content; // Ex: "1970"
-            const metadata = DECADES_METADATA[decade];
-  
-        if (!metadata) {
-            setActiveLore(` Sceau de la décennie ${decade}`);
-            return;
+          if (properties.item) {
+            const event = ALL_TIMELINE_ITEMS.find(e => e.id === properties.item);
+            if (event) {
+              if (event.className === 'tp-wax-seal') {
+                setActiveLore(`🔴 Sceau de la décennie ${event.content}`);
+                return;
+              }
+              let tooltipContent = event.content;
+              if (event.type === 'range' && event.end) {
+                const startYear = new Date(event.start).getFullYear();
+                const endYear = new Date(event.end).getFullYear();
+                tooltipContent = `${event.content} (${startYear} - ${endYear})`;
+              }
+              if (event.loreSnippet) {
+                tooltipContent += `\n\n📜 ${event.loreSnippet}`;
+              }
+              setActiveLore(tooltipContent);
             }
-  
-          // Calculer les stats dynamiques
-          const decadeStart = metadata.period.start;
-          const decadeEnd = metadata.period.end;
-          const eventCount = countEventsInDecade(METAL_EVENTS, decadeStart, decadeEnd);
-          const activePillars = getActivePillarsInDecade(METAL_EVENTS, decadeStart, decadeEnd);
-  
-          // Formater les piliers avec leurs icônes
-          const pillarsDisplay = activePillars
-          .map(pillar => {
-          const pillarData = PILLAR_METADATA[pillar as GamificationPillar];
-          return pillarData ? `${pillarData.icon} ${pillar}` : pillar;
-          })
-          .join(', ');
-          // Construire le lore enrichi
-          const richLore = `🔴 ${metadata.epicTitle}
-
-          📅 Période : ${decadeStart} - ${decadeEnd}
-
-          📜 ${metadata.narrative}
-
-          ✨ Statistiques de la décennie :
-          • ${eventCount} événements majeurs
-          • Piliers actifs : ${pillarsDisplay}
-
-          🏆 Événement marquant : ${metadata.keyEvent || 'N/A'}`;
-
-          setActiveLore(richLore);
-          return;
           }
-
-          // ✅ Construction du contenu avec date/période
-          let tooltipContent = event.content;
-      
-          // Ajout de la date ou période
-            const startYear = new Date(event.start).getFullYear();
-      
-          if (event.type === 'range' && event.end) {
-            const endYear = new Date(event.end).getFullYear();
-          tooltipContent += `\n📅 Période : ${startYear} - ${endYear}`;
-          } else {
-        // Pour les événements ponctuels, formater la date complète
-        const dateObj = new Date(event.start);
-        const options: Intl.DateTimeFormatOptions = { 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
-        };
-        const formattedDate = dateObj.toLocaleDateString('fr-FR', options);
-        tooltipContent += `\n📅 Date : ${formattedDate}`;
-      }
-      
-      // Ajout du lore
-      if (event.loreSnippet) {
-        tooltipContent += `\n\n📜 ${event.loreSnippet}`;
-      }
-      
-      setActiveLore(tooltipContent);
-    }
-  }
-});
+        });
 
         setIsLoading(false);
       } catch (error) {
@@ -231,8 +151,6 @@ export default function TimelineClient() {
       const filteredEvents = activeFilters.length > 0
         ? METAL_EVENTS.filter(e => activeFilters.includes(e.pillar!))
         : METAL_EVENTS;
-      
-      // ✅ Important : toujours inclure les sceaux même lors du filtrage
       const itemsToShow = [...filteredEvents, ...WAX_SEALS];
       timelineRef.current.setItems(new DataSet(itemsToShow));
       setActiveLore(null);
@@ -263,7 +181,6 @@ export default function TimelineClient() {
       <div className="metal-card p-4 space-y-4">
         <div>
           <h3 className="font-serif text-sm mb-3 text-gray-400 uppercase tracking-wider">🔍 Filtrer par pilier</h3>
-          {/* ✅ scroll-hide et snap-x pour un défilement tactile fluide */}
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
             <button
               onClick={() => setActiveFilters([])}
@@ -300,79 +217,15 @@ export default function TimelineClient() {
         </div>
 
         {activeLore && (
-  <div className="border-l-4 border-metal-fire bg-metal-fire/5 p-4 animate-fade-in rounded-r-lg">
-    <div className="text-gray-200 font-serif space-y-3">
-      {activeLore.split('\n\n').map((section, sectionIndex) => {
-        // Titre principal (première section)
-        if (sectionIndex === 0 && section.startsWith('🔴')) {
-          return (
-            <h3 key={sectionIndex} className="text-xl font-bold text-metal-fire mb-4">
-              {section.replace(' ', '')}
-            </h3>
-          );
-        }
-        
-        // Période
-        if (section.startsWith('📅')) {
-          return (
-            <p key={sectionIndex} className="text-sm font-semibold text-metal-rust">
-              {section}
-            </p>
-          );
-        }
-        
-        // Lore narratif
-        if (section.startsWith('📜')) {
-          return (
-            <p key={sectionIndex} className="text-sm leading-relaxed text-gray-300 italic">
-              {section.replace('📜 ', '')}
-            </p>
-          );
-        }
-        
-        // Statistiques
-        if (section.startsWith('✨')) {
-          return (
-            <div key={sectionIndex} className="mt-4 pt-3 border-t border-metal-fire/30">
-              <p className="text-sm font-semibold text-metal-fire mb-2">{section}</p>
-            </div>
-          );
-        }
-        
-        // Détails des stats (lignes commençant par •)
-        if (section.includes('•')) {
-          const lines = section.split('\n').filter(line => line.trim());
-          return (
-            <ul key={sectionIndex} className="space-y-1">
-              {lines.map((line, lineIndex) => (
-                <li key={lineIndex} className="text-sm text-gray-400 pl-2">
-                  {line.replace('• ', '')}
-                </li>
+          <div className="border-l-4 border-metal-fire bg-metal-fire/5 p-3 animate-fade-in rounded-r-lg">
+            <div className="text-gray-200 font-serif whitespace-pre-line">
+              {activeLore.split('\n\n').map((part, index) => (
+                <p key={index} className={index === 0 ? 'text-lg font-bold mb-2' : 'text-sm italic text-gray-300'}>{part}</p>
               ))}
-            </ul>
-          );
-        }
-        
-        // Événement marquant
-        if (section.startsWith('🏆')) {
-          return (
-            <div key={sectionIndex} className="mt-3 p-3 bg-metal-fire/10 rounded-lg border border-metal-fire/30">
-              <p className="text-sm font-semibold text-metal-fire mb-1">{section.split(':')[0]}</p>
-              <p className="text-sm text-gray-300">{section.split(':')[1]?.trim()}</p>
             </div>
-          );
-        }
-        
-        // Fallback
-        return (
-          <p key={sectionIndex} className="text-sm text-gray-300">
-            {section}
-          </p>
-        );
-      })}
-    </div>
-  </div>
-)}
+          </div>
+        )}
+
         <div className="relative">
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-metal-black/80 z-10 rounded-lg">
@@ -384,7 +237,6 @@ export default function TimelineClient() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* ✅ Padding adaptatif (p-4 sur mobile, p-5 sur desktop) */}
         <div className="metal-card p-4 sm:p-5">
           <h3 className="font-serif text-base sm:text-lg mb-3 text-metal-rust">⏳ Navigation Rapide</h3>
           <div className="flex flex-wrap justify-center gap-2">
