@@ -4,7 +4,7 @@
 
 /* ═══════════════════════════════════════════
    THÈMES (Variables CSS)
-   ══════════════════════════════════════════ */
+   ═══════════════════════════════════════════ */
 :root, [data-theme="forge"] {
   --color-primary: #8b0000;
   --color-primary-hover: #b33939;
@@ -146,6 +146,22 @@
 .vis-panel.vis-top { height: 85px !important; min-height: 85px !important; }
 .vis-panel.vis-center { padding-top: 5px !important; }
 
+/* 6. CORRECTION GROUPES : Cacher la colonne de gauche pour alignement plein écran */
+.vis-labelset {
+  display: none !important;
+}
+.vis-panel.vis-left {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+}
+.vis-panel.vis-center, 
+.vis-panel.vis-right {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+}
+
 /* ═══════════════════════════════════════════
    LIGNE D'ENCRE SÉPIA (Axe horizontal)
    ═══════════════════════════════════════════ */
@@ -179,7 +195,7 @@
 /* ═══════════════════════════════════════════
    SCEAUX DE CIRE (Groupe 'wax-seals' - orientation top)
    Structurellement dans le panneau du haut
-   ══════════════════════════════════════════ */
+   ═══════════════════════════════════════════ */
 .vis-item.tp-wax-seal {
   width: 40px !important;
   height: 40px !important;
@@ -187,7 +203,6 @@
   border: none !important;
   overflow: visible !important;
   margin-left: -20px !important; /* Centre le sceau sur la ligne médiane */
-  /* ✅ PAS de margin-top : vis-timeline place automatiquement dans le panneau top */
   z-index: 2 !important;
 }
 .vis-item.tp-wax-seal .vis-item-content {
