@@ -53,15 +53,16 @@ const METAL_EVENTS: TimelineEvent[] = [
 
 // ══════════════════════════════════════════
 // SCEAUX DE CIRE (groupe 'wax-seals' - orientation top)
-// Placés au MILIEU de chaque décennie
+// Placés au MILIEU de chaque décennie (1975, 1985, etc.)
+// Content = '1970', '1980'... pour que DECADES_METADATA[event.content] fonctionne
 // ═══════════════════════════════════════════
 const WAX_SEALS: TimelineEvent[] = [
-  { id: 1001, group: 'wax-seals', content: '70s', start: '1975-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
-  { id: 1002, group: 'wax-seals', content: '80s', start: '1985-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
-  { id: 1003, group: 'wax-seals', content: '90s', start: '1995-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
-  { id: 1004, group: 'wax-seals', content: '2k', start: '2005-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
-  { id: 1005, group: 'wax-seals', content: '2k10', start: '2015-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
-  { id: 1006, group: 'wax-seals', content: '2k20', start: '2025-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
+  { id: 1001, group: 'wax-seals', content: '1970', start: '1975-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
+  { id: 1002, group: 'wax-seals', content: '1980', start: '1985-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
+  { id: 1003, group: 'wax-seals', content: '1990', start: '1995-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
+  { id: 1004, group: 'wax-seals', content: '2000', start: '2005-01-01', className: 'tp-wax-seal', loreSnippet: ' Sceau de la décennie 2000' },
+  { id: 1005, group: 'wax-seals', content: '2010', start: '2015-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
+  { id: 1006, group: 'wax-seals', content: '2020', start: '2025-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
 ];
 
 const ALL_TIMELINE_ITEMS = [...METAL_EVENTS, ...WAX_SEALS];
@@ -95,7 +96,7 @@ export default function TimelineClient() {
         const groups = new DataSet([
           { 
             id: 'events', 
-            content: ' ', // Espace pour éviter les bugs de rendu avec chaîne vide
+            content: ' ', // Espace pour éviter les bugs de rendu
           },
           { 
             id: 'wax-seals', 
@@ -122,6 +123,12 @@ export default function TimelineClient() {
           showCurrentTime: false,
           moveable: true,
           zoomable: true,
+          // ✅ NOUVEAU : Affiche les dates tous les 5 ans (1970, 1975, 1980, 1985...)
+          // Les wax seals (1975, 1985, 1995...) s'alignent automatiquement dessus
+          timeAxis: {
+            scale: 'year',
+            step: 5,
+          },
           template: (item: TimelineEvent) => {
             if (item.className === 'tp-wax-seal') {
               return `<div class="wax-seal-icon">${item.content}</div>`;
@@ -144,21 +151,11 @@ export default function TimelineClient() {
             if (event) {
               // ✅ LORE ENRICHI pour les sceaux de cire
               if (event.className === 'tp-wax-seal') {
-                // 1. Mapper le nom d'affichage ('70s') vers la clé réelle de DECADES_METADATA ('1970')
-                const displayToKeyMap: Record<string, string> = {
-                  '70s': '1970',
-                  '80s': '1980',
-                  '90s': '1990',
-                  '2k': '2000',
-                  '2k10': '2010',
-                  '2k20': '2020',
-                };
-                
-                const decadeKey = displayToKeyMap[event.content] || event.content;
-                const metadata = DECADES_METADATA[decadeKey];
+                const decade = event.content; // '1970', '1980', etc. (clé directe de DECADES_METADATA)
+                const metadata = DECADES_METADATA[decade];
                 
                 if (!metadata) {
-                  setActiveLore(`🔴 Sceau de la décennie ${event.content}`);
+                  setActiveLore(`🔴 Sceau de la décennie ${decade}`);
                   return;
                 }
                 
@@ -178,7 +175,7 @@ export default function TimelineClient() {
 
 📅 Période : ${decadeStart} - ${decadeEnd}
 
-📜 ${metadata.narrative}
+ ${metadata.narrative}
 
 ✨ Statistiques de la décennie :
 • ${eventCount} événements majeurs
@@ -206,7 +203,7 @@ export default function TimelineClient() {
                   day: 'numeric' 
                 };
                 const formattedDate = dateObj.toLocaleDateString('fr-FR', options);
-                tooltipContent += `\n📅 Date : ${formattedDate}`;
+                tooltipContent += `\n Date : ${formattedDate}`;
               }
               
               if (event.loreSnippet) {
@@ -311,24 +308,42 @@ export default function TimelineClient() {
           <div className="border-l-4 border-metal-fire bg-metal-fire/5 p-4 animate-fade-in rounded-r-lg">
             <div className="text-gray-200 font-serif space-y-3">
               {activeLore.split('\n\n').map((section, sectionIndex) => {
-                if (sectionIndex === 0 && section.startsWith('🔴')) {
-                  return <h3 key={sectionIndex} className="text-xl font-bold text-metal-fire mb-4">{section.trim()}</h3>;
+                if (sectionIndex === 0 && section.startsWith('')) {
+                  return (
+                    <h3 key={sectionIndex} className="text-xl font-bold text-metal-fire mb-4">
+                      {section.trim()}
+                    </h3>
+                  );
                 }
                 if (section.startsWith('📅')) {
-                  return <p key={sectionIndex} className="text-sm font-semibold text-metal-rust">{section}</p>;
+                  return (
+                    <p key={sectionIndex} className="text-sm font-semibold text-metal-rust">
+                      {section}
+                    </p>
+                  );
                 }
                 if (section.startsWith('📜')) {
-                  return <p key={sectionIndex} className="text-sm leading-relaxed text-gray-300 italic">{section.replace('📜 ', '')}</p>;
+                  return (
+                    <p key={sectionIndex} className="text-sm leading-relaxed text-gray-300 italic">
+                      {section.replace('📜 ', '')}
+                    </p>
+                  );
                 }
                 if (section.startsWith('✨')) {
-                  return <div key={sectionIndex} className="mt-4 pt-3 border-t border-metal-fire/30"><p className="text-sm font-semibold text-metal-fire mb-2">{section}</p></div>;
+                  return (
+                    <div key={sectionIndex} className="mt-4 pt-3 border-t border-metal-fire/30">
+                      <p className="text-sm font-semibold text-metal-fire mb-2">{section}</p>
+                    </div>
+                  );
                 }
                 if (section.includes('•')) {
                   const lines = section.split('\n').filter(line => line.trim());
                   return (
                     <ul key={sectionIndex} className="space-y-1">
                       {lines.map((line, lineIndex) => (
-                        <li key={lineIndex} className="text-sm text-gray-400 pl-2">{line.replace('• ', '')}</li>
+                        <li key={lineIndex} className="text-sm text-gray-400 pl-2">
+                          {line.replace('• ', '')}
+                        </li>
                       ))}
                     </ul>
                   );
@@ -341,7 +356,11 @@ export default function TimelineClient() {
                     </div>
                   );
                 }
-                return <p key={sectionIndex} className="text-sm text-gray-300">{section}</p>;
+                return (
+                  <p key={sectionIndex} className="text-sm text-gray-300">
+                    {section}
+                  </p>
+                );
               })}
             </div>
           </div>
