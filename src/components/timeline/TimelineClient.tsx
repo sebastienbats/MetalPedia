@@ -4,53 +4,64 @@ import { useEffect, useRef, useState } from 'react';
 import Loader from '@/components/ui/Loader';
 import { PILLAR_METADATA, type GamificationPillar, type TimelineEvent } from '@/types/api';
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
+import { DECADES_METADATA } from '@/data/decades';
+import { 
+  countEventsInDecade, 
+  getActivePillarsInDecade 
+} from '@/utils/timelineStats';
 
+// ═══════════════════════════════════════════
+// ÉVÉNEMENTS METAL (groupe 'events' - orientation bottom)
+// ═══════════════════════════════════════════
 const METAL_EVENTS: TimelineEvent[] = [
-  { id: 1, content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le Premier Riff résonne. Le Silence Primordial est brisé.' },
-  { id: 2, content: 'Sortie de "Paranoid"', start: '1970-09-18', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Les Tables du Savoir enregistrent leur premier chapitre.' },
-  { id: 3, content: 'Deep Purple - "Machine Head"', start: '1972-03-25', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le riff devient une incantation.' },
-  { id: 4, content: 'Led Zeppelin - "Houses of the Holy"', start: '1973-03-28', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Les sanctuaires du rock s\'élèvent.' },
-  { id: 5, content: 'Iron Maiden - Formation', start: '1975-12-25', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'La Vierge de Fer naît dans les brumes de Londres.' },
-  { id: 6, content: 'Judas Priest - "British Steel"', start: '1980-04-14', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'L\'acier britannique forge une nouvelle ère.' },
-  { id: 7, content: 'NWOBHM - Nouvelle vague du heavy', start: '1979-01-01', end: '1983-12-31', type: 'range', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'La forge s\'embrase en Grande-Bretagne.' },
-  { id: 8, content: 'Metallica - Formation', start: '1981-10-28', pillar: 'Thrash Metal', className: 'tp-thrash', loreSnippet: 'Les quatre cavaliers de l\'apocalypse thrash se rassemblent.' },
-  { id: 9, content: 'Metallica - "Kill \'Em All"', start: '1983-07-25', pillar: 'Thrash Metal', className: 'tp-thrash', loreSnippet: 'La vitesse devient une arme. +25 XP Vitesse acquise.' },
-  { id: 10, content: 'Slayer - "Reign in Blood"', start: '1986-10-07', pillar: 'Thrash Metal', className: 'tp-thrash', loreSnippet: 'La violence sonore atteint son paroxysme.' },
-  { id: 11, content: 'Megadeth - "Peace Sells"', start: '1986-09-19', pillar: 'Thrash Metal', className: 'tp-thrash', loreSnippet: 'La paix se vend, la guerre s\'achète.' },
-  { id: 12, content: 'Anthrax - "Among the Living"', start: '1987-03-22', pillar: 'Thrash Metal', className: 'tp-thrash', loreSnippet: 'Le Big Four est complet. Le thrash règne.' },
-  { id: 13, content: 'Émergence du Death Metal (Floride)', start: '1983-01-01', end: '1990-12-31', type: 'range', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Les profondeurs de la Floride engendrent l\'horreur sonore.' },
-  { id: 14, content: 'Death - "Scream Bloody Gore"', start: '1987-05-28', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Le growl est forgé. Le Nécromancien approuve.' },
-  { id: 15, content: 'Morbid Angel - "Altars of Madness"', start: '1989-05-12', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Les autels de la folie sont érigés.' },
-  { id: 16, content: 'Cannibal Corpse - Formation', start: '1988-12-01', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Le cadavre cannibale prend vie à Buffalo.' },
-  { id: 17, content: 'Première vague Black Metal', start: '1982-01-01', end: '1990-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'Les ténèbres s\'éveillent en Europe.' },
-  { id: 18, content: 'Seconde vague Black Metal norvégien', start: '1991-01-01', end: '1996-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: '🌑 Les forêts de Norvège s\'embrasent. Le froid est absolu.' },
-  { id: 19, content: 'Darkthrone - "A Blaze in the Northern Sky"', start: '1992-02-26', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'Un brasier s\'allume dans le ciel du Nord.' },
-  { id: 20, content: 'Mayhem - "De Mysteriis Dom Sathanas"', start: '1994-05-24', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'L\'opus maudit scelle le pacte avec l\'Oubli.' },
-  { id: 21, content: 'Burzum - "Filosofem"', start: '1996-01-01', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'La philosophie du son devient incantation.' },
-  { id: 22, content: 'Helloween - "Keeper of the Seven Keys"', start: '1987-05-23', pillar: 'Power Metal', className: 'tp-power', loreSnippet: 'Les mélodies épiques ouvrent les portails du fantastique.' },
-  { id: 23, content: 'Blind Guardian - "Somewhere Far Beyond"', start: '1992-03-30', pillar: 'Power Metal', className: 'tp-power', loreSnippet: 'Quelque part au-delà, les bardes chantent encore.' },
-  { id: 24, content: 'Explosion du Power Metal européen', start: '1994-01-01', end: '2000-12-31', type: 'range', pillar: 'Power Metal', className: 'tp-power', loreSnippet: 'L\'Europe s\'illumine de mélodies héroïques.' },
-  { id: 25, content: 'Nightwish - Formation', start: '1996-07-06', pillar: 'Power Metal', className: 'tp-power', loreSnippet: 'Le symphonique s\'allie à la puissance du métal.' },
-  { id: 26, content: 'Korn - Premier album', start: '1994-10-11', pillar: 'Metalcore', className: 'tp-metalcore', loreSnippet: 'Les chaînes du conventionnel sont brisées. Le Nu Metal déferle.' },
-  { id: 27, content: 'Nu Metal - Ère mainstream', start: '1994-01-01', end: '2004-12-31', type: 'range', pillar: 'Metalcore', className: 'tp-metalcore', loreSnippet: 'Le metal conquiert les ondes et les MTV.' },
-  { id: 28, content: 'System of a Down - "Toxicity"', start: '2001-09-04', pillar: 'Metalcore', className: 'tp-metalcore', loreSnippet: 'La toxicité devient un art politique.' },
-  { id: 29, content: 'Metalcore - Émergence', start: '2000-01-01', end: '2010-12-31', type: 'range', pillar: 'Metalcore', className: 'tp-metalcore', loreSnippet: 'Le cœur du metal bat au rythme des breakdowns.' },
-  { id: 30, content: 'Killswitch Engage - "Alive or Just Breathing"', start: '2002-05-21', pillar: 'Metalcore', className: 'tp-metalcore', loreSnippet: 'Vivant ou seulement respirant, le metalcore persiste.' },
-  { id: 31, content: 'Meshuggah - "Catch Thirtythree"', start: '2005-05-23', pillar: 'Progressive Metal', className: 'tp-progressive', loreSnippet: 'L\'Architecte du Chaos redéfinit les mathématiques du riff.' },
-  { id: 32, content: 'Periphery - Formation', start: '2005-01-01', pillar: 'Progressive Metal', className: 'tp-progressive', loreSnippet: 'La périphérie du metal repousse ses limites.' },
-  { id: 33, content: 'Djent & Metal progressif moderne', start: '2005-01-01', end: '2015-12-31', type: 'range', pillar: 'Progressive Metal', className: 'tp-progressive', loreSnippet: 'Le djent résonne. Les temps impairs deviennent rois.' },
-  { id: 34, content: 'Renaissance du Heavy Trad', start: '2015-01-01', end: '2026-01-01', type: 'range', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Les anciens reviennent. La boucle est bouclée.' },
-  { id: 35, content: 'Ghost - "Meliora"', start: '2015-08-21', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le clergé satirique bénit les foules.' },
+  { id: 1, group: 'events', content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le Premier Riff résonne. Le Silence Primordial est brisé.' },
+  { id: 2, group: 'events', content: 'Sortie de "Paranoid"', start: '1970-09-18', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Les Tables du Savoir enregistrent leur premier chapitre.' },
+  { id: 3, group: 'events', content: 'Deep Purple - "Machine Head"', start: '1972-03-25', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le riff devient une incantation.' },
+  { id: 4, group: 'events', content: 'Led Zeppelin - "Houses of the Holy"', start: '1973-03-28', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Les sanctuaires du rock s\'élèvent.' },
+  { id: 5, group: 'events', content: 'Iron Maiden - Formation', start: '1975-12-25', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'La Vierge de Fer naît dans les brumes de Londres.' },
+  { id: 6, group: 'events', content: 'Judas Priest - "British Steel"', start: '1980-04-14', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'L\'acier britannique forge une nouvelle ère.' },
+  { id: 7, group: 'events', content: 'NWOBHM - Nouvelle vague du heavy', start: '1979-01-01', end: '1983-12-31', type: 'range', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'La forge s\'embrase en Grande-Bretagne.' },
+  { id: 8, group: 'events', content: 'Metallica - Formation', start: '1981-10-28', pillar: 'Thrash Metal', className: 'tp-thrash', loreSnippet: 'Les quatre cavaliers de l\'apocalypse thrash se rassemblent.' },
+  { id: 9, group: 'events', content: 'Metallica - "Kill \'Em All"', start: '1983-07-25', pillar: 'Thrash Metal', className: 'tp-thrash', loreSnippet: 'La vitesse devient une arme. +25 XP Vitesse acquise.' },
+  { id: 10, group: 'events', content: 'Slayer - "Reign in Blood"', start: '1986-10-07', pillar: 'Thrash Metal', className: 'tp-thrash', loreSnippet: 'La violence sonore atteint son paroxysme.' },
+  { id: 11, group: 'events', content: 'Megadeth - "Peace Sells"', start: '1986-09-19', pillar: 'Thrash Metal', className: 'tp-thrash', loreSnippet: 'La paix se vend, la guerre s\'achète.' },
+  { id: 12, group: 'events', content: 'Anthrax - "Among the Living"', start: '1987-03-22', pillar: 'Thrash Metal', className: 'tp-thrash', loreSnippet: 'Le Big Four est complet. Le thrash règne.' },
+  { id: 13, group: 'events', content: 'Émergence du Death Metal (Floride)', start: '1983-01-01', end: '1990-12-31', type: 'range', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Les profondeurs de la Floride engendrent l\'horreur sonore.' },
+  { id: 14, group: 'events', content: 'Death - "Scream Bloody Gore"', start: '1987-05-28', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Le growl est forgé. Le Nécromancien approuve.' },
+  { id: 15, group: 'events', content: 'Morbid Angel - "Altars of Madness"', start: '1989-05-12', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Les autels de la folie sont érigés.' },
+  { id: 16, group: 'events', content: 'Cannibal Corpse - Formation', start: '1988-12-01', pillar: 'Death Metal', className: 'tp-death', loreSnippet: 'Le cadavre cannibale prend vie à Buffalo.' },
+  { id: 17, group: 'events', content: 'Première vague Black Metal', start: '1982-01-01', end: '1990-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'Les ténèbres s\'éveillent en Europe.' },
+  { id: 18, group: 'events', content: 'Seconde vague Black Metal norvégien', start: '1991-01-01', end: '1996-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black', loreSnippet: ' Les forêts de Norvège s\'embrasent. Le froid est absolu.' },
+  { id: 19, group: 'events', content: 'Darkthrone - "A Blaze in the Northern Sky"', start: '1992-02-26', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'Un brasier s\'allume dans le ciel du Nord.' },
+  { id: 20, group: 'events', content: 'Mayhem - "De Mysteriis Dom Sathanas"', start: '1994-05-24', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'L\'opus maudit scelle le pacte avec l\'Oubli.' },
+  { id: 21, group: 'events', content: 'Burzum - "Filosofem"', start: '1996-01-01', pillar: 'Black Metal', className: 'tp-black', loreSnippet: 'La philosophie du son devient incantation.' },
+  { id: 22, group: 'events', content: 'Helloween - "Keeper of the Seven Keys"', start: '1987-05-23', pillar: 'Power Metal', className: 'tp-power', loreSnippet: 'Les mélodies épiques ouvrent les portails du fantastique.' },
+  { id: 23, group: 'events', content: 'Blind Guardian - "Somewhere Far Beyond"', start: '1992-03-30', pillar: 'Power Metal', className: 'tp-power', loreSnippet: 'Quelque part au-delà, les bardes chantent encore.' },
+  { id: 24, group: 'events', content: 'Explosion du Power Metal européen', start: '1994-01-01', end: '2000-12-31', type: 'range', pillar: 'Power Metal', className: 'tp-power', loreSnippet: 'L\'Europe s\'illumine de mélodies héroïques.' },
+  { id: 25, group: 'events', content: 'Nightwish - Formation', start: '1996-07-06', pillar: 'Power Metal', className: 'tp-power', loreSnippet: 'Le symphonique s\'allie à la puissance du métal.' },
+  { id: 26, group: 'events', content: 'Korn - Premier album', start: '1994-10-11', pillar: 'Metalcore', className: 'tp-metalcore', loreSnippet: 'Les chaînes du conventionnel sont brisées. Le Nu Metal déferle.' },
+  { id: 27, group: 'events', content: 'Nu Metal - Ère mainstream', start: '1994-01-01', end: '2004-12-31', type: 'range', pillar: 'Metalcore', className: 'tp-metalcore', loreSnippet: 'Le metal conquiert les ondes et les MTV.' },
+  { id: 28, group: 'events', content: 'System of a Down - "Toxicity"', start: '2001-09-04', pillar: 'Metalcore', className: 'tp-metalcore', loreSnippet: 'La toxicité devient un art politique.' },
+  { id: 29, group: 'events', content: 'Metalcore - Émergence', start: '2000-01-01', end: '2010-12-31', type: 'range', pillar: 'Metalcore', className: 'tp-metalcore', loreSnippet: 'Le cœur du metal bat au rythme des breakdowns.' },
+  { id: 30, group: 'events', content: 'Killswitch Engage - "Alive or Just Breathing"', start: '2002-05-21', pillar: 'Metalcore', className: 'tp-metalcore', loreSnippet: 'Vivant ou seulement respirant, le metalcore persiste.' },
+  { id: 31, group: 'events', content: 'Meshuggah - "Catch Thirtythree"', start: '2005-05-23', pillar: 'Progressive Metal', className: 'tp-progressive', loreSnippet: 'L\'Architecte du Chaos redéfinit les mathématiques du riff.' },
+  { id: 32, group: 'events', content: 'Periphery - Formation', start: '2005-01-01', pillar: 'Progressive Metal', className: 'tp-progressive', loreSnippet: 'La périphérie du metal repousse ses limites.' },
+  { id: 33, group: 'events', content: 'Djent & Metal progressif moderne', start: '2005-01-01', end: '2015-12-31', type: 'range', pillar: 'Progressive Metal', className: 'tp-progressive', loreSnippet: 'Le djent résonne. Les temps impairs deviennent rois.' },
+  { id: 34, group: 'events', content: 'Renaissance du Heavy Trad', start: '2015-01-01', end: '2026-01-01', type: 'range', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Les anciens reviennent. La boucle est bouclée.' },
+  { id: 35, group: 'events', content: 'Ghost - "Meliora"', start: '2015-08-21', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le clergé satirique bénit les foules.' },
 ];
 
-// 🕯️ SCEAUX DE CIRE placés au milieu de chaque décennie (Dates corrigées)
+// ══════════════════════════════════════════
+// SCEAUX DE CIRE (groupe 'wax-seals' - orientation top)
+// Placés au MILIEU de chaque décennie
+// ═══════════════════════════════════════════
 const WAX_SEALS: TimelineEvent[] = [
-  { id: 1001, content: '1970', start: '1975-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
-  { id: 1002, content: '1980', start: '1985-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
-  { id: 1003, content: '1990', start: '1995-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
-  { id: 1004, content: '2000', start: '2005-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
-  { id: 1005, content: '2010', start: '2015-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
-  { id: 1006, content: '2020', start: '2025-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
+  { id: 1001, group: 'wax-seals', content: '1970', start: '1975-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
+  { id: 1002, group: 'wax-seals', content: '1980', start: '1985-01-01', className: 'tp-wax-seal', loreSnippet: ' Sceau de la décennie 1980' },
+  { id: 1003, group: 'wax-seals', content: '1990', start: '1995-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
+  { id: 1004, group: 'wax-seals', content: '2000', start: '2005-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
+  { id: 1005, group: 'wax-seals', content: '2010', start: '2015-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
+  { id: 1006, group: 'wax-seals', content: '2020', start: '2025-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
 ];
 
 const ALL_TIMELINE_ITEMS = [...METAL_EVENTS, ...WAX_SEALS];
@@ -76,10 +87,31 @@ export default function TimelineClient() {
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
         const initialItems = new DataSet(ALL_TIMELINE_ITEMS);
         
+        // ══════════════════════════════════════════
+        // GROUPES : Séparation structurelle des panneaux
+        // - events : orientation 'bottom' (en dessous de l'axe)
+        // - wax-seals : orientation 'top' (au-dessus de l'axe, avec les dates)
+        // ═══════════════════════════════════════════
+        const groups = new DataSet([
+          { 
+            id: 'events', 
+            content: '', 
+            visible: false,
+            // orientation par défaut = 'bottom'
+          },
+          { 
+            id: 'wax-seals', 
+            content: '', 
+            visible: false, 
+            orientation: 'top',
+          },
+        ]);
+        
         const isMobile = window.innerWidth < 768;
         const isSmall = window.innerWidth < 480;
 
         const options: any = {
+          groups: groups,
           height: isSmall ? '400px' : isMobile ? '450px' : '600px',
           start: isMobile ? '1985-01-01' : '1975-01-01',
           end: isMobile ? '2000-01-01' : '2010-01-01',
@@ -106,23 +138,74 @@ export default function TimelineClient() {
 
         timelineRef.current = new Timeline(container, initialItems, options);
 
+        // ═══════════════════════════════════════════
+        // GESTION DES CLICS avec LORE ENRICHI
+        // ═══════════════════════════════════════════
         timelineRef.current.on('click', (properties: any) => {
           if (properties.item) {
             const event = ALL_TIMELINE_ITEMS.find(e => e.id === properties.item);
             if (event) {
+              // ✅ LORE ENRICHI pour les sceaux de cire
               if (event.className === 'tp-wax-seal') {
-                setActiveLore(`🔴 Sceau de la décennie ${event.content}`);
+                const decade = event.content;
+                const metadata = DECADES_METADATA[decade];
+                
+                if (!metadata) {
+                  setActiveLore(`🔴 Sceau de la décennie ${decade}`);
+                  return;
+                }
+                
+                const decadeStart = metadata.period.start;
+                const decadeEnd = metadata.period.end;
+                const eventCount = countEventsInDecade(METAL_EVENTS, decadeStart, decadeEnd);
+                const activePillars = getActivePillarsInDecade(METAL_EVENTS, decadeStart, decadeEnd);
+                
+                const pillarsDisplay = activePillars
+                  .map(pillar => {
+                    const pillarData = PILLAR_METADATA[pillar as GamificationPillar];
+                    return pillarData ? `${pillarData.icon} ${pillar}` : pillar;
+                  })
+                  .join('\n• ');
+                
+                const richLore = ` ${metadata.epicTitle}
+
+📅 Période : ${decadeStart} - ${decadeEnd}
+
+📜 ${metadata.narrative}
+
+✨ Statistiques de la décennie :
+• ${eventCount} événements majeurs
+• Piliers actifs : 
+• ${pillarsDisplay}
+
+ Événement marquant : ${metadata.keyEvent || 'N/A'}`;
+
+                setActiveLore(richLore);
                 return;
               }
+
+              // ✅ LORE pour les événements normaux
               let tooltipContent = event.content;
+              const startYear = new Date(event.start).getFullYear();
+              
               if (event.type === 'range' && event.end) {
-                const startYear = new Date(event.start).getFullYear();
                 const endYear = new Date(event.end).getFullYear();
-                tooltipContent = `${event.content} (${startYear} - ${endYear})`;
+                tooltipContent += `\n📅 Période : ${startYear} - ${endYear}`;
+              } else {
+                const dateObj = new Date(event.start);
+                const options: Intl.DateTimeFormatOptions = { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                };
+                const formattedDate = dateObj.toLocaleDateString('fr-FR', options);
+                tooltipContent += `\n📅 Date : ${formattedDate}`;
               }
+              
               if (event.loreSnippet) {
                 tooltipContent += `\n\n📜 ${event.loreSnippet}`;
               }
+              
               setActiveLore(tooltipContent);
             }
           }
@@ -216,12 +299,72 @@ export default function TimelineClient() {
           )}
         </div>
 
+        {/* ✅ AFFICHAGE DU LORE ENRICHI avec parsing des sections emoji */}
         {activeLore && (
-          <div className="border-l-4 border-metal-fire bg-metal-fire/5 p-3 animate-fade-in rounded-r-lg">
-            <div className="text-gray-200 font-serif whitespace-pre-line">
-              {activeLore.split('\n\n').map((part, index) => (
-                <p key={index} className={index === 0 ? 'text-lg font-bold mb-2' : 'text-sm italic text-gray-300'}>{part}</p>
-              ))}
+          <div className="border-l-4 border-metal-fire bg-metal-fire/5 p-4 animate-fade-in rounded-r-lg">
+            <div className="text-gray-200 font-serif space-y-3">
+              {activeLore.split('\n\n').map((section, sectionIndex) => {
+                // Titre principal (première section)
+                if (sectionIndex === 0 && section.startsWith('🔴')) {
+                  return (
+                    <h3 key={sectionIndex} className="text-xl font-bold text-metal-fire mb-4">
+                      {section.trim()}
+                    </h3>
+                  );
+                }
+                // Période
+                if (section.startsWith('📅')) {
+                  return (
+                    <p key={sectionIndex} className="text-sm font-semibold text-metal-rust">
+                      {section}
+                    </p>
+                  );
+                }
+                // Lore narratif
+                if (section.startsWith('📜')) {
+                  return (
+                    <p key={sectionIndex} className="text-sm leading-relaxed text-gray-300 italic">
+                      {section.replace('📜 ', '')}
+                    </p>
+                  );
+                }
+                // Statistiques
+                if (section.startsWith('✨')) {
+                  return (
+                    <div key={sectionIndex} className="mt-4 pt-3 border-t border-metal-fire/30">
+                      <p className="text-sm font-semibold text-metal-fire mb-2">{section}</p>
+                    </div>
+                  );
+                }
+                // Détails des stats (lignes commençant par •)
+                if (section.includes('•')) {
+                  const lines = section.split('\n').filter(line => line.trim());
+                  return (
+                    <ul key={sectionIndex} className="space-y-1">
+                      {lines.map((line, lineIndex) => (
+                        <li key={lineIndex} className="text-sm text-gray-400 pl-2">
+                          {line.replace('• ', '')}
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                }
+                // Événement marquant
+                if (section.startsWith('🏆')) {
+                  return (
+                    <div key={sectionIndex} className="mt-3 p-3 bg-metal-fire/10 rounded-lg border border-metal-fire/30">
+                      <p className="text-sm font-semibold text-metal-fire mb-1">{section.split(':')[0]}</p>
+                      <p className="text-sm text-gray-300">{section.split(':')[1]?.trim()}</p>
+                    </div>
+                  );
+                }
+                // Fallback
+                return (
+                  <p key={sectionIndex} className="text-sm text-gray-300">
+                    {section}
+                  </p>
+                );
+              })}
             </div>
           </div>
         )}
@@ -251,7 +394,7 @@ export default function TimelineClient() {
           </div>
         </div>
         <div className="metal-card p-4 sm:p-5">
-          <h3 className="font-serif text-base sm:text-lg mb-3 text-metal-rust">🎨 Légende des Piliers</h3>
+          <h3 className="font-serif text-base sm:text-lg mb-3 text-metal-rust"> Légende des Piliers</h3>
           <div className="grid grid-cols-2 gap-3 text-sm">
             {Object.entries(PILLAR_METADATA).map(([key, data]) => (
               <div key={key} className="flex items-center gap-2">
