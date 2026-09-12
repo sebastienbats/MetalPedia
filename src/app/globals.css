@@ -155,7 +155,7 @@
 }
 
 /* 4. WAX SEALS DANS L'AXE */
-.vis-time-axis.vis-top .vis-item.tp-wax-seal {
+.vis-item.tp-wax-seal {
   width: 40px !important;
   height: 40px !important;
   background: transparent !important;
@@ -166,7 +166,7 @@
   z-index: 2 !important;
 }
 
-.vis-time-axis.vis-top .vis-item.tp-wax-seal .vis-item-content {
+.vis-item.tp-wax-seal .vis-item-content {
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
@@ -177,7 +177,7 @@
   overflow: visible !important;
 }
 
-.vis-time-axis.vis-top .wax-seal-icon {
+.wax-seal-icon {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -196,7 +196,7 @@
   z-index: 2 !important;
 }
 
-.vis-time-axis.vis-top .wax-seal-icon:hover {
+.wax-seal-icon:hover {
   transform: scale(1.25) !important;
   box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.8), 0 6px 20px rgba(139, 0, 0, 0.8), 0 0 30px rgba(198, 40, 40, 0.5) !important;
   filter: brightness(1.2) !important;
