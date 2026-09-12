@@ -119,10 +119,10 @@
 }
 
 /* ═══════════════════════════════════════════
-   MOTEUR D'ALIGNEMENT UNIFIÉ (Dates + Gouttes d'encre)
+   MOTEUR D'ALIGNEMENT UNIFIÉ (Dates + Gouttes + Sceaux)
    ═══════════════════════════════════════════ */
 
-/* 1. MASQUER L'AXE DU BAS */
+/* 1. MASQUER L'AXE DU BAS (source des doublons) */
 .vis-panel.vis-bottom,
 .vis-time-axis.vis-bottom {
   display: none !important;
@@ -130,23 +130,21 @@
   height: 0 !important;
 }
 
-/* 2. DATES DE L'AXE DU HAUT */
+/* 2. DATES DE L'AXE DU HAUT (Alignement natif centré sur les gouttes) */
 .vis-time-axis.vis-top .vis-text {
   color: #3e2723 !important;
-  /* ✅ La variable --font-medieval est en premier, suivie des fallbacks */
-  font-family: var(--font-medieval), 'MedievalSharp', cursive, serif !important;
+  font-family: 'MedievalSharp', var(--font-medieval), cursive, serif !important;
   font-size: 0.85rem !important;
   font-weight: 600;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
   white-space: nowrap !important;
   margin: 0 !important;
-  padding: 0 4px !important;
+  padding: 0 !important; /* Supprimé pour un centrage pixel-perfect natif */
   text-align: center !important;
-  margin-left: -25px !important;
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  z-index: 3 !important;
+  z-index: 3 !important; /* Au-dessus de la ligne sépia */
 }
 
 /* 3. GRILLES MAJEURES (Décennies) */
@@ -200,7 +198,7 @@
     transparent 100%
   );
   box-shadow: 0 0 4px rgba(62, 39, 35, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
-  z-index: 2 !important;
+  z-index: 2 !important; /* Au-dessus des sceaux, en dessous des dates */
   pointer-events: none;
   filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='rough'><feTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2'/><feDisplacementMap in='SourceGraphic' scale='2'/></filter></svg>#rough");
 }
@@ -223,7 +221,7 @@
 }
 
 /* ═══════════════════════════════════════════
-   SCEAUX DE CIRE (Éléments indépendants)
+   SCEAUX DE CIRE (Éléments indépendants, milieu de décennie)
    ═══════════════════════════════════════════ */
 
 .vis-item.tp-wax-seal {
@@ -234,8 +232,8 @@
   background: transparent !important;
   border: none !important;
   overflow: visible !important;
-  margin-left: -20px !important;
-  margin-top: -20px !important;
+  margin-left: -20px !important; /* Centre le sceau de 40px sur la ligne */
+  margin-top: -20px !important;  /* Remonte le sceau pour chevaucher l'axe */
   z-index: 1 !important;
 }
 
@@ -250,7 +248,6 @@
   overflow: visible !important;
 }
 
-/* ✅ Définition UNIQUE et complète de l'icône du sceau */
 .wax-seal-icon {
   display: inline-flex !important;
   align-items: center !important;
@@ -260,7 +257,7 @@
   border-radius: 50% !important;
   background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
   border: 2px solid #3e0000 !important;
-  font-family: var(--font-medieval), 'MedievalSharp', cursive, serif !important;
+  font-family: 'MedievalSharp', var(--font-medieval), cursive, serif !important;
   font-size: 0.7rem !important;
   font-weight: 700 !important;
   color: #fff3e0 !important;
@@ -308,7 +305,7 @@
     0 2px 6px rgba(62, 39, 35, 0.4),
     inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
   position: relative !important;
-  z-index: 4 !important;
+  z-index: 4 !important; /* Tout en haut de la pile */
   overflow: visible !important;
 }
 
@@ -455,7 +452,7 @@
   }
 }
 
-/* ══════════════════════════════════════════
+/* ═══════════════════════════════════════════
    OPTIMISATION TRÈS PETITS ÉCRANS (< 480px)
    ═══════════════════════════════════════════ */
 
@@ -482,6 +479,12 @@
     min-width: 28px !important;
     max-width: 28px !important;
     height: 28px !important;
+  }
+
+  .wax-seal-icon {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.55rem !important;
   }
 }
 
