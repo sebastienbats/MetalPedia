@@ -2,9 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ═══════════════════════════════════════════
-   THÈMES (Variables CSS)
-   ══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   🎨 THÈMES (Variables CSS)
+   ═══════════════════════════════════════════════════════════════
+   Définit les palettes de couleurs pour chaque thème de l'app.
+   Utilisés par les composants Tailwind via les classes custom.
+   ═══════════════════════════════════════════════════════════════ */
 :root, [data-theme="forge"] {
   --color-primary: #8b0000;
   --color-primary-hover: #b33939;
@@ -50,6 +53,7 @@
   }
 }
 
+/* Tooltip custom pour les graphiques D3 (si utilisés ailleurs dans l'app) */
 .d3-tooltip {
   position: absolute;
   background: var(--color-bg-secondary);
@@ -60,9 +64,15 @@
   z-index: 1000;
 }
 
-/* ═══════════════════════════════════════════
-   TIMELINE - LE PARCHMIN DU TEMPS (Conteneur)
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   📜 TIMELINE - LE PARCHMIN DU TEMPS (Conteneur principal)
+   ═══════════════════════════════════════════════════════════════
+   Crée l'effet visuel de parchemin ancien avec :
+   - Dégradés radiaux pour les taches d'usure
+   - Dégradé linéaire pour la texture de base
+   - Motif de lignes répétées (effet papier ligné)
+   - Vignette sombre sur les bords (effet vieilli)
+   ═══════════════════════════════════════════════════════════════ */
 .timeline-container {
   background: 
     radial-gradient(ellipse at 20% 30%, rgba(139, 90, 43, 0.15) 0%, transparent 50%),
@@ -76,6 +86,8 @@
   overflow: visible !important;
   z-index: 0;
 }
+
+/* Texture de papier ligné (lignes horizontales et verticales très fines) */
 .timeline-container::before {
   content: '';
   position: absolute;
@@ -85,6 +97,8 @@
   z-index: -2;
   border-radius: 8px;
 }
+
+/* Vignette sombre sur les 4 coins (effet parchemin vieilli) */
 .timeline-container::after {
   content: '';
   position: absolute;
@@ -95,20 +109,24 @@
   border-radius: 8px;
 }
 
-/* ═══════════════════════════════════════════
-   STYLING DE L'AXE
-   ✅ vis-timeline gère le positionnement (timeAxis + groupes)
-   ❌ CSS ne fait que styliser (police, couleurs, z-index)
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+    STYLING DE L'AXE TEMPOREL
+   ═══════════════════════════════════════════════════════════════
+   ✅ vis-timeline GÈRE le positionnement via :
+      - timeAxis: { scale: 'year', step: 5 } → dates tous les 5 ans
+      - groups: { orientation: 'top'/'bottom' } → position verticale
+   ❌ CSS fait UNIQUEMENT le styling (police, couleurs, z-index)
+   ═══════════════════════════════════════════════════════════════ */
 
-/* 1. MASQUER L'AXE DU BAS */
+/* 1. Masque l'axe du bas (on n'affiche que l'axe du haut) */
 .vis-panel.vis-bottom, .vis-time-axis.vis-bottom {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
 }
 
-/* 2. STYLISATION DES DATES (Police MedievalSharp) */
+/* 2. Stylisation des dates de l'axe du haut */
+/*    Police MedievalSharp chargée via next/font dans layout.tsx */
 .vis-time-axis.vis-top .vis-text {
   color: #3e2723 !important;
   font-family: 'MedievalSharp', var(--font-medieval), cursive, serif !important;
@@ -122,34 +140,40 @@
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  z-index: 3 !important;
+  z-index: 3 !important; /* Au-dessus de la ligne sépia (z-index: 2) */
 }
 
-/* 3. STYLISATION DES GRILLES (vis-timeline les génère) */
+/* 3. Stylisation des grilles verticales (générées par vis-timeline) */
+/*    vis-major = lignes de décennie (1970, 1980...) */
 .vis-time-axis .vis-grid.vis-major {
   border-color: rgba(62, 39, 35, 0.6) !important;
   border-width: 2px !important;
   border-left-style: solid !important;
 }
 
+/*    vis-minor = lignes intermédiaires (1975, 1985...) */
 .vis-time-axis .vis-grid.vis-minor {
   border-color: rgba(101, 67, 33, 0.15) !important;
   border-style: dashed !important;
   border-left-style: dashed !important;
 }
 
-/* 4. PANNEAUX */
+/* 4. Configuration des panneaux */
 .vis-panel.vis-center, .vis-panel.vis-bottom, .vis-panel.vis-top {
   border-color: transparent !important;
   overflow: visible !important;
 }
+/*    Hauteur du panneau du haut : 45px (dates) + 40px (sceaux) = 85px */
 .vis-panel.vis-top { height: 85px !important; min-height: 85px !important; }
 .vis-panel.vis-center { padding-top: 5px !important; }
 
-/* ═══════════════════════════════════════════
-   LIGNE D'ENCRE SÉPIA (Axe horizontal custom)
-   ❌ NON gérée par vis-timeline - Ajout CSS custom
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   🖋️ LIGNE D'ENCRE SÉPIA (Axe horizontal custom)
+   ═══════════════════════════════════════════════════════════════
+   ❌ NON gérée par vis-timeline - Création 100% CSS
+   Pseudo-élément ::before dessiné sur le "plafond" du panneau central.
+   Utilise un filtre SVG pour l'effet d'encre rugueuse.
+   ═══════════════════════════════════════════════════════════════ */
 .vis-panel.vis-center::before {
   content: '';
   position: absolute;
@@ -157,15 +181,17 @@
   height: 3px;
   background: linear-gradient(90deg, transparent 0%, #3e2723 5%, #5d4037 20%, #3e2723 50%, #5d4037 80%, #3e2723 95%, transparent 100%);
   box-shadow: 0 0 4px rgba(62, 39, 35, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
-  z-index: 2 !important;
+  z-index: 2 !important; /* Entre les dates (3) et les gouttes (1) */
   pointer-events: none;
   filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='rough'><feTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2'/><feDisplacementMap in='SourceGraphic' scale='2'/></filter></svg>#rough");
 }
 
-/* ═══════════════════════════════════════════
-   GOUTTES D'ENCRE (Lignes verticales)
-   ✅ vis-timeline les génère pour chaque événement
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   💧 GOUTTES D'ENCRE (Lignes verticales des événements)
+   ═══════════════════════════════════════════════════════════════
+   ✅ vis-timeline les génère automatiquement pour chaque item
+   CSS ne fait que styliser (couleur, épaisseur, style)
+   ═══════════════════════════════════════════════════════════════ */
 .vis-item .vis-line {
   border-left: 2px dashed rgba(62, 39, 35, 0.5) !important;
   opacity: 1 !important;
@@ -174,22 +200,26 @@
   display: block !important;
   color: #660000 !important;
 }
+/*    Ligne pleine pour les événements de type "range" (périodes) */
 .vis-item.vis-range .vis-line {
   border-left: 3px solid rgba(139, 0, 0, 0.4) !important;
 }
 
-/* ═══════════════════════════════════════════
-   SCEAUX DE CIRE
-   ✅ Positionnés par vis-timeline (groupes + timeAxis step: 5)
-   ❌ CSS ne fait que styliser (couleur, taille, hover)
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   🔴 SCEAUX DE CIRE (Marqueurs de milieu de décennie)
+   ═══════════════════════════════════════════════════════════════
+   ✅ Positionnés par vis-timeline via :
+      - group: 'wax-seals' + orientation: 'top'
+      - timeAxis step: 5 (alignés sur 1975, 1985, 1995...)
+    CSS fait UNIQUEMENT le styling visuel
+   ══════════════════════════════════════════════════════════════ */
 .vis-item.tp-wax-seal {
   width: 40px !important;
   height: 40px !important;
   background: transparent !important;
   border: none !important;
   overflow: visible !important;
-  z-index: 2 !important;
+  z-index: 2 !important; /* Au-dessus de la ligne sépia, en dessous des dates */
 }
 .vis-item.tp-wax-seal .vis-item-content {
   padding: 0 !important;
@@ -201,6 +231,8 @@
   background: transparent !important;
   overflow: visible !important;
 }
+
+/*    L'icône visuelle du sceau (cercle rouge avec effet 3D) */
 .wax-seal-icon {
   display: inline-flex !important;
   align-items: center !important;
@@ -224,16 +256,19 @@
   box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.8), 0 6px 20px rgba(139, 0, 0, 0.8), 0 0 30px rgba(198, 40, 40, 0.5) !important;
   filter: brightness(1.2) !important;
 }
+/*    Ligne verticale spécifique aux sceaux (rouge foncé) */
 .vis-item.tp-wax-seal .vis-line {
   border-left: 3px solid rgba(139, 0, 0, 0.7) !important;
   opacity: 0.8 !important;
   z-index: 1 !important;
 }
 
-/* ═══════════════════════════════════════════
-   ICÔNES COMPACTES SUR PARCHEMIN (Événements)
-   ✅ Positionnées par vis-timeline (groupes)
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   🎸 ICÔNES COMPACTES SUR PARCHEMIN (Événements metal)
+   ═══════════════════════════════════════════════════════════════
+   ✅ Positionnées par vis-timeline via group: 'events'
+   ❌ CSS fait UNIQUEMENT le styling visuel
+   ═══════════════════════════════════════════════════════════════ */
 .parchment-icon {
   display: inline-flex !important;
   align-items: center !important;
@@ -248,7 +283,7 @@
   border: 2px solid var(--pillar-color, #3e2723) !important;
   box-shadow: 0 0 0 1px rgba(62, 39, 35, 0.3), 0 2px 6px rgba(62, 39, 35, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
   position: relative !important;
-  z-index: 4 !important;
+  z-index: 4 !important; /* Tout en haut de la pile visuelle */
   overflow: visible !important;
 }
 .parchment-icon:hover {
@@ -256,6 +291,8 @@
   box-shadow: 0 0 0 2px var(--pillar-color, #3e2723), 0 4px 12px rgba(62, 39, 35, 0.6), 0 0 20px var(--pillar-color, #3e2723) !important;
   filter: brightness(1.1) !important;
 }
+
+/*    Conteneur des icônes d'événements (hors wax-seals) */
 .vis-item[class^="tp-"]:not(.tp-wax-seal) {
   width: 40px !important;
   min-width: 40px !important;
@@ -279,20 +316,50 @@
   overflow: visible !important;
 }
 
-/* ═══════════════════════════════════════════
-   CORRECTION OVERFLOW & SÉLECTION
-   ═══════════════════════════════════════════ */
-.vis-item-overflow { overflow: visible !important; width: 100% !important; height: 100% !important; }
-.vis-item.vis-range .vis-item-overflow { display: none !important; }
-.vis-item, .vis-item.vis-point, .vis-item.vis-range, .vis-foreground .vis-group { overflow: visible !important; }
+/* ═══════════════════════════════════════════════════════════════
+   🔧 CORRECTIONS OVERFLOW & SÉLECTION
+   ═══════════════════════════════════════════════════════════════
+   PROBLÈME : vis-timeline applique overflow:hidden à plusieurs
+   niveaux de sa hiérarchie DOM, ce qui coupe :
+   - Les icônes rondes (débordent de leur conteneur carré)
+   - Les effets hover (scale, box-shadow)
+   - Les gouttes d'encre (lignes verticales)
+   
+   SOLUTION : Forcer overflow:visible à TOUS les niveaux.
+   ═══════════════════════════════════════════════════════════════ */
+
+/*    Ouvre le conteneur overflow interne de vis-timeline */
+.vis-item-overflow { 
+  overflow: visible !important; 
+  width: 100% !important; 
+  height: 100% !important; 
+}
+
+/*    Cache le conteneur overflow pour les events "range" (inutile) */
+.vis-item.vis-range .vis-item-overflow { 
+  display: none !important; 
+}
+
+/*    Force overflow:visible à TOUS les niveaux de la hiérarchie */
+.vis-item, 
+.vis-item.vis-point, 
+.vis-item.vis-range, 
+.vis-foreground .vis-group { 
+  overflow: visible !important; 
+}
+
+/*    Style de l'icône quand l'événement est sélectionné (clic) */
+/*    vis-timeline ajoute auto la classe .vis-selected au clic */
 .vis-item.vis-selected .parchment-icon {
   box-shadow: 0 0 0 3px #8b0000, 0 0 20px rgba(139, 0, 0, 0.8), inset 0 0 10px rgba(139, 0, 0, 0.3) !important;
   transform: scale(1.15) !important;
 }
 
-/* ══════════════════════════════════════════
-   OPTIMISATION MOBILE (< 768px)
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   📱 OPTIMISATION MOBILE (< 768px)
+   ═══════════════════════════════════════════════════════════════
+   Réduit les tailles pour s'adapter aux petits écrans.
+   ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   .timeline-container { padding: 5px !important; }
   .vis-panel.vis-top { height: 70px !important; min-height: 70px !important; }
@@ -309,6 +376,9 @@
   .parchment-icon:hover, .wax-seal-icon:hover { transform: scale(1.1) !important; }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   📱 OPTIMISATION TRÈS PETITS ÉCRANS (< 480px)
+   ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 479px) {
   .vis-time-axis .vis-text { font-size: 0.65rem !important; }
   .vis-panel.vis-top { height: 60px !important; min-height: 60px !important; }
@@ -318,10 +388,17 @@
   .wax-seal-icon { width: 24px !important; height: 24px !important; font-size: 0.55rem !important; }
 }
 
-/* ═══════════════════════════════════════════
-   ANIMATIONS & UTILITAIRES
-   ═══════════════════════════════════════════ */
-@keyframes fade-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-.animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+/* ═══════════════════════════════════════════════════════════════
+   ✨ ANIMATIONS & UTILITAIRES
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes fade-in { 
+  from { opacity: 0; transform: translateY(-10px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
+.animate-fade-in { 
+  animation: fade-in 0.4s ease-out forwards; 
+}
+
+/* Cache les scrollbars tout en gardant le scroll fonctionnel */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
