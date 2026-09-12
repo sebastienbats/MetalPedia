@@ -154,55 +154,7 @@
   border-left-style: solid !important;
 }
 
-/* 4. WAX SEALS DANS L'AXE */
-.vis-item.tp-wax-seal {
-  width: 40px !important;
-  height: 40px !important;
-  background: transparent !important;
-  border: none !important;
-  overflow: visible !important;
-  margin-left: -20px !important;  /* Centre le sceau sur sa ligne */
-  margin-top: 10px !important;    /* Positionne sous les dates */
-  z-index: 2 !important;
-}
-
-.vis-item.tp-wax-seal .vis-item-content {
-  padding: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: transparent !important;
-  overflow: visible !important;
-}
-
-.wax-seal-icon {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
-  background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
-  border: 2px solid #3e0000 !important;
-  font-family: 'MedievalSharp', var(--font-medieval), cursive, serif !important;
-  font-size: 0.7rem !important;
-  font-weight: 700 !important;
-  color: #fff3e0 !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
-  cursor: pointer !important;
-  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-  z-index: 2 !important;
-}
-
-.wax-seal-icon:hover {
-  transform: scale(1.25) !important;
-  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.8), 0 6px 20px rgba(139, 0, 0, 0.8), 0 0 30px rgba(198, 40, 40, 0.5) !important;
-  filter: brightness(1.2) !important;
-}
-
-/* 5. GRILLES MINEURES */
+/* 4. GRILLES MINEURES */
 .vis-time-axis .vis-grid.vis-minor {
   border-color: rgba(101, 67, 33, 0.15) !important;
   border-style: dashed !important;
@@ -269,9 +221,11 @@
 }
 
 /* ═══════════════════════════════════════════
-   SCEAUX DE CIRE (Éléments indépendants, milieu de décennie)
+   SCEAUX DE CIRE (Structure native conservée)
    ═══════════════════════════════════════════ */
 
+/* 1. Le conteneur de l'item reste dans le panneau central (natif) 
+   mais on le remonte visuellement pour qu'il chevauche l'axe */
 .vis-item.tp-wax-seal {
   width: 40px !important;
   min-width: 40px !important;
@@ -280,11 +234,18 @@
   background: transparent !important;
   border: none !important;
   overflow: visible !important;
-  margin-left: -20px !important; /* Centre le sceau de 40px sur la ligne */
-  margin-top: -20px !important;  /* Remonte le sceau pour chevaucher l'axe */
-  z-index: 1 !important;
+  
+  /* ✅ Centre horizontalement sur la ligne de la décennie (40px / 2 = 20px) */
+  margin-left: -20px !important; 
+  
+  /* ✅ Remonte l'élément pour qu'il chevauche l'axe sépia */
+  margin-top: -25px !important; 
+  
+  /* ✅ Passe au-dessus de la ligne sépia (z-index: 0) mais en dessous des dates (z-index: 3) */
+  z-index: 2 !important;
 }
 
+/* 2. Le contenu interne doit remplir le conteneur pour centrer l'icône */
 .vis-item.tp-wax-seal .vis-item-content {
   padding: 0 !important;
   display: flex !important;
@@ -296,6 +257,7 @@
   overflow: visible !important;
 }
 
+/* 3. L'icône visuelle du sceau (générée par le template TSX) */
 .wax-seal-icon {
   display: inline-flex !important;
   align-items: center !important;
@@ -312,7 +274,7 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
   cursor: pointer !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease !important;
-  z-index: 1 !important;
+  z-index: 2 !important;
 }
 
 .wax-seal-icon:hover {
@@ -321,6 +283,7 @@
   filter: brightness(1.2) !important;
 }
 
+/* 4. La ligne verticale du sceau (pour le relier visuellement au bas) */
 .vis-item.tp-wax-seal .vis-line {
   border-left: 3px solid rgba(139, 0, 0, 0.7) !important;
   opacity: 0.8 !important;
