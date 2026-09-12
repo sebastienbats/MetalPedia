@@ -11,7 +11,7 @@ import {
 } from '@/utils/timelineStats';
 
 // ═══════════════════════════════════════════
-// ÉVÉNEMENTS METAL (groupe 'events')
+// ÉVÉNEMENTS METAL (groupe 'events' - orientation bottom)
 // ═══════════════════════════════════════════
 const METAL_EVENTS: TimelineEvent[] = [
   { id: 1, group: 'events', content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy', loreSnippet: 'Le Premier Riff résonne. Le Silence Primordial est brisé.' },
@@ -53,14 +53,15 @@ const METAL_EVENTS: TimelineEvent[] = [
 
 // ══════════════════════════════════════════
 // SCEAUX DE CIRE (groupe 'wax-seals' - orientation top)
-// Content = '1970', '1980'... pour que DECADES_METADATA[event.content] fonctionne nativement
+// Placés au MILIEU de chaque décennie (1975, 1985, etc.)
+// Content = '1970', '1980'... pour que DECADES_METADATA[event.content] fonctionne
 // ══════════════════════════════════════════
 const WAX_SEALS: TimelineEvent[] = [
   { id: 1001, group: 'wax-seals', content: '1970', start: '1975-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
   { id: 1002, group: 'wax-seals', content: '1980', start: '1985-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
-  { id: 1003, group: 'wax-seals', content: '1990', start: '1995-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
+  { id: 1003, group: 'wax-seals', content: '1990', start: '1995-01-01', className: 'tp-wax-seal', loreSnippet: ' Sceau de la décennie 1990' },
   { id: 1004, group: 'wax-seals', content: '2000', start: '2005-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
-  { id: 1005, group: 'wax-seals', content: '2010', start: '2015-01-01', className: 'tp-wax-seal', loreSnippet: ' Sceau de la décennie 2010' },
+  { id: 1005, group: 'wax-seals', content: '2010', start: '2015-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
   { id: 1006, group: 'wax-seals', content: '2020', start: '2025-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
 ];
 
@@ -89,10 +90,19 @@ export default function TimelineClient() {
         
         // ══════════════════════════════════════════
         // GROUPES : Séparation structurelle des panneaux
-        // ═══════════════════════════════════════════
+        // - events : orientation 'bottom' (en dessous de l'axe)
+        // - wax-seals : orientation 'top' (au-dessus de l'axe, avec les dates)
+        // ══════════════════════════════════════════
         const groups = new DataSet([
-          { id: 'events', content: ' ' },
-          { id: 'wax-seals', content: ' ', orientation: 'top' },
+          { 
+            id: 'events', 
+            content: ' ', // Espace pour éviter les bugs de rendu
+          },
+          { 
+            id: 'wax-seals', 
+            content: ' ', 
+            orientation: 'top',
+          },
         ]);
         
         const isMobile = window.innerWidth < 768;
@@ -114,6 +124,7 @@ export default function TimelineClient() {
           moveable: true,
           zoomable: true,
           // ✅ NOUVEAU : Affiche les dates tous les 5 ans (1970, 1975, 1980, 1985...)
+          // Les wax seals (1975, 1985, 1995...) s'alignent automatiquement dessus
           timeAxis: {
             scale: 'year',
             step: 5,
@@ -131,9 +142,9 @@ export default function TimelineClient() {
 
         timelineRef.current = new Timeline(container, initialItems, options);
 
-        // ═══════════════════════════════════════════
+        // ══════════════════════════════════════════
         // GESTION DES CLICS avec LORE AVANCÉ
-        // ═══════════════════════════════════════════
+        // ══════════════════════════════════════════
         timelineRef.current.on('click', (properties: any) => {
           if (properties.item) {
             const event = ALL_TIMELINE_ITEMS.find(e => e.id === properties.item);
@@ -144,7 +155,7 @@ export default function TimelineClient() {
                 const metadata = DECADES_METADATA[decade];
                 
                 if (!metadata) {
-                  setActiveLore(` Sceau de la décennie ${decade}`);
+                  setActiveLore(`🔴 Sceau de la décennie ${decade}`);
                   return;
                 }
                 
@@ -153,24 +164,25 @@ export default function TimelineClient() {
                 const eventCount = countEventsInDecade(METAL_EVENTS, decadeStart, decadeEnd);
                 const activePillars = getActivePillarsInDecade(METAL_EVENTS, decadeStart, decadeEnd);
                 
+                // ✅ Format original : piliers sur une seule ligne séparés par virgules
                 const pillarsDisplay = activePillars
                   .map(pillar => {
                     const pillarData = PILLAR_METADATA[pillar as GamificationPillar];
                     return pillarData ? `${pillarData.icon} ${pillar}` : pillar;
                   })
-                  .join('\n• ');
+                  .join(', ');
                 
-                // Construction de la chaîne avancée avec tous les emojis pour le parseur React
+                // ✅ Chaque section séparée par \n\n pour le parseur React
                 const richLore = `🔴 ${metadata.epicTitle}
 
 📅 Période : ${decadeStart} - ${decadeEnd}
 
-📜 ${metadata.narrative}
+ ${metadata.narrative}
 
 ✨ Statistiques de la décennie :
+
 • ${eventCount} événements majeurs
-• Piliers actifs : 
-• ${pillarsDisplay}
+• Piliers actifs : ${pillarsDisplay}
 
 🏆 Événement marquant : ${metadata.keyEvent || 'N/A'}`;
 
@@ -193,11 +205,11 @@ export default function TimelineClient() {
                   day: 'numeric' 
                 };
                 const formattedDate = dateObj.toLocaleDateString('fr-FR', options);
-                tooltipContent += `\n📅 Date : ${formattedDate}`;
+                tooltipContent += `\n Date : ${formattedDate}`;
               }
               
               if (event.loreSnippet) {
-                tooltipContent += `\n\n ${event.loreSnippet}`;
+                tooltipContent += `\n\n📜 ${event.loreSnippet}`;
               }
               
               setActiveLore(tooltipContent);
@@ -267,7 +279,7 @@ export default function TimelineClient() {
                   : 'bg-metal-fire/20 text-white border-metal-fire/40 hover:bg-metal-fire/40'
               }`}
             >
-               Tout
+              🌍 Tout
             </button>
             {Object.entries(PILLAR_METADATA).map(([key, data]) => {
               const isActive = activeFilters.includes(key as GamificationPillar);
@@ -388,7 +400,7 @@ export default function TimelineClient() {
           </div>
         </div>
         <div className="metal-card p-4 sm:p-5">
-          <h3 className="font-serif text-base sm:text-lg mb-3 text-metal-rust"> Légende des Piliers</h3>
+          <h3 className="font-serif text-base sm:text-lg mb-3 text-metal-rust">🎨 Légende des Piliers</h3>
           <div className="grid grid-cols-2 gap-3 text-sm">
             {Object.entries(PILLAR_METADATA).map(([key, data]) => (
               <div key={key} className="flex items-center gap-2">
