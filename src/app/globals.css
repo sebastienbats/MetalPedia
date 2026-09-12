@@ -106,7 +106,7 @@
   height: 0 !important;
 }
 
-/* 2. DATES DE L'AXE DU HAUT (MedievalSharp en 1er, alignement natif) */
+/* 2. DATES DE L'AXE DU HAUT (toutes les dates, y compris 1975, 1985...) */
 .vis-time-axis.vis-top .vis-text {
   color: #3e2723 !important;
   font-family: 'MedievalSharp', var(--font-medieval), cursive, serif !important;
@@ -145,22 +145,6 @@
 /* ✅ HAUTEUR AUGMENTÉE : 45px (dates) + 40px (sceaux) = 85px */
 .vis-panel.vis-top { height: 85px !important; min-height: 85px !important; }
 .vis-panel.vis-center { padding-top: 5px !important; }
-
-/* 6. CORRECTION GROUPES : Cacher la colonne de gauche pour alignement plein écran */
-.vis-labelset {
-  display: none !important;
-}
-.vis-panel.vis-left {
-  display: none !important;
-  width: 0 !important;
-  min-width: 0 !important;
-}
-.vis-panel.vis-center, 
-.vis-panel.vis-right {
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
-}
 
 /* ═══════════════════════════════════════════
    LIGNE D'ENCRE SÉPIA (Axe horizontal)
@@ -245,7 +229,7 @@
 }
 
 /* ═══════════════════════════════════════════
-   ICÔNES COMPACTES SUR PARCHEMIN (Événements - groupe 'events')
+   ICÔNES COMPACTES SUR PARCHEMIN (Événements)
    ═══════════════════════════════════════════ */
 .parchment-icon {
   display: inline-flex !important;
@@ -303,7 +287,7 @@
   transform: scale(1.15) !important;
 }
 
-/* ═══════════════════════════════════════════
+/* ══════════════════════════════════════════
    OPTIMISATION MOBILE (< 768px)
    ═══════════════════════════════════════════ */
 @media (max-width: 767px) {
