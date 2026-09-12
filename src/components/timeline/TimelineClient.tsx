@@ -111,7 +111,10 @@ export default function TimelineClient() {
             axis: isMobile ? 8 : 15 
           },
           
-          orientation: 'top',
+          orientation: {
+            axis: 'top',
+            item: 'top'  // ✅ Place les items (wax seals) dans le panneau du haut avec les dates
+          },
           stack: true,
           showCurrentTime: false,
           
