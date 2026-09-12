@@ -58,8 +58,8 @@ const METAL_EVENTS: TimelineEvent[] = [
 // ══════════════════════════════════════════
 const WAX_SEALS: TimelineEvent[] = [
   { id: 1001, group: 'wax-seals', content: '1970', start: '1975-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
-  { id: 1002, group: 'wax-seals', content: '1980', start: '1985-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
-  { id: 1003, group: 'wax-seals', content: '1990', start: '1995-01-01', className: 'tp-wax-seal', loreSnippet: ' Sceau de la décennie 1990' },
+  { id: 1002, group: 'wax-seals', content: '1980', start: '1985-01-01', className: 'tp-wax-seal', loreSnippet: ' Sceau de la décennie 1980' },
+  { id: 1003, group: 'wax-seals', content: '1990', start: '1995-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
   { id: 1004, group: 'wax-seals', content: '2000', start: '2005-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
   { id: 1005, group: 'wax-seals', content: '2010', start: '2015-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
   { id: 1006, group: 'wax-seals', content: '2020', start: '2025-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
@@ -92,17 +92,10 @@ export default function TimelineClient() {
         // GROUPES : Séparation structurelle des panneaux
         // - events : orientation 'bottom' (en dessous de l'axe)
         // - wax-seals : orientation 'top' (au-dessus de l'axe, avec les dates)
-        // ══════════════════════════════════════════
+        // ═════════════════════════════════════════
         const groups = new DataSet([
-          { 
-            id: 'events', 
-            content: ' ', // Espace pour éviter les bugs de rendu
-          },
-          { 
-            id: 'wax-seals', 
-            content: ' ', 
-            orientation: 'top',
-          },
+          { id: 'events', content: ' ' },
+          { id: 'wax-seals', content: ' ', orientation: 'top' },
         ]);
         
         const isMobile = window.innerWidth < 768;
@@ -123,8 +116,7 @@ export default function TimelineClient() {
           showCurrentTime: false,
           moveable: true,
           zoomable: true,
-          // ✅ NOUVEAU : Affiche les dates tous les 5 ans (1970, 1975, 1980, 1985...)
-          // Les wax seals (1975, 1985, 1995...) s'alignent automatiquement dessus
+          // ✅ vis-timeline génère les dates tous les 5 ans (1970, 1975, 1980, 1985...)
           timeAxis: {
             scale: 'year',
             step: 5,
@@ -205,7 +197,7 @@ export default function TimelineClient() {
                   day: 'numeric' 
                 };
                 const formattedDate = dateObj.toLocaleDateString('fr-FR', options);
-                tooltipContent += `\n Date : ${formattedDate}`;
+                tooltipContent += `\n📅 Date : ${formattedDate}`;
               }
               
               if (event.loreSnippet) {
@@ -305,12 +297,11 @@ export default function TimelineClient() {
           )}
         </div>
 
-        {/* ✅ PARSEUR DE LORE AVANCÉ (Gestion complète des emojis et sections) */}
+        {/* ✅ PARSEUR DE LORE AVANCÉ */}
         {activeLore && (
           <div className="border-l-4 border-metal-fire bg-metal-fire/5 p-4 animate-fade-in rounded-r-lg">
             <div className="text-gray-200 font-serif space-y-3">
               {activeLore.split('\n\n').map((section, sectionIndex) => {
-                // Titre principal (première section)
                 if (sectionIndex === 0 && section.startsWith('🔴')) {
                   return (
                     <h3 key={sectionIndex} className="text-xl font-bold text-metal-fire mb-4">
@@ -318,7 +309,6 @@ export default function TimelineClient() {
                     </h3>
                   );
                 }
-                // Période
                 if (section.startsWith('📅')) {
                   return (
                     <p key={sectionIndex} className="text-sm font-semibold text-metal-rust">
@@ -326,15 +316,13 @@ export default function TimelineClient() {
                     </p>
                   );
                 }
-                // Lore narratif
                 if (section.startsWith('📜')) {
                   return (
                     <p key={sectionIndex} className="text-sm leading-relaxed text-gray-300 italic">
-                      {section.replace('📜 ', '')}
+                      {section.replace(' ', '')}
                     </p>
                   );
                 }
-                // Statistiques header
                 if (section.startsWith('✨')) {
                   return (
                     <div key={sectionIndex} className="mt-4 pt-3 border-t border-metal-fire/30">
@@ -342,7 +330,6 @@ export default function TimelineClient() {
                     </div>
                   );
                 }
-                // Détails des stats (lignes commençant par •)
                 if (section.includes('•')) {
                   const lines = section.split('\n').filter(line => line.trim());
                   return (
@@ -355,7 +342,6 @@ export default function TimelineClient() {
                     </ul>
                   );
                 }
-                // Événement marquant
                 if (section.startsWith('🏆')) {
                   return (
                     <div key={sectionIndex} className="mt-3 p-3 bg-metal-fire/10 rounded-lg border border-metal-fire/30">
@@ -364,7 +350,6 @@ export default function TimelineClient() {
                     </div>
                   );
                 }
-                // Fallback
                 return (
                   <p key={sectionIndex} className="text-sm text-gray-300">
                     {section}
@@ -387,7 +372,7 @@ export default function TimelineClient() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="metal-card p-4 sm:p-5">
-          <h3 className="font-serif text-base sm:text-lg mb-3 text-metal-rust">⏳ Navigation Rapide</h3>
+          <h3 className="font-serif text-base sm:text-lg mb-3 text-metal-rust"> Navigation Rapide</h3>
           <div className="flex flex-wrap justify-center gap-2">
             {['1970', '1985', '2000', '2015'].map((year) => (
               <button key={year} onClick={() => handleGoToYear(year)} className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg border border-metal-gray bg-metal-black/50 text-gray-300 hover:text-metal-fire hover:border-metal-fire hover:bg-metal-fire/10 transition-all active:scale-95">
