@@ -95,14 +95,11 @@ export default function TimelineClient() {
         const groups = new DataSet([
           { 
             id: 'events', 
-            content: '', 
-            visible: false,
-            // orientation par défaut = 'bottom'
+            content: ' ', // Espace pour éviter les bugs de rendu avec chaîne vide
           },
           { 
             id: 'wax-seals', 
-            content: '', 
-            visible: false, 
+            content: ' ', 
             orientation: 'top',
           },
         ]);
@@ -147,11 +144,21 @@ export default function TimelineClient() {
             if (event) {
               // ✅ LORE ENRICHI pour les sceaux de cire
               if (event.className === 'tp-wax-seal') {
-                const decade = event.content;
-                const metadata = DECADES_METADATA[decade];
+                // 1. Mapper le nom d'affichage ('70s') vers la clé réelle de DECADES_METADATA ('1970')
+                const displayToKeyMap: Record<string, string> = {
+                  '70s': '1970',
+                  '80s': '1980',
+                  '90s': '1990',
+                  '2k': '2000',
+                  '2k10': '2010',
+                  '2k20': '2020',
+                };
+                
+                const decadeKey = displayToKeyMap[event.content] || event.content;
+                const metadata = DECADES_METADATA[decadeKey];
                 
                 if (!metadata) {
-                  setActiveLore(`🔴 Sceau de la décennie ${decade}`);
+                  setActiveLore(`🔴 Sceau de la décennie ${event.content}`);
                   return;
                 }
                 
@@ -167,7 +174,7 @@ export default function TimelineClient() {
                   })
                   .join('\n• ');
                 
-                const richLore = ` ${metadata.epicTitle}
+                const richLore = `🔴 ${metadata.epicTitle}
 
 📅 Période : ${decadeStart} - ${decadeEnd}
 
@@ -178,7 +185,7 @@ export default function TimelineClient() {
 • Piliers actifs : 
 • ${pillarsDisplay}
 
- Événement marquant : ${metadata.keyEvent || 'N/A'}`;
+🏆 Événement marquant : ${metadata.keyEvent || 'N/A'}`;
 
                 setActiveLore(richLore);
                 return;
@@ -304,52 +311,28 @@ export default function TimelineClient() {
           <div className="border-l-4 border-metal-fire bg-metal-fire/5 p-4 animate-fade-in rounded-r-lg">
             <div className="text-gray-200 font-serif space-y-3">
               {activeLore.split('\n\n').map((section, sectionIndex) => {
-                // Titre principal (première section)
                 if (sectionIndex === 0 && section.startsWith('🔴')) {
-                  return (
-                    <h3 key={sectionIndex} className="text-xl font-bold text-metal-fire mb-4">
-                      {section.trim()}
-                    </h3>
-                  );
+                  return <h3 key={sectionIndex} className="text-xl font-bold text-metal-fire mb-4">{section.trim()}</h3>;
                 }
-                // Période
                 if (section.startsWith('📅')) {
-                  return (
-                    <p key={sectionIndex} className="text-sm font-semibold text-metal-rust">
-                      {section}
-                    </p>
-                  );
+                  return <p key={sectionIndex} className="text-sm font-semibold text-metal-rust">{section}</p>;
                 }
-                // Lore narratif
                 if (section.startsWith('📜')) {
-                  return (
-                    <p key={sectionIndex} className="text-sm leading-relaxed text-gray-300 italic">
-                      {section.replace('📜 ', '')}
-                    </p>
-                  );
+                  return <p key={sectionIndex} className="text-sm leading-relaxed text-gray-300 italic">{section.replace('📜 ', '')}</p>;
                 }
-                // Statistiques
                 if (section.startsWith('✨')) {
-                  return (
-                    <div key={sectionIndex} className="mt-4 pt-3 border-t border-metal-fire/30">
-                      <p className="text-sm font-semibold text-metal-fire mb-2">{section}</p>
-                    </div>
-                  );
+                  return <div key={sectionIndex} className="mt-4 pt-3 border-t border-metal-fire/30"><p className="text-sm font-semibold text-metal-fire mb-2">{section}</p></div>;
                 }
-                // Détails des stats (lignes commençant par •)
                 if (section.includes('•')) {
                   const lines = section.split('\n').filter(line => line.trim());
                   return (
                     <ul key={sectionIndex} className="space-y-1">
                       {lines.map((line, lineIndex) => (
-                        <li key={lineIndex} className="text-sm text-gray-400 pl-2">
-                          {line.replace('• ', '')}
-                        </li>
+                        <li key={lineIndex} className="text-sm text-gray-400 pl-2">{line.replace('• ', '')}</li>
                       ))}
                     </ul>
                   );
                 }
-                // Événement marquant
                 if (section.startsWith('🏆')) {
                   return (
                     <div key={sectionIndex} className="mt-3 p-3 bg-metal-fire/10 rounded-lg border border-metal-fire/30">
@@ -358,12 +341,7 @@ export default function TimelineClient() {
                     </div>
                   );
                 }
-                // Fallback
-                return (
-                  <p key={sectionIndex} className="text-sm text-gray-300">
-                    {section}
-                  </p>
-                );
+                return <p key={sectionIndex} className="text-sm text-gray-300">{section}</p>;
               })}
             </div>
           </div>
@@ -394,7 +372,7 @@ export default function TimelineClient() {
           </div>
         </div>
         <div className="metal-card p-4 sm:p-5">
-          <h3 className="font-serif text-base sm:text-lg mb-3 text-metal-rust"> Légende des Piliers</h3>
+          <h3 className="font-serif text-base sm:text-lg mb-3 text-metal-rust">🎨 Légende des Piliers</h3>
           <div className="grid grid-cols-2 gap-3 text-sm">
             {Object.entries(PILLAR_METADATA).map(([key, data]) => (
               <div key={key} className="flex items-center gap-2">
