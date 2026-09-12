@@ -56,12 +56,12 @@ const METAL_EVENTS: TimelineEvent[] = [
 // Placés au MILIEU de chaque décennie
 // ═══════════════════════════════════════════
 const WAX_SEALS: TimelineEvent[] = [
-  { id: 1001, group: 'wax-seals', content: '1970', start: '1975-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
-  { id: 1002, group: 'wax-seals', content: '1980', start: '1985-01-01', className: 'tp-wax-seal', loreSnippet: ' Sceau de la décennie 1980' },
-  { id: 1003, group: 'wax-seals', content: '1990', start: '1995-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
-  { id: 1004, group: 'wax-seals', content: '2000', start: '2005-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
-  { id: 1005, group: 'wax-seals', content: '2010', start: '2015-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
-  { id: 1006, group: 'wax-seals', content: '2020', start: '2025-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
+  { id: 1001, group: 'wax-seals', content: '70s', start: '1975-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1970' },
+  { id: 1002, group: 'wax-seals', content: '80s', start: '1985-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1980' },
+  { id: 1003, group: 'wax-seals', content: '90s', start: '1995-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 1990' },
+  { id: 1004, group: 'wax-seals', content: '2k', start: '2005-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2000' },
+  { id: 1005, group: 'wax-seals', content: '2k10', start: '2015-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2010' },
+  { id: 1006, group: 'wax-seals', content: '2k20', start: '2025-01-01', className: 'tp-wax-seal', loreSnippet: '🔴 Sceau de la décennie 2020' },
 ];
 
 const ALL_TIMELINE_ITEMS = [...METAL_EVENTS, ...WAX_SEALS];
