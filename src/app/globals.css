@@ -131,7 +131,7 @@
 }
 
 /* 2. DATES DE L'AXE DU HAUT (Alignement natif centré sur les gouttes) */
-.vis-time-axis.vis-top .vis-text {
+.vis-text {
   color: #3e2723 !important;
   font-family: 'MedievalSharp', var(--font-medieval), cursive, serif !important;
   font-size: 0.85rem !important;
