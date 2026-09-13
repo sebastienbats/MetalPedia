@@ -19,7 +19,7 @@ export default function TimelineClient() {
   useEffect(() => {
     if (!isClient || !containerRef.current) return;
 
-    let isMounted = true; // Pour éviter les fuites de mémoire si le composant est démonté rapidement
+    let isMounted = true;
 
     const initTimeline = async () => {
       try {
@@ -46,7 +46,28 @@ export default function TimelineClient() {
 
         if (isMounted && containerRef.current) {
           timelineRef.current = new Timeline(containerRef.current, items, options);
-          console.log('✅ Timeline initialisée avec succès !');
+          
+          // ✅ FORCER LE STYLE DES DATES APRÈS LE RENDU
+          const applyDateStyles = () => {
+            if (typeof window !== 'undefined') {
+              const dateElements = document.querySelectorAll('.vis-text');
+              dateElements.forEach((el) => {
+                const htmlEl = el as HTMLElement;
+                htmlEl.style.setProperty('font-family', 'var(--font-medieval), cursive, serif', 'important');
+                htmlEl.style.setProperty('color', '#3e2723', 'important');
+                htmlEl.style.setProperty('text-shadow', '0 1px 2px rgba(255, 255, 255, 0.4)', 'important');
+              });
+            }
+          };
+
+          // Appliquer avec un micro-délai pour s'assurer que le DOM est peint par vis-timeline
+          setTimeout(applyDateStyles, 50);
+
+          // Et aussi après chaque changement de vue (zoom/scroll/déplacement)
+          timelineRef.current.on('rangechanged', applyDateStyles);
+          timelineRef.current.on('changed', applyDateStyles); 
+          
+          console.log('✅ Timeline initialisée avec styles forcés !');
         }
       } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la timeline:', error);
@@ -55,7 +76,7 @@ export default function TimelineClient() {
 
     initTimeline();
 
-    // Nettoyage propre
+    // ✅ Nettoyage propre (UN SEUL retour ici, le doublon a été supprimé)
     return () => {
       isMounted = false;
       if (timelineRef.current) {
@@ -79,7 +100,7 @@ export default function TimelineClient() {
   // 5. Vrai rendu une fois que le client a pris le relais
   return (
     <div className="p-4 bg-gray-900 rounded-lg">
-      <h2 className="text-white text-xl mb-4 text-center font-serif">Phase 2 : Le Parchemin du Temps</h2>
+      <h2 className="text-white text-xl mb-4 text-center font-serif">Phase 3 : Police MedievalSharp</h2>
       
       {/* ✅ Ajout de la classe timeline-container ici */}
       <div 
