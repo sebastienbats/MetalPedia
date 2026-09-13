@@ -45,16 +45,48 @@ const METAL_EVENTS = [
 ];
 
 // ═══════════════════════════════════════════
+// SCEAUX DE CIRE (6 marqueurs de décennies)
+// ═══════════════════════════════════════════
+const WAX_SEALS = [
+  { id: 1001, content: '1970', start: '1975-01-01', className: 'tp-wax-seal' },
+  { id: 1002, content: '1980', start: '1985-01-01', className: 'tp-wax-seal' },
+  { id: 1003, content: '1990', start: '1995-01-01', className: 'tp-wax-seal' },
+  { id: 1004, content: '2000', start: '2005-01-01', className: 'tp-wax-seal' },
+  { id: 1005, content: '2010', start: '2015-01-01', className: 'tp-wax-seal' },
+  { id: 1006, content: '2020', start: '2025-01-01', className: 'tp-wax-seal' },
+];
+
+// ✅ FUSION DES ÉVÉNEMENTS ET DES SCEAUX
+const ALL_ITEMS = [...METAL_EVENTS, ...WAX_SEALS];
+
+// ═══════════════════════════════════════════
 // MÉTADONNÉES DES PILIERS (couleurs et icônes)
 // ═══════════════════════════════════════════
 const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
   'Heavy Metal': { icon: '🎸', color: '#8b0000' },
   'Thrash Metal': { icon: '⚡', color: '#d63031' },
-  'Death Metal': { icon: '💀', color: '#2d3436' },
-  'Black Metal': { icon: '🌑', color: '#000000' },
+  'Death Metal': { icon: '🩸', color: '#2d3436' },
+  'Black Metal': { icon: '💀', color: '#000000' },
   'Power Metal': { icon: '🔥', color: '#e17055' },
-  'Metalcore': { icon: '🎭', color: '#6c5ce7' },
+  'Doom Metal': { icon: '🌑', color: '#636e72' },
   'Progressive Metal': { icon: '🌀', color: '#00b894' },
+  'Folk Metal': { icon: '🍀', color: '#00b894' },
+  'Metalcore': { icon: '💥', color: '#6c5ce7' },
+};
+
+// ═══════════════════════════════════════════
+// MAPPING className -> Nom complet du pilier
+// ══════════════════════════════════════════
+const CLASS_TO_PILLAR: Record<string, string> = {
+  'tp-heavy': 'Heavy Metal',
+  'tp-thrash': 'Thrash Metal',
+  'tp-death': 'Death Metal',
+  'tp-black': 'Black Metal',
+  'tp-power': 'Power Metal',
+  'tp-doom': 'Doom Metal',
+  'tp-progressive': 'Progressive Metal',
+  'tp-folk': 'Folk Metal',
+  'tp-metalcore': 'Metalcore',
 };
 
 export default function TimelineClient() {
@@ -75,8 +107,8 @@ export default function TimelineClient() {
       try {
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
         
-        // ✅ Conversion des événements en format vis-timeline
-        const items = new DataSet(METAL_EVENTS.map(event => ({
+        // ✅ CORRECTION 1 : Utiliser ALL_ITEMS pour inclure les sceaux !
+        const items = new DataSet(ALL_ITEMS.map(event => ({
           id: event.id,
           content: event.content,
           start: event.start,
@@ -101,11 +133,19 @@ export default function TimelineClient() {
           moveable: true,
           zoomable: true,
           showCurrentTime: false,
-          // ✅ Template custom pour afficher les icônes
+          // ✅ CORRECTION 2 : Template propre utilisant notre mapping fiable
           template: (item: any) => {
-            const pillarData = PILLAR_METADATA[item.className?.replace('tp-', '').split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')];
+            // 1. Gestion spécifique des sceaux de cire
+            if (item.className === 'tp-wax-seal') {
+              return `<div class="wax-seal-icon">${item.content}</div>`;
+            }
+            
+            // 2. Gestion des événements via le mapping CLASS_TO_PILLAR
+            const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
+            const pillarData = PILLAR_METADATA[pillarName];
             const icon = pillarData?.icon || '🎸';
             const color = pillarData?.color || '#8b0000';
+            
             return `<div class="parchment-icon" style="--pillar-color: ${color};">${icon}</div>`;
           },
         };
@@ -130,7 +170,7 @@ export default function TimelineClient() {
           timelineRef.current.on('rangechanged', applyDateStyles);
           timelineRef.current.on('changed', applyDateStyles);
           
-          console.log('✅ Timeline initialisée avec 35 événements !');
+          console.log('✅ Timeline initialisée avec 35 événements + 6 sceaux !');
         }
       } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la timeline:', error);
@@ -151,7 +191,7 @@ export default function TimelineClient() {
   if (!isClient) {
     return (
       <div className="p-4 bg-gray-900 rounded-lg">
-        <h2 className="text-white text-xl mb-4">Phase 1 : Squelette de la Timeline</h2>
+        <h2 className="text-white text-xl mb-4">Phase 4 : Les Événements Metal</h2>
         <div className="bg-gray-800 rounded animate-pulse" style={{ height: '400px' }} />
       </div>
     );
