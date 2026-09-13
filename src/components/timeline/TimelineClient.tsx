@@ -1,35 +1,32 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-// On importe le CSS de base de vis-timeline
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
 
 export default function TimelineClient() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<any>(null);
-  const [mounted, setMounted] = useState(false);
+  
+  // 1. État pour savoir si on est côté client
+  const [isClient, setIsClient] = useState(false);
 
-  // 1. Sécurité pour le SSR (Server-Side Rendering)
+  // 2. On passe à true UNIQUEMENT côté client, après le premier rendu
   useEffect(() => {
-    setMounted(true);
+    setIsClient(true);
   }, []);
 
-  // 2. Initialisation de la timeline
+  // 3. Initialisation de la timeline (ne s'exécute que si isClient est true)
   useEffect(() => {
-    // On n'initialise que côté client
-    if (!mounted || typeof window === 'undefined') return;
-    const container = containerRef.current;
-    if (!container) return;
+    if (!isClient || !containerRef.current) return;
+
+    let isMounted = true; // Pour éviter les fuites de mémoire si le composant est démonté rapidement
 
     const initTimeline = async () => {
       try {
-        // Import dynamique pour éviter les erreurs SSR
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
         
-        // Dataset vide pour l'instant
         const items = new DataSet([]);
-
-        // ✅ Configuration de base (avec : any pour éviter les erreurs strictes de TS sur vis-timeline)
+        
         const options: any = {
           height: '400px',
           start: '1970-01-01',
@@ -37,21 +34,20 @@ export default function TimelineClient() {
           min: '1960-01-01',
           max: '2030-12-31',
           orientation: 'top',
-          // ✅ C'est ici la magie : on demande les dates tous les 5 ans
           timeAxis: { 
             scale: 'year', 
             step: 5 
           },
-          zoomMin: 1000 * 60 * 60 * 24 * 365, // Zoom max = 1 an
-          zoomMax: 1000 * 60 * 60 * 24 * 365 * 50, // Zoom min = 50 ans
+          zoomMin: 1000 * 60 * 60 * 24 * 365,
+          zoomMax: 1000 * 60 * 60 * 24 * 365 * 50,
           moveable: true,
           zoomable: true,
         };
 
-        // Création de l'instance
-        timelineRef.current = new Timeline(container, items, options);
-        
-        console.log('✅ Timeline initialisée avec succès !');
+        if (isMounted && containerRef.current) {
+          timelineRef.current = new Timeline(containerRef.current, items, options);
+          console.log('✅ Timeline initialisée avec succès !');
+        }
       } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la timeline:', error);
       }
@@ -59,27 +55,35 @@ export default function TimelineClient() {
 
     initTimeline();
 
-    // Nettoyage à la destruction du composant
+    // Nettoyage propre
     return () => {
+      isMounted = false;
       if (timelineRef.current) {
         timelineRef.current.destroy();
         timelineRef.current = null;
       }
     };
-  }, [mounted]);
+  }, [isClient]);
 
-  // 3. Rendu minimal
-  if (!mounted) return null;
+  // 4. RENDU IDENTIQUE serveur et premier rendu client (Élimine l'erreur #418)
+  if (!isClient) {
+    return (
+      <div className="p-4 bg-gray-900 rounded-lg">
+        <h2 className="text-white text-xl mb-4">Phase 1 : Squelette de la Timeline</h2>
+        {/* Placeholder visuel pendant le chargement côté client */}
+        <div className="bg-gray-800 rounded animate-pulse" style={{ height: '400px' }} />
+      </div>
+    );
+  }
 
+  // 5. Vrai rendu une fois que le client a pris le relais
   return (
     <div className="p-4 bg-gray-900 rounded-lg">
       <h2 className="text-white text-xl mb-4">Phase 1 : Squelette de la Timeline</h2>
-      {/* suppressHydrationWarning est ajouté dès le début pour éviter le bug React #418 */}
       <div 
         ref={containerRef} 
         className="bg-white rounded" 
         style={{ height: '400px' }}
-        suppressHydrationWarning 
       />
     </div>
   );
