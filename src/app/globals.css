@@ -273,25 +273,25 @@
   border-radius: 50% !important;
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════
    7. GOUTTES D'ENCRE (Lignes verticales de liaison)
-   ✅ CRÉATION MANUELLE via pseudo-élément (car .vis-line n'existe pas)
-   ✅ La ligne part de sous l'axe et descend jusqu'au centre de l'icône
+   ✅ FORCÉES pour passer outre la suppression des points bleus
    ═══════════════════════════════════════════════════════════ */
 .vis-item[class^="tp-"]::before {
-  content: '';
+  content: '' !important;
+  display: block !important; /* ✅ CRUCIAL : Force l'affichage malgré la règle de suppression */
   position: absolute;
   left: 50%;
   top: -100px; /* Part de très haut (sera caché sous l'axe Sépia) */
   height: calc(50% + 100px); /* Descend jusqu'au centre exact de l'icône */
-  width: 4px;
-  /* Motif pointillé sépia */
+  width: 4px; /* Épaisseur bien visible */
+  /* Motif pointillé sépia très contrasté */
   background: repeating-linear-gradient(
     to bottom,
-    rgba(62, 39, 35, 0.6) 0px,
-    rgba(62, 39, 35, 0.6) 4px,
-    transparent 4px,
-    transparent 8px
+    rgba(62, 39, 35, 0.9) 0px,
+    rgba(62, 39, 35, 0.9) 6px,
+    transparent 6px,
+    transparent 10px
   ) !important;
   transform: translateX(-50%);
   z-index: 1 !important;
