@@ -295,7 +295,7 @@
     transparent 10px
   ) !important;
   transform: translateX(-50%);
-  z-index: 1 !important;
+  z-index: -1 !important;
   pointer-events: none;
 }
 
