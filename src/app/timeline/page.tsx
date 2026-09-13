@@ -17,7 +17,9 @@ export default function TimelinePage() {
         </p>
       </header>
 
+      <main className="container mx-auto p-8">
       <TimelineClient />
+      </main>
     </div>
   );
 }
