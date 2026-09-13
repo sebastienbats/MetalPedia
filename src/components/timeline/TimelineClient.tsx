@@ -114,7 +114,8 @@ export default function TimelineClient() {
             const icon = pillarData?.icon || '🎸';
             const color = pillarData?.color || '#8b0000';
             
-            return `<div class="parchment-icon" style="--pillar-color: ${color};">${icon}</div>`;
+            // ✅ On retourne un div "pillar-badge" qui aura la couleur de fond du pilier
+            return `<div class="pillar-badge" style="background-color: ${color}; --pillar-color: ${color};">${icon}</div>`;
           },
         };
 
