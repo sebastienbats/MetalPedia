@@ -213,30 +213,38 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   6. BADGES CIRCULAIRES COLORÉS (Sans casser le layout vis-timeline)
+   6. FORCAGE ABSOLU DE L'AFFICHAGE (Point & Range)
    ═══════════════════════════════════════════════════════════ */
 
-/* ✅ 1. Tuer le carré bleu par défaut pour TOUS les items tp- */
+/* ✅ 1. On tue le style par défaut et on force la visibilité du conteneur */
 .vis-item[class*="tp-"] {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   outline: none !important;
+  overflow: visible !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
 }
 
-/* ✅ 2. Pour les POINTS uniquement : préparer le conteneur de contenu */
-.vis-item.vis-point[class*="tp-"] .vis-item-content {
-  padding: 0 !important;
-  display: flex !important;
+/* ✅ 2. On force le conteneur de contenu à être visible et à centrer son enfant */
+.vis-item[class*="tp-"] .vis-item-content,
+.vis-item[class*="tp-"] .vis-item-overflow {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  display: flex !important; /* Force l'affichage et permet le centrage */
   align-items: center !important;
   justify-content: center !important;
   width: 100% !important;
   height: 100% !important;
-  background: transparent !important;
   overflow: visible !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
-/* ✅ 3. Le badge lui-même dicte la taille (40x40) */
+/* ✅ 3. Le badge circulaire (pour les points) */
 .pillar-badge {
   display: flex !important;
   align-items: center !important;
@@ -259,15 +267,15 @@
   z-index: 10 !important;
 }
 
-/* ✅ 4. Gouttes d'encre : restreintes aux POINTS uniquement */
-.vis-item.vis-point[class*="tp-"]::before {
+/* ✅ 4. Gouttes d'encre (uniquement visuellement sous les badges) */
+.vis-item[class*="tp-"]::before {
   content: '' !important;
   display: block !important;
   position: absolute;
   left: 50%;
   top: -100px;
   height: calc(50% + 100px);
-  width: 0.5px;
+  width: 4px;
   background: repeating-linear-gradient(
     to bottom,
     rgba(62, 39, 35, 0.9) 0px,
