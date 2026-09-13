@@ -62,7 +62,7 @@
 
 /* ═══════════════════════════════════════════
    TIMELINE - LE PARCHMIN DU TEMPS (Conteneur)
-   ═══════════════════════════════════════════ */
+   ══════════════════════════════════════════ */
 .timeline-container {
   background: 
     radial-gradient(ellipse at 20% 30%, rgba(139, 90, 43, 0.15) 0%, transparent 50%),
@@ -136,28 +136,8 @@
   border-color: transparent !important;
   overflow: visible !important;
 }
-.vis-panel.vis-top { height: 85px !important; min-height: 85px !important; }
+.vis-panel.vis-top { height: 45px !important; min-height: 45px !important; }
 .vis-panel.vis-center { padding-top: 5px !important; }
-
-/* ═══════════════════════════════════════════
-   MASQUER PROPREMENT LE PANNEAU DE GAUCHE
-   (Sans casser le moteur de layout de vis-timeline)
-   ═══════════════════════════════════════════ */
-.vis-labelset .vis-label {
-  display: none !important;
-}
-.vis-panel.vis-left {
-  width: 0 !important;
-  min-width: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  overflow: hidden !important;
-}
-.vis-panel.vis-center, 
-.vis-panel.vis-right {
-  left: 0 !important;
-  width: 100% !important;
-}
 
 /* ═══════════════════════════════════════════
    LIGNE D'ENCRE SÉPIA (Axe horizontal custom)
@@ -191,8 +171,8 @@
 
 /* ═══════════════════════════════════════════
    SCEAUX DE CIRE
-   ✅ margin-left: -20px est OBLIGATOIRE pour centrer 
-      un élément de 40px sur la ligne de date vis-timeline
+   ✅ margin-left: -20px centre sur la date
+   ✅ margin-top: -25px remonte visuellement au-dessus de l'axe
    ═══════════════════════════════════════════ */
 .vis-item.tp-wax-seal {
   width: 40px !important;
@@ -200,7 +180,8 @@
   background: transparent !important;
   border: none !important;
   overflow: visible !important;
-  margin-left: -20px !important; /* Centre l'élément de 40px sur la date */
+  margin-left: -20px !important;
+  margin-top: -25px !important;
   z-index: 2 !important;
 }
 .vis-item.tp-wax-seal .vis-item-content {
@@ -244,7 +225,7 @@
 
 /* ═══════════════════════════════════════════
    ICÔNES COMPACTES SUR PARCHEMIN (Événements)
-   ✅ margin-left: -20px pour le même centrage
+   ✅ margin-left: -20px centre sur la date
    ═══════════════════════════════════════════ */
 .parchment-icon {
   display: inline-flex !important;
@@ -278,7 +259,7 @@
   box-shadow: none !important;
   overflow: visible !important;
   border-radius: 50% !important;
-  margin-left: -20px !important; /* Centre l'élément de 40px sur la date */
+  margin-left: -20px !important;
   z-index: 4 !important;
 }
 .vis-item[class^="tp-"]:not(.tp-wax-seal) .vis-item-content {
@@ -308,13 +289,13 @@
    ═══════════════════════════════════════════ */
 @media (max-width: 767px) {
   .timeline-container { padding: 5px !important; }
-  .vis-panel.vis-top { height: 70px !important; min-height: 70px !important; }
+  .vis-panel.vis-top { height: 35px !important; min-height: 35px !important; }
   .vis-time-axis .vis-text { font-size: 0.7rem !important; margin-left: 0 !important; margin-right: 0 !important; padding: 0 !important; text-align: center !important; white-space: nowrap !important; }
   .vis-time-axis .vis-grid.vis-major { border-left-width: 1px !important; margin-left: -0.5px !important; }
   .vis-time-axis .vis-grid.vis-minor { border-width: 1px !important; opacity: 0.5 !important; }
   .parchment-icon { width: 28px !important; height: 28px !important; font-size: 0.9rem !important; }
-  .vis-item[class^="tp-"]:not(.tp-wax-seal) { width: 32px !important; height: 32px !important; margin-left: -16px !important; } /* Centré pour 32px */
-  .vis-item.tp-wax-seal { width: 32px !important; height: 32px !important; margin-left: -16px !important; } /* Centré pour 32px */
+  .vis-item[class^="tp-"]:not(.tp-wax-seal) { width: 32px !important; height: 32px !important; margin-left: -16px !important; }
+  .vis-item.tp-wax-seal { width: 32px !important; height: 32px !important; margin-left: -16px !important; }
   .wax-seal-icon { width: 28px !important; height: 28px !important; font-size: 0.6rem !important; }
   .vis-item .vis-line { border-left-width: 1px !important; }
   .vis-item.tp-wax-seal .vis-line { border-left-width: 2px !important; }
@@ -324,10 +305,10 @@
 
 @media (max-width: 479px) {
   .vis-time-axis .vis-text { font-size: 0.65rem !important; }
-  .vis-panel.vis-top { height: 60px !important; min-height: 60px !important; }
+  .vis-panel.vis-top { height: 30px !important; min-height: 30px !important; }
   .parchment-icon { width: 24px !important; height: 24px !important; font-size: 0.8rem !important; }
-  .vis-item[class^="tp-"]:not(.tp-wax-seal) { width: 28px !important; height: 28px !important; margin-left: -14px !important; } /* Centré pour 28px */
-  .vis-item.tp-wax-seal { width: 28px !important; height: 28px !important; margin-left: -14px !important; } /* Centré pour 28px */
+  .vis-item[class^="tp-"]:not(.tp-wax-seal) { width: 28px !important; height: 28px !important; margin-left: -14px !important; }
+  .vis-item.tp-wax-seal { width: 28px !important; height: 28px !important; margin-left: -14px !important; }
   .wax-seal-icon { width: 24px !important; height: 24px !important; font-size: 0.55rem !important; }
 }
 
