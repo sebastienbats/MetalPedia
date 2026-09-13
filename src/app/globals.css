@@ -277,7 +277,8 @@
    7. GOUTTES D'ENCRE (Lignes verticales de liaison)
    ✅ FORCÉES pour passer outre la suppression des points bleus
    ═══════════════════════════════════════════════════════════ */
-.vis-item[class^="tp-"]::before {
+/* Section 7 - GOUTTES D'ENCRE : remplace [class^="tp-"] par [class*="tp-"] */
+.vis-item[class*="tp-"]::before {
   content: '' !important;
   display: block !important; /* ✅ CRUCIAL : Force l'affichage malgré la règle de suppression */
   position: absolute;
