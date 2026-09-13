@@ -41,17 +41,6 @@ const METAL_EVENTS = [
   { id: 35, content: 'Ghost - "Meliora"', start: '2015-08-21', pillar: 'Heavy Metal', className: 'tp-heavy' },
 ];
 
-const WAX_SEALS = [
-  { id: 1001, content: '1970', start: '1975-01-01', className: 'tp-wax-seal' },
-  { id: 1002, content: '1980', start: '1985-01-01', className: 'tp-wax-seal' },
-  { id: 1003, content: '1990', start: '1995-01-01', className: 'tp-wax-seal' },
-  { id: 1004, content: '2000', start: '2005-01-01', className: 'tp-wax-seal' },
-  { id: 1005, content: '2010', start: '2015-01-01', className: 'tp-wax-seal' },
-  { id: 1006, content: '2020', start: '2025-01-01', className: 'tp-wax-seal' },
-];
-
-const ALL_ITEMS = [...METAL_EVENTS, ...WAX_SEALS];
-
 const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
   'Heavy Metal': { icon: '🎸', color: '#8b0000' },
   'Thrash Metal': { icon: '⚡', color: '#d63031' },
@@ -92,11 +81,9 @@ export default function TimelineClient() {
 
     const initTimeline = async () => {
       try {
-        console.log('🚀 1. CLIENT CODE RUNNING. Total items to render:', ALL_ITEMS.length);
-        
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
         
-        const items = new DataSet(ALL_ITEMS.map((event: any) => ({
+        const items = new DataSet(METAL_EVENTS.map((event: any) => ({
           id: event.id,
           content: event.content,
           start: event.start,
@@ -105,8 +92,6 @@ export default function TimelineClient() {
           className: event.className,
         })));
         
-        console.log('📦 2. DataSet created with', items.length, 'items');
-
         const options: any = {
           height: '400px',
           start: '1970-01-01',
@@ -114,23 +99,16 @@ export default function TimelineClient() {
           min: '1960-01-01',
           max: '2030-12-31',
           orientation: 'top',
-          timeAxis: { scale: 'year', step: 5 },
+          timeAxis: { 
+            scale: 'year', 
+            step: 5 
+          },
           zoomMin: 1000 * 60 * 60 * 24 * 365,
           zoomMax: 1000 * 60 * 60 * 24 * 365 * 50,
           moveable: true,
           zoomable: true,
           showCurrentTime: false,
-          
-          // ✅ TEMPLATE AVEC LOGS AGRESSIFS
           template: (item: any) => {
-            console.log('🎨 TEMPLATE CALLED FOR:', item.content, '| CLASS:', item.className);
-            const classStr = String(item.className || '');
-            
-            if (classStr.includes('wax-seal')) {
-              console.log('🔴 WAX SEAL DETECTED! Applying RED inline style.');
-              return `<div style="background: red !important; color: white !important; width: 40px !important; height: 40px !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: bold !important; border: 2px solid darkred !important;">${item.content}</div>`;
-            }
-            
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
             const pillarData = PILLAR_METADATA[pillarName];
             const icon = pillarData?.icon || '🎸';
@@ -142,7 +120,25 @@ export default function TimelineClient() {
 
         if (isMounted && containerRef.current) {
           timelineRef.current = new Timeline(containerRef.current, items, options);
-          console.log('✅ 3. Timeline instance created successfully!');
+          
+          // Forcer le style des dates
+          const applyDateStyles = () => {
+            if (typeof window !== 'undefined') {
+              const dateElements = document.querySelectorAll('.vis-text');
+              dateElements.forEach((el) => {
+                const htmlEl = el as HTMLElement;
+                htmlEl.style.setProperty('font-family', 'var(--font-medieval), cursive, serif', 'important');
+                htmlEl.style.setProperty('color', '#3e2723', 'important');
+                htmlEl.style.setProperty('text-shadow', '0 1px 2px rgba(255, 255, 255, 0.4)', 'important');
+              });
+            }
+          };
+
+          setTimeout(applyDateStyles, 50);
+          timelineRef.current.on('rangechanged', applyDateStyles);
+          timelineRef.current.on('changed', applyDateStyles);
+          
+          console.log('✅ Timeline initialisée avec 35 événements !');
         }
       } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la timeline:', error);
@@ -163,7 +159,7 @@ export default function TimelineClient() {
   if (!isClient) {
     return (
       <div className="p-4 bg-gray-900 rounded-lg">
-        <h2 className="text-white text-xl mb-4">Chargement...</h2>
+        <h2 className="text-white text-xl mb-4">Chargement de la Timeline...</h2>
         <div className="bg-gray-800 rounded animate-pulse" style={{ height: '400px' }} />
       </div>
     );
@@ -172,7 +168,11 @@ export default function TimelineClient() {
   return (
     <div className="p-4 bg-gray-900 rounded-lg">
       <h2 className="text-white text-xl mb-4 text-center font-serif">Timeline MetalPedia</h2>
-      <div ref={containerRef} className="timeline-container" style={{ minHeight: '400px' }} />
+      <div 
+        ref={containerRef} 
+        className="timeline-container" 
+        style={{ minHeight: '400px' }}
+      />
     </div>
   );
 }
