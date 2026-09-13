@@ -133,10 +133,10 @@ export default function TimelineClient() {
           moveable: true,
           zoomable: true,
           showCurrentTime: false,
-          // ✅ CORRECTION 2 : Template propre utilisant notre mapping fiable
+                // ✅ Template blindé pour les sceaux et les événements
           template: (item: any) => {
-            // 1. Gestion spécifique des sceaux de cire
-            if (item.className === 'tp-wax-seal') {
+            // 1. Gestion spécifique des sceaux de cire (plus robuste avec .includes)
+            if (item.className && item.className.includes('wax-seal')) {
               return `<div class="wax-seal-icon">${item.content}</div>`;
             }
             
