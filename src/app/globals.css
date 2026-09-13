@@ -279,6 +279,7 @@
   background: transparent !important;
   border: none !important;
   overflow: visible !important;
+  /* ✅ Centrage parfait sur la date */
   transform: translateX(-50%) translateY(-35px) !important;
   z-index: 10 !important;
 }
@@ -317,13 +318,6 @@
   transform: scale(1.25) !important;
   box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.8), 0 6px 20px rgba(139, 0, 0, 0.8), 0 0 30px rgba(198, 40, 40, 0.5) !important;
   filter: brightness(1.2) !important;
-}
-
-/* La goutte d'encre du sceau */
-.vis-item.tp-wax-seal .vis-line {
-  border-left: 3px solid rgba(139, 0, 0, 0.7) !important;
-  opacity: 0.8 !important;
-  z-index: 1 !important;
 }
 
 /* ═══════════════════════════════════════════
