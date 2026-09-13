@@ -108,11 +108,19 @@ export default function TimelineClient() {
           moveable: true,
           zoomable: true,
           showCurrentTime: false,
+          // ✅ TEMPLATE SÉPARÉ : Range vs Point
           template: function(item: any) {
+            // 1. Si c'est une période (range), on affiche une barre de texte stylisée
+            if (item.type === 'range') {
+              return '<div style="padding: 4px 8px; background: rgba(139, 0, 0, 0.15); border-radius: 4px; border: 1px dashed rgba(62, 39, 35, 0.6); color: #3e2723; font-weight: bold; font-size: 0.75rem; font-family: var(--font-medieval), serif; white-space: nowrap;">' + item.content + '</div>';
+            }
+            
+            // 2. Sinon, c'est un événement ponctuel : on affiche le badge circulaire
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
             const pillarData = PILLAR_METADATA[pillarName];
             const icon = pillarData?.icon || '🎸';
             const color = pillarData?.color || '#8b0000';
+            
             return '<div class="pillar-badge" style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background-color:' + color + ';border:2px solid rgba(255,255,255,0.4);box-shadow:0 4px 6px rgba(0,0,0,0.4);font-size:1.2rem;cursor:pointer;position:relative;z-index:4;">' + icon + '</div>';
           }
         };
