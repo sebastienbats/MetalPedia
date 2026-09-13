@@ -261,8 +261,7 @@ export interface TimelineEvent {
   pillar?: GamificationPillar;
   className?: string;
   loreSnippet?: string;
-  group?: string; // ✅ Ajouté pour la gestion des groupes vis-timeline (events / wax-seals)
-}
+  }
 
 export interface DecadeMetadata {
   year: string;
