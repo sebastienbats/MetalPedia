@@ -213,64 +213,47 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   6. ICÔNES COMPACTES SUR PARCHEMIN (Événements)
+   6. BADGES CIRCULAIRES COLORÉS (Remplacement des carrés bleus)
    ═══════════════════════════════════════════════════════════ */
-.vis-item[class^="tp-"],
-.vis-item[class^="tp-"] .vis-item-content,
-.vis-item[class^="tp-"] .vis-item-overflow {
+
+/* ✅ 1. Tuer le carré bleu par défaut de vis-timeline */
+.vis-item[class*="tp-"],
+.vis-item[class*="tp-"] .vis-item-content,
+.vis-item[class*="tp-"] .vis-item-overflow {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  border-radius: 50% !important;
-}
-
-.parchment-icon {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
-  background: radial-gradient(circle at 30% 30%, rgba(212, 184, 150, 0.95) 0%, rgba(180, 140, 100, 0.9) 70%, rgba(139, 90, 43, 0.85) 100%) !important;
-  font-size: 1.2rem !important;
-  cursor: pointer !important;
-  transition: all 0.3s ease !important;
-  border: 2px solid var(--pillar-color, #3e2723) !important;
-  box-shadow: 0 0 0 1px rgba(62, 39, 35, 0.3), 0 2px 6px rgba(62, 39, 35, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
-  position: relative !important;
-  z-index: 4 !important;
+  outline: none !important;
   overflow: visible !important;
 }
-.parchment-icon:hover {
-  transform: scale(1.2) rotate(-5deg) !important;
-  box-shadow: 0 0 0 2px var(--pillar-color, #3e2723), 0 4px 12px rgba(62, 39, 35, 0.6), 0 0 20px var(--pillar-color, #3e2723) !important;
-  filter: brightness(1.1) !important;
-}
 
-.vis-item[class^="tp-"] {
+/* ✅ 2. Le nouveau Badge Circulaire */
+.pillar-badge {
   width: 40px !important;
-  min-width: 40px !important;
-  max-width: 40px !important;
   height: 40px !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  overflow: visible !important;
-  border-radius: 50% !important;
-  margin-left: -20px !important;
-  z-index: 4 !important;
-}
-
-.vis-item[class^="tp-"] .vis-item-content {
-  padding: 0 !important;
+  border-radius: 50% !important; /* Rend le carré circulaire */
+  
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: transparent !important;
-  overflow: visible !important;
-  border-radius: 50% !important;
+  
+  font-size: 1.2rem !important; /* Taille de l'emoji */
+  
+  /* Bordure blanche subtile pour faire ressortir le badge du parchemin */
+  border: 2px solid rgba(255, 255, 255, 0.4) !important; 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important; /* Ombre portée */
+  
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  position: relative;
+  z-index: 4 !important;
+}
+
+/* Effet au survol : le badge grossit et brille avec sa couleur */
+.pillar-badge:hover {
+  transform: scale(1.2) !important;
+  box-shadow: 0 0 15px var(--pillar-color) !important; /* Halo coloré */
+  z-index: 10 !important;
 }
 
 /* ══════════════════════════════════════════════════════════
