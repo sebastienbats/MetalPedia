@@ -123,6 +123,14 @@
 }
 
 /* ═══════════════════════════════════════════
+   SUPPRESSION DU CADRE BLANC PAR DÉFAUT
+   ═══════════════════════════════════════════ */
+.vis-timeline {
+  border: none !important;
+  background: transparent !important;
+}
+
+/* ═══════════════════════════════════════════
    STYLING DE L'AXE TEMPOREL (Dates)
    ═══════════════════════════════════════════ */
 
