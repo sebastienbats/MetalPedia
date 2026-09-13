@@ -111,11 +111,10 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   3. SUPPRESSION DES ÉLÉMENTS PAR DÉFAUT DE VIS-TIMELINE
-   + VERROUILLAGE DES ÉVÉNEMENTS SOUS L'AXE
+   3. SUPPRESSION DES ÉLÉMENTS PAR DÉFAUT & VERROUILLAGE
    ═══════════════════════════════════════════════════════════ */
 
-/* ✅ VERROUILLAGE : Coupe tout ce qui dépasse au-dessus de l'axe (5px = hauteur du padding-top) */
+/* ✅ VERROUILLAGE : Coupe tout ce qui dépasse au-dessus de la zone des événements */
 .vis-panel.vis-center {
   clip-path: inset(5px 0 0 0) !important;
 }
@@ -165,7 +164,7 @@
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  z-index: 3 !important;
+  z-index: 15 !important; /* ✅ AU-DESSUS de la ligne Sépia (z-index: 10) */
 }
 
 .vis-time-axis .vis-grid.vis-major {
@@ -188,16 +187,27 @@
 .vis-panel.vis-center { padding-top: 5px !important; }
 
 /* ═══════════════════════════════════════════════════════════
-   5. LIGNE D'ENCRE SÉPIA (Axe horizontal central custom)
+   5. LIGNE D'ENCRE SÉPIA (Déplacée sur le panneau TOP)
+   ✅ L'axe est maintenant dans le panneau du haut (non-clipé)
+   ✅ Positionné en bas du panneau top = à la jonction avec center
    ═══════════════════════════════════════════════════════════ */
+
+/* Ancien axe du panneau center → supprimé pour éviter le clipping */
 .vis-panel.vis-center::before {
+  display: none !important;
+}
+
+/* ✅ Nouvel axe sur le panneau TOP, collé en bas (jonction avec center) */
+.vis-panel.vis-top::after {
   content: '';
   position: absolute;
-  left: 0; right: 0; top: 0; 
+  left: 0; 
+  right: 0; 
+  bottom: 0; /* Collé tout en bas du panneau des dates */
   height: 3px;
   background: linear-gradient(90deg, transparent 0%, #3e2723 5%, #5d4037 20%, #3e2723 50%, #5d4037 80%, #3e2723 95%, transparent 100%);
   box-shadow: 0 0 4px rgba(62, 39, 35, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
-  z-index: 2 !important;
+  z-index: 10 !important; /* ✅ Entre les événements (4) et les dates (15) */
   pointer-events: none;
   filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='rough'><feTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2'/><feDisplacementMap in='SourceGraphic' scale='2'/></filter></svg>#rough");
 }
@@ -316,7 +326,6 @@
   .vis-item[class^="tp-"] { width: 32px !important; height: 32px !important; margin-left: -16px !important; }
   
   .vis-item .vis-line { border-left-width: 1px !important; }
-  .vis-panel.vis-center::before { height: 2px !important; }
   .parchment-icon:hover { transform: scale(1.1) !important; }
 }
 
