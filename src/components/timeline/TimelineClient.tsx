@@ -115,7 +115,7 @@ export default function TimelineClient() {
               return '<div style="padding: 4px 8px; background: rgba(139, 0, 0, 0.15); border-radius: 4px; border: 1px dashed rgba(62, 39, 35, 0.6); color: #3e2723; font-weight: bold; font-size: 0.75rem; font-family: var(--font-medieval), serif; white-space: nowrap;">' + item.content + '</div>';
             }
             
-            // 2. Sinon, c'est un événement ponctuel : on affiche le badge circulaire
+            // 2. Sinon, c'est un événement ponctuel (point) : on affiche le badge circulaire
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
             const pillarData = PILLAR_METADATA[pillarName];
             const icon = pillarData?.icon || '🎸';
