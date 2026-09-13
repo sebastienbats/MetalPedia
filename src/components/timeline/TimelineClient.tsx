@@ -79,11 +79,13 @@ export default function TimelineClient() {
   // 5. Vrai rendu une fois que le client a pris le relais
   return (
     <div className="p-4 bg-gray-900 rounded-lg">
-      <h2 className="text-white text-xl mb-4">Phase 1 : Squelette de la Timeline</h2>
+      <h2 className="text-white text-xl mb-4 text-center font-serif">Phase 2 : Le Parchemin du Temps</h2>
+      
+      {/* ✅ Ajout de la classe timeline-container ici */}
       <div 
         ref={containerRef} 
-        className="bg-white rounded" 
-        style={{ height: '400px' }}
+        className="timeline-container" 
+        style={{ minHeight: '400px' }}
       />
     </div>
   );
