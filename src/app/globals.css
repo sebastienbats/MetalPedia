@@ -2,9 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ═══════════════════════════════════════════
-   THÈMES (Variables CSS)
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   1. THÈMES DYNAMIQUES (Variables CSS)
+   Définit les palettes de couleurs pour les 4 thèmes de l'app.
+   Le thème par défaut est "forge" (appliqué via data-theme ou :root).
+   ═══════════════════════════════════════════════════════════ */
 :root, [data-theme="forge"] {
   --color-primary: #8b0000;
   --color-primary-hover: #b33939;
@@ -42,6 +44,9 @@
   --color-border: #263238;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   2. STYLES DE BASE & COMPOSANTS GLOBAUX
+   ═══════════════════════════════════════════════════════════ */
 @layer base {
   body {
     background-color: var(--color-bg);
@@ -50,21 +55,25 @@
   }
 }
 
+/* Tooltip utilisé par les graphiques D3.js (ex: SimilarityGraph) */
 .d3-tooltip {
   position: absolute;
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 12px;
-  pointer-events: none;
+  pointer-events: none; /* Empêche la tooltip de bloquer les clics */
   z-index: 1000;
 }
 
-/* ═══════════════════════════════════════════
-   TIMELINE - LE PARCHMIN DU TEMPS (Conteneur)
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   3. TIMELINE : LE PARCHEMIN DU TEMPS (Conteneur Principal)
+   ═══════════════════════════════════════════════════════════ */
 .timeline-container {
-  /* Fond de base parchemin + taches d'usure radiales */
+  /* Superposition de dégradés pour simuler un vieux parchemin :
+     1 & 2 : Taches d'usure radiales subtiles
+     3 : Lueur centrale
+     4 : Dégradé de base beige/marron */
   background: 
     radial-gradient(ellipse at 20% 30%, rgba(139, 90, 43, 0.15) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 70%, rgba(101, 67, 33, 0.15) 0%, transparent 50%),
@@ -75,18 +84,18 @@
   padding: 10px;
   position: relative;
   
-  /* Ombres pour l'effet de profondeur et de bordure usée */
+  /* Ombres internes pour la profondeur + ombre externe pour le détachement */
   box-shadow: 
     inset 0 0 60px rgba(101, 67, 33, 0.4), 
     inset 0 0 20px rgba(139, 90, 43, 0.3), 
     0 10px 40px rgba(0, 0, 0, 0.6), 
     0 0 0 1px rgba(101, 67, 33, 0.5);
     
-  overflow: visible !important; /* CRUCIAL pour que les icônes ne soient pas coupées */
+  overflow: visible !important; /* CRUCIAL : empêche vis-timeline de couper les icônes qui débordent */
   z-index: 0;
 }
 
-/* Texture de papier ligné très subtile */
+/* Texture de papier ligné très subtile en arrière-plan */
 .timeline-container::before {
   content: '';
   position: absolute;
@@ -99,7 +108,7 @@
   border-radius: 8px;
 }
 
-/* Vignette sombre sur les 4 coins (effet vieilli) */
+/* Vignette sombre sur les 4 coins pour un effet de vieillissement */
 .timeline-container::after {
   content: '';
   position: absolute;
@@ -113,34 +122,53 @@
   z-index: -1;
   border-radius: 8px;
 }
-/* ═══════════════════════════════════════════
-   STYLING DE L'AXE
-   ══════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+   4. SUPPRESSION DES ÉLÉMENTS PAR DÉFAUT DE VIS-TIMELINE
+   Nettoyage agressif pour laisser place au design custom.
+   ═══════════════════════════════════════════════════════════ */
+/* Masquer l'axe temporel du bas (on garde seulement celui du haut) */
 .vis-panel.vis-bottom, .vis-time-axis.vis-bottom {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;
 }
 
-/* ═══════════════════════════════════════════
-   SUPPRESSION DU CADRE BLANC PAR DÉFAUT
-   ═══════════════════════════════════════════ */
+/* Supprimer le cadre blanc et le fond par défaut du conteneur principal */
 .vis-timeline {
   border: none !important;
   background: transparent !important;
 }
 
-/* ═══════════════════════════════════════════
-   STYLING DE L'AXE TEMPOREL (Dates)
-   ═══════════════════════════════════════════ */
+/* Éliminer les petits points bleus et artefacts que vis-timeline ajoute aux items de type "point" */
+.vis-item.vis-point::before,
+.vis-item.vis-point::after,
+.vis-item .vis-item-content::before,
+.vis-item .vis-item-content::after {
+  display: none !important;
+  content: none !important;
+  background: transparent !important;
+  border: none !important;
+}
 
-/* Application de la police MedievalSharp aux dates */
+.vis-item .vis-dot {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   5. STYLING DE L'AXE TEMPOREL (Dates en haut)
+   ═══════════════════════════════════════════════════════════ */
+/* Application de la police MedievalSharp et couleur sépia foncée */
 .vis-time-axis.vis-top .vis-text {
   color: #3e2723 !important;
   font-family: var(--font-medieval), cursive, serif !important;
   font-size: 0.85rem !important;
   font-weight: 400 !important;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4); /* Légère lueur pour la lisibilité */
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4); /* Lueur pour lisibilité sur le parchemin */
   white-space: nowrap !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -151,18 +179,21 @@
   z-index: 3 !important;
 }
 
+/* Grille majeure (lignes des années) : trait solide sépia */
 .vis-time-axis .vis-grid.vis-major {
   border-color: rgba(62, 39, 35, 0.6) !important;
   border-width: 2px !important;
   border-left-style: solid !important;
 }
 
+/* Grille mineure (lignes intermédiaires) : trait pointillé discret */
 .vis-time-axis .vis-grid.vis-minor {
   border-color: rgba(101, 67, 33, 0.15) !important;
   border-style: dashed !important;
   border-left-style: dashed !important;
 }
 
+/* Nettoyage des bordures des panneaux et ajustement des hauteurs */
 .vis-panel.vis-center, .vis-panel.vis-bottom, .vis-panel.vis-top {
   border-color: transparent !important;
   overflow: visible !important;
@@ -170,28 +201,28 @@
 .vis-panel.vis-top { height: 45px !important; min-height: 45px !important; }
 .vis-panel.vis-center { padding-top: 5px !important; }
 
-/* ═══════════════════════════════════════════
-   LIGNE D'ENCRE SÉPIA (Axe horizontal custom)
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   6. LIGNE D'ENCRE SÉPIA (Axe horizontal central custom)
+   Remplace la ligne grise par défaut par une ligne style "encre".
+   ═══════════════════════════════════════════════════════════ */
 .vis-panel.vis-center::before {
   content: '';
   position: absolute;
   left: 0; right: 0; top: 0; 
   height: 3px;
+  /* Dégradé pour que la ligne s'estompe légèrement sur les bords gauche/droite */
   background: linear-gradient(90deg, transparent 0%, #3e2723 5%, #5d4037 20%, #3e2723 50%, #5d4037 80%, #3e2723 95%, transparent 100%);
   box-shadow: 0 0 4px rgba(62, 39, 35, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
-  z-index: 2 !important;
+  z-index: 2 !important; /* Au-dessus de la grille, en dessous des icônes */
   pointer-events: none;
+  /* Filtre SVG pour donner un aspect rugueux et organique à la ligne (effet encre sur papier) */
   filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='rough'><feTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2'/><feDisplacementMap in='SourceGraphic' scale='2'/></filter></svg>#rough");
 }
 
-/* ═══════════════════════════════════════════
-   ICÔNES COMPACTES SUR PARCHEMIN (Événements)
-   ✅ margin-left: -20px centre sur la date
-   ✅ Suppression du carré blanc/gris
-   ═══════════════════════════════════════════ */
-
-/* Force la transparence à TOUS les niveaux du conteneur */
+/* ═══════════════════════════════════════════════════════════
+   7. ICÔNES COMPACTES SUR PARCHEMIN (Événements)
+   ═══════════════════════════════════════════════════════════ */
+/* Force la transparence sur TOUS les conteneurs générés par vis-timeline pour éviter les carrés blancs/gris */
 .vis-item[class^="tp-"],
 .vis-item[class^="tp-"] .vis-item-content,
 .vis-item[class^="tp-"] .vis-item-overflow {
@@ -201,7 +232,7 @@
   border-radius: 50% !important;
 }
 
-/* L'icône visuelle elle-même (le cercle coloré) */
+/* Le cercle coloré visible (l'icône elle-même) */
 .parchment-icon {
   display: inline-flex !important;
   align-items: center !important;
@@ -209,23 +240,27 @@
   width: 36px !important;
   height: 36px !important;
   border-radius: 50% !important;
+  /* Dégradé radial pour un effet de cachet/parchemin en relief */
   background: radial-gradient(circle at 30% 30%, rgba(212, 184, 150, 0.95) 0%, rgba(180, 140, 100, 0.9) 70%, rgba(139, 90, 43, 0.85) 100%) !important;
   font-size: 1.2rem !important;
   cursor: pointer !important;
   transition: all 0.3s ease !important;
+  /* La couleur de bordure est injectée dynamiquement via la variable --pillar-color */
   border: 2px solid var(--pillar-color, #3e2723) !important;
   box-shadow: 0 0 0 1px rgba(62, 39, 35, 0.3), 0 2px 6px rgba(62, 39, 35, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
   position: relative !important;
-  z-index: 4 !important;
+  z-index: 4 !important; /* Au-dessus de la ligne sépia (z-index: 2) et des grilles */
   overflow: visible !important;
 }
+
+/* Effet au survol : légère rotation et lueur de la couleur du pilier */
 .parchment-icon:hover {
   transform: scale(1.2) rotate(-5deg) !important;
   box-shadow: 0 0 0 2px var(--pillar-color, #3e2723), 0 4px 12px rgba(62, 39, 35, 0.6), 0 0 20px var(--pillar-color, #3e2723) !important;
   filter: brightness(1.1) !important;
 }
 
-/* Conteneur de l'item (positionnement) */
+/* Conteneur de l'item : dimensionne la zone cliquable et centre l'icône sur la ligne de date */
 .vis-item[class^="tp-"] {
   width: 40px !important;
   min-width: 40px !important;
@@ -236,11 +271,11 @@
   box-shadow: none !important;
   overflow: visible !important;
   border-radius: 50% !important;
-  margin-left: -20px !important; /* ✅ CRUCIAL : Centre l'icône sur la date */
+  margin-left: -20px !important; /* CRUCIAL : décale de la moitié de la largeur (40px/2) pour centrer parfaitement sur le point de date */
   z-index: 4 !important;
 }
 
-/* Contenu interne */
+/* Centrage flex du contenu à l'intérieur du conteneur */
 .vis-item[class^="tp-"] .vis-item-content {
   padding: 0 !important;
   display: flex !important;
@@ -253,119 +288,88 @@
   border-radius: 50% !important;
 }
 
-/* ═══════════════════════════════════════════
-   GOUTTES D'ENCRE (Lignes verticales)
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   8. GOUTTES D'ENCRE (Lignes verticales de liaison)
+   Relie visuellement l'icône à l'axe sépia central.
+   ═══════════════════════════════════════════════════════════ */
 .vis-item .vis-line {
   border-left: 2px dashed rgba(62, 39, 35, 0.5) !important;
   opacity: 1 !important;
-  z-index: 1 !important;
+  z-index: 1 !important; /* En dessous de l'icône (z-index: 4) et de l'axe (z-index: 2) */
   pointer-events: none;
   display: block !important;
-  color: #660000 !important;
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important; /* Centre la ligne de 2px parfaitement */
 }
+
+/* Pour les événements de type "range" (périodes), la ligne est plus épaisse et pleine */
 .vis-item.vis-range .vis-line {
   border-left: 3px solid rgba(139, 0, 0, 0.4) !important;
 }
 
-/* ══════════════════════════════════════════
-   SCEAUX DE CIRE (Positionnement & Transparence)
-   ✅ translateX(-50%) centre parfaitement sur la date
-   ✅ translateY(-35px) remonte au-dessus de l'axe
-   ═══════════════════════════════════════════ */
-.vis-item.tp-wax-seal {
-  width: 40px !important;
-  height: 40px !important;
-  background: transparent !important;
-  border: none !important;
-  overflow: visible !important;
-  /* ✅ Centrage parfait sur la date */
-  transform: translateX(-50%) translateY(-35px) !important;
-  z-index: 10 !important;
-}
-
-.vis-item.tp-wax-seal .vis-item-content {
-  padding: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: transparent !important;
-  overflow: visible !important;
-}
-
-.wax-seal-icon {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
-  background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
-  border: 2px solid #3e0000 !important;
-  font-family: var(--font-medieval), cursive, serif !important;
-  font-size: 0.7rem !important;
-  font-weight: 700 !important;
-  color: #fff3e0 !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
-  cursor: pointer !important;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease !important;
-  z-index: 10 !important;
-}
-
-.wax-seal-icon:hover {
-  transform: scale(1.25) !important;
-  box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.8), 0 6px 20px rgba(139, 0, 0, 0.8), 0 0 30px rgba(198, 40, 40, 0.5) !important;
-  filter: brightness(1.2) !important;
-}
-
-/* ═══════════════════════════════════════════
-   CORRECTION OVERFLOW & SÉLECTION
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   9. CORRECTIONS OVERFLOW & ÉTAT DE SÉLECTION
+   ═══════════════════════════════════════════════════════════ */
+/* Empêche tout masquage intempestif lors des interactions ou du rendu */
 .vis-item-overflow { overflow: visible !important; width: 100% !important; height: 100% !important; }
 .vis-item.vis-range .vis-item-overflow { display: none !important; }
 .vis-item, .vis-item.vis-point, .vis-item.vis-range, .vis-foreground .vis-group { overflow: visible !important; }
+
+/* Halo rouge distinctif lorsqu'un événement est cliqué/sélectionné */
 .vis-item.vis-selected .parchment-icon {
   box-shadow: 0 0 0 3px #8b0000, 0 0 20px rgba(139, 0, 0, 0.8), inset 0 0 10px rgba(139, 0, 0, 0.3) !important;
   transform: scale(1.15) !important;
 }
 
-/* ═══════════════════════════════════════════
-   OPTIMISATION MOBILE (< 768px)
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   10. OPTIMISATION MOBILE (Responsive)
+   Ajuste les proportions pour garder la lisibilité sur petits écrans.
+   ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   .timeline-container { padding: 5px !important; }
   .vis-panel.vis-top { height: 35px !important; min-height: 35px !important; }
-  .vis-time-axis .vis-text { font-size: 0.7rem !important; margin-left: 0 !important; margin-right: 0 !important; padding: 0 !important; text-align: center !important; white-space: nowrap !important; }
+  
+  .vis-time-axis .vis-text { 
+    font-size: 0.7rem !important; 
+    margin-left: 0 !important; 
+    margin-right: 0 !important; 
+    padding: 0 !important; 
+    text-align: center !important; 
+    white-space: nowrap !important; 
+  }
   .vis-time-axis .vis-grid.vis-major { border-left-width: 1px !important; margin-left: -0.5px !important; }
   .vis-time-axis .vis-grid.vis-minor { border-width: 1px !important; opacity: 0.5 !important; }
   
+  /* Réduction des icônes et ajustement du centrage (-16px pour une largeur de 32px) */
   .parchment-icon { width: 28px !important; height: 28px !important; font-size: 0.9rem !important; }
-  .vis-item[class^="tp-"]:not(.tp-wax-seal) { width: 32px !important; height: 32px !important; margin-left: -16px !important; }
-  .vis-item.tp-wax-seal { width: 32px !important; height: 32px !important; margin-left: -16px !important; }
-  .wax-seal-icon { width: 28px !important; height: 28px !important; font-size: 0.6rem !important; }
+  .vis-item[class^="tp-"] { width: 32px !important; height: 32px !important; margin-left: -16px !important; }
   
   .vis-item .vis-line { border-left-width: 1px !important; }
-  .vis-item.tp-wax-seal .vis-line { border-left-width: 2px !important; }
   .vis-panel.vis-center::before { height: 2px !important; }
-  .parchment-icon:hover, .wax-seal-icon:hover { transform: scale(1.1) !important; }
+  .parchment-icon:hover { transform: scale(1.1) !important; }
 }
 
 @media (max-width: 479px) {
   .vis-time-axis .vis-text { font-size: 0.65rem !important; }
   .vis-panel.vis-top { height: 30px !important; min-height: 30px !important; }
   
+  /* Réduction extrême pour très petits écrans (-14px pour une largeur de 28px) */
   .parchment-icon { width: 24px !important; height: 24px !important; font-size: 0.8rem !important; }
-  .vis-item[class^="tp-"]:not(.tp-wax-seal) { width: 28px !important; height: 28px !important; margin-left: -14px !important; }
-  .vis-item.tp-wax-seal { width: 28px !important; height: 28px !important; margin-left: -14px !important; }
-  .wax-seal-icon { width: 24px !important; height: 24px !important; font-size: 0.55rem !important; }
+  .vis-item[class^="tp-"] { width: 28px !important; height: 28px !important; margin-left: -14px !important; }
 }
 
-/* ═══════════════════════════════════════════
-   ANIMATIONS & UTILITAIRES
-   ══════════════════════════════════════════ */
-@keyframes fade-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+/* ═══════════════════════════════════════════════════════════
+   11. ANIMATIONS & UTILITAIRES
+   ═══════════════════════════════════════════════════════════ */
+@keyframes fade-in { 
+  from { opacity: 0; transform: translateY(-10px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
 .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+
+/* Masquage propre des barres de défilement tout en gardant le scroll fonctionnel */
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
