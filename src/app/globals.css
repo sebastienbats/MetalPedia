@@ -268,11 +268,10 @@
   border-left: 3px solid rgba(139, 0, 0, 0.4) !important;
 }
 
-/* ═══════════════════════════════════════════
-   SCEAUX DE CIRE
-   ✅ transform: translateY(-35px) les remonte AU-DESSUS de l'axe
-   ✅ margin-left: -20px centre sur la date
-   ✅ z-index: 10 les place au-dessus de l'axe sépia (z-index: 2)
+/* ══════════════════════════════════════════
+   SCEAUX DE CIRE (Positionnement & Transparence)
+   ✅ translateX(-50%) centre parfaitement sur la date
+   ✅ translateY(-35px) remonte au-dessus de l'axe
    ═══════════════════════════════════════════ */
 .vis-item.tp-wax-seal {
   width: 40px !important;
@@ -280,9 +279,8 @@
   background: transparent !important;
   border: none !important;
   overflow: visible !important;
-  margin-left: -20px !important;
-  transform: translateY(-35px) !important; /* ✅ FORCE le déplacement vers le haut */
-  z-index: 10 !important; /* ✅ Au-dessus de tout */
+  transform: translateX(-50%) translateY(-35px) !important;
+  z-index: 10 !important;
 }
 
 .vis-item.tp-wax-seal .vis-item-content {
