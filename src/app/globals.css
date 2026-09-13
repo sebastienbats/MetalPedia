@@ -285,7 +285,7 @@
   left: 50%;
   top: -100px; /* Part de très haut (sera caché sous l'axe Sépia) */
   height: calc(50% + 100px); /* Descend jusqu'au centre exact de l'icône */
-  width: 4px; /* Épaisseur bien visible */
+  width: 2px; /* Épaisseur bien visible *
   /* Motif pointillé sépia très contrasté */
   background: repeating-linear-gradient(
     to bottom,
