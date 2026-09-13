@@ -107,7 +107,6 @@ export default function TimelineClient() {
       try {
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
         
-        // ✅ CORRECTION 1 : Utiliser ALL_ITEMS pour inclure les sceaux !
         const items = new DataSet(ALL_ITEMS.map((event: any) => ({
           id: event.id,
           content: event.content,
@@ -133,14 +132,11 @@ export default function TimelineClient() {
           moveable: true,
           zoomable: true,
           showCurrentTime: false,
-                // ✅ Template blindé pour les sceaux et les événements
           template: (item: any) => {
-            // 1. Gestion spécifique des sceaux de cire (plus robuste avec .includes)
             if (item.className && item.className.includes('wax-seal')) {
               return `<div class="wax-seal-icon">${item.content}</div>`;
             }
             
-            // 2. Gestion des événements via le mapping CLASS_TO_PILLAR
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
             const pillarData = PILLAR_METADATA[pillarName];
             const icon = pillarData?.icon || '🎸';
@@ -153,7 +149,7 @@ export default function TimelineClient() {
         if (isMounted && containerRef.current) {
           timelineRef.current = new Timeline(containerRef.current, items, options);
           
-          // Forcer le style des dates
+          // ✅ 1. Forcer le style des dates
           const applyDateStyles = () => {
             if (typeof window !== 'undefined') {
               const dateElements = document.querySelectorAll('.vis-text');
@@ -166,9 +162,34 @@ export default function TimelineClient() {
             }
           };
 
-          setTimeout(applyDateStyles, 50);
-          timelineRef.current.on('rangechanged', applyDateStyles);
-          timelineRef.current.on('changed', applyDateStyles);
+          // ✅ 2. Forcer le style des sceaux de cire
+          const applyWaxSealStyles = () => {
+            if (typeof window !== 'undefined') {
+              const sealElements = document.querySelectorAll('.vis-item.tp-wax-seal .vis-item-content');
+              sealElements.forEach((el) => {
+                const htmlEl = el as HTMLElement;
+                const iconDiv = htmlEl.querySelector('.wax-seal-icon');
+                if (iconDiv) {
+                  iconDiv.setAttribute('style', 
+                    'display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 36px !important; height: 36px !important; border-radius: 50% !important; background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important; border: 2px solid #3e0000 !important; font-family: var(--font-medieval), cursive, serif !important; font-size: 0.7rem !important; font-weight: 700 !important; color: #fff3e0 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important; cursor: pointer !important; z-index: 10 !important;'
+                  );
+                }
+              });
+            }
+          };
+
+          // ✅ 3. Fonction combinée pour appliquer les deux styles
+          const applyAllStyles = () => {
+            applyDateStyles();
+            applyWaxSealStyles();
+          };
+
+          // Appliquer après un court délai pour laisser vis-timeline finir le rendu DOM
+          setTimeout(applyAllStyles, 50);
+
+          // Et aussi après chaque changement de vue (zoom, scroll, déplacement)
+          timelineRef.current.on('rangechanged', applyAllStyles);
+          timelineRef.current.on('changed', applyAllStyles);
           
           console.log('✅ Timeline initialisée avec 35 événements + 6 sceaux !');
         }
