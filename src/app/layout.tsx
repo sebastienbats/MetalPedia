@@ -40,7 +40,6 @@ const fontMedievalSharp = MedievalSharp({
   subsets: ['latin'],
   weight: '400',
   variable: '--font-medieval',
-  display: 'swap',
 });
 
 // ═══════════════════════════════════════════
