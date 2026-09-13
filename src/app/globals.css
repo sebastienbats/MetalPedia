@@ -270,8 +270,9 @@
 
 /* ═══════════════════════════════════════════
    SCEAUX DE CIRE
+   ✅ transform: translateY(-35px) les remonte AU-DESSUS de l'axe
    ✅ margin-left: -20px centre sur la date
-   ✅ margin-top: -25px remonte visuellement au-dessus de l'axe
+   ✅ z-index: 10 les place au-dessus de l'axe sépia (z-index: 2)
    ═══════════════════════════════════════════ */
 .vis-item.tp-wax-seal {
   width: 40px !important;
@@ -280,9 +281,10 @@
   border: none !important;
   overflow: visible !important;
   margin-left: -20px !important;
-  margin-top: -25px !important;
-  z-index: 2 !important;
+  transform: translateY(-35px) !important; /* ✅ FORCE le déplacement vers le haut */
+  z-index: 10 !important; /* ✅ Au-dessus de tout */
 }
+
 .vis-item.tp-wax-seal .vis-item-content {
   padding: 0 !important;
   display: flex !important;
@@ -293,6 +295,7 @@
   background: transparent !important;
   overflow: visible !important;
 }
+
 .wax-seal-icon {
   display: inline-flex !important;
   align-items: center !important;
@@ -302,20 +305,23 @@
   border-radius: 50% !important;
   background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important;
   border: 2px solid #3e0000 !important;
-  font-family: 'MedievalSharp', var(--font-medieval), cursive, serif !important;
+  font-family: var(--font-medieval), cursive, serif !important;
   font-size: 0.7rem !important;
   font-weight: 700 !important;
   color: #fff3e0 !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
   cursor: pointer !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease !important;
-  z-index: 2 !important;
+  z-index: 10 !important;
 }
+
 .wax-seal-icon:hover {
   transform: scale(1.25) !important;
   box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.8), 0 6px 20px rgba(139, 0, 0, 0.8), 0 0 30px rgba(198, 40, 40, 0.5) !important;
   filter: brightness(1.2) !important;
 }
+
+/* La goutte d'encre du sceau */
 .vis-item.tp-wax-seal .vis-line {
   border-left: 3px solid rgba(139, 0, 0, 0.7) !important;
   opacity: 0.8 !important;
