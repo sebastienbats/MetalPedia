@@ -122,12 +122,17 @@
   height: 0 !important;
 }
 
+/* ═══════════════════════════════════════════
+   STYLING DE L'AXE TEMPOREL (Dates)
+   ═══════════════════════════════════════════ */
+
+/* Application de la police MedievalSharp aux dates */
 .vis-time-axis.vis-top .vis-text {
-  color: #3e2723 !important;
-  font-family: 'MedievalSharp', var(--font-medieval), cursive, serif !important;
+  color: #3e2723 !important; /* Marron sépia foncé pour le contraste sur le parchemin */
+  font-family: var(--font-medieval), cursive, serif !important;
   font-size: 0.85rem !important;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  font-weight: 400 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4); /* Légère lueur pour la lisibilité */
   white-space: nowrap !important;
   margin: 0 !important;
   padding: 0 !important;
