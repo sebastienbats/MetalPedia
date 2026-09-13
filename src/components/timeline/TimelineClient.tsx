@@ -3,19 +3,69 @@
 import { useEffect, useRef, useState } from 'react';
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
 
+// ═══════════════════════════════════════════
+// DONNÉES : 35 ÉVÉNEMENTS METAL
+// ═══════════════════════════════════════════
+const METAL_EVENTS = [
+  { id: 1, content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy' },
+  { id: 2, content: 'Sortie de "Paranoid"', start: '1970-09-18', pillar: 'Heavy Metal', className: 'tp-heavy' },
+  { id: 3, content: 'Deep Purple - "Machine Head"', start: '1972-03-25', pillar: 'Heavy Metal', className: 'tp-heavy' },
+  { id: 4, content: 'Led Zeppelin - "Houses of the Holy"', start: '1973-03-28', pillar: 'Heavy Metal', className: 'tp-heavy' },
+  { id: 5, content: 'Iron Maiden - Formation', start: '1975-12-25', pillar: 'Heavy Metal', className: 'tp-heavy' },
+  { id: 6, content: 'Judas Priest - "British Steel"', start: '1980-04-14', pillar: 'Heavy Metal', className: 'tp-heavy' },
+  { id: 7, content: 'NWOBHM - Nouvelle vague', start: '1979-01-01', end: '1983-12-31', type: 'range', pillar: 'Heavy Metal', className: 'tp-heavy' },
+  { id: 8, content: 'Metallica - Formation', start: '1981-10-28', pillar: 'Thrash Metal', className: 'tp-thrash' },
+  { id: 9, content: 'Metallica - "Kill \'Em All"', start: '1983-07-25', pillar: 'Thrash Metal', className: 'tp-thrash' },
+  { id: 10, content: 'Slayer - "Reign in Blood"', start: '1986-10-07', pillar: 'Thrash Metal', className: 'tp-thrash' },
+  { id: 11, content: 'Megadeth - "Peace Sells"', start: '1986-09-19', pillar: 'Thrash Metal', className: 'tp-thrash' },
+  { id: 12, content: 'Anthrax - "Among the Living"', start: '1987-03-22', pillar: 'Thrash Metal', className: 'tp-thrash' },
+  { id: 13, content: 'Émergence du Death Metal', start: '1983-01-01', end: '1990-12-31', type: 'range', pillar: 'Death Metal', className: 'tp-death' },
+  { id: 14, content: 'Death - "Scream Bloody Gore"', start: '1987-05-28', pillar: 'Death Metal', className: 'tp-death' },
+  { id: 15, content: 'Morbid Angel - "Altars of Madness"', start: '1989-05-12', pillar: 'Death Metal', className: 'tp-death' },
+  { id: 16, content: 'Cannibal Corpse - Formation', start: '1988-12-01', pillar: 'Death Metal', className: 'tp-death' },
+  { id: 17, content: 'Première vague Black Metal', start: '1982-01-01', end: '1990-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black' },
+  { id: 18, content: 'Seconde vague Black Metal', start: '1991-01-01', end: '1996-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black' },
+  { id: 19, content: 'Darkthrone - "A Blaze in the Northern Sky"', start: '1992-02-26', pillar: 'Black Metal', className: 'tp-black' },
+  { id: 20, content: 'Mayhem - "De Mysteriis Dom Sathanas"', start: '1994-05-24', pillar: 'Black Metal', className: 'tp-black' },
+  { id: 21, content: 'Burzum - "Filosofem"', start: '1996-01-01', pillar: 'Black Metal', className: 'tp-black' },
+  { id: 22, content: 'Helloween - "Keeper of the Seven Keys"', start: '1987-05-23', pillar: 'Power Metal', className: 'tp-power' },
+  { id: 23, content: 'Blind Guardian - "Somewhere Far Beyond"', start: '1992-03-30', pillar: 'Power Metal', className: 'tp-power' },
+  { id: 24, content: 'Explosion du Power Metal', start: '1994-01-01', end: '2000-12-31', type: 'range', pillar: 'Power Metal', className: 'tp-power' },
+  { id: 25, content: 'Nightwish - Formation', start: '1996-07-06', pillar: 'Power Metal', className: 'tp-power' },
+  { id: 26, content: 'Korn - Premier album', start: '1994-10-11', pillar: 'Metalcore', className: 'tp-metalcore' },
+  { id: 27, content: 'Nu Metal - Ère mainstream', start: '1994-01-01', end: '2004-12-31', type: 'range', pillar: 'Metalcore', className: 'tp-metalcore' },
+  { id: 28, content: 'System of a Down - "Toxicity"', start: '2001-09-04', pillar: 'Metalcore', className: 'tp-metalcore' },
+  { id: 29, content: 'Metalcore - Émergence', start: '2000-01-01', end: '2010-12-31', type: 'range', pillar: 'Metalcore', className: 'tp-metalcore' },
+  { id: 30, content: 'Killswitch Engage - "Alive or Just Breathing"', start: '2002-05-21', pillar: 'Metalcore', className: 'tp-metalcore' },
+  { id: 31, content: 'Meshuggah - "Catch Thirtythree"', start: '2005-05-23', pillar: 'Progressive Metal', className: 'tp-progressive' },
+  { id: 32, content: 'Periphery - Formation', start: '2005-01-01', pillar: 'Progressive Metal', className: 'tp-progressive' },
+  { id: 33, content: 'Djent & Metal progressif', start: '2005-01-01', end: '2015-12-31', type: 'range', pillar: 'Progressive Metal', className: 'tp-progressive' },
+  { id: 34, content: 'Renaissance du Heavy Trad', start: '2015-01-01', end: '2026-01-01', type: 'range', pillar: 'Heavy Metal', className: 'tp-heavy' },
+  { id: 35, content: 'Ghost - "Meliora"', start: '2015-08-21', pillar: 'Heavy Metal', className: 'tp-heavy' },
+];
+
+// ═══════════════════════════════════════════
+// MÉTADONNÉES DES PILIERS (couleurs et icônes)
+// ═══════════════════════════════════════════
+const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
+  'Heavy Metal': { icon: '🎸', color: '#8b0000' },
+  'Thrash Metal': { icon: '⚡', color: '#d63031' },
+  'Death Metal': { icon: '💀', color: '#2d3436' },
+  'Black Metal': { icon: '🌑', color: '#000000' },
+  'Power Metal': { icon: '🔥', color: '#e17055' },
+  'Metalcore': { icon: '🎭', color: '#6c5ce7' },
+  'Progressive Metal': { icon: '🌀', color: '#00b894' },
+};
+
 export default function TimelineClient() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<any>(null);
-  
-  // 1. État pour savoir si on est côté client
   const [isClient, setIsClient] = useState(false);
 
-  // 2. On passe à true UNIQUEMENT côté client, après le premier rendu
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // 3. Initialisation de la timeline (ne s'exécute que si isClient est true)
   useEffect(() => {
     if (!isClient || !containerRef.current) return;
 
@@ -25,7 +75,15 @@ export default function TimelineClient() {
       try {
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
         
-        const items = new DataSet([]);
+        // ✅ Conversion des événements en format vis-timeline
+        const items = new DataSet(METAL_EVENTS.map(event => ({
+          id: event.id,
+          content: event.content,
+          start: event.start,
+          end: event.end,
+          type: event.type || 'point',
+          className: event.className,
+        })));
         
         const options: any = {
           height: '400px',
@@ -42,13 +100,20 @@ export default function TimelineClient() {
           zoomMax: 1000 * 60 * 60 * 24 * 365 * 50,
           moveable: true,
           zoomable: true,
-          showCurrentTime: false, // ✅ AJOUT : Cache la ligne rouge "Aujourd'hui"
+          showCurrentTime: false,
+          // ✅ Template custom pour afficher les icônes
+          template: (item: any) => {
+            const pillarData = PILLAR_METADATA[item.className?.replace('tp-', '').split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')];
+            const icon = pillarData?.icon || '🎸';
+            const color = pillarData?.color || '#8b0000';
+            return `<div class="parchment-icon" style="--pillar-color: ${color};">${icon}</div>`;
+          },
         };
 
         if (isMounted && containerRef.current) {
           timelineRef.current = new Timeline(containerRef.current, items, options);
           
-          // ✅ FORCER LE STYLE DES DATES APRÈS LE RENDU
+          // Forcer le style des dates
           const applyDateStyles = () => {
             if (typeof window !== 'undefined') {
               const dateElements = document.querySelectorAll('.vis-text');
@@ -61,14 +126,11 @@ export default function TimelineClient() {
             }
           };
 
-          // Appliquer avec un micro-délai pour s'assurer que le DOM est peint par vis-timeline
           setTimeout(applyDateStyles, 50);
-
-          // Et aussi après chaque changement de vue (zoom/scroll/déplacement)
           timelineRef.current.on('rangechanged', applyDateStyles);
-          timelineRef.current.on('changed', applyDateStyles); 
+          timelineRef.current.on('changed', applyDateStyles);
           
-          console.log('✅ Timeline initialisée avec styles forcés !');
+          console.log('✅ Timeline initialisée avec 35 événements !');
         }
       } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la timeline:', error);
@@ -77,7 +139,6 @@ export default function TimelineClient() {
 
     initTimeline();
 
-    // ✅ Nettoyage propre (UN SEUL retour ici, le doublon a été supprimé)
     return () => {
       isMounted = false;
       if (timelineRef.current) {
@@ -87,23 +148,18 @@ export default function TimelineClient() {
     };
   }, [isClient]);
 
-  // 4. RENDU IDENTIQUE serveur et premier rendu client (Élimine l'erreur #418)
   if (!isClient) {
     return (
       <div className="p-4 bg-gray-900 rounded-lg">
         <h2 className="text-white text-xl mb-4">Phase 1 : Squelette de la Timeline</h2>
-        {/* Placeholder visuel pendant le chargement côté client */}
         <div className="bg-gray-800 rounded animate-pulse" style={{ height: '400px' }} />
       </div>
     );
   }
 
-  // 5. Vrai rendu une fois que le client a pris le relais
   return (
     <div className="p-4 bg-gray-900 rounded-lg">
-      <h2 className="text-white text-xl mb-4 text-center font-serif">Phase 3 : Police MedievalSharp</h2>
-      
-      {/* ✅ Ajout de la classe timeline-container ici */}
+      <h2 className="text-white text-xl mb-4 text-center font-serif">Phase 4 : Les Événements Metal</h2>
       <div 
         ref={containerRef} 
         className="timeline-container" 
