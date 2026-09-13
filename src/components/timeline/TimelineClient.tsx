@@ -133,8 +133,17 @@ export default function TimelineClient() {
           zoomable: true,
           showCurrentTime: false,
           template: (item: any) => {
-            if (item.className && item.className.includes('wax-seal')) {
-              return `<div class="wax-seal-icon">${item.content}</div>`;
+          // ✅ Option nucléaire : style inline garanti pour les sceaux
+          template: (item: any) => {
+            // ✅ TEST DE DÉBOGAGE : On affiche le className dans la console
+            console.log('🔍 ITEM:', item.content, '| className:', item.className);
+
+            // ✅ On force la vérification en convertissant tout en string
+            const classStr = String(item.className || '');
+            
+            if (classStr.includes('wax-seal')) {
+              // ✅ STYLE INLINE ULTRA-VISIBLE (ROUGE VIF) pour tester si le template est bien appelé
+              return `<div style="background: red !important; color: white !important; width: 40px !important; height: 40px !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: bold !important; border: 2px solid darkred !important;">${item.content}</div>`;
             }
             
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
