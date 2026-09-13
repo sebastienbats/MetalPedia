@@ -128,7 +128,7 @@
 
 /* Application de la police MedievalSharp aux dates */
 .vis-time-axis.vis-top .vis-text {
-  color: red !important; /* ✅ TEST TEMPORAIRE : Si ça devient rouge, le CSS fonctionne */
+  color: #3e2723 !important;
   font-family: var(--font-medieval), cursive, serif !important;
   font-size: 0.85rem !important;
   font-weight: 400 !important;
