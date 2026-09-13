@@ -56,12 +56,8 @@ const WAX_SEALS = [
   { id: 1006, content: '2020', start: '2025-01-01', className: 'tp-wax-seal' },
 ];
 
-// ✅ FUSION DES ÉVÉNEMENTS ET DES SCEAUX
 const ALL_ITEMS = [...METAL_EVENTS, ...WAX_SEALS];
 
-// ═══════════════════════════════════════════
-// MÉTADONNÉES DES PILIERS (couleurs et icônes)
-// ═══════════════════════════════════════════
 const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
   'Heavy Metal': { icon: '🎸', color: '#8b0000' },
   'Thrash Metal': { icon: '⚡', color: '#d63031' },
@@ -74,9 +70,6 @@ const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
   'Metalcore': { icon: '💥', color: '#6c5ce7' },
 };
 
-// ═══════════════════════════════════════════
-// MAPPING className -> Nom complet du pilier
-// ══════════════════════════════════════════
 const CLASS_TO_PILLAR: Record<string, string> = {
   'tp-heavy': 'Heavy Metal',
   'tp-thrash': 'Thrash Metal',
@@ -132,17 +125,13 @@ export default function TimelineClient() {
           moveable: true,
           zoomable: true,
           showCurrentTime: false,
+          
+          // ✅ TEST DE DÉBOGAGE ULTIME : Style inline ROUGE VIF + Console Log
           template: (item: any) => {
-          // ✅ Option nucléaire : style inline garanti pour les sceaux
-          template: (item: any) => {
-            // ✅ TEST DE DÉBOGAGE : On affiche le className dans la console
             console.log('🔍 ITEM:', item.content, '| className:', item.className);
-
-            // ✅ On force la vérification en convertissant tout en string
             const classStr = String(item.className || '');
             
             if (classStr.includes('wax-seal')) {
-              // ✅ STYLE INLINE ULTRA-VISIBLE (ROUGE VIF) pour tester si le template est bien appelé
               return `<div style="background: red !important; color: white !important; width: 40px !important; height: 40px !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: bold !important; border: 2px solid darkred !important;">${item.content}</div>`;
             }
             
@@ -158,7 +147,6 @@ export default function TimelineClient() {
         if (isMounted && containerRef.current) {
           timelineRef.current = new Timeline(containerRef.current, items, options);
           
-          // ✅ 1. Forcer le style des dates
           const applyDateStyles = () => {
             if (typeof window !== 'undefined') {
               const dateElements = document.querySelectorAll('.vis-text');
@@ -171,7 +159,6 @@ export default function TimelineClient() {
             }
           };
 
-          // ✅ 2. Forcer le style des sceaux de cire
           const applyWaxSealStyles = () => {
             if (typeof window !== 'undefined') {
               const sealElements = document.querySelectorAll('.vis-item.tp-wax-seal .vis-item-content');
@@ -187,16 +174,12 @@ export default function TimelineClient() {
             }
           };
 
-          // ✅ 3. Fonction combinée pour appliquer les deux styles
           const applyAllStyles = () => {
             applyDateStyles();
             applyWaxSealStyles();
           };
 
-          // Appliquer après un court délai pour laisser vis-timeline finir le rendu DOM
           setTimeout(applyAllStyles, 50);
-
-          // Et aussi après chaque changement de vue (zoom, scroll, déplacement)
           timelineRef.current.on('rangechanged', applyAllStyles);
           timelineRef.current.on('changed', applyAllStyles);
           
