@@ -29,8 +29,8 @@ export default function TimelineClient() {
         // Dataset vide pour l'instant
         const items = new DataSet([]);
 
-        // Configuration de base
-        const options = {
+        // ✅ Configuration de base (avec : any pour éviter les erreurs strictes de TS sur vis-timeline)
+        const options: any = {
           height: '400px',
           start: '1970-01-01',
           end: '2000-01-01',
@@ -53,7 +53,7 @@ export default function TimelineClient() {
         
         console.log('✅ Timeline initialisée avec succès !');
       } catch (error) {
-        console.error(' Erreur lors de l\'initialisation de la timeline:', error);
+        console.error('❌ Erreur lors de l\'initialisation de la timeline:', error);
       }
     };
 
