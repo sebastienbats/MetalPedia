@@ -3,9 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
 
-// ═══════════════════════════════════════════
-// DONNÉES : 35 ÉVÉNEMENTS METAL
-// ═══════════════════════════════════════════
 const METAL_EVENTS = [
   { id: 1, content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy' },
   { id: 2, content: 'Sortie de "Paranoid"', start: '1970-09-18', pillar: 'Heavy Metal', className: 'tp-heavy' },
@@ -44,9 +41,6 @@ const METAL_EVENTS = [
   { id: 35, content: 'Ghost - "Meliora"', start: '2015-08-21', pillar: 'Heavy Metal', className: 'tp-heavy' },
 ];
 
-// ═══════════════════════════════════════════
-// SCEAUX DE CIRE (6 marqueurs de décennies)
-// ═══════════════════════════════════════════
 const WAX_SEALS = [
   { id: 1001, content: '1970', start: '1975-01-01', className: 'tp-wax-seal' },
   { id: 1002, content: '1980', start: '1985-01-01', className: 'tp-wax-seal' },
@@ -98,6 +92,8 @@ export default function TimelineClient() {
 
     const initTimeline = async () => {
       try {
+        console.log('🚀 1. CLIENT CODE RUNNING. Total items to render:', ALL_ITEMS.length);
+        
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
         
         const items = new DataSet(ALL_ITEMS.map((event: any) => ({
@@ -109,6 +105,8 @@ export default function TimelineClient() {
           className: event.className,
         })));
         
+        console.log('📦 2. DataSet created with', items.length, 'items');
+
         const options: any = {
           height: '400px',
           start: '1970-01-01',
@@ -116,22 +114,20 @@ export default function TimelineClient() {
           min: '1960-01-01',
           max: '2030-12-31',
           orientation: 'top',
-          timeAxis: { 
-            scale: 'year', 
-            step: 5 
-          },
+          timeAxis: { scale: 'year', step: 5 },
           zoomMin: 1000 * 60 * 60 * 24 * 365,
           zoomMax: 1000 * 60 * 60 * 24 * 365 * 50,
           moveable: true,
           zoomable: true,
           showCurrentTime: false,
           
-          // ✅ TEST DE DÉBOGAGE ULTIME : Style inline ROUGE VIF + Console Log
+          // ✅ TEMPLATE AVEC LOGS AGRESSIFS
           template: (item: any) => {
-            console.log('🔍 ITEM:', item.content, '| className:', item.className);
+            console.log('🎨 TEMPLATE CALLED FOR:', item.content, '| CLASS:', item.className);
             const classStr = String(item.className || '');
             
             if (classStr.includes('wax-seal')) {
+              console.log('🔴 WAX SEAL DETECTED! Applying RED inline style.');
               return `<div style="background: red !important; color: white !important; width: 40px !important; height: 40px !important; border-radius: 50% !important; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: bold !important; border: 2px solid darkred !important;">${item.content}</div>`;
             }
             
@@ -146,44 +142,7 @@ export default function TimelineClient() {
 
         if (isMounted && containerRef.current) {
           timelineRef.current = new Timeline(containerRef.current, items, options);
-          
-          const applyDateStyles = () => {
-            if (typeof window !== 'undefined') {
-              const dateElements = document.querySelectorAll('.vis-text');
-              dateElements.forEach((el) => {
-                const htmlEl = el as HTMLElement;
-                htmlEl.style.setProperty('font-family', 'var(--font-medieval), cursive, serif', 'important');
-                htmlEl.style.setProperty('color', '#3e2723', 'important');
-                htmlEl.style.setProperty('text-shadow', '0 1px 2px rgba(255, 255, 255, 0.4)', 'important');
-              });
-            }
-          };
-
-          const applyWaxSealStyles = () => {
-            if (typeof window !== 'undefined') {
-              const sealElements = document.querySelectorAll('.vis-item.tp-wax-seal .vis-item-content');
-              sealElements.forEach((el) => {
-                const htmlEl = el as HTMLElement;
-                const iconDiv = htmlEl.querySelector('.wax-seal-icon');
-                if (iconDiv) {
-                  iconDiv.setAttribute('style', 
-                    'display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 36px !important; height: 36px !important; border-radius: 50% !important; background: radial-gradient(circle at 35% 35%, #c62828 0%, #8b0000 50%, #5d0000 100%) !important; border: 2px solid #3e0000 !important; font-family: var(--font-medieval), cursive, serif !important; font-size: 0.7rem !important; font-weight: 700 !important; color: #fff3e0 !important; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important; cursor: pointer !important; z-index: 10 !important;'
-                  );
-                }
-              });
-            }
-          };
-
-          const applyAllStyles = () => {
-            applyDateStyles();
-            applyWaxSealStyles();
-          };
-
-          setTimeout(applyAllStyles, 50);
-          timelineRef.current.on('rangechanged', applyAllStyles);
-          timelineRef.current.on('changed', applyAllStyles);
-          
-          console.log('✅ Timeline initialisée avec 35 événements + 6 sceaux !');
+          console.log('✅ 3. Timeline instance created successfully!');
         }
       } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la timeline:', error);
@@ -204,7 +163,7 @@ export default function TimelineClient() {
   if (!isClient) {
     return (
       <div className="p-4 bg-gray-900 rounded-lg">
-        <h2 className="text-white text-xl mb-4">Phase 4 : Les Événements Metal</h2>
+        <h2 className="text-white text-xl mb-4">Chargement...</h2>
         <div className="bg-gray-800 rounded animate-pulse" style={{ height: '400px' }} />
       </div>
     );
@@ -212,12 +171,8 @@ export default function TimelineClient() {
 
   return (
     <div className="p-4 bg-gray-900 rounded-lg">
-      <h2 className="text-white text-xl mb-4 text-center font-serif">Phase 4 : Les Événements Metal</h2>
-      <div 
-        ref={containerRef} 
-        className="timeline-container" 
-        style={{ minHeight: '400px' }}
-      />
+      <h2 className="text-white text-xl mb-4 text-center font-serif">Timeline MetalPedia</h2>
+      <div ref={containerRef} className="timeline-container" style={{ minHeight: '400px' }} />
     </div>
   );
 }
