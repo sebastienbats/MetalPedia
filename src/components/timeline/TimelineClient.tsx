@@ -108,22 +108,13 @@ export default function TimelineClient() {
           moveable: true,
           zoomable: true,
           showCurrentTime: false,
-          template: (item: any) => {
+          template: function(item: any) {
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
             const pillarData = PILLAR_METADATA[pillarName];
             const icon = pillarData?.icon || '🎸';
             const color = pillarData?.color || '#8b0000';
-            
-            // ✅ On retourne un div "pillar-badge" qui aura la couleur de fond du pilier
-template: (item: any) => {
-  const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
-  const pillarData = PILLAR_METADATA[pillarName];
-  const icon = pillarData?.icon || '🎸';
-  const color = pillarData?.color || '#8b0000';
-  
-  // ✅ Styles inline FORCÉS pour garantir l'affichage du badge circulaire
-            return `<div class="pillar-badge" style="display: flex !important; align-items: center !important; justify-content: center !important; width: 40px !important; height: 40px !important; border-radius: 50% !important; background-color: ${color} !important; border: 2px solid rgba(255, 255, 255, 0.4) !important; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important; font-size: 1.2rem !important; cursor: pointer !important; position: relative !important; z-index: 4 !important; transition: all 0.3s ease !important;">${icon}</div>`;
-          },
+            return '<div class="pillar-badge" style="display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background-color:' + color + ';border:2px solid rgba(255,255,255,0.4);box-shadow:0 4px 6px rgba(0,0,0,0.4);font-size:1.2rem;cursor:pointer;position:relative;z-index:4;">' + icon + '</div>';
+          }
         };
 
         if (isMounted && containerRef.current) {
