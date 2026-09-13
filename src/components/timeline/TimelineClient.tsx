@@ -108,7 +108,7 @@ export default function TimelineClient() {
         const { Timeline, DataSet } = await import('vis-timeline/standalone');
         
         // ✅ CORRECTION 1 : Utiliser ALL_ITEMS pour inclure les sceaux !
-        const items = new DataSet(ALL_ITEMS.map(event => ({
+        const items = new DataSet(ALL_ITEMS.map((event: any) => ({
           id: event.id,
           content: event.content,
           start: event.start,
