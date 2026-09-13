@@ -42,6 +42,7 @@ export default function TimelineClient() {
           zoomMax: 1000 * 60 * 60 * 24 * 365 * 50,
           moveable: true,
           zoomable: true,
+          showCurrentTime: false, // ✅ AJOUT : Cache la ligne rouge "Aujourd'hui"
         };
 
         if (isMounted && containerRef.current) {
