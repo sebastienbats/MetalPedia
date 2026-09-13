@@ -213,36 +213,19 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   6. BADGES CIRCULAIRES COLORÉS (Exclut les ranges)
+   6. BADGES CIRCULAIRES COLORÉS (Sans casser le layout vis-timeline)
    ═══════════════════════════════════════════════════════════ */
 
-/* ✅ 1. Tuer le carré bleu par défaut (SAUF pour les ranges qui ont besoin de leur structure) */
-.vis-item[class*="tp-"]:not(.vis-range),
-.vis-item[class*="tp-"]:not(.vis-range) .vis-item-content,
-.vis-item[class*="tp-"]:not(.vis-range) .vis-item-overflow {
+/* ✅ 1. Tuer le carré bleu par défaut pour TOUS les items tp- */
+.vis-item[class*="tp-"] {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   outline: none !important;
-  overflow: visible !important;
 }
 
-/* ✅ 2. Le conteneur de l'item ponctuel (positionnement) */
-.vis-item[class*="tp-"]:not(.vis-range) {
-  width: 40px !important;
-  min-width: 40px !important;
-  max-width: 40px !important;
-  height: 40px !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  overflow: visible !important;
-  margin-left: -20px !important;
-  z-index: 4 !important;
-}
-
-/* ✅ 3. Contenu interne */
-.vis-item[class*="tp-"]:not(.vis-range) .vis-item-content {
+/* ✅ 2. Pour les POINTS uniquement : préparer le conteneur de contenu */
+.vis-item.vis-point[class*="tp-"] .vis-item-content {
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
@@ -253,20 +236,38 @@
   overflow: visible !important;
 }
 
-/* ══════════════════════════════════════════════════════════
-   7. GOUTTES D'ENCRE (Lignes verticales de liaison)
-   ✅ FORCÉES pour passer outre la suppression des points bleus
-   ═══════════════════════════════════════════════════════════ */
-/* Section 7 - GOUTTES D'ENCRE : remplace [class^="tp-"] par [class*="tp-"] */
-.vis-item[class*="tp-"]::before {
+/* ✅ 3. Le badge lui-même dicte la taille (40x40) */
+.pillar-badge {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important;
+  font-size: 1.2rem !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 4 !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.pillar-badge:hover {
+  transform: scale(1.2) !important;
+  box-shadow: 0 0 15px var(--pillar-color, #8b0000) !important;
+  z-index: 10 !important;
+}
+
+/* ✅ 4. Gouttes d'encre : restreintes aux POINTS uniquement */
+.vis-item.vis-point[class*="tp-"]::before {
   content: '' !important;
-  display: block !important; /* ✅ CRUCIAL : Force l'affichage malgré la règle de suppression */
+  display: block !important;
   position: absolute;
   left: 50%;
-  top: -100px; /* Part de très haut (sera caché sous l'axe Sépia) */
-  height: calc(50% + 100px); /* Descend jusqu'au centre exact de l'icône */
-  width: 0.5px; /* Épaisseur de la ligne *
-  /* Motif pointillé sépia très contrasté */
+  top: -100px;
+  height: calc(50% + 100px);
+  width: 4px;
   background: repeating-linear-gradient(
     to bottom,
     rgba(62, 39, 35, 0.9) 0px,
@@ -285,13 +286,16 @@
 .vis-item-overflow { overflow: visible !important; width: 100% !important; height: 100% !important; }
 .vis-item.vis-range .vis-item-overflow { display: none !important; }
 .vis-item, .vis-item.vis-point, .vis-item.vis-range, .vis-foreground .vis-group { overflow: visible !important; }
-.vis-item.vis-selected .parchment-icon {
+
+/* ✅ MIS À JOUR : .parchment-icon est devenu .pillar-badge */
+.vis-item.vis-selected .pillar-badge {
   box-shadow: 0 0 0 3px #8b0000, 0 0 20px rgba(139, 0, 0, 0.8), inset 0 0 10px rgba(139, 0, 0, 0.3) !important;
   transform: scale(1.15) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════
    9. OPTIMISATION MOBILE (Responsive)
+   ✅ Nettoyé : on cible maintenant .pillar-badge, plus le wrapper .vis-item
    ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   .timeline-container { padding: 5px !important; }
@@ -308,19 +312,20 @@
   .vis-time-axis .vis-grid.vis-major { border-left-width: 1px !important; margin-left: -0.5px !important; }
   .vis-time-axis .vis-grid.vis-minor { border-width: 1px !important; opacity: 0.5 !important; }
   
-  .parchment-icon { width: 28px !important; height: 28px !important; font-size: 0.9rem !important; }
-  .vis-item[class^="tp-"] { width: 32px !important; height: 32px !important; margin-left: -16px !important; }
+  /* ✅ On réduit la taille du badge, pas du wrapper */
+  .pillar-badge { width: 28px !important; height: 28px !important; font-size: 0.9rem !important; }
   
-  .vis-item .vis-line { border-left-width: 1px !important; }
-  .parchment-icon:hover { transform: scale(1.1) !important; }
+  /* ✅ On affine la goutte d'encre sur mobile */
+  .vis-item.vis-point[class*="tp-"]::before { width: 2px !important; }
+  
+  .pillar-badge:hover { transform: scale(1.1) !important; }
 }
 
 @media (max-width: 479px) {
   .vis-time-axis .vis-text { font-size: 0.65rem !important; }
   .vis-panel.vis-top { height: 30px !important; min-height: 30px !important; }
   
-  .parchment-icon { width: 24px !important; height: 24px !important; font-size: 0.8rem !important; }
-  .vis-item[class^="tp-"] { width: 28px !important; height: 28px !important; margin-left: -14px !important; }
+  .pillar-badge { width: 24px !important; height: 24px !important; font-size: 0.8rem !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════
