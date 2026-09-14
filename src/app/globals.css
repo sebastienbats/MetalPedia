@@ -61,7 +61,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   2. TIMELINE : LE PARCHEMIN DU TEMPS (Conteneur Principal)
+   2. TIMELINE : LE PARCHEMIN DU TEMPS
    ═══════════════════════════════════════════════════════════ */
 .timeline-container {
   background: 
@@ -69,17 +69,14 @@
     radial-gradient(ellipse at 80% 70%, rgba(101, 67, 33, 0.15) 0%, transparent 50%),
     radial-gradient(ellipse at 50% 50%, rgba(160, 120, 80, 0.1) 0%, transparent 70%),
     linear-gradient(135deg, #d4b896 0%, #c9a876 25%, #d4b896 50%, #b89968 75%, #c9a876 100%);
-  
   border-radius: 8px;
   padding: 10px;
   position: relative;
-  
   box-shadow: 
     inset 0 0 60px rgba(101, 67, 33, 0.4), 
     inset 0 0 20px rgba(139, 90, 43, 0.3), 
     0 10px 40px rgba(0, 0, 0, 0.6), 
     0 0 0 1px rgba(101, 67, 33, 0.5);
-    
   overflow: visible !important;
   z-index: 0;
 }
@@ -111,45 +108,17 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   3. SUPPRESSION DES ÉLÉMENTS PAR DÉFAUT & VERROUILLAGE
+   3. NETTOYAGE VIS-TIMELINE & VERROUILLAGE
    ═══════════════════════════════════════════════════════════ */
-
-/* ✅ VERROUILLAGE : Coupe tout ce qui dépasse au-dessus de la zone des événements */
-.vis-panel.vis-center {
-  clip-path: inset(5px 0 0 0) !important;
-}
-
-.vis-panel.vis-bottom, .vis-time-axis.vis-bottom {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-}
-
-.vis-timeline {
-  border: none !important;
-  background: transparent !important;
-}
-
-.vis-item.vis-point::before,
-.vis-item.vis-point::after,
-.vis-item .vis-item-content::before,
-.vis-item .vis-item-content::after {
-  display: none !important;
-  content: none !important;
-  background: transparent !important;
-  border: none !important;
-}
-
-.vis-item .vis-dot {
-  display: none !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  opacity: 0 !important;
-}
+.vis-panel.vis-center { clip-path: inset(5px 0 0 0) !important; }
+.vis-panel.vis-bottom, .vis-time-axis.vis-bottom { display: none !important; visibility: hidden !important; height: 0 !important; }
+.vis-timeline { border: none !important; background: transparent !important; }
+.vis-item .vis-dot { display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; opacity: 0 !important; }
+.vis-item-overflow { overflow: visible !important; width: 100% !important; height: 100% !important; }
+.vis-item, .vis-item.vis-point, .vis-item.vis-range, .vis-foreground .vis-group { overflow: visible !important; }
 
 /* ═══════════════════════════════════════════════════════════
-   4. STYLING DE L'AXE TEMPOREL (Dates en haut)
+   4. AXE TEMPOREL & LIGNE SÉPIA
    ═══════════════════════════════════════════════════════════ */
 .vis-time-axis.vis-top .vis-text {
   color: #3e2723 !important;
@@ -158,192 +127,55 @@
   font-weight: 400 !important;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
   white-space: nowrap !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  text-align: center !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  z-index: 15 !important; /* ✅ AU-DESSUS de la ligne Sépia (z-index: 10) */
+  margin: 0 !important; padding: 0 !important; text-align: center !important;
+  display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 15 !important;
 }
-
-.vis-time-axis .vis-grid.vis-major {
-  border-color: rgba(62, 39, 35, 0.6) !important;
-  border-width: 2px !important;
-  border-left-style: solid !important;
-}
-
-.vis-time-axis .vis-grid.vis-minor {
-  border-color: rgba(101, 67, 33, 0.15) !important;
-  border-style: dashed !important;
-  border-left-style: dashed !important;
-}
-
-.vis-panel.vis-center, .vis-panel.vis-bottom, .vis-panel.vis-top {
-  border-color: transparent !important;
-  overflow: visible !important;
-}
+.vis-time-axis .vis-grid.vis-major { border-color: rgba(62, 39, 35, 0.6) !important; border-width: 2px !important; border-left-style: solid !important; }
+.vis-time-axis .vis-grid.vis-minor { border-color: rgba(101, 67, 33, 0.15) !important; border-style: dashed !important; border-left-style: dashed !important; }
+.vis-panel.vis-center, .vis-panel.vis-bottom, .vis-panel.vis-top { border-color: transparent !important; overflow: visible !important; }
 .vis-panel.vis-top { height: 45px !important; min-height: 45px !important; }
 .vis-panel.vis-center { padding-top: 5px !important; }
 
-/* ═══════════════════════════════════════════════════════════
-   5. LIGNE D'ENCRE SÉPIA (Déplacée sur le panneau TOP)
-   ✅ L'axe est maintenant dans le panneau du haut (non-clipé)
-   ✅ Positionné en bas du panneau top = à la jonction avec center
-   ═══════════════════════════════════════════════════════════ */
-
-/* Ancien axe du panneau center → supprimé pour éviter le clipping */
-.vis-panel.vis-center::before {
-  display: none !important;
-}
-
-/* ✅ Nouvel axe sur le panneau TOP, collé en bas (jonction avec center) */
+.vis-panel.vis-center::before { display: none !important; }
 .vis-panel.vis-top::after {
-  content: '';
-  position: absolute;
-  left: 0; 
-  right: 0; 
-  bottom: 0; /* Collé tout en bas du panneau des dates */
-  height: 3px;
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
   background: linear-gradient(90deg, transparent 0%, #3e2723 5%, #5d4037 20%, #3e2723 50%, #5d4037 80%, #3e2723 95%, transparent 100%);
   box-shadow: 0 0 4px rgba(62, 39, 35, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
-  z-index: 10 !important; /* ✅ Entre les événements (4) et les dates (15) */
-  pointer-events: none;
+  z-index: 10 !important; pointer-events: none;
   filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='rough'><feTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2'/><feDisplacementMap in='SourceGraphic' scale='2'/></filter></svg>#rough");
 }
 
 /* ═══════════════════════════════════════════════════════════
-   6. FORCAGE ABSOLU DE L'AFFICHAGE (Point & Range)
+   5. GOUTTES D'ENCRE (Uniquement via CSS, c'est plus simple)
    ═══════════════════════════════════════════════════════════ */
-
-/* ✅ 1. On tue le style par défaut et on force la visibilité du conteneur */
-.vis-item[class*="tp-"] {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-  overflow: visible !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  display: block !important;
+.vis-item.vis-point[class*="tp-"]::before {
+  content: '' !important; display: block !important; position: absolute; left: 50%; top: -100px;
+  height: calc(50% + 100px); width: 4px;
+  background: repeating-linear-gradient(to bottom, rgba(62, 39, 35, 0.9) 0px, rgba(62, 39, 35, 0.9) 6px, transparent 6px, transparent 10px) !important;
+  transform: translateX(-50%); z-index: -1 !important; pointer-events: none;
 }
 
-/* ✅ 2. On force le conteneur de contenu à être visible et à centrer son enfant */
-.vis-item[class*="tp-"] .vis-item-content,
-.vis-item[class*="tp-"] .vis-item-overflow {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  display: flex !important; /* Force l'affichage et permet le centrage */
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  height: 100% !important;
-  overflow: visible !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* ✅ 3. Le badge circulaire (pour les points) */
-.pillar-badge {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 40px !important;
-  height: 40px !important;
-  border-radius: 50% !important;
-  border: 2px solid rgba(255, 255, 255, 0.4) !important;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important;
-  font-size: 1.2rem !important;
-  cursor: pointer !important;
-  position: relative !important;
-  z-index: 4 !important;
-  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-}
-
-.pillar-badge:hover {
+/* ═══════════════════════════════════════════════════════════
+   6. HOVER EFFECT (Géré en CSS car plus performant que JS)
+   ═══════════════════════════════════════════════════════════ */
+.forced-badge:hover {
   transform: scale(1.2) !important;
-  box-shadow: 0 0 15px var(--pillar-color, #8b0000) !important;
+  box-shadow: 0 0 15px rgba(139, 0, 0, 0.6) !important;
   z-index: 10 !important;
 }
 
-/* ✅ 4. Gouttes d'encre (uniquement visuellement sous les badges) */
-.vis-item[class*="tp-"]::before {
-  content: '' !important;
-  display: block !important;
-  position: absolute;
-  left: 50%;
-  top: -100px;
-  height: calc(50% + 100px);
-  width: 4px;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(62, 39, 35, 0.9) 0px,
-    rgba(62, 39, 35, 0.9) 6px,
-    transparent 6px,
-    transparent 10px
-  ) !important;
-  transform: translateX(-50%);
-  z-index: -1 !important;
-  pointer-events: none;
-}
-
 /* ═══════════════════════════════════════════════════════════
-   8. CORRECTIONS OVERFLOW & ÉTAT DE SÉLECTION
-   ═══════════════════════════════════════════════════════════ */
-.vis-item-overflow { overflow: visible !important; width: 100% !important; height: 100% !important; }
-.vis-item.vis-range .vis-item-overflow { display: none !important; }
-.vis-item, .vis-item.vis-point, .vis-item.vis-range, .vis-foreground .vis-group { overflow: visible !important; }
-
-/* ✅ MIS À JOUR : .parchment-icon est devenu .pillar-badge */
-.vis-item.vis-selected .pillar-badge {
-  box-shadow: 0 0 0 3px #8b0000, 0 0 20px rgba(139, 0, 0, 0.8), inset 0 0 10px rgba(139, 0, 0, 0.3) !important;
-  transform: scale(1.15) !important;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   9. OPTIMISATION MOBILE (Responsive)
-   ✅ Nettoyé : on cible maintenant .pillar-badge, plus le wrapper .vis-item
+   7. RESPONSIVE
    ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   .timeline-container { padding: 5px !important; }
   .vis-panel.vis-top { height: 35px !important; min-height: 35px !important; }
-  
-  .vis-time-axis .vis-text { 
-    font-size: 0.7rem !important; 
-    margin-left: 0 !important; 
-    margin-right: 0 !important; 
-    padding: 0 !important; 
-    text-align: center !important; 
-    white-space: nowrap !important; 
-  }
+  .vis-time-axis .vis-text { font-size: 0.7rem !important; margin: 0 !important; padding: 0 !important; text-align: center !important; white-space: nowrap !important; }
   .vis-time-axis .vis-grid.vis-major { border-left-width: 1px !important; margin-left: -0.5px !important; }
   .vis-time-axis .vis-grid.vis-minor { border-width: 1px !important; opacity: 0.5 !important; }
-  
-  /* ✅ On réduit la taille du badge, pas du wrapper */
-  .pillar-badge { width: 28px !important; height: 28px !important; font-size: 0.9rem !important; }
-  
-  /* ✅ On affine la goutte d'encre sur mobile */
   .vis-item.vis-point[class*="tp-"]::before { width: 2px !important; }
-  
-  .pillar-badge:hover { transform: scale(1.1) !important; }
 }
-
 @media (max-width: 479px) {
   .vis-time-axis .vis-text { font-size: 0.65rem !important; }
   .vis-panel.vis-top { height: 30px !important; min-height: 30px !important; }
-  
-  .pillar-badge { width: 24px !important; height: 24px !important; font-size: 0.8rem !important; }
 }
-
-/* ═══════════════════════════════════════════════════════════
-   10. ANIMATIONS & UTILITAIRES
-   ═══════════════════════════════════════════════════════════ */
-@keyframes fade-in { 
-  from { opacity: 0; transform: translateY(-10px); } 
-  to { opacity: 1; transform: translateY(0); } 
-}
-.animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
-
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
