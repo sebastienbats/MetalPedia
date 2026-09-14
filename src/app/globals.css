@@ -150,7 +150,7 @@
 
 /* ═══════════════════════════════════════════════════════════
    4. STYLING DE L'AXE TEMPOREL (Dates en haut)
-   ══════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════ */
 .vis-time-axis.vis-top .vis-text {
   color: #3e2723 !important;
   font-family: var(--font-medieval), cursive, serif !important;
@@ -235,8 +235,28 @@
 .vis-item.vis-range.tp-metalcore { background-color: #6c5ce7 !important; }
 
 /* ═══════════════════════════════════════════════════════════
-   7. HOVER EFFECT SUR LES BADGES
+   7. STYLES DES BADGES (Forcés en CSS + Hover)
    ═══════════════════════════════════════════════════════════ */
+
+/* ✅ Styles de base du badge (garantissent l'affichage même si le JS met 1ms) */
+.forced-badge {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  font-size: 1.2rem !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 4 !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+  overflow: hidden !important;
+}
+
+/* ✅ Hover effect */
 .forced-badge:hover {
   transform: scale(1.2) !important;
   box-shadow: 0 0 15px rgba(139, 0, 0, 0.6) !important;
