@@ -61,7 +61,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   2. TIMELINE : LE PARCHEMIN DU TEMPS
+   2. TIMELINE : LE PARCHEMIN DU TEMPS (Conteneur Principal)
    ═══════════════════════════════════════════════════════════ */
 .timeline-container {
   background: 
@@ -69,14 +69,17 @@
     radial-gradient(ellipse at 80% 70%, rgba(101, 67, 33, 0.15) 0%, transparent 50%),
     radial-gradient(ellipse at 50% 50%, rgba(160, 120, 80, 0.1) 0%, transparent 70%),
     linear-gradient(135deg, #d4b896 0%, #c9a876 25%, #d4b896 50%, #b89968 75%, #c9a876 100%);
+  
   border-radius: 8px;
   padding: 10px;
   position: relative;
+  
   box-shadow: 
     inset 0 0 60px rgba(101, 67, 33, 0.4), 
     inset 0 0 20px rgba(139, 90, 43, 0.3), 
     0 10px 40px rgba(0, 0, 0, 0.6), 
     0 0 0 1px rgba(101, 67, 33, 0.5);
+    
   overflow: visible !important;
   z-index: 0;
 }
@@ -108,18 +111,46 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   3. NETTOYAGE VIS-TIMELINE & VERROUILLAGE
+   3. SUPPRESSION DES ÉLÉMENTS PAR DÉFAUT & VERROUILLAGE
    ═══════════════════════════════════════════════════════════ */
-.vis-panel.vis-center { clip-path: inset(5px 0 0 0) !important; }
-.vis-panel.vis-bottom, .vis-time-axis.vis-bottom { display: none !important; visibility: hidden !important; height: 0 !important; }
-.vis-timeline { border: none !important; background: transparent !important; }
-.vis-item .vis-dot { display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; opacity: 0 !important; }
-.vis-item-overflow { overflow: visible !important; width: 100% !important; height: 100% !important; }
-.vis-item, .vis-item.vis-point, .vis-item.vis-range, .vis-foreground .vis-group { overflow: visible !important; }
+
+/* ✅ VERROUILLAGE : Coupe tout ce qui dépasse au-dessus de la zone des événements */
+.vis-panel.vis-center {
+  clip-path: inset(5px 0 0 0) !important;
+}
+
+.vis-panel.vis-bottom, .vis-time-axis.vis-bottom {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+}
+
+.vis-timeline {
+  border: none !important;
+  background: transparent !important;
+}
+
+.vis-item .vis-dot {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+}
+
+.vis-item-overflow { 
+  overflow: visible !important; 
+  width: 100% !important; 
+  height: 100% !important; 
+}
+
+.vis-item, .vis-item.vis-point, .vis-item.vis-range, .vis-foreground .vis-group { 
+  overflow: visible !important; 
+}
 
 /* ═══════════════════════════════════════════════════════════
-   4. AXE TEMPOREL & LIGNE SÉPIA
-   ═══════════════════════════════════════════════════════════ */
+   4. STYLING DE L'AXE TEMPOREL (Dates en haut)
+   ══════════════════════════════════════════════════════════ */
 .vis-time-axis.vis-top .vis-text {
   color: #3e2723 !important;
   font-family: var(--font-medieval), cursive, serif !important;
@@ -127,56 +158,84 @@
   font-weight: 400 !important;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
   white-space: nowrap !important;
-  margin: 0 !important; padding: 0 !important; text-align: center !important;
-  display: block !important; visibility: visible !important; opacity: 1 !important; z-index: 15 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: center !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 15 !important;
 }
-.vis-time-axis .vis-grid.vis-major { border-color: rgba(62, 39, 35, 0.6) !important; border-width: 2px !important; border-left-style: solid !important; }
-.vis-time-axis .vis-grid.vis-minor { border-color: rgba(101, 67, 33, 0.15) !important; border-style: dashed !important; border-left-style: dashed !important; }
-.vis-panel.vis-center, .vis-panel.vis-bottom, .vis-panel.vis-top { border-color: transparent !important; overflow: visible !important; }
+
+.vis-time-axis .vis-grid.vis-major {
+  border-color: rgba(62, 39, 35, 0.6) !important;
+  border-width: 2px !important;
+  border-left-style: solid !important;
+}
+
+.vis-time-axis .vis-grid.vis-minor {
+  border-color: rgba(101, 67, 33, 0.15) !important;
+  border-style: dashed !important;
+  border-left-style: dashed !important;
+}
+
+.vis-panel.vis-center, .vis-panel.vis-bottom, .vis-panel.vis-top {
+  border-color: transparent !important;
+  overflow: visible !important;
+}
 .vis-panel.vis-top { height: 45px !important; min-height: 45px !important; }
 .vis-panel.vis-center { padding-top: 5px !important; }
 
-.vis-panel.vis-center::before { display: none !important; }
+/* ═══════════════════════════════════════════════════════════
+   5. LIGNE D'ENCRE SÉPIA (Déplacée sur le panneau TOP)
+   ═══════════════════════════════════════════════════════════ */
+.vis-panel.vis-center::before {
+  display: none !important;
+}
+
 .vis-panel.vis-top::after {
-  content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+  content: '';
+  position: absolute;
+  left: 0; 
+  right: 0; 
+  bottom: 0;
+  height: 3px;
   background: linear-gradient(90deg, transparent 0%, #3e2723 5%, #5d4037 20%, #3e2723 50%, #5d4037 80%, #3e2723 95%, transparent 100%);
   box-shadow: 0 0 4px rgba(62, 39, 35, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
-  z-index: 10 !important; pointer-events: none;
+  z-index: 10 !important;
+  pointer-events: none;
   filter: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='rough'><feTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='2'/><feDisplacementMap in='SourceGraphic' scale='2'/></filter></svg>#rough");
 }
 
 /* ═══════════════════════════════════════════════════════════
-   5. RANGES EN TRAITS HORIZONTAUX
+   6. COULEURS DES RANGES (Périodes)
+   ✅ Le fond prend la couleur du pilier grâce aux classes tp-...
    ═══════════════════════════════════════════════════════════ */
 .vis-item.vis-range {
-  background: rgba(139, 0, 0, 0.5) !important;
+  color: #ffffff !important;
+  font-family: var(--font-medieval), serif !important;
+  font-weight: bold !important;
+  font-size: 0.8rem !important;
   border: none !important;
-  border-radius: 3px !important;
-  height: 6px !important;
-  min-height: 6px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  overflow: visible !important;
 }
 
-.vis-item.vis-range .vis-item-content {
-  font-family: var(--font-medieval), serif !important;
-  font-size: 0.75rem !important;
-  color: #3e2723 !important;
-  font-weight: bold !important;
-  white-space: nowrap !important;
-  background: rgba(212, 184, 150, 0.95) !important;
-  padding: 2px 8px !important;
-  border-radius: 4px !important;
-  border: 1px solid rgba(62, 39, 35, 0.3) !important;
-  position: absolute !important;
-  top: -25px !important;
-  z-index: 5 !important;
-}
+.vis-item.vis-range.tp-heavy { background-color: #8b0000 !important; }
+.vis-item.vis-range.tp-thrash { background-color: #d63031 !important; }
+.vis-item.vis-range.tp-death { background-color: #2d3436 !important; }
+.vis-item.vis-range.tp-black { background-color: #000000 !important; }
+.vis-item.vis-range.tp-power { background-color: #e17055 !important; }
+.vis-item.vis-range.tp-doom { background-color: #636e72 !important; }
+.vis-item.vis-range.tp-progressive { background-color: #00b894 !important; }
+.vis-item.vis-range.tp-folk { background-color: #00b894 !important; }
+.vis-item.vis-range.tp-metalcore { background-color: #6c5ce7 !important; }
 
 /* ═══════════════════════════════════════════════════════════
-   6. HOVER EFFECT (Géré en CSS car plus performant que JS)
+   7. HOVER EFFECT SUR LES BADGES
    ═══════════════════════════════════════════════════════════ */
 .forced-badge:hover {
   transform: scale(1.2) !important;
@@ -185,17 +244,42 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   7. RESPONSIVE
+   8. OPTIMISATION MOBILE (Responsive)
    ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   .timeline-container { padding: 5px !important; }
   .vis-panel.vis-top { height: 35px !important; min-height: 35px !important; }
-  .vis-time-axis .vis-text { font-size: 0.7rem !important; margin: 0 !important; padding: 0 !important; text-align: center !important; white-space: nowrap !important; }
+  
+  .vis-time-axis .vis-text { 
+    font-size: 0.7rem !important; 
+    margin-left: 0 !important; 
+    margin-right: 0 !important; 
+    padding: 0 !important; 
+    text-align: center !important; 
+    white-space: nowrap !important; 
+  }
   .vis-time-axis .vis-grid.vis-major { border-left-width: 1px !important; margin-left: -0.5px !important; }
   .vis-time-axis .vis-grid.vis-minor { border-width: 1px !important; opacity: 0.5 !important; }
-  .vis-item.vis-point[class*="tp-"]::before { width: 2px !important; }
+  
+  .forced-badge { width: 28px !important; height: 28px !important; font-size: 0.9rem !important; }
+  .forced-badge:hover { transform: scale(1.1) !important; }
 }
+
 @media (max-width: 479px) {
   .vis-time-axis .vis-text { font-size: 0.65rem !important; }
   .vis-panel.vis-top { height: 30px !important; min-height: 30px !important; }
+  
+  .forced-badge { width: 24px !important; height: 24px !important; font-size: 0.8rem !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   9. ANIMATIONS & UTILITAIRES
+   ═══════════════════════════════════════════════════════════ */
+@keyframes fade-in { 
+  from { opacity: 0; transform: translateY(-10px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
+.animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
