@@ -76,7 +76,6 @@ export default function TimelineClient() {
 
   useEffect(() => {
     if (!isClient || !containerRef.current) return;
-
     let isMounted = true;
 
     const initTimeline = async () => {
@@ -99,29 +98,29 @@ export default function TimelineClient() {
           min: '1960-01-01',
           max: '2030-12-31',
           orientation: 'top',
-          timeAxis: { 
-            scale: 'year', 
-            step: 5 
-          },
+          timeAxis: { scale: 'year', step: 5 },
           zoomMin: 1000 * 60 * 60 * 24 * 365,
           zoomMax: 1000 * 60 * 60 * 24 * 365 * 50,
           moveable: true,
           zoomable: true,
           showCurrentTime: false,
-          // ✅ TEMPLATE (ANY)
+          
+          // ✅ TEMPLATE ULTRA-SIMPLE (Zéro risque d'erreur de build)
           template: function(item: any) {
-  const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
-  const pillarData = PILLAR_METADATA[pillarName] || { icon: '', color: '#8b0000' };
-  const icon = pillarData.icon;
-  const color = pillarData.color;
-  return '<div class="parchment-icon" style="--pillar-color: ' + color + ';">' + icon + '</div>';
-}
+            if (item.type === 'range') {
+              return '<span class="range-text">' + item.content + '</span>';
+            }
+            const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
+            const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸', color: '#8b0000' };
+            // On passe la couleur via un attribut data, et on met une classe simple
+            return '<div class="forced-badge" data-color="' + pillarData.color + '">' + pillarData.icon + '</div>';
+          }
         };
 
         if (isMounted && containerRef.current) {
           timelineRef.current = new Timeline(containerRef.current, items, options);
           
-          // Forcer le style des dates
+          // ✅ 1. Forcer le style des dates (comme avant)
           const applyDateStyles = () => {
             if (typeof window !== 'undefined') {
               const dateElements = document.querySelectorAll('.vis-text');
@@ -134,11 +133,53 @@ export default function TimelineClient() {
             }
           };
 
-          setTimeout(applyDateStyles, 50);
-          timelineRef.current.on('rangechanged', applyDateStyles);
-          timelineRef.current.on('changed', applyDateStyles);
+          // ✅ 2. NOUVEAU : Forcer le style des badges ET nettoyer le wrapper vis-item
+          const applyBadgeStyles = () => {
+            if (typeof window !== 'undefined') {
+              // A. Nettoyer le wrapper vis-item pour qu'il soit invisible
+              const visItems = document.querySelectorAll('.vis-item[class*="tp-"]');
+              visItems.forEach((el) => {
+                const htmlEl = el as HTMLElement;
+                htmlEl.style.setProperty('background', 'transparent', 'important');
+                htmlEl.style.setProperty('border', 'none', 'important');
+                htmlEl.style.setProperty('box-shadow', 'none', 'important');
+                htmlEl.style.setProperty('overflow', 'visible', 'important');
+              });
+
+              // B. Forcer le style du badge circulaire coloré
+              const badges = document.querySelectorAll('.forced-badge');
+              badges.forEach((el) => {
+                const htmlEl = el as HTMLElement;
+                const color = htmlEl.getAttribute('data-color') || '#8b0000';
+                
+                htmlEl.style.setProperty('display', 'flex', 'important');
+                htmlEl.style.setProperty('align-items', 'center', 'important');
+                htmlEl.style.setProperty('justify-content', 'center', 'important');
+                htmlEl.style.setProperty('width', '36px', 'important');
+                htmlEl.style.setProperty('height', '36px', 'important');
+                htmlEl.style.setProperty('border-radius', '50%', 'important');
+                htmlEl.style.setProperty('background-color', color, 'important');
+                htmlEl.style.setProperty('border', '2px solid rgba(255, 255, 255, 0.4)', 'important');
+                htmlEl.style.setProperty('box-shadow', '0 2px 4px rgba(0, 0, 0, 0.3)', 'important');
+                htmlEl.style.setProperty('font-size', '1.2rem', 'important');
+                htmlEl.style.setProperty('cursor', 'pointer', 'important');
+                htmlEl.style.setProperty('z-index', '4', 'important');
+                htmlEl.style.setProperty('transition', 'transform 0.3s ease, box-shadow 0.3s ease', 'important');
+              });
+            }
+          };
+
+          // ✅ 3. Appliquer les deux fonctions
+          const applyAllStyles = () => {
+            applyDateStyles();
+            applyBadgeStyles();
+          };
+
+          setTimeout(applyAllStyles, 50); // Appliquer au chargement
+          timelineRef.current.on('rangechanged', applyAllStyles); // Réappliquer au zoom/scroll
+          timelineRef.current.on('changed', applyAllStyles);      // Réappliquer aux changements
           
-          console.log('✅ Timeline initialisée avec 35 événements !');
+          console.log('✅ Timeline initialisée avec styles forcés !');
         }
       } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la timeline:', error);
@@ -168,11 +209,7 @@ export default function TimelineClient() {
   return (
     <div className="p-4 bg-gray-900 rounded-lg">
       <h2 className="text-white text-xl mb-4 text-center font-serif">Timeline MetalPedia</h2>
-      <div 
-        ref={containerRef} 
-        className="timeline-container" 
-        style={{ minHeight: '400px' }}
-      />
+      <div ref={containerRef} className="timeline-container" style={{ minHeight: '400px' }} />
     </div>
   );
 }
