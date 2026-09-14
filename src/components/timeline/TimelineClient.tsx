@@ -109,8 +109,14 @@ export default function TimelineClient() {
           template: function(item: any) {
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
             const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸' };
+             // Pour les ranges, on retourne le contenu textuel
+            if (item.type === 'range') {
+            return item.content;
+            }
+  
+            // Pour les points, on retourne l'emoji
             return pillarData.icon;
-          }
+            }
         };
 
         if (isMounted && containerRef.current) {
