@@ -264,7 +264,8 @@
 
 /* ✅ Hover sur les ranges */
 .vis-item.vis-range:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
+  box-shadow: 0 0 20px rgba(139, 0, 0, 0.8), 0 0 30px rgba(139, 0, 0, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
   z-index: 5 !important;
 }
 
@@ -298,7 +299,6 @@
   .vis-time-axis .vis-grid.vis-minor { border-width: 1px !important; opacity: 0.5 !important; }
   
   .vis-item.vis-point { width: 32px !important; height: 32px !important; font-size: 1rem !important; }
-  .vis-item.vis-point:hover { transform: scale(1.1) !important; }
 }
 
 @media (max-width: 479px) {
