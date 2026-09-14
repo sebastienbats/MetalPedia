@@ -105,15 +105,15 @@ export default function TimelineClient() {
           zoomable: true,
           showCurrentTime: false,
           
-          // ✅ TEMPLATE ULTRA-SIMPLE (Zéro risque d'erreur de build)
-          template: function(item: any) {
+           template: function(item: any) {
             if (item.type === 'range') {
-              return '<span class="range-text">' + item.content + '</span>';
+              return '<span>' + item.content + '</span>';
             }
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
             const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸', color: '#8b0000' };
-            // On passe la couleur via un attribut data, et on met une classe simple
-            return '<div class="forced-badge" data-color="' + pillarData.color + '">' + pillarData.icon + '</div>';
+            const icon = pillarData.icon;
+            const color = pillarData.color;
+            return '<div class="forced-badge" data-color="' + color + '">' + icon + '</div>';
           }
         };
 
