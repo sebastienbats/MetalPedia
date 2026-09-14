@@ -240,10 +240,10 @@
 .vis-item.vis-point.tp-folk { background-color: #00b894 !important; }
 .vis-item.vis-point.tp-metalcore { background-color: #6c5ce7 !important; }
 
-/* Hover sur les points */
+/* ✅ Hover sur les points : GLOW au lieu de scale */
 .vis-item.vis-point:hover {
-  transform: scale(1.2) !important;
-  box-shadow: 0 0 15px rgba(139, 0, 0, 0.6) !important;
+  box-shadow: 0 0 20px rgba(139, 0, 0, 0.8), 0 0 30px rgba(139, 0, 0, 0.4) !important;
+  border-color: rgba(255, 255, 255, 0.9) !important;
   z-index: 10 !important;
 }
 
@@ -261,6 +261,11 @@
   justify-content: center !important;
   z-index: 2 !important;
 }
+
+/* ✅ Hover sur les ranges */
+.vis-item.vis-range:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
+  z-index: 5 !important;
 
 /* Couleurs des ranges par pilier */
 .vis-item.vis-range.tp-heavy { background-color: #8b0000 !important; }
