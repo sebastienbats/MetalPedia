@@ -113,8 +113,6 @@
 /* ═══════════════════════════════════════════════════════════
    3. SUPPRESSION DES ÉLÉMENTS PAR DÉFAUT & VERROUILLAGE
    ═══════════════════════════════════════════════════════════ */
-
-/* ✅ VERROUILLAGE : Coupe tout ce qui dépasse au-dessus de la zone des événements */
 .vis-panel.vis-center {
   clip-path: inset(5px 0 0 0) !important;
 }
@@ -148,7 +146,7 @@
   overflow: visible !important; 
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════
    4. STYLING DE L'AXE TEMPOREL (Dates en haut)
    ═══════════════════════════════════════════════════════════ */
 .vis-time-axis.vis-top .vis-text {
@@ -208,9 +206,46 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   6. COULEURS DES RANGES (Périodes)
-   ✅ Le fond prend la couleur du pilier grâce aux classes tp-...
-   ═══════════════════════════════════════════════════════════ */
+   6. BADGES & RANGES COLORÉS (Gérés 100% par CSS via les classes tp-...)
+   ══════════════════════════════════════════════════════════ */
+
+/* ✅ POINTS : Cercles colorés avec emoji */
+.vis-item.vis-point {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  border-radius: 50% !important;
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.2rem !important;
+  cursor: pointer !important;
+  overflow: visible !important;
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Couleurs des points par pilier */
+.vis-item.vis-point.tp-heavy { background-color: #8b0000 !important; }
+.vis-item.vis-point.tp-thrash { background-color: #d63031 !important; }
+.vis-item.vis-point.tp-death { background-color: #2d3436 !important; }
+.vis-item.vis-point.tp-black { background-color: #000000 !important; }
+.vis-item.vis-point.tp-power { background-color: #e17055 !important; }
+.vis-item.vis-point.tp-doom { background-color: #636e72 !important; }
+.vis-item.vis-point.tp-progressive { background-color: #00b894 !important; }
+.vis-item.vis-point.tp-folk { background-color: #00b894 !important; }
+.vis-item.vis-point.tp-metalcore { background-color: #6c5ce7 !important; }
+
+/* Hover sur les points */
+.vis-item.vis-point:hover {
+  transform: scale(1.2) !important;
+  box-shadow: 0 0 15px rgba(139, 0, 0, 0.6) !important;
+  z-index: 10 !important;
+}
+
+/* ✅ RANGES : Barres horizontales colorées */
 .vis-item.vis-range {
   color: #ffffff !important;
   font-family: var(--font-medieval), serif !important;
@@ -224,6 +259,7 @@
   justify-content: center !important;
 }
 
+/* Couleurs des ranges par pilier */
 .vis-item.vis-range.tp-heavy { background-color: #8b0000 !important; }
 .vis-item.vis-range.tp-thrash { background-color: #d63031 !important; }
 .vis-item.vis-range.tp-death { background-color: #2d3436 !important; }
@@ -235,36 +271,7 @@
 .vis-item.vis-range.tp-metalcore { background-color: #6c5ce7 !important; }
 
 /* ═══════════════════════════════════════════════════════════
-   7. STYLES DES BADGES (Forcés en CSS + Hover)
-   ═══════════════════════════════════════════════════════════ */
-
-/* ✅ Styles de base du badge (garantissent l'affichage même si le JS met 1ms) */
-.forced-badge {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
-  border: 2px solid rgba(255, 255, 255, 0.4) !important;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
-  font-size: 1.2rem !important;
-  cursor: pointer !important;
-  position: relative !important;
-  z-index: 4 !important;
-  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-  overflow: hidden !important;
-}
-
-/* ✅ Hover effect */
-.forced-badge:hover {
-  transform: scale(1.2) !important;
-  box-shadow: 0 0 15px rgba(139, 0, 0, 0.6) !important;
-  z-index: 10 !important;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   8. OPTIMISATION MOBILE (Responsive)
+   7. OPTIMISATION MOBILE (Responsive)
    ═══════════════════════════════════════════════════════════ */
 @media (max-width: 767px) {
   .timeline-container { padding: 5px !important; }
@@ -281,19 +288,19 @@
   .vis-time-axis .vis-grid.vis-major { border-left-width: 1px !important; margin-left: -0.5px !important; }
   .vis-time-axis .vis-grid.vis-minor { border-width: 1px !important; opacity: 0.5 !important; }
   
-  .forced-badge { width: 28px !important; height: 28px !important; font-size: 0.9rem !important; }
-  .forced-badge:hover { transform: scale(1.1) !important; }
+  .vis-item.vis-point { width: 32px !important; height: 32px !important; font-size: 1rem !important; }
+  .vis-item.vis-point:hover { transform: scale(1.1) !important; }
 }
 
 @media (max-width: 479px) {
   .vis-time-axis .vis-text { font-size: 0.65rem !important; }
   .vis-panel.vis-top { height: 30px !important; min-height: 30px !important; }
   
-  .forced-badge { width: 24px !important; height: 24px !important; font-size: 0.8rem !important; }
+  .vis-item.vis-point { width: 28px !important; height: 28px !important; font-size: 0.9rem !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   9. ANIMATIONS & UTILITAIRES
+   8. ANIMATIONS & UTILITAIRES
    ═══════════════════════════════════════════════════════════ */
 @keyframes fade-in { 
   from { opacity: 0; transform: translateY(-10px); } 
