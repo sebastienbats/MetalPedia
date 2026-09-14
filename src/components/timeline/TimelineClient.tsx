@@ -105,22 +105,17 @@ export default function TimelineClient() {
           zoomable: true,
           showCurrentTime: false,
           
-           template: function(item: any) {
-            if (item.type === 'range') {
-              return '<span>' + item.content + '</span>';
-            }
+          // ✅ TEMPLATE ULTRA-SIMPLE : Juste l'emoji, le CSS fait le reste
+          template: function(item: any) {
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
-            const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸', color: '#8b0000' };
-            const icon = pillarData.icon;
-            const color = pillarData.color;
-            return '<div class="forced-badge" data-color="' + color + '">' + icon + '</div>';
+            const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸' };
+            return pillarData.icon;
           }
         };
 
         if (isMounted && containerRef.current) {
           timelineRef.current = new Timeline(containerRef.current, items, options);
           
-          // ✅ 1. Forcer le style des dates (comme avant)
           const applyDateStyles = () => {
             if (typeof window !== 'undefined') {
               const dateElements = document.querySelectorAll('.vis-text');
@@ -133,54 +128,11 @@ export default function TimelineClient() {
             }
           };
 
-          // ✅ 2. NOUVEAU : Forcer le style des badges ET nettoyer le wrapper vis-item
-          const applyBadgeStyles = () => {
-  if (typeof window !== 'undefined') {
-    // ✅ 1. Wrapper transparent : EXCLURE les ranges (ils ont leur propre couleur CSS)
-    const visItems = document.querySelectorAll('.vis-item[class*="tp-"]:not(.vis-range)');
-    visItems.forEach((el) => {
-      const htmlEl = el as HTMLElement;
-      htmlEl.style.setProperty('background', 'transparent', 'important');
-      htmlEl.style.setProperty('border', 'none', 'important');
-      htmlEl.style.setProperty('box-shadow', 'none', 'important');
-      htmlEl.style.setProperty('overflow', 'visible', 'important');
-    });
-
-    // ✅ 2. Badges colorés
-    const badges = document.querySelectorAll('.forced-badge');
-    badges.forEach((el) => {
-      const htmlEl = el as HTMLElement;
-      const color = htmlEl.getAttribute('data-color') || '#8b0000';
-      
-      htmlEl.style.setProperty('display', 'flex', 'important');
-      htmlEl.style.setProperty('align-items', 'center', 'important');
-      htmlEl.style.setProperty('justify-content', 'center', 'important');
-      htmlEl.style.setProperty('width', '36px', 'important');
-      htmlEl.style.setProperty('height', '36px', 'important');
-      htmlEl.style.setProperty('border-radius', '50%', 'important');
-      htmlEl.style.setProperty('background-color', color, 'important');
-      htmlEl.style.setProperty('border', '2px solid rgba(255, 255, 255, 0.4)', 'important');
-      htmlEl.style.setProperty('box-shadow', '0 2px 4px rgba(0, 0, 0, 0.3)', 'important');
-      htmlEl.style.setProperty('font-size', '1.2rem', 'important');
-      htmlEl.style.setProperty('cursor', 'pointer', 'important');
-      htmlEl.style.setProperty('z-index', '4', 'important');
-    });
-    
-    // ✅ 3. Ranges : on ne touche à rien, le CSS gère leur couleur
-  }
-};
-
-          // ✅ 3. Appliquer les deux fonctions
-          const applyAllStyles = () => {
-            applyDateStyles();
-            applyBadgeStyles();
-          };
-
-          setTimeout(applyAllStyles, 50); // Appliquer au chargement
-          timelineRef.current.on('rangechanged', applyAllStyles); // Réappliquer au zoom/scroll
-          timelineRef.current.on('changed', applyAllStyles);      // Réappliquer aux changements
+          setTimeout(applyDateStyles, 50);
+          timelineRef.current.on('rangechanged', applyDateStyles);
+          timelineRef.current.on('changed', applyDateStyles);
           
-          console.log('✅ Timeline initialisée avec styles forcés !');
+          console.log('✅ Timeline initialisée avec badges CSS natifs !');
         }
       } catch (error) {
         console.error('❌ Erreur lors de l\'initialisation de la timeline:', error);
