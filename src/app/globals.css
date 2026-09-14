@@ -146,13 +146,33 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   5. GOUTTES D'ENCRE (Uniquement via CSS, c'est plus simple)
+   5. RANGES EN TRAITS HORIZONTAUX
    ═══════════════════════════════════════════════════════════ */
-.vis-item.vis-point[class*="tp-"]::before {
-  content: '' !important; display: block !important; position: absolute; left: 50%; top: -100px;
-  height: calc(50% + 100px); width: 0.5px;
-  background: repeating-linear-gradient(to bottom, rgba(62, 39, 35, 0.9) 0px, rgba(62, 39, 35, 0.9) 6px, transparent 6px, transparent 10px) !important;
-  transform: translateX(-50%); z-index: -1 !important; pointer-events: none;
+.vis-item.vis-range {
+  background: rgba(139, 0, 0, 0.5) !important;
+  border: none !important;
+  border-radius: 3px !important;
+  height: 6px !important;
+  min-height: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+
+.vis-item.vis-range .vis-item-content {
+  font-family: var(--font-medieval), serif !important;
+  font-size: 0.75rem !important;
+  color: #3e2723 !important;
+  font-weight: bold !important;
+  white-space: nowrap !important;
+  background: rgba(212, 184, 150, 0.95) !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(62, 39, 35, 0.3) !important;
+  position: absolute !important;
+  top: -25px !important;
+  z-index: 5 !important;
 }
 
 /* ═══════════════════════════════════════════════════════════
