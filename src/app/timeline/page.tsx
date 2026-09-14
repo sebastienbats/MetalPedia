@@ -17,9 +17,8 @@ export default function TimelinePage() {
         </p>
       </header>
 
-      <main className="container mx-auto p-8">
+      {/* ✅ Timeline en pleine largeur */}
       <TimelineClient />
-      </main>
     </div>
   );
 }
