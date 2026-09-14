@@ -135,39 +135,40 @@ export default function TimelineClient() {
 
           // ✅ 2. NOUVEAU : Forcer le style des badges ET nettoyer le wrapper vis-item
           const applyBadgeStyles = () => {
-            if (typeof window !== 'undefined') {
-              // A. Nettoyer le wrapper vis-item pour qu'il soit invisible
-              const visItems = document.querySelectorAll('.vis-item[class*="tp-"]');
-              visItems.forEach((el) => {
-                const htmlEl = el as HTMLElement;
-                htmlEl.style.setProperty('background', 'transparent', 'important');
-                htmlEl.style.setProperty('border', 'none', 'important');
-                htmlEl.style.setProperty('box-shadow', 'none', 'important');
-                htmlEl.style.setProperty('overflow', 'visible', 'important');
-              });
+  if (typeof window !== 'undefined') {
+    // ✅ 1. Wrapper transparent : EXCLURE les ranges (ils ont leur propre couleur CSS)
+    const visItems = document.querySelectorAll('.vis-item[class*="tp-"]:not(.vis-range)');
+    visItems.forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      htmlEl.style.setProperty('background', 'transparent', 'important');
+      htmlEl.style.setProperty('border', 'none', 'important');
+      htmlEl.style.setProperty('box-shadow', 'none', 'important');
+      htmlEl.style.setProperty('overflow', 'visible', 'important');
+    });
 
-              // B. Forcer le style du badge circulaire coloré
-              const badges = document.querySelectorAll('.forced-badge');
-              badges.forEach((el) => {
-                const htmlEl = el as HTMLElement;
-                const color = htmlEl.getAttribute('data-color') || '#8b0000';
-                
-                htmlEl.style.setProperty('display', 'flex', 'important');
-                htmlEl.style.setProperty('align-items', 'center', 'important');
-                htmlEl.style.setProperty('justify-content', 'center', 'important');
-                htmlEl.style.setProperty('width', '36px', 'important');
-                htmlEl.style.setProperty('height', '36px', 'important');
-                htmlEl.style.setProperty('border-radius', '50%', 'important');
-                htmlEl.style.setProperty('background-color', color, 'important');
-                htmlEl.style.setProperty('border', '2px solid rgba(255, 255, 255, 0.4)', 'important');
-                htmlEl.style.setProperty('box-shadow', '0 2px 4px rgba(0, 0, 0, 0.3)', 'important');
-                htmlEl.style.setProperty('font-size', '1.2rem', 'important');
-                htmlEl.style.setProperty('cursor', 'pointer', 'important');
-                htmlEl.style.setProperty('z-index', '4', 'important');
-                htmlEl.style.setProperty('transition', 'transform 0.3s ease, box-shadow 0.3s ease', 'important');
-              });
-            }
-          };
+    // ✅ 2. Badges colorés
+    const badges = document.querySelectorAll('.forced-badge');
+    badges.forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      const color = htmlEl.getAttribute('data-color') || '#8b0000';
+      
+      htmlEl.style.setProperty('display', 'flex', 'important');
+      htmlEl.style.setProperty('align-items', 'center', 'important');
+      htmlEl.style.setProperty('justify-content', 'center', 'important');
+      htmlEl.style.setProperty('width', '36px', 'important');
+      htmlEl.style.setProperty('height', '36px', 'important');
+      htmlEl.style.setProperty('border-radius', '50%', 'important');
+      htmlEl.style.setProperty('background-color', color, 'important');
+      htmlEl.style.setProperty('border', '2px solid rgba(255, 255, 255, 0.4)', 'important');
+      htmlEl.style.setProperty('box-shadow', '0 2px 4px rgba(0, 0, 0, 0.3)', 'important');
+      htmlEl.style.setProperty('font-size', '1.2rem', 'important');
+      htmlEl.style.setProperty('cursor', 'pointer', 'important');
+      htmlEl.style.setProperty('z-index', '4', 'important');
+    });
+    
+    // ✅ 3. Ranges : on ne touche à rien, le CSS gère leur couleur
+  }
+};
 
           // ✅ 3. Appliquer les deux fonctions
           const applyAllStyles = () => {
