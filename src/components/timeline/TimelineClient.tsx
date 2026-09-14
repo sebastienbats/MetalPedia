@@ -110,11 +110,7 @@ export default function TimelineClient() {
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
             const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸' };
             return pillarData.icon;
-            }
-  
-            // Pour les points, on retourne l'emoji
-            return pillarData.icon;
-            }
+          }
         };
 
         if (isMounted && containerRef.current) {
@@ -139,7 +135,7 @@ export default function TimelineClient() {
           console.log('✅ Timeline initialisée avec badges CSS natifs !');
         }
       } catch (error) {
-        console.error('❌ Erreur lors de l\'initialisation de la timeline:', error);
+        console.error(' Erreur lors de l\'initialisation de la timeline:', error);
       }
     };
 
