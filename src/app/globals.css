@@ -266,6 +266,7 @@
 .vis-item.vis-range:hover {
   box-shadow: 0 4px 8px rgba(0,0,0,0.5) !important;
   z-index: 5 !important;
+}
 
 /* Couleurs des ranges par pilier */
 .vis-item.vis-range.tp-heavy { background-color: #8b0000 !important; }
