@@ -12,6 +12,7 @@ export interface MetalverseEvent {
   end?: string;
   type: 'point' | 'range';
   pillar: string;
+  className: string; // ✅ AJOUTÉ : Nécessaire pour les styles CSS vis-timeline
   icon: string;
   color: string;
   act: string;
