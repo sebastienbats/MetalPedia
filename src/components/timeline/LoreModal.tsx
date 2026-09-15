@@ -10,11 +10,11 @@ export interface MetalverseEvent {
   content: string;
   start: string;
   end?: string;
-  type: 'point' | 'range';
+  type?: 'point' | 'range'; // ✅ Rendu optionnel
   pillar: string;
-  className: string; // ✅ AJOUTÉ : Nécessaire pour les styles CSS vis-timeline
-  icon: string;
-  color: string;
+  className: string;
+  icon?: string; // ✅ Rendu optionnel
+  color?: string; // ✅ Rendu optionnel
   act: string;
   real_lore: string;
   metalverse_echo: string;
@@ -66,7 +66,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
       <div className="lore-modal" onClick={(e) => e.stopPropagation()}>
         
         {/* HEADER */}
-        <div className="lore-header" style={{ background: `linear-gradient(135deg, ${event.color} 0%, #0a0a0a 100%)` }}>
+        <div className="lore-header" style={{ background: `linear-gradient(135deg, ${event.color || '#8b0000'} 0%, #0a0a0a 100%)` }}>
           <div className="lore-act-badge">🎭 {event.act}</div>
           <div className="lore-header-content">
             <h2 className="lore-title">{event.content}</h2>
