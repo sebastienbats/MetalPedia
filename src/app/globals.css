@@ -319,3 +319,288 @@
 
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ═══════════════════════════════════════════════════════════
+   9. CODEX METALVERSE & LORE EXCLUSIF DE CLASSE
+   ═══════════════════════════════════════════════════════════ */
+
+.lore-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: lore-fade 0.3s ease;
+}
+
+.lore-modal {
+  background: #121212;
+  border: 1px solid rgba(139, 0, 0, 0.5);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 650px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), 0 0 20px rgba(139, 0, 0, 0.2);
+  animation: lore-slide 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lore-header {
+  padding: 24px;
+  position: relative;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lore-act-badge {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #fff;
+  width: fit-content;
+  font-family: var(--font-medieval), serif;
+  letter-spacing: 1px;
+}
+
+.lore-title {
+  font-family: var(--font-medieval), serif;
+  font-size: 1.8rem;
+  color: #fff;
+  margin: 0;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+}
+
+.lore-date {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.lore-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.4);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+}
+.lore-close:hover { background: rgba(255,0,0,0.4); transform: rotate(90deg); }
+
+.lore-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: #0a0a0a;
+}
+
+.lore-tab {
+  flex: 1;
+  padding: 16px;
+  background: none;
+  border: none;
+  color: #666;
+  font-family: var(--font-medieval), serif;
+  font-size: 1rem;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+}
+
+.lore-tab.active {
+  color: #d4b896;
+  border-bottom-color: #8b0000;
+  background: rgba(139, 0, 0, 0.05);
+}
+
+.lore-tab.locked {
+  color: #444 !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.lore-body {
+  padding: 30px;
+}
+
+.lore-text {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #e0e0e0;
+  margin: 0;
+}
+
+.echo-container {
+  position: relative;
+  padding: 20px;
+  border-radius: 8px;
+  background: radial-gradient(circle at center, rgba(20, 0, 40, 0.8) 0%, rgba(0,0,0,0) 70%);
+  border: 1px solid rgba(100, 0, 200, 0.3);
+}
+
+.echo-text {
+  color: #b088ff !important;
+  font-style: italic;
+  text-shadow: 0 0 15px rgba(100, 0, 200, 0.4);
+}
+
+.class-lore-container {
+  position: relative;
+  padding: 24px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(139, 0, 0, 0.1) 100%);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.2), inset 0 0 20px rgba(255, 215, 0, 0.05);
+  animation: class-lore-glow 3s ease-in-out infinite;
+}
+
+@keyframes class-lore-glow {
+  0%, 100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.2), inset 0 0 20px rgba(255, 215, 0, 0.05); }
+  50% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.4), inset 0 0 30px rgba(255, 215, 0, 0.1); }
+}
+
+.class-lore-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+  color: #000;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-bottom: 16px;
+  font-family: var(--font-medieval), serif;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
+.class-lore-text {
+  color: #ffd700 !important;
+  font-style: italic;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  line-height: 1.8;
+}
+
+.class-lore-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.class-lore-xp {
+  font-family: var(--font-medieval), serif;
+  font-weight: bold;
+  color: #ffd700;
+  font-size: 1.1rem;
+}
+
+.class-lore-rarity {
+  font-size: 0.9rem;
+  color: #ff8c00;
+  font-weight: 600;
+}
+
+.class-locked-container {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+}
+
+.class-locked-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  opacity: 0.5;
+  animation: lock-pulse 2s ease-in-out infinite;
+}
+
+@keyframes lock-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+.class-locked-title {
+  font-family: var(--font-medieval), serif;
+  font-size: 1.5rem;
+  color: #888;
+  margin: 0 0 12px 0;
+}
+
+.class-locked-text {
+  color: #aaa;
+  font-size: 1rem;
+  margin: 0 0 16px 0;
+  line-height: 1.6;
+}
+
+.class-locked-text strong {
+  color: #d4b896;
+  font-weight: bold;
+}
+
+.class-locked-hint {
+  color: #666;
+  font-size: 0.9rem;
+  font-style: italic;
+  margin: 0;
+}
+
+.lore-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  background: rgba(0,0,0,0.3);
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.xp-reward {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.xp-icon {
+  font-size: 1.5rem;
+  animation: xp-pulse 2s infinite;
+}
+
+@keyframes xp-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+
+.xp-text {
+  font-family: var(--font-medieval), serif;
+  font-weight: bold;
+  color: #ffd700;
+  font-size: 1.2rem;
+}
+
+.lore-status {
+  font-size: 0.9rem;
+  color: #888;
+  font-weight: 600;
+}
+
+@keyframes lore-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lore-slide { from { opacity: 0; transform: translateY(40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+@media (max-width: 767px) {
+  .lore-title { font-size: 1.4rem; }
+  .lore-body { padding: 20px; }
+  .lore-footer { flex-direction: column; gap: 10px; text-align: center; }
+  .class-lore-footer { flex-direction: column; gap: 8px; text-align: center; }
+}
