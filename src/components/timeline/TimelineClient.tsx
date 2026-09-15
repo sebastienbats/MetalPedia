@@ -649,6 +649,156 @@ const METAL_EVENTS: MetalverseEvent[] = [
       shaman: '🌿 Les thèmes occultes résonnent avec tes pratiques. Tu reconnais les esprits anciens.',
       chain_breaker: '️⛓️ Ghost a brisé les conventions du metal en intégrant des éléments pop. Tu célèbres cette rébellion.'
     }
+  },
+  {
+      // ═══════════════════════════════════════════════════════════
+      // 🌑 DOOM METAL - Les Gardiens du Vide
+      // ═══════════════════════════════════════════════════════════
+    id: 36, content: 'Émergence du Doom Metal', start: '1968-01-01', end: '1980-12-31', type: 'range', pillar: 'Doom Metal', className: 'tp-doom',
+    act: 'Acte I : La Genèse des Ombres',
+    real_lore: 'Black Sabbath pose les bases avec des tempos lents et lourds. Des groupes comme Pentagram et Saint Vitus développent le genre dans l\'underground des années 70-80.',
+    metalverse_echo: 'Les premiers Gardiens du Vide ralentissent le flux du temps. Chaque note étirée est une incantation qui ouvre des portails vers les profondeurs de l\'âme.',
+    xp: 300,
+    class_lore: {
+      necromancer: '🌑 Cette lenteur est ton alliée. Tu reconnais dans ces riffs étirés les incantations des anciens mages du vide.',
+      executioner: '☠️ La lourdeur de Sabbath est ton manuel. Tu apprécies la brutalité d\'un marteau qui frappe lentement mais sûrement.',
+      paladin: '⚔️ Ces origines sont sacrées. Tu défends l\'honneur du Doom Metal avec chaque écoute de ces riffs ancestraux.',
+      berserker: '🤘 Cette lenteur est un défi pour ta vitesse. Tu apprends la patience et la densité du son.',
+      bard: '🎼 Ces mélodies lourdes sont les fondations de mille épopées. Tu collectionnes ces albums comme des chapitres de la Grande Saga.',
+      void_guardian: '🕳️ Cette période est ton sanctuaire. Tu médites sur chaque note étirée, chaque silence pesant.',
+      chaos_architect: '🧩 La structure de ces riffs est un puzzle de lourdeur. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Les thèmes occultes de cette époque résonnent avec tes pratiques. Tu reconnais les esprits du vide.',
+      chain_breaker: '⛓️ Cette période a brisé les conventions de la vitesse. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 37, content: 'Candlemass - "Epicus Doomicus Metallicus"', start: '1986-11-01', pillar: 'Doom Metal', className: 'tp-doom',
+    act: 'Acte I : La Genèse des Ombres',
+    real_lore: 'Le groupe suédois définit le doom metal épique avec des tempos ultra-lents, des voix opératiques et des riffs monumentaux.',
+    metalverse_echo: 'Les Gardiens du Nord forgent leur première arme véritablement lourde. Leurs chants funèbres résonnent dans les cathédrales du vide.',
+    xp: 350,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire. Tu reconnais les incantations des anciens dans chaque note étirée.',
+      executioner: '☠️ La lourdeur de "Solitude" est chirurgicale. Tu apprécies la brutalité élégante de ce doom épique.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du doom metal avec chaque écoute.',
+      berserker: '🤘 Cette lenteur est un test pour ta rage. Tu apprends que la densité peut être aussi puissante que la vitesse.',
+      bard: '🎼 Les voix opératiques de cet album sont des chants épiques. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ "Solitude" est ta méditation ultime. Tu erres dans le vide sonore pendant 8 minutes.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de lourdeur. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Les thèmes de solitude et de mort résonnent avec tes rituels. Tu reconnais les esprits du vide.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions de la vitesse. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 38, content: 'Electric Wizard - "Dopethrone"', start: '2000-10-17', pillar: 'Doom Metal', className: 'tp-doom',
+    act: 'Acte VII : La Renaissance',
+    real_lore: 'Le groupe britannique définit le stoner doom avec des riffs fuzz massifs, des thèmes occultes et une production lo-fi volontaire.',
+    metalverse_echo: 'Les Sorciers de l\'Électricité invoquent des entités de fuzz et de distorsion. Leurs riffs massifs écrasent la réalité.',
+    xp: 300,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire de fuzz. Tu reconnais les incantations des anciens dans chaque note distordue.',
+      executioner: '☠️ La lourdeur de "Weird Tales" est chirurgicale. Tu apprécies la brutalité élégante de ce stoner doom.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du stoner doom avec chaque écoute.',
+      berserker: '🤘 Cette lenteur est un test pour ta rage. Tu apprends que le fuzz peut être aussi puissant que la vitesse.',
+      bard: '🎼 Les riffs massifs de cet album sont des chants épiques. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ "Weird Tales" est ta méditation ultime. Tu erres dans le fuzz sonore pendant 10 minutes.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de fuzz. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Les thèmes occultes résonnent avec tes rituels. Tu reconnais les esprits du fuzz.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions de la production. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 39, content: 'Sleep - "Dopesmoker"', start: '2003-04-01', pillar: 'Doom Metal', className: 'tp-doom',
+    act: 'Acte VII : La Renaissance',
+    real_lore: 'Un album culte de 63 minutes composé d\'un seul morceau, définissant le stoner doom avec des riffs hypnotiques et répétitifs.',
+    metalverse_echo: 'Les Dormeurs du Désert chantent un hymne unique de 63 minutes. Leur riff hypnotique traverse les dimensions.',
+    xp: 400,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire ultime. Tu reconnais les incantations des anciens dans ce riff de 63 minutes.',
+      executioner: '☠️ La lourdeur de "Dopesmoker" est chirurgicale. Tu apprécies la brutalité élégante de ce stoner doom.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du stoner doom avec chaque écoute.',
+      berserker: '🤘 Cette lenteur est un test ultime pour ta rage. Tu apprends que la répétition peut être aussi puissante que la vitesse.',
+      bard: '🎼 Ce riff unique est un chant épique de 63 minutes. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ "Dopesmoker" est ta méditation ultime. Tu erres dans le riff sonore pendant une heure.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de répétition. Tu décortiques chaque variation subtile.',
+      shaman: '🌿 Les thèmes du désert et du voyage résonnent avec tes rituels. Tu reconnais les esprits du fuzz.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions de la structure. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  {
+  // ═══════════════════════════════════════════════════════════
+  // 🍀 FOLK METAL - Les Chaman des Racines
+  // ═══════════════════════════════════════════════════════════
+    id: 40, content: 'Émergence du Folk Metal', start: '1990-01-01', end: '2000-12-31', type: 'range', pillar: 'Folk Metal', className: 'tp-folk',
+    act: 'Acte IV : L\'Âge d\'Or des Mélodies',
+    real_lore: 'Des groupes comme Skyclad, Cruachan et Subway to Sally fusionnent metal et traditions folkloriques celtiques, nordiques et médiévales.',
+    metalverse_echo: 'Les Chaman des Racines unissent les anciennes mélodies à la fureur du métal. Leurs chants résonnent dans les forêts ancestrales.',
+    xp: 300,
+    class_lore: {
+      necromancer: '🌑 Ces mélodies anciennes résonnent avec ton âme. Tu reconnais les esprits des ancêtres dans cette musique.',
+      executioner: '☠️ La précision de cette fusion est chirurgicale. Tu apprécies la brutalité élégante du folk metal.',
+      paladin: '⚔️ Cette période est un pilier de ton ordre. Tu défends l\'honneur du folk metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cette époque est ton carburant. Tu fonces à travers ces années comme un guerrier ivre de vitesse.',
+      bard: '🎼 Cette période est une mine d\'or pour ta collection. Tu ajoutes chaque groupe folk à ton grimoire de légendes.',
+      void_guardian: '🕳️ La complexité de cette époque est ta méditation. Tu contemples la fusion des traditions avec détachement.',
+      chaos_architect: '🧩 La complexité de cette époque est un puzzle. Tu décortiques chaque groupe comme un architecte du chaos.',
+      shaman: '🌿 Cette période est ton âge d\'or. Tu reconnais les esprits de la nature dans chaque mélodie folk.',
+      chain_breaker: '⛓️ Cette période a brisé les conventions du metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 41, content: 'Skyclad - "The Wayward Sons of Holy Earth"', start: '1991-08-01', pillar: 'Folk Metal', className: 'tp-folk',
+    act: 'Acte IV : L\'Âge d\'Or des Mélodies',
+    real_lore: 'Souvent considéré comme le premier album de folk metal, il fusionne thrash metal et mélodies folkloriques britanniques.',
+    metalverse_echo: 'Les Fils Égarés de la Terre Sainte chantent les anciennes mélodies avec la fureur du thrash. Le cercle est bouclé.',
+    xp: 350,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire ancestral. Tu reconnais les esprits des ancêtres dans cette fusion unique.',
+      executioner: '☠️ La précision de cette fusion est chirurgicale. Tu apprécies la brutalité élégante du folk metal naissant.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du folk metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces à travers ces mélodies comme un guerrier ivre de vitesse.',
+      bard: '🎼 Cet album est le premier chapitre de la légende folk metal. Tu le collectionnes comme une relique sacrée.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la fusion des traditions avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de fusion. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Cet album est ton âge d\'or. Tu reconnais les esprits de la nature dans chaque mélodie folk.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 42, content: 'Ensiferum - "Ensiferum"', start: '2001-10-01', pillar: 'Folk Metal', className: 'tp-folk',
+    act: 'Acte IV : L\'Âge d\'Or des Mélodies',
+    real_lore: 'Le groupe finlandais définit le folk metal mélodique avec des riffs puissants, des mélodies folkloriques et des thèmes héroïques.',
+    metalverse_echo: 'Les Héros de la Forêt chantent les anciennes légendes avec la fureur du metal. Leurs mélodies résonnent dans les bois ancestraux.',
+    xp: 300,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire héroïque. Tu reconnais les esprits des anciens guerriers dans cette musique.',
+      executioner: '☠️ La précision de cet album est chirurgicale. Tu apprécies la brutalité élégante du folk metal mélodique.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du folk metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces à travers ces mélodies comme un guerrier ivre de vitesse.',
+      bard: '🎼 Cet album est un chapitre de la légende Ensiferum. Tu le collectionnes comme une relique sacrée.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la fusion des traditions avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de fusion. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Cet album est ton âge d\'or. Tu reconnais les esprits de la nature dans chaque mélodie folk.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 43, content: 'Korpiklaani - "Korpiklaani"', start: '2003-08-01', pillar: 'Folk Metal', className: 'tp-folk',
+    act: 'Acte IV : L\'Âge d\'Or des Mélodies',
+    real_lore: 'Le groupe finlandais définit le folk metal festif avec des mélodies entraînantes, des thèmes alcolisés et une énergie contagieuse.',
+    metalverse_echo: 'Les Danseurs de la Forêt célèbrent les anciennes traditions avec une joie contagieuse. Leurs mélodies résonnent dans les tavernes ancestrales.',
+    xp: 250,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire festif. Tu reconnais les esprits de la joie dans cette musique.',
+      executioner: '☠️ La précision de cet album est chirurgicale. Tu apprécies la brutalité élégante du folk metal festif.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du folk metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces à travers ces mélodies comme un guerrier ivre de joie.',
+      bard: '🎼 Cet album est un chapitre de la légende Korpiklaani. Tu le collectionnes comme une relique sacrée.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la fusion des traditions avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de fusion. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Cet album est ton âge d\'or. Tu reconnais les esprits de la nature dans chaque mélodie folk.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
   }
 ];
 
