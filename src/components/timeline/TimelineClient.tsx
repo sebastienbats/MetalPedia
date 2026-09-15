@@ -799,6 +799,472 @@ const METAL_EVENTS: MetalverseEvent[] = [
       shaman: '🌿 Cet album est ton âge d\'or. Tu reconnais les esprits de la nature dans chaque mélodie folk.',
       chain_breaker: '⛓️ Cet album a brisé les conventions du metal. Tu célèbres cette rébellion avec chaque écoute.'
     }
+
+    // ═══════════════════════════════════════════════════════════
+  // 🎸 HEAVY METAL - Albums cultes (1976-1983)
+  // ═══════════════════════════════════════════════════════════
+  { 
+    id: 44, content: 'Rainbow - "Rising"', start: '1976-05-17', pillar: 'Heavy Metal', className: 'tp-heavy',
+    act: 'Acte I : La Genèse des Ombres',
+    real_lore: 'Ritchie Blackmore et Ronnie James Dio créent un chef-d\'œuvre du hard rock avec "Stargazer", une épopée de 8 minutes devenue légendaire.',
+    metalverse_echo: 'L\'Arc-en-Ciel de Feu s\'élève vers les étoiles. Le Mage Noir et le Chanteur des Hauteurs invoquent un dragon cosmique.',
+    xp: 300,
+    class_lore: {
+      necromancer: '🌑 "Stargazer" est une incantation de 8 minutes. Tu reconnais les esprits astraux dans cette musique.',
+      executioner: '☠️ La précision de Blackmore est chirurgicale. Tu apprécies la brutalité élégante de chaque solo.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du hard rock avec chaque écoute.',
+      berserker: '🤘 L\'énergie de "Stargazer" est ton carburant. Tu fonces dans le mosh pit avec la rage de Dio.',
+      bard: '🎼 "Stargazer" est une épopée de 8 minutes. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples les étoiles avec détachement.',
+      chaos_architect: '🧩 La structure de "Stargazer" est un puzzle épique. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Les thèmes mystiques résonnent avec tes rituels. Tu reconnais les esprits du cosmos.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du rock. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 45, content: 'Dio - "Holy Diver"', start: '1983-05-25', pillar: 'Heavy Metal', className: 'tp-heavy',
+    act: 'Acte II : La Grande Croisade',
+    real_lore: 'Ronnie James Dio, après Black Sabbath et Rainbow, fonde son propre groupe et livre un album culte avec le titre éponyme.',
+    metalverse_echo: 'Le Plongeur Sacré émerge des abysses. Sa voix de velours et d\'acier devient l\'hymne de millions de métalleux.',
+    xp: 320,
+    class_lore: {
+      necromancer: '🌑 "Holy Diver" est une incantation puissante. Tu reconnais les esprits des profondeurs dans cette musique.',
+      executioner: '☠️ La voix de Dio est une lame de velours. Tu apprécies la brutalité élégante de chaque note.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du heavy metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de "Holy Diver" est ton carburant. Tu fonces dans le mosh pit avec la rage de Dio.',
+      bard: '🎼 Les mélodies de cet album sont des chants épiques. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu plonges dans les abysses sonores.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de riffs. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Les thèmes mystiques résonnent avec tes rituels. Tu reconnais les esprits des profondeurs.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 46, content: 'Accept - "Balls to the Wall"', start: '1983-12-05', pillar: 'Heavy Metal', className: 'tp-heavy',
+    act: 'Acte II : La Grande Croisade',
+    real_lore: 'Le groupe allemand livre un hymne du heavy metal avec le titre éponyme, devenant un classique absolu du genre.',
+    metalverse_echo: 'Les Murs de la Honte s\'effondrent. Les Guerriers d\'Acier allemands forgent un hymne de rébellion éternelle.',
+    xp: 280,
+    class_lore: {
+      necromancer: '🌑 Cet album résonne avec ton âme. Tu reconnais les esprits de la rébellion dans cette musique.',
+      executioner: '☠️ La précision d\'Accept est chirurgicale. Tu apprécies la brutalité élégante du heavy metal allemand.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du heavy metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage d\'Accept.',
+      bard: '🎼 Les hymnes de cet album sont des chants de rébellion. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la puissance avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de riffs. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Les thèmes de rébellion résonnent avec tes rituels. Tu reconnais les esprits de la liberté.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  // ═══════════════════════════════════════════════════════════
+  // ⚡ THRASH METAL - Range manquant + Albums cultes (1983-1995)
+  // ═══════════════════════════════════════════════════════════
+  { 
+    id: 47, content: 'Âge d\'Or du Thrash Metal', start: '1983-01-01', end: '1995-12-31', type: 'range', pillar: 'Thrash Metal', className: 'tp-thrash',
+    act: 'Acte II : La Tempête de l\'Acier',
+    real_lore: 'La période classique du thrash metal voit l\'émergence du Big Four et de groupes comme Testament, Exodus et Kreator.',
+    metalverse_echo: 'La Tempête de l\'Acier atteint son apogée. Les Quatre Cavaliers et leurs alliés déchaînent une vitesse jamais vue.',
+    xp: 400,
+    class_lore: {
+      necromancer: '🌑 Cette période résonne avec ton âme. Tu reconnais les esprits de la rébellion dans cette musique.',
+      executioner: '☠️ La précision de cette époque est chirurgicale. Tu apprécies la brutalité élégante du thrash classique.',
+      paladin: '⚔️ Cette période est un pilier de ton ordre. Tu défends l\'honneur du thrash metal avec chaque écoute.',
+      berserker: '🤘 Cette période est ton âge d\'or. Tu fonces à travers ces années comme un guerrier ivre de vitesse. +40% d\'XP vintage !',
+      bard: '🎼 Cette période est une mine d\'or pour ta collection. Tu ajoutes chaque groupe thrash à ton grimoire de légendes.',
+      void_guardian: '🕳️ La complexité de cette époque est ta méditation. Tu contemples la vitesse avec détachement.',
+      chaos_architect: '🧩 La complexité de cette époque est un puzzle. Tu décortiques chaque groupe comme un architecte du chaos.',
+      shaman: '🌿 Les thèmes de rébellion résonnent avec tes pratiques. Tu reconnais les esprits de la vitesse.',
+      chain_breaker: '⛓️ Cette période a brisé toutes les conventions. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 48, content: 'Exodus - "Bonded by Blood"', start: '1985-04-01', pillar: 'Thrash Metal', className: 'tp-thrash',
+    act: 'Acte II : La Tempête de l\'Acier',
+    real_lore: 'Le groupe de la Baie de San Francisco livre l\'un des albums fondateurs du thrash metal, avec une agressivité brute et des riffs tranchants.',
+    metalverse_echo: 'Les Liés par le Sang forgent leur premier pacte de vitesse. Leur thrash est d\'une pureté absolue.',
+    xp: 300,
+    class_lore: {
+      necromancer: '🌑 Cet album résonne avec ton âme. Tu reconnais les esprits de la rébellion dans cette musique.',
+      executioner: '☠️ La précision d\'Exodus est chirurgicale. Tu apprécies la brutalité élégante du thrash pur.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du thrash metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage d\'Exodus.',
+      bard: '🎼 Cet album est un chapitre de la légende Exodus. Tu le collectionnes comme une relique sacrée.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la vitesse avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de riffs. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Les thèmes de rébellion résonnent avec tes pratiques. Tu reconnais les esprits de la vitesse.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du thrash. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 49, content: 'Kreator - "Pleasure to Kill"', start: '1986-11-01', pillar: 'Thrash Metal', className: 'tp-thrash',
+    act: 'Acte II : La Tempête de l\'Acier',
+    real_lore: 'Le groupe allemand définit le thrash metal européen avec une agressivité brute, des tempos ultra-rapides et une production raw.',
+    metalverse_echo: 'Les Créateurs de la Destruction forgent des armes thrash d\'une agressivité pure. Leur vitesse est impitoyable.',
+    xp: 310,
+    class_lore: {
+      necromancer: '🌑 Cet album résonne avec ton âme. Tu reconnais les esprits de la rébellion dans cette musique.',
+      executioner: '☠️ La précision de Kreator est chirurgicale. Tu apprécies la brutalité élégante du thrash européen.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du thrash metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage de Kreator.',
+      bard: '🎼 Cet album est un chapitre de la légende Kreator. Tu le collectionnes comme une relique sacrée.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la vitesse avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de vitesse. Tu décortiques chaque riff rapide.',
+      shaman: '🌿 Les thèmes de rébellion résonnent avec tes pratiques. Tu reconnais les esprits de la vitesse.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du thrash. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 50, content: 'Testament - "The New Order"', start: '1988-05-03', pillar: 'Thrash Metal', className: 'tp-thrash',
+    act: 'Acte II : La Tempête de l\'Acier',
+    real_lore: 'Le groupe de la Baie de San Francisco livre un chef-d\'œuvre du thrash technique avec des riffs complexes et une énergie brute.',
+    metalverse_echo: 'Les Nouveaux Guerriers de l\'Ordre forgent des armes thrash d\'une précision technique inégalée.',
+    xp: 290,
+    class_lore: {
+      necromancer: '🌑 Cet album résonne avec ton âme. Tu reconnais les esprits de la rébellion dans cette musique.',
+      executioner: '☠️ La précision de Testament est chirurgicale. Tu apprécies la brutalité élégante du thrash technique.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du thrash metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage de Testament.',
+      bard: '🎼 Cet album est un chapitre de la légende Testament. Tu le collectionnes comme une relique sacrée.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la technique avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle technique. Tu décortiques chaque riff complexe.',
+      shaman: '🌿 Les thèmes de rébellion résonnent avec tes pratiques. Tu reconnais les esprits de la vitesse.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du thrash. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 🩸 DEATH METAL - Albums cultes (1989-1990)
+  // ═══════════════════════════════════════════════════════════
+  { 
+    id: 51, content: 'Obituary - "Slowly We Rot"', start: '1989-06-12', pillar: 'Death Metal', className: 'tp-death',
+    act: 'Acte III : Le Voile Déchiré',
+    real_lore: 'Le groupe de Tampa livre l\'un des albums fondateurs du death metal floridien, avec une lourdeur unique et des growls gutturaux.',
+    metalverse_echo: 'Les Nécrophages de Tampa ralentissent la putréfaction. Leur death metal est d\'une lourdeur viscérale.',
+    xp: 310,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire de putréfaction. Tu reconnais les esprits de la décomposition dans cette musique.',
+      executioner: '☠️ La lourdeur d\'Obituary est chirurgicale. Tu apprécies la brutalité élégante du death floridien.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du death metal avec chaque écoute.',
+      berserker: '🤘 La brutalité de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage d\'Obituary.',
+      bard: '🎼 Les growls de cet album sont des incantations de putréfaction. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La lourdeur de cet album est ta méditation. Tu contemples la décomposition avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de lourdeur. Tu décortiques chaque riff.',
+      shaman: '🌿 Les thèmes de mort résonnent avec tes rituels. Tu reconnais les esprits de la décomposition.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du death metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 52, content: 'Entombed - "Left Hand Path"', start: '1990-06-01', pillar: 'Death Metal', className: 'tp-death',
+    act: 'Acte III : Le Voile Déchiré',
+    real_lore: 'Le groupe suédois définit le death metal scandinave avec un son buzzsaw unique et une atmosphère glaciale.',
+    metalverse_echo: 'Les Enterrés du Chemin de la Main Gauche ouvrent les portails du Nord. Leur death metal est d\'une froideur absolue.',
+    xp: 320,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire nordique. Tu reconnais les esprits du froid dans cette musique.',
+      executioner: '☠️ Le son buzzsaw d\'Entombed est chirurgical. Tu apprécies la brutalité élégante du death suédois.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du death metal avec chaque écoute.',
+      berserker: '🤘 La brutalité de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage d\'Entombed.',
+      bard: '🎼 Les atmosphères de cet album sont des chants nordiques. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La froideur de cet album est ta méditation. Tu erres dans les glaces sonores.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de buzzsaw. Tu décortiques chaque riff.',
+      shaman: '🌿 Les thèmes nordiques résonnent avec tes rituels. Tu reconnais les esprits du froid.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du death metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 53, content: 'Deicide - "Deicide"', start: '1990-06-25', pillar: 'Death Metal', className: 'tp-death',
+    act: 'Acte III : Le Voile Déchiré',
+    real_lore: 'Le groupe de Tampa livre un album blasphématoire culte, avec des growls aigus et une agressivité anti-chrétienne.',
+    metalverse_echo: 'Les Tueurs de Dieux prononcent le Nom Interdit. Leur blasphème sonore résonne dans les cathédrales du vide.',
+    xp: 330,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire blasphématoire. Tu reconnais les esprits de la rébellion dans cette musique.',
+      executioner: '☠️ La précision de Deicide est chirurgicale. Tu apprécies la brutalité élégante du death blasphématoire.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du death metal avec chaque écoute.',
+      berserker: '🤘 La brutalité de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage de Deicide.',
+      bard: '🎼 Les thèmes blasphématoires de cet album sont des incantations interdites. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples le blasphème avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de blasphème. Tu décortiques chaque riff.',
+      shaman: '🌿 Les thèmes anti-chrétiens résonnent avec tes rituels. Tu reconnais les esprits de la rébellion.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du death metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 💀 BLACK METAL - Albums cultes (1993-1995)
+  // ══════════════════════════════════════════════════════════
+  { 
+    id: 54, content: 'Emperor - "In the Nightside Eclipse"', start: '1994-03-21', pillar: 'Black Metal', className: 'tp-black',
+    act: 'Acte III : L\'Hiver Éternel',
+    real_lore: 'Le groupe norvégien définit le black metal symphonique avec des claviers atmosphériques et une complexité musicale unique.',
+    metalverse_echo: 'Les Empereurs de l\'Éclipse Nocturne invoquent des symphonies de ténèbres. Leur black metal est d\'une majesté glaciale.',
+    xp: 350,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire symphonique. Tu reconnais les esprits de la majesté dans cette musique.',
+      executioner: '☠️ La précision d\'Emperor est chirurgicale. Tu apprécies la brutalité élégante du black symphonique.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du black metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage d\'Emperor.',
+      bard: '🎼 Les claviers de cet album sont des symphonies nocturnes. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la majesté avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle symphonique. Tu décortiques chaque couche sonore.',
+      shaman: '🌿 Les thèmes nocturnes résonnent avec tes rituels. Tu reconnais les esprits de la majesté.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du black metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 55, content: 'Immortal - "Pure Holocaust"', start: '1993-11-01', pillar: 'Black Metal', className: 'tp-black',
+    act: 'Acte III : L\'Hiver Éternel',
+    real_lore: 'Le duo norvégien livre un album de black metal pur, avec des riffs gelés et une atmosphère hivernale absolue.',
+    metalverse_echo: 'Les Immortels du Holocauste Pur errent dans les blizzards éternels. Leur black metal est d\'une froideur absolue.',
+    xp: 330,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire hivernal. Tu reconnais les esprits du gel dans cette musique.',
+      executioner: '☠️ La précision d\'Immortal est chirurgicale. Tu apprécies la brutalité élégante du black pur.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du black metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage d\'Immortal.',
+      bard: '🎼 Les riffs gelés de cet album sont des chants hivernaux. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La froideur de cet album est ta méditation. Tu erres dans les blizzards sonores.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de gel. Tu décortiques chaque riff.',
+      shaman: '🌿 Les thèmes hivernaux résonnent avec tes rituels. Tu reconnais les esprits du gel.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du black metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 56, content: 'Dissection - "Storm of the Light\'s Bane"', start: '1995-11-17', pillar: 'Black Metal', className: 'tp-black',
+    act: 'Acte III : L\'Hiver Éternel',
+    real_lore: 'Le groupe suédois fusionne black metal et death metal mélodique, créant un chef-d\'œuvre de beauté sombre.',
+    metalverse_echo: 'La Dissection de la Tempête de la Lumière Maudite crée une beauté sombre unique. Leur black metal est d\'une élégance mortelle.',
+    xp: 340,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire de beauté sombre. Tu reconnais les esprits de l\'élégance dans cette musique.',
+      executioner: '☠️ La précision de Dissection est chirurgicale. Tu apprécies la brutalité élégante du black mélodique.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du black metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage de Dissection.',
+      bard: '🎼 Les mélodies de cet album sont des chants de beauté sombre. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la beauté avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle mélodique. Tu décortiques chaque riff.',
+      shaman: '🌿 Les thèmes de beauté sombre résonnent avec tes rituels. Tu reconnais les esprits de l\'élégance.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du black metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 🔥 POWER METAL - Albums cultes (1988-1998)
+  // ═══════════════════════════════════════════════════════════
+  { 
+    id: 57, content: 'Manowar - "Kings of Metal"', start: '1988-12-01', pillar: 'Power Metal', className: 'tp-power',
+    act: 'Acte IV : L\'Âge d\'Or des Mélodies',
+    real_lore: 'Le groupe américain définit le power metal épique avec des thèmes de guerriers, des voix puissantes et une esthétique over-the-top.',
+    metalverse_echo: 'Les Rois du Metal règnent sur les champs de bataille sonores. Leur power metal est d\'une puissance absolue.',
+    xp: 310,
+    class_lore: {
+      necromancer: '🌑 Cet album résonne avec ton âme. Tu reconnais les esprits de la puissance dans cette musique.',
+      executioner: '☠️ La précision de Manowar est chirurgicale. Tu apprécies la brutalité élégante du power épique.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du power metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage de Manowar.',
+      bard: '🎼 Les thèmes épiques de cet album sont des chants de guerre. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la puissance avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle épique. Tu décortiques chaque riff.',
+      shaman: '🌿 Les thèmes de guerriers résonnent avec tes rituels. Tu reconnais les esprits de la puissance.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du power metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 58, content: 'Rhapsody - "Symphony of Enchanted Lands"', start: '1998-10-12', pillar: 'Power Metal', className: 'tp-power',
+    act: 'Acte IV : L\'Âge d\'Or des Mélodies',
+    real_lore: 'Le groupe italien définit le power metal symphonique avec des orchestrations grandioses et des thèmes fantasy.',
+    metalverse_echo: 'Les Rhapsodies des Terres Enchantées créent des symphonies de dragons et de magie. Leur power metal est d\'une grandeur unique.',
+    xp: 330,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire fantasy. Tu reconnais les esprits de la magie dans cette musique.',
+      executioner: '☠️ La précision de Rhapsody est chirurgicale. Tu apprécies la brutalité élégante du power symphonique.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du power metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage de Rhapsody.',
+      bard: '🎼 Les orchestrations de cet album sont des symphonies fantasy. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la grandeur avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle symphonique. Tu décortiques chaque orchestration.',
+      shaman: '🌿 Les thèmes fantasy résonnent avec tes rituels. Tu reconnais les esprits de la magie.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du power metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 59, content: 'Stratovarius - "Visions"', start: '1997-05-12', pillar: 'Power Metal', className: 'tp-power',
+    act: 'Acte IV : L\'Âge d\'Or des Mélodies',
+    real_lore: 'Le groupe finlandais définit le power metal néo-classique avec des solos de guitare virtuoses et des mélodies accrocheuses.',
+    metalverse_echo: 'Les Stratovarius des Visions forgent des mélodies néo-classiques. Leur power metal est d\'une virtuosité unique.',
+    xp: 300,
+    class_lore: {
+      necromancer: '🌑 Cet album résonne avec ton âme. Tu reconnais les esprits de la virtuosité dans cette musique.',
+      executioner: '☠️ La précision de Stratovarius est chirurgicale. Tu apprécies la brutalité élégante du power néo-classique.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du power metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage de Stratovarius.',
+      bard: '🎼 Les solos de cet album sont des chants néo-classiques. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la virtuosité avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle néo-classique. Tu décortiques chaque solo.',
+      shaman: '🌿 Les thèmes de virtuosité résonnent avec tes rituels. Tu reconnais les esprits de la technique.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du power metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 🌑 DOOM METAL - Album culte manquant (1973)
+  // ═══════════════════════════════════════════════════════════
+  { 
+    id: 60, content: 'Black Sabbath - "Sabbath Bloody Sabbath"', start: '1973-12-01', pillar: 'Doom Metal', className: 'tp-doom',
+    act: 'Acte I : La Genèse des Ombres',
+    real_lore: 'Un album plus complexe et atmosphérique que ses prédécesseurs, explorant des thèmes psychédéliques et des structures plus longues.',
+    metalverse_echo: 'Les Mages de l\'Abîme ralentissent le flux du temps. Ils tissent des toiles d\'araignée sonores où chaque note résonne pendant une éternité.',
+    xp: 320,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire psychédélique. Tu reconnais les esprits de l\'abîme dans cette musique.',
+      executioner: '☠️ La lourdeur de cet album est chirurgicale. Tu apprécies la brutalité élégante du doom psychédélique.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du doom metal avec chaque écoute.',
+      berserker: '🤘 La lenteur de cet album est un défi pour ta rage. Tu apprends que la densité peut être aussi puissante que la vitesse.',
+      bard: '🎼 Les structures longues de cet album sont des épopées psychédéliques. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ "Sabbath Bloody Sabbath" est ta méditation psychédélique. Tu erres dans les brumes sonores.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle psychédélique. Tu décortiques chaque changement d\'humeur.',
+      shaman: '🌿 Les thèmes psychédéliques résonnent avec tes rituels. Tu reconnais les esprits de l\'abîme.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du hard rock. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 🍀 FOLK METAL - Album culte manquant (1995)
+  // ═══════════════════════════════════════════════════════════
+  { 
+    id: 61, content: 'Cruachan - "Tuatha Na Gael"', start: '1995-04-01', pillar: 'Folk Metal', className: 'tp-folk',
+    act: 'Acte IV : L\'Âge d\'Or des Mélodies',
+    real_lore: 'Le groupe irlandais définit le celtic metal avec des instruments traditionnels et des thèmes de la mythologie celtique.',
+    metalverse_echo: 'Les Enfants de Gael invoquent les anciens dieux celtiques. Leur folk metal est d\'une authenticité unique.',
+    xp: 310,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire celtique. Tu reconnais les esprits des druides dans cette musique.',
+      executioner: '☠️ La précision de Cruachan est chirurgicale. Tu apprécies la brutalité élégante du celtic metal.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du folk metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces à travers ces mélodies celtiques comme un guerrier ivre de vitesse.',
+      bard: '🎼 Les instruments traditionnels de cet album sont des chants celtiques. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la fusion celtique avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle celtique. Tu décortiques chaque instrument traditionnel.',
+      shaman: '🌿 Cet album est ton âge d\'or celtique. Tu reconnais les esprits de la nature dans chaque mélodie folk.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 🌀 PROGRESSIVE METAL - Albums cultes (1992-2001)
+  // ═══════════════════════════════════════════════════════════
+  { 
+    id: 62, content: 'Dream Theater - "Images and Words"', start: '1992-07-07', pillar: 'Progressive Metal', className: 'tp-progressive',
+    act: 'Acte V : Les Rouages du Vide',
+    real_lore: 'Le groupe américain définit le progressive metal moderne avec une technique impressionnante et des compositions complexes.',
+    metalverse_echo: 'Le Théâtre des Rêves forge des images et des mots sonores. Leur progressive metal est d\'une complexité unique.',
+    xp: 340,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire technique. Tu reconnais les esprits complexes dans cette musique.',
+      executioner: '☠️ La précision de Dream Theater est chirurgicale. Tu apprécies la brutalité élégante du prog moderne.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du progressive metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage de Dream Theater.',
+      bard: '🎼 Les compositions de cet album sont des épopées techniques. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la technique avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle technique. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Les thèmes modernes résonnent avec tes pratiques. Tu reconnais les esprits complexes.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du progressive metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 63, content: 'Tool - "Lateralus"', start: '2001-05-15', pillar: 'Progressive Metal', className: 'tp-progressive',
+    act: 'Acte V : Les Rouages du Vide',
+    real_lore: 'Le groupe américain définit le progressive metal moderne avec des structures mathématiques et des thèmes philosophiques.',
+    metalverse_echo: 'Les Outils de la Spirale d\'Or créent des structures mathématiques sonores. Leur progressive metal est d\'une complexité cosmique.',
+    xp: 360,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire mathématique. Tu reconnais les esprits de la spirale dans cette musique.',
+      executioner: '☠️ La précision de Tool est chirurgicale. Tu apprécies la brutalité élégante du prog mathématique.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du progressive metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage de Tool.',
+      bard: '🎼 Les structures mathématiques de cet album sont des chants cosmiques. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu erres dans la spirale sonore.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle mathématique. Tu décortiques chaque changement de signature.',
+      shaman: '🌿 Les thèmes philosophiques résonnent avec tes rituels. Tu reconnais les esprits de la spirale.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du progressive metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 64, content: 'Opeth - "Blackwater Park"', start: '2001-02-27', pillar: 'Progressive Metal', className: 'tp-progressive',
+    act: 'Acte V : Les Rouages du Vide',
+    real_lore: 'Le groupe suédois fusionne death metal et progressive rock, créant un chef-d\'œuvre de beauté sombre et de complexité.',
+    metalverse_echo: 'Le Parc des Eaux Noires crée une beauté sombre unique. Leur death-prog est d\'une élégance mortelle.',
+    xp: 350,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire de beauté sombre. Tu reconnais les esprits de l\'élégance dans cette musique.',
+      executioner: '☠️ La précision d\'Opeth est chirurgicale. Tu apprécies la brutalité élégante du death-prog.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du progressive metal avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage d\'Opeth.',
+      bard: '🎼 Les compositions de cet album sont des épopées de beauté sombre. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu erres dans les eaux noires sonores.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de beauté sombre. Tu décortiques chaque changement d\'humeur.',
+      shaman: '🌿 Les thèmes de beauté sombre résonnent avec tes rituels. Tu reconnais les esprits de l\'élégance.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du progressive metal. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 💥 METALCORE - Albums cultes (2001-2014)
+  // ═══════════════════════════════════════════════════════════
+  { 
+    id: 65, content: 'Converge - "Jane Doe"', start: '2001-09-25', pillar: 'Metalcore', className: 'tp-metalcore',
+    act: 'Acte VI : La Rébellion Moderne',
+    real_lore: 'Le groupe américain définit le mathcore avec une agressivité brute, des structures chaotiques et une intensité émotionnelle.',
+    metalverse_echo: 'La Convergence de Jane Doe crée un chaos sonore unique. Leur mathcore est d\'une intensité absolue.',
+    xp: 330,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire de chaos. Tu reconnais les esprits de l\'intensité dans cette musique.',
+      executioner: '☠️ La précision de Converge est chirurgicale. Tu apprécies la brutalité élégante du mathcore.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du metalcore avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage de Converge.',
+      bard: '🎼 Les structures chaotiques de cet album sont des chants d\'intensité. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples le chaos avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle de chaos. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Les thèmes d\'intensité résonnent avec tes rituels. Tu reconnais les esprits du chaos.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du metalcore. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 66, content: 'Mastodon - "Crack the Skye"', start: '2009-03-24', pillar: 'Metalcore', className: 'tp-metalcore',
+    act: 'Acte VII : La Renaissance',
+    real_lore: 'Le groupe d\'Atlanta fusionne sludge metal et progressive rock, créant un album conceptuel sur les voyages astraux.',
+    metalverse_echo: 'Les Mastodontes de la Fente du Ciel voyagent entre les dimensions. Leur sludge-prog est d\'une complexité cosmique.',
+    xp: 340,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire cosmique. Tu reconnais les esprits des voyages astraux dans cette musique.',
+      executioner: '☠️ La précision de Mastodon est chirurgicale. Tu apprécies la brutalité élégante du sludge-prog.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du metalcore avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage de Mastodon.',
+      bard: '🎼 Les thèmes cosmiques de cet album sont des chants astraux. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu erres dans les dimensions sonores.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle cosmique. Tu décortiques chaque changement de tempo.',
+      shaman: '🌿 Les thèmes de voyages astraux résonnent avec tes rituels. Tu reconnais les esprits du cosmos.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du metalcore. Tu célèbres cette rébellion avec chaque écoute.'
+    }
+  },
+  { 
+    id: 67, content: 'Code Orange - "Forever"', start: '2014-09-16', pillar: 'Metalcore', className: 'tp-metalcore',
+    act: 'Acte VII : La Renaissance',
+    real_lore: 'Le groupe de Pittsburgh définit le hardcore moderne avec une agressivité industrielle et des éléments électroniques.',
+    metalverse_echo: 'Le Code Orange de l\'Éternité crée un hardcore industriel unique. Leur fusion électronique est d\'une modernité absolue.',
+    xp: 320,
+    class_lore: {
+      necromancer: '🌑 Cet album est ton grimoire industriel. Tu reconnais les esprits de la modernité dans cette musique.',
+      executioner: '☠️ La précision de Code Orange est chirurgicale. Tu apprécies la brutalité élégante du hardcore moderne.',
+      paladin: '⚔️ Cet album est un pilier de ton ordre. Tu défends l\'honneur du metalcore avec chaque écoute.',
+      berserker: '🤘 L\'énergie de cet album est ton carburant. Tu fonces dans le mosh pit avec la rage de Code Orange.',
+      bard: '🎼 Les éléments électroniques de cet album sont des chants industriels. Tu collectionnes cet album comme un chapitre de la Grande Saga.',
+      void_guardian: '🕳️ La complexité de cet album est ta méditation. Tu contemples la modernité avec détachement.',
+      chaos_architect: '🧩 La structure de cet album est un puzzle industriel. Tu décortiques chaque synthé.',
+      shaman: '🌿 Les thèmes modernes résonnent avec tes rituels. Tu reconnais les esprits de l\'industrie.',
+      chain_breaker: '⛓️ Cet album a brisé les conventions du metalcore. Tu célèbres cette rébellion avec chaque écoute.'
+    }
   }
 ];
 
