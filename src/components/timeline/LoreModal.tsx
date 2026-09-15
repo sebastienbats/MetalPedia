@@ -66,14 +66,17 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
       <div className="lore-modal" onClick={(e) => e.stopPropagation()}>
         
         {/* HEADER */}
-        <div className="lore-header" style={{ background: `linear-gradient(135deg, ${event.color || '#8b0000'} 0%, #0a0a0a 100%)` }}>
-          <div className="lore-act-badge">🎭 {event.act}</div>
-          <div className="lore-header-content">
-            <h2 className="lore-title">{event.content}</h2>
-            <p className="lore-date">{dateLabel} • {event.pillar}</p>
-          </div>
-          <button className="lore-close" onClick={onClose}>✕</button>
-        </div>
+<div className="lore-header" style={{ background: `linear-gradient(135deg, ${event.color || '#8b0000'} 0%, #0a0a0a 100%)` }}>
+  <div className="lore-header-top">
+    <div className="lore-icon-pillar">{event.icon || '🎸'}</div>
+    <div className="lore-act-badge">🎭 {event.act}</div>
+  </div>
+  <div className="lore-header-content">
+    <h2 className="lore-title">{event.content}</h2>
+    <p className="lore-date">{dateLabel} • {event.pillar}</p>
+  </div>
+  <button className="lore-close" onClick={onClose}>✕</button>
+</div>
 
         {/* ONGLETS */}
         <div className="lore-tabs">
