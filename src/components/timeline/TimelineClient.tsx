@@ -799,8 +799,8 @@ const METAL_EVENTS: MetalverseEvent[] = [
       shaman: '🌿 Cet album est ton âge d\'or. Tu reconnais les esprits de la nature dans chaque mélodie folk.',
       chain_breaker: '⛓️ Cet album a brisé les conventions du metal. Tu célèbres cette rébellion avec chaque écoute.'
     }
-
-    // ═══════════════════════════════════════════════════════════
+  },
+   // ═══════════════════════════════════════════════════════════
   // 🎸 HEAVY METAL - Albums cultes (1976-1983)
   // ═══════════════════════════════════════════════════════════
   { 
