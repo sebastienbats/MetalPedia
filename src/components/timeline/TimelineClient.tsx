@@ -6,6 +6,19 @@ import LoreModal, { type MetalverseEvent } from './LoreModal';
 import { CHARACTER_CLASSES } from '@/lib/gamification/classes';
 import type { CharacterClass } from '@/types/api';
 
+// ✅ MÉTADONNÉES DES PILIERS (Icônes et Couleurs pour la timeline)
+const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
+  'Heavy Metal': { icon: '🎸', color: '#8b0000' },
+  'Thrash Metal': { icon: '⚡', color: '#d63031' },
+  'Death Metal': { icon: '🩸', color: '#2d3436' },
+  'Black Metal': { icon: '💀', color: '#000000' },
+  'Power Metal': { icon: '🔥', color: '#e17055' },
+  'Doom Metal': { icon: '🌑', color: '#636e72' },
+  'Progressive Metal': { icon: '🌀', color: '#00b894' },
+  'Folk Metal': { icon: '🍀', color: '#00b894' },
+  'Metalcore': { icon: '💥', color: '#6c5ce7' },
+};
+
 const METAL_EVENTS: MetalverseEvent[] = [
   { 
     id: 1, content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy',
@@ -692,10 +705,11 @@ export default function TimelineClient() {
           zoomable: true,
           showCurrentTime: false,
           
+          // ✅ CORRECTION : Utilise PILLAR_METADATA pour l'icône, pas CHARACTER_CLASSES
           template: function(item: any) {
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
-            const classForPillar = Object.values(CHARACTER_CLASSES).find(c => c.pillar === pillarName);
-            return classForPillar ? classForPillar.icon : '';
+            const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸' };
+            return pillarData.icon;
           }
         };
 
