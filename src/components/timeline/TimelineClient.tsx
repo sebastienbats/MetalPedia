@@ -1742,8 +1742,8 @@ export default function TimelineClient() {
           template: function(item: any) {
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
             const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸' };
-            // ✅ Retourne du HTML avec icône + texte
-            return `<span style="font-size:16px;margin-right:4px;">${pillarData.icon}</span><span>${item.content}</span>`;
+            // ✅ Retourne du HTML avec icône
+            return `<span style="font-size:16px;margin-right:4px;">${pillarData.icon}</span>`;
           }
         };
 
