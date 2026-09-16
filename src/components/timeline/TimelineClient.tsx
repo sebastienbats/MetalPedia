@@ -1213,7 +1213,7 @@ const METAL_EVENTS: MetalverseEvent[] = [
     }
   },
   { 
-    id: 43, content: 'Korpiklaani - "Korpiklaani"', start: '2003-08-01', pillar: 'Folk Metal', className: 'tp-folk',
+    id: 86, content: 'Korpiklaani - "Korpiklaani"', start: '2003-08-01', pillar: 'Folk Metal', className: 'tp-folk',
     rune: 'ᛞ',
     fragment_title: 'La Fête de la Forêt',
     act: 'Acte IV : L\'Âge d\'Or des Mélodies',
