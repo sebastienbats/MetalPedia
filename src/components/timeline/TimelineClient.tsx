@@ -1829,9 +1829,11 @@ export default function TimelineClient() {
 
   return (
     <div className="w-full px-4 md:px-8">
-      <h2 className="text-white text-xl mb-4 text-center font-serif">
-        Timeline MetalPedia — Clique sur un événement pour découvrir son histoire
-      </h2>
+      <h3 className="text-white text-xl mb-4 text-center font-serif">
+        Grimoire des Anciens
+        Clique sur un événement pour découvrir son histoire et son écho dans le Metalverse
+        Réunis les runes pour reconstruire les Tables du Savoir
+      </h3>
       
       {/* ✅ Conteneur avec styles explicites */}
       <div 
