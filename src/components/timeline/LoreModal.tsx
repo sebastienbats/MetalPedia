@@ -10,12 +10,14 @@ export interface MetalverseEvent {
   content: string;
   start: string;
   end?: string;
-  type?: 'point' | 'range'; // ✅ Rendu optionnel
+  type?: 'point' | 'range';
   pillar: string;
   className: string;
-  icon?: string; // ✅ Rendu optionnel
-  color?: string; // ✅ Rendu optionnel
+  icon?: string;           // Icône du pilier (injectée dynamiquement)
+  color?: string;          // Couleur du pilier (injectée dynamiquement)
   act: string;
+  rune?: string;           // 🆕 Rune gravée sur ce fragment de Table
+  fragment_title?: string; // 🆕 Nom poétique du fragment
   real_lore: string;
   metalverse_echo: string;
   xp: number;
@@ -65,20 +67,25 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
     <div className="lore-overlay" onClick={onClose}>
       <div className="lore-modal" onClick={(e) => e.stopPropagation()}>
         
-        {/* HEADER */}
-<div className="lore-header" style={{ background: `linear-gradient(135deg, ${event.color || '#8b0000'} 0%, #0a0a0a 100%)` }}>
-  <div className="lore-header-top">
-    <div className="lore-icon-pillar">{event.icon || '🎸'}</div>
-    <div className="lore-act-badge">🎭 {event.act}</div>
-  </div>
-  <div className="lore-header-content">
-    <h2 className="lore-title">{event.content}</h2>
-    <p className="lore-date">{dateLabel} • {event.pillar}</p>
-  </div>
-  <button className="lore-close" onClick={onClose}>✕</button>
-</div>
+        {/* ═══════════════════════════════════════════════════════════
+            EN-TÊTE : Icône du PILIER en gros + titre + date
+            ═══════════════════════════════════════════════════════════ */}
+        <div className="lore-header" style={{ background: `linear-gradient(135deg, ${event.color || '#8b0000'} 0%, #0a0a0a 100%)` }}>
+          <div className="lore-header-top">
+            {/* Icône du PILIER en gros */}
+            <div className="lore-icon-pillar">{event.icon || '🎸'}</div>
+            <div className="lore-act-badge">🎭 {event.act}</div>
+          </div>
+          <div className="lore-header-content">
+            <h2 className="lore-title">{event.content}</h2>
+            <p className="lore-date">{dateLabel} • {event.pillar}</p>
+          </div>
+          <button className="lore-close" onClick={onClose}>✕</button>
+        </div>
 
-        {/* ONGLETS */}
+        {/* ═══════════════════════════════════════════════════════════
+            ONGLETS : Chronique Réelle / Écho Metalverse / Révélation
+            ═══════════════════════════════════════════════════════════ */}
         <div className="lore-tabs">
           <button 
             className={`lore-tab ${activeTab === 'real' ? 'active' : ''}`} 
@@ -103,12 +110,17 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           )}
         </div>
 
-        {/* CONTENU */}
+        {/* ═══════════════════════════════════════════════════════════
+            CONTENU DES ONGLETS
+            ═══════════════════════════════════════════════════════════ */}
         <div className="lore-body">
+          
+          {/* ONGLET CHRONIQUE RÉELLE */}
           {activeTab === 'real' && (
             <p className="lore-text">{event.real_lore}</p>
           )}
 
+          {/* ONGLET ÉCHO METALVERSE */}
           {activeTab === 'echo' && (
             <div className="echo-container">
               <div className="echo-glow"></div>
@@ -116,12 +128,29 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
             </div>
           )}
 
+          {/* ONGLET RÉVÉLATION : Fragment + Icône de CLASSE + Lore exclusif */}
           {activeTab === 'class' && hasExclusiveLore && selectedClass && (
             <div className="class-lore-container">
+              
+              {/* 🆕 BLOC FRAGMENT DE TABLE (exclusif à cet onglet) */}
+              {event.rune && event.fragment_title && (
+                <div className="fragment-block">
+                  <div className="fragment-rune">{event.rune}</div>
+                  <div className="fragment-info">
+                    <span className="fragment-label">Fragment de la Table {event.pillar}</span>
+                    <span className="fragment-title">{event.fragment_title}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* ✅ Icône de la CLASSE + nom de la classe */}
               <div className="class-lore-badge">
-                🗝️ Révélation exclusive : {CHARACTER_CLASSES[selectedClass].name}
+                <span className="class-icon">{CHARACTER_CLASSES[selectedClass].icon}</span>
+                <span>Révélation exclusive : {CHARACTER_CLASSES[selectedClass].name}</span>
               </div>
+              
               <p className="lore-text class-lore-text">{exclusiveLore}</p>
+              
               <div className="class-lore-footer">
                 <span className="class-lore-xp">✨ +{Math.floor(event.xp * 1.5)} XP Bonus</span>
                 <span className="class-lore-rarity">🏆 Contenu Légendaire</span>
@@ -129,12 +158,13 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
             </div>
           )}
 
+          {/* ONGLET RÉVÉLATION VERROUILLÉ */}
           {activeTab === 'class' && !hasExclusiveLore && (
             <div className="class-locked-container">
               <div className="class-locked-icon">🔒</div>
               <h3 className="class-locked-title">Secret Scellé</h3>
               <p className="class-locked-text">
-                Cette révélation du Metalverse est réservée aux initiés de la voie : 
+                Cette révélation du Metalverse — et le fragment de Table qu'elle contient — est réservée aux initiés de la voie : 
                 <strong> {pillarClass ? CHARACTER_CLASSES[pillarClass].name : event.pillar}</strong>.
               </p>
               <p className="class-locked-hint">
@@ -144,7 +174,9 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           )}
         </div>
 
-        {/* FOOTER XP */}
+        {/* ═══════════════════════════════════════════════════════════
+            FOOTER : XP et Rareté
+            ═══════════════════════════════════════════════════════════ */}
         {event.xp > 0 && (
           <div className="lore-footer">
             <div className="xp-reward">
