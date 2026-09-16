@@ -3,8 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
 import LoreModal, { type MetalverseEvent } from './LoreModal';
-import { CHARACTER_CLASSES } from '@/lib/gamification/classes';
-import type { CharacterClass } from '@/types/api';
 
 // ═══════════════════════════════════════════════════════════
 // MÉTADONNÉES DES PILIERS (Icônes PILIER pour la timeline)
@@ -15,7 +13,7 @@ const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
   'Death Metal':        { icon: '🩸', color: '#2d3436' },
   'Black Metal':        { icon: '💀', color: '#000000' },
   'Power Metal':        { icon: '🔥', color: '#e17055' },
-  'Doom Metal':         { icon: '🕯️', color: '#636e72' },
+  'Doom Metal':         { icon: '🧟', color: '#636e72' },
   'Progressive Metal':  { icon: '🌀', color: '#00b894' },
   'Folk Metal':         { icon: '🍀', color: '#27ae60' },
   'Metalcore':          { icon: '💥', color: '#6c5ce7' },
@@ -26,7 +24,7 @@ const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
 // ═══════════════════════════════════════════════════════════
 const METAL_EVENTS: MetalverseEvent[] = [
   // ═══════════════════════════════════════════════════════════
-  // 🎸 HEAVY METAL - Fragments de la Table Heavy (IDs 1-7)
+  // 🎸 HEAVY METAL - Fragments de la Table Heavy
   // ═══════════════════════════════════════════════════════════
   { 
     id: 1, content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy',
@@ -170,7 +168,7 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // ⚡ THRASH METAL - Fragments de la Table Thrash (IDs 8-12, 47-50, 70-71)
+  // ⚡ THRASH METAL - Fragments de la Table Thrash
   // ═══════════════════════════════════════════════════════════
   { 
     id: 8, content: 'Metallica - Formation', start: '1981-10-28', pillar: 'Thrash Metal', className: 'tp-thrash',
@@ -394,7 +392,8 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 🩸 DEATH METAL - Fragments de la Table Death (IDs 13-16, 43-45, 51-52, 72-73)
+  // 🩸 DEATH METAL - Fragments de la Table Death
+  // (IDs 13-16, 43-45, 51-52, 72-73 — 11 événements)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 13, content: 'Émergence du Death Metal', start: '1983-01-01', end: '1990-12-31', type: 'range', pillar: 'Death Metal', className: 'tp-death',
@@ -618,7 +617,8 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 💀 BLACK METAL - Fragments de la Table Black (IDs 17-21, 54-56, 74-75)
+  // 💀 BLACK METAL - Fragments de la Table Black
+  // (IDs 17-21, 54-56, 74-75 — 10 événements)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 17, content: 'Première vague Black Metal', start: '1982-01-01', end: '1990-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black',
@@ -822,7 +822,8 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 🔥 POWER METAL - Fragments de la Table Power (IDs 22-25, 57-59, 76-77)
+  // 🔥 POWER METAL - Fragments de la Table Power
+  // (IDs 22-25, 57-59, 76-77 — 9 événements)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 22, content: 'Helloween - "Keeper of the Seven Keys"', start: '1987-05-23', pillar: 'Power Metal', className: 'tp-power',
@@ -1006,7 +1007,8 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 🕯️ DOOM METAL - Fragments de la Table Doom (IDs 36-39, 60, 78-79)
+  // 🕯️ DOOM METAL - Fragments de la Table Doom
+  // (IDs 36-39, 60, 78-79 — 7 événements)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 36, content: 'Émergence du Doom Metal', start: '1968-01-01', end: '1980-12-31', type: 'range', pillar: 'Doom Metal', className: 'tp-doom',
@@ -1150,7 +1152,8 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 🍀 FOLK METAL - Fragments de la Table Folk (IDs 40-43, 61, 80-81)
+  // 🍀 FOLK METAL - Fragments de la Table Folk
+  // (IDs 40-43, 61, 80-81 — 7 événements)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 40, content: 'Émergence du Folk Metal', start: '1990-01-01', end: '2000-12-31', type: 'range', pillar: 'Folk Metal', className: 'tp-folk',
@@ -1294,7 +1297,8 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 🌀 PROGRESSIVE METAL - Fragments de la Table Progressive (IDs 31-33, 62-64, 82-83)
+  // 🌀 PROGRESSIVE METAL - Fragments de la Table Progressive
+  // (IDs 31-33, 62-64, 82-83 — 8 événements)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 62, content: 'Dream Theater - "Images and Words"', start: '1992-07-07', pillar: 'Progressive Metal', className: 'tp-progressive',
@@ -1458,7 +1462,8 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 💥 METALCORE & NU METAL - Fragments de la Table Metalcore (IDs 26-30, 65-67, 84-85)
+  // 💥 METALCORE & NU METAL - Fragments de la Table Metalcore
+  // (IDs 26-30, 65-67, 84-85 — 10 événements)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 26, content: 'Korn - Premier album', start: '1994-10-11', pillar: 'Metalcore', className: 'tp-metalcore',
@@ -1732,8 +1737,7 @@ export default function TimelineClient() {
         if (isMounted && containerRef.current) {
           timelineRef.current = new Timeline(containerRef.current, items, options);
           
-          // ✅ CORRECTION : Utilise PILLAR_METADATA pour l'icône de la modale
-          // (L'icône de classe sera gérée par LoreModal dans l'onglet Révélation)
+          // ✅ Injecte l'icône et la couleur du PILIER dans la modale
           timelineRef.current.on('select', (properties: any) => {
             if (properties.items && properties.items.length > 0) {
               const itemId = properties.items[0];
@@ -1744,8 +1748,8 @@ export default function TimelineClient() {
                 
                 setSelectedEvent({
                   ...eventData,
-                  icon: pillarData.icon,   // ✅ Icône du PILIER pour l'en-tête
-                  color: pillarData.color,  // ✅ Couleur du PILIER
+                  icon: pillarData.icon,
+                  color: pillarData.color,
                 });
               }
             }
