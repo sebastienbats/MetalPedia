@@ -20,13 +20,15 @@ const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// LES 80 ÉVÉNEMENTS DU METALVERSE (avec fragments narratifs)
+// LES 80 ÉVÉNEMENTS DU METALVERSE
 // ═══════════════════════════════════════════════════════════
 const METAL_EVENTS: MetalverseEvent[] = [
+  // ... GARDE TES 80 ÉVÉNEMENTS EXACTEMENT COMME ILS SONT ...
+  // (id: 1 à 85, avec rune, fragment_title, class_lore, etc.)
   // ═══════════════════════════════════════════════════════════
-  // 🎸 HEAVY METAL - Fragments de la Table Heavy
+  // 🎸 HEAVY METAL - Fragments de la Table Heavy (IDs 1-7)
   // ═══════════════════════════════════════════════════════════
-  { 
+    { 
     id: 1, content: 'Formation de Black Sabbath', start: '1968-11-01', pillar: 'Heavy Metal', className: 'tp-heavy',
     rune: 'ᚦ',
     fragment_title: 'L\'Enclume du Néant',
@@ -168,7 +170,7 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // ⚡ THRASH METAL - Fragments de la Table Thrash
+  // ⚡ THRASH METAL - Fragments de la Table Thrash (IDs 8-12, 47-50, 70-71)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 8, content: 'Metallica - Formation', start: '1981-10-28', pillar: 'Thrash Metal', className: 'tp-thrash',
@@ -392,8 +394,7 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 🩸 DEATH METAL - Fragments de la Table Death
-  // (IDs 13-16, 43-45, 51-52, 72-73 — 11 événements)
+  // 🩸 DEATH METAL - Fragments de la Table Death (IDs 13-16, 43-45, 51-52, 72-73)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 13, content: 'Émergence du Death Metal', start: '1983-01-01', end: '1990-12-31', type: 'range', pillar: 'Death Metal', className: 'tp-death',
@@ -617,8 +618,7 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 💀 BLACK METAL - Fragments de la Table Black
-  // (IDs 17-21, 54-56, 74-75 — 10 événements)
+  // 💀 BLACK METAL - Fragments de la Table Black (IDs 17-21, 54-56, 74-75)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 17, content: 'Première vague Black Metal', start: '1982-01-01', end: '1990-12-31', type: 'range', pillar: 'Black Metal', className: 'tp-black',
@@ -822,8 +822,7 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 🔥 POWER METAL - Fragments de la Table Power
-  // (IDs 22-25, 57-59, 76-77 — 9 événements)
+  // 🔥 POWER METAL - Fragments de la Table Power (IDs 22-25, 57-59, 76-77)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 22, content: 'Helloween - "Keeper of the Seven Keys"', start: '1987-05-23', pillar: 'Power Metal', className: 'tp-power',
@@ -1007,8 +1006,7 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 🕯️ DOOM METAL - Fragments de la Table Doom
-  // (IDs 36-39, 60, 78-79 — 7 événements)
+  // 🕯️ DOOM METAL - Fragments de la Table Doom (IDs 36-39, 60, 78-79)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 36, content: 'Émergence du Doom Metal', start: '1968-01-01', end: '1980-12-31', type: 'range', pillar: 'Doom Metal', className: 'tp-doom',
@@ -1152,8 +1150,7 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 🍀 FOLK METAL - Fragments de la Table Folk
-  // (IDs 40-43, 61, 80-81 — 7 événements)
+  // 🍀 FOLK METAL - Fragments de la Table Folk (IDs 40-43, 61, 80-81)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 40, content: 'Émergence du Folk Metal', start: '1990-01-01', end: '2000-12-31', type: 'range', pillar: 'Folk Metal', className: 'tp-folk',
@@ -1297,8 +1294,7 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 🌀 PROGRESSIVE METAL - Fragments de la Table Progressive
-  // (IDs 31-33, 62-64, 82-83 — 8 événements)
+  // 🌀 PROGRESSIVE METAL - Fragments de la Table Progressive (IDs 31-33, 62-64, 82-83)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 62, content: 'Dream Theater - "Images and Words"', start: '1992-07-07', pillar: 'Progressive Metal', className: 'tp-progressive',
@@ -1462,8 +1458,7 @@ const METAL_EVENTS: MetalverseEvent[] = [
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 💥 METALCORE & NU METAL - Fragments de la Table Metalcore
-  // (IDs 26-30, 65-67, 84-85 — 10 événements)
+  // 💥 METALCORE & NU METAL - Fragments de la Table Metalcore (IDs 26-30, 65-67, 84-85)
   // ═══════════════════════════════════════════════════════════
   { 
     id: 26, content: 'Korn - Premier album', start: '1994-10-11', pillar: 'Metalcore', className: 'tp-metalcore',
@@ -1690,6 +1685,7 @@ export default function TimelineClient() {
   const timelineRef = useRef<any>(null);
   const [isClient, setIsClient] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<MetalverseEvent | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -1697,103 +1693,136 @@ export default function TimelineClient() {
 
   useEffect(() => {
     if (!isClient || !containerRef.current) return;
+
+    let timeline: any = null;
     let isMounted = true;
 
     const initTimeline = async () => {
       try {
-        const { Timeline, DataSet } = await import('vis-timeline/standalone');
+        console.log('🔄 Initialisation de vis-timeline...');
         
-        const items = new DataSet(METAL_EVENTS.map((event) => ({
+        // ✅ Import dynamique avec fallback
+        const visModule = await import('vis-timeline/standalone');
+        const Timeline = visModule.Timeline;
+        const DataSet = visModule.DataSet;
+
+        if (!isMounted || !containerRef.current) return;
+
+        // ✅ Construction des items AVEC type explicite
+        const itemsArray = METAL_EVENTS.map((event) => ({
           id: event.id,
           content: event.content,
           start: event.start,
-          end: event.end,
-          type: event.type || 'point',
+          end: event.type === 'range' ? event.end : undefined,
+          type: event.type === 'range' ? 'range' : 'point',
           className: event.className,
-        })));
+        }));
+
+        const items = new DataSet(itemsArray);
         
+        // ✅ Options corrigées
         const options: any = {
-          height: '400px',
-          start: '1970-01-01',
-          end: '2000-01-01',
+          height: '500px',
+          start: '1968-01-01',
+          end: '2025-01-01',
           min: '1960-01-01',
           max: '2030-12-31',
           orientation: 'top',
-          timeAxis: { scale: 'year', step: 5 },
-          zoomMin: 1000 * 60 * 60 * 24 * 365,
-          zoomMax: 1000 * 60 * 60 * 24 * 365 * 50,
+          timeAxis: { 
+            scale: 'year', 
+            step: 5 
+          },
+          zoomMin: 1000 * 60 * 60 * 24 * 365,       // 1 an
+          zoomMax: 1000 * 60 * 60 * 24 * 365 * 70,  // 70 ans
           moveable: true,
           zoomable: true,
           showCurrentTime: false,
-          
-          // ✅ Icône du PILIER sur la timeline
+          selectable: true,
+          // ✅ Template corrigé : retourne du HTML complet
           template: function(item: any) {
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
             const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸' };
-            return pillarData.icon;
+            // ✅ Retourne du HTML avec icône + texte
+            return `<span style="font-size:16px;margin-right:4px;">${pillarData.icon}</span><span>${item.content}</span>`;
           }
         };
 
-        if (isMounted && containerRef.current) {
-          timelineRef.current = new Timeline(containerRef.current, items, options);
-          
-          // ✅ Injecte l'icône et la couleur du PILIER dans la modale
-          timelineRef.current.on('select', (properties: any) => {
-            if (properties.items && properties.items.length > 0) {
-              const itemId = properties.items[0];
-              const eventData = METAL_EVENTS.find((e) => e.id === itemId);
-              if (eventData) {
-                const pillarName = CLASS_TO_PILLAR[eventData.className] || 'Heavy Metal';
-                const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸', color: '#8b0000' };
-                
-                setSelectedEvent({
-                  ...eventData,
-                  icon: pillarData.icon,
-                  color: pillarData.color,
-                });
-              }
-            }
-          });
-          
-          const applyDateStyles = () => {
-            if (typeof window !== 'undefined') {
-              const dateElements = document.querySelectorAll('.vis-text');
-              dateElements.forEach((el) => {
-                const htmlEl = el as HTMLElement;
-                htmlEl.style.setProperty('font-family', 'var(--font-medieval), cursive, serif', 'important');
-                htmlEl.style.setProperty('color', '#3e2723', 'important');
-                htmlEl.style.setProperty('text-shadow', '0 1px 2px rgba(255, 255, 255, 0.4)', 'important');
+        console.log('📊 Création de la timeline avec', itemsArray.length, 'événements');
+
+        // ✅ Création de la timeline
+        timeline = new Timeline(containerRef.current, items, options);
+        timelineRef.current = timeline;
+        
+        // ✅ Gestion de la sélection
+        timeline.on('select', (properties: any) => {
+          if (properties.items && properties.items.length > 0) {
+            const itemId = properties.items[0];
+            const eventData = METAL_EVENTS.find((e) => e.id === itemId);
+            if (eventData) {
+              const pillarName = CLASS_TO_PILLAR[eventData.className] || 'Heavy Metal';
+              const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸', color: '#8b0000' };
+              
+              setSelectedEvent({
+                ...eventData,
+                icon: pillarData.icon,
+                color: pillarData.color,
               });
             }
-          };
+          }
+        });
+        
+        // ✅ Application des styles sur les dates
+        const applyDateStyles = () => {
+          if (typeof window !== 'undefined') {
+            const dateElements = document.querySelectorAll('.vis-text');
+            dateElements.forEach((el) => {
+              const htmlEl = el as HTMLElement;
+              htmlEl.style.fontFamily = 'var(--font-medieval), cursive, serif';
+              htmlEl.style.color = '#3e2723';
+              htmlEl.style.textShadow = '0 1px 2px rgba(255, 255, 255, 0.4)';
+            });
+          }
+        };
 
-          setTimeout(applyDateStyles, 50);
-          timelineRef.current.on('rangechanged', applyDateStyles);
-          timelineRef.current.on('changed', applyDateStyles);
-          
-          console.log('✅ Timeline initialisée avec le Codex du Metalverse !');
-        }
-      } catch (error) {
-        console.error('❌ Erreur lors de l\'initialisation de la timeline:', error);
+        setTimeout(applyDateStyles, 100);
+        timeline.on('rangechanged', applyDateStyles);
+        timeline.on('changed', applyDateStyles);
+        
+        console.log('✅ Timeline initialisée avec le Codex du Metalverse !');
+      } catch (err) {
+        console.error('❌ Erreur lors de l\'initialisation de la timeline:', err);
+        setError(err instanceof Error ? err.message : 'Erreur inconnue');
       }
     };
 
     initTimeline();
 
+    // ✅ Cleanup
     return () => {
       isMounted = false;
-      if (timelineRef.current) {
-        timelineRef.current.destroy();
+      if (timeline) {
+        timeline.destroy();
         timelineRef.current = null;
       }
     };
   }, [isClient]);
 
+  // ✅ Affichage du chargement
   if (!isClient) {
     return (
-      <div className="p-4 bg-gray-900 rounded-lg">
-        <h2 className="text-white text-xl mb-4">Chargement de la Timeline...</h2>
-        <div className="bg-gray-800 rounded animate-pulse" style={{ height: '400px' }} />
+      <div className="w-full p-8">
+        <h2 className="text-white text-xl mb-4 text-center">Chargement de la Timeline...</h2>
+        <div className="bg-gray-800 rounded animate-pulse" style={{ height: '500px' }} />
+      </div>
+    );
+  }
+
+  // ✅ Affichage en cas d'erreur
+  if (error) {
+    return (
+      <div className="w-full p-8 text-center">
+        <h2 className="text-red-500 text-xl mb-4">❌ Erreur de chargement</h2>
+        <p className="text-gray-300">{error}</p>
       </div>
     );
   }
@@ -1803,7 +1832,23 @@ export default function TimelineClient() {
       <h2 className="text-white text-xl mb-4 text-center font-serif">
         Timeline MetalPedia — Clique sur un événement pour découvrir son histoire
       </h2>
-      <div ref={containerRef} className="timeline-container w-full" style={{ minHeight: '400px' }} />
+      
+      {/* ✅ Conteneur avec styles explicites */}
+      <div 
+        ref={containerRef} 
+        className="timeline-container"
+        style={{ 
+          width: '100%',
+          height: '500px',
+          minHeight: '500px',
+          position: 'relative',
+          backgroundColor: 'rgba(245, 230, 211, 0.9)',
+          borderRadius: '12px',
+          border: '3px solid #8b4513',
+          boxShadow: '0 8px 32px rgba(139, 69, 19, 0.3)',
+          overflow: 'hidden'
+        }}
+      />
       
       <LoreModal
         event={selectedEvent}
