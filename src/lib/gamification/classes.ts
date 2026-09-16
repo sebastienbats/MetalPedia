@@ -11,7 +11,7 @@ export const CHARACTER_CLASSES: Record<CharacterClass, ClassMetadata> = {
   necromancer: {
     id: 'necromancer',
     name: 'Nécromancien des Ombres',
-    icon: '🌑',
+    icon: '🧟',
     pillar: 'Black Metal' as GamificationPillar,
     description: 'Expert des groupes obscurs et underground. Tu trouves la beauté là où d\'autres ne voient que les ténèbres.',
     lore: 'Né dans les cryptes oubliées du Metalverse, le Nécromancien parcourt les recoins les plus sombres de l\'encyclopédie. Là où les autres hésitent, lui avance, guidé par l\'appel des groupes dont le nom n\'est murmuré que dans les catacombes.',
