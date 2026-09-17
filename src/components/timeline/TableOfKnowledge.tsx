@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useFragmentStore } from '@/stores/fragmentStore';
 import { useClassStore } from '@/stores/classStore';
+import { CHARACTER_CLASSES } from '@/lib/gamification/classes';
 
 // ═══════════════════════════════════════════════════════════
 // MÉTADONNÉES DES PILIERS
@@ -40,7 +41,7 @@ const PILLARS = [
     { id: 45, rune: 'ᚫ', title: 'Le Blasphème Nécessaire' },
     { id: 51, rune: 'ᛃ', title: 'Le Cycle des Dynasties' },
     { id: 52, rune: 'ᛖ', title: "L'Histoire Cachée" },
-    { id: 72, rune: 'ᚣ', title: 'L\'Atlas de la Fin' },
+    { id: 72, rune: 'ᚣ', title: "L'Atlas de la Fin" },
     { id: 73, rune: 'ᛁ', title: 'Le Désert qui Attend' },
   ]},
   { id: 'Black Metal', icon: '💀', color: '#000000', fragments: [
@@ -72,7 +73,7 @@ const PILLARS = [
     { id: 37, rune: 'ᛒ', title: "L'Arbre qui Pousse dans le Vide" },
     { id: 38, rune: 'ᛖ', title: 'Le Cheval de Fumée' },
     { id: 39, rune: 'ᛃ', title: 'Le Cycle Éternel' },
-    { id: 78, rune: 'ᛗ', title: 'L\'Homme qui Porte le Cercueil' },
+    { id: 78, rune: 'ᛗ', title: "L'Homme qui Porte le Cercueil" },
     { id: 79, rune: 'ᛏ', title: 'Le Gardien du Vide Existentiel' },
   ]},
   { id: 'Progressive Metal', icon: '🌀', color: '#00b894', fragments: [
@@ -113,8 +114,11 @@ const PILLARS = [
 // ═══════════════════════════════════════════════════════════
 export default function TableOfKnowledge() {
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
-  const { collectedIds } = useFragmentStore();
+  const collectedIds = useFragmentStore((state) => state.collectedIds);
   const { selectedClass } = useClassStore();
+
+  // Nom lisible de la classe
+  const className = selectedClass ? CHARACTER_CLASSES[selectedClass]?.name : null;
 
   // Calculer la progression globale
   const totalFragments = PILLARS.reduce((sum, p) => sum + p.fragments.length, 0);
@@ -127,19 +131,25 @@ export default function TableOfKnowledge() {
     <div className="w-full max-w-6xl mx-auto px-4 py-8">
       {/* En-tête */}
       <div className="text-center mb-8">
-        <h2 id="decouvertes-title" className="font-metal text-2xl sm:text-3xl md:text-4xl text-metal-rust mb-2">📜 La Table du Savoir
+        {/* ✅ className au lieu de class */}
+        <h2 
+          id="decouvertes-title" 
+          className="font-metal text-2xl sm:text-3xl md:text-4xl text-metal-rust mb-2"
+        >
+          📜 La Table du Savoir
         </h2>
+        {/* ✅ className au lieu de class */}
         <p className="text-gray-400 font-serif text-sm sm:text-base mb-6">
-          {selectedClass 
-            ? `En tant que ${selectedClass}, explore les fragments du Metalverse`
+          {className
+            ? `En tant que ${className}, explore les fragments du Metalverse`
             : 'Choisis une classe pour explorer les fragments du Metalverse'}
         </p>
         
         {/* Progression globale */}
         <div className="max-w-md mx-auto">
           <div className="flex justify-between text-sm mb-1">
-            <span>Progression globale</span>
-            <span>{collectedCount}/{totalFragments} fragments</span>
+            <span className="text-gray-300">Progression globale</span>
+            <span className="text-gray-400">{collectedCount}/{totalFragments} fragments</span>
           </div>
           <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
             <div 
