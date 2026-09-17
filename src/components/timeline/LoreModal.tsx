@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useClassStore } from '@/stores/classStore';
+import { useFragmentStore } from '@/stores/fragmentStore';
 import { CHARACTER_CLASSES } from '@/lib/gamification/classes';
 import type { CharacterClass } from '@/types/api';
 
@@ -49,7 +50,11 @@ const PILLAR_TO_CLASS: Record<string, CharacterClass> = {
 
 export default function LoreModal({ event, onClose }: LoreModalProps) {
   const [activeTab, setActiveTab] = useState<'real' | 'echo' | 'class'>('real');
+  const [showCollectAnimation, setShowCollectAnimation] = useState(false);
+  
   const { selectedClass } = useClassStore();
+  const collectFragment = useFragmentStore((state) => state.collectFragment);
+  const isCollected = useFragmentStore((state) => event ? state.isCollected(event.id) : false);
 
   // Fermer avec la touche Échap
   useEffect(() => {
@@ -69,7 +74,19 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
   // Réinitialiser l'onglet à chaque nouvel événement
   useEffect(() => {
     setActiveTab('real');
+    setShowCollectAnimation(false);
   }, [event]);
+
+  // Déclencher la collecte quand on ouvre la Révélation avec la bonne classe
+  useEffect(() => {
+    if (activeTab === 'class' && hasExclusiveLore && event) {
+      const isNew = collectFragment(event.id);
+      if (isNew) {
+        setShowCollectAnimation(true);
+        setTimeout(() => setShowCollectAnimation(false), 3500);
+      }
+    }
+  }, [activeTab, event]);
 
   if (!event) return null;
 
@@ -78,7 +95,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
     ? `${new Date(event.start).getFullYear()} → ${new Date(event.end || '').getFullYear()}`
     : new Date(event.start).getFullYear();
 
-  // ✅ Vérifier que la classe du joueur correspond au pilier de l'événement
+  // Vérifier que la classe du joueur correspond au pilier de l'événement
   const requiredClass = PILLAR_TO_CLASS[event.pillar];
   const hasExclusiveLore = !!(
     selectedClass && 
@@ -104,7 +121,6 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           }}
         >
           <div className="lore-header-top">
-            {/* Icône du pilier en gros */}
             <div className="lore-icon-pillar">{event.icon || '🎸'}</div>
             <div className="lore-act-badge">🎭 {event.act}</div>
           </div>
@@ -165,16 +181,29 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
             </div>
           )}
 
-          {/* ✅ Onglet Révélation : accessible seulement si bonne classe */}
+          {/* Onglet Révélation : accessible seulement si bonne classe */}
           {activeTab === 'class' && hasExclusiveLore && selectedClass && (
             <div className="class-lore-container">
               
+              {/* Animation de collecte (nouveau fragment) */}
+              {showCollectAnimation && (
+                <div className="fragment-collected-banner">
+                  <span className="banner-icon">✨</span>
+                  <div className="banner-text">
+                    <strong>Fragment de Table gravé !</strong>
+                    <span>Il rejoint ta collection permanente.</span>
+                  </div>
+                </div>
+              )}
+
               {/* Fragment de Table : visible uniquement ici */}
               {event.rune && event.fragment_title && (
-                <div className="fragment-block">
+                <div className={`fragment-block ${isCollected ? 'fragment-collected' : ''}`}>
                   <div className="fragment-rune">{event.rune}</div>
                   <div className="fragment-info">
-                    <span className="fragment-label">Fragment de la Table {event.pillar}</span>
+                    <span className="fragment-label">
+                      {isCollected ? '✅ Fragment Collecté' : `Fragment de la Table ${event.pillar}`}
+                    </span>
                     <span className="fragment-title">{event.fragment_title}</span>
                   </div>
                 </div>
@@ -219,15 +248,12 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           let footerStatus: string;
 
           if (activeTab === 'real') {
-            // Onglet Chronique Réelle : 100 XP, statut Commun
             footerXp = 100;
             footerStatus = '🥉 Commun';
           } else if (activeTab === 'echo') {
-            // Onglet Écho Metalverse : 150 XP, statut Rare
             footerXp = 150;
             footerStatus = '🥈 Rare';
           } else {
-            // Onglet Révélation : XP de base × 1.5, statut ÉPIQUE fixe
             footerXp = Math.floor(event.xp * 1.5);
             footerStatus = '🥇 Épique';
           }
