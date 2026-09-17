@@ -225,7 +225,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           } else if (activeTab === 'echo') {
             // Onglet Écho Metalverse : 150 XP, statut Rare
             footerXp = 150;
-            footerStatus = '🥇 Rare';
+            footerStatus = '🥈 Rare';
           } else {
             // Onglet Révélation : XP de base × 1.5, statut ÉPIQUE fixe
             footerXp = Math.floor(event.xp * 1.5);
