@@ -133,6 +133,7 @@ export default function TableOfKnowledge() {
             ? `En tant que ${selectedClass}, explore les fragments du Metalverse`
             : 'Choisis une classe pour explorer les fragments du Metalverse'}
         </p>
+      </div>
         
         {/* Progression globale */}
         <div className="max-w-md mx-auto">
