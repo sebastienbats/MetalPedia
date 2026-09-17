@@ -345,19 +345,6 @@ export default function ProfilePage() {
       ═══════════════════════════════════════════════════════════ */}
       <section id="decouvertes" aria-labelledby="decouvertes-title" className="scroll-mt-24 space-y-4">
         <ChapterDivider number="IV" title="Tes Découvertes" />
-
-        <div className="text-center">
-          <h2
-            id="decouvertes-title"
-            className="font-metal text-2xl sm:text-3xl md:text-4xl text-metal-rust mb-2"
-          >
-            📜 La Table du Savoir
-          </h2>
-          <p className="text-gray-400 font-serif text-sm sm:text-base mb-6">
-            Les 85 fragments du Metalverse que tu as gravés dans ta mémoire en explorant la Timeline
-          </p>
-        </div>
-
         <div className="relative p-4 sm:p-6 md:p-8 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
           <FloatingRunes preset="parchment" />
           <div className="relative z-10">
