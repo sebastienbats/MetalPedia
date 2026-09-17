@@ -188,19 +188,35 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           )}
         </div>
 
-        {/* FOOTER XP */}
-        {event.xp > 0 && (
-          <div className="lore-footer">
-            <div className="xp-reward">
-              <span className="xp-icon">✨</span>
-              <span className="xp-text">+{event.xp} XP</span>
-            </div>
-            <div className="lore-status">
-              {event.xp >= 500 ? '🏆 Légendaire' : event.xp >= 200 ? '🥇 Rare' : '🥉 Commun'}
-            </div>
-          </div>
-        )}
+        {/* FOOTER XP - Adapté selon l'onglet actif */}
+{(() => {
+  // Calcul dynamique selon l'onglet actif
+  let footerXp: number;
+  let footerStatus: string;
+
+  if (activeTab === 'real') {
+    // Onglet Chronique Réelle : 100 XP, statut Commun
+    footerXp = 100;
+    footerStatus = '🥉 Commun';
+  } else if (activeTab === 'echo') {
+    // Onglet Écho Metalverse : 150 XP, statut Rare
+    footerXp = 150;
+    footerStatus = '🥇 Rare';
+  } else {
+    // Onglet Révélation : XP de base × 1.5, statut basé sur la valeur
+    footerXp = Math.floor(event.xp * 1.5);
+    footerStatus = event.xp >= 500 ? '🏆 Légendaire' : event.xp >= 200 ? '🥇 Rare' : '🥉 Commun';
+  }
+
+  return (
+    <div className="lore-footer">
+      <div className="xp-reward">
+        <span className="xp-icon">✨</span>
+        <span className="xp-text">+{footerXp} XP</span>
+      </div>
+      <div className="lore-status">
+        {footerStatus}
       </div>
     </div>
   );
-}
+})()}
