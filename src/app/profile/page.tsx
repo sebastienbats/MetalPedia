@@ -45,7 +45,7 @@ export default function ProfilePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="space-y-10 pb-12 animate-fade-in">
+    <div className="space-y-10 pb-12">
       {/* ═══════════════════════════════════════════════════════════
           1. EN-TÊTE PRINCIPAL
       ═══════════════════════════════════════════════════════════ */}
