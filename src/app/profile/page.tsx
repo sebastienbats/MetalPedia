@@ -60,10 +60,12 @@ export default function ProfilePage() {
       </header>
 
       {/* ═══════════════════════════════════════════════════════════
-          2. SECTION CLASSE DE PERSONNAGE (Priorité visuelle maximale)
+          2. SECTION CLASSE DE PERSONNAGE
       ═══════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="class-section-title" className="metal-card p-6 border-2 border-metal-gray relative overflow-hidden">
-        {/* Effet de halo coloré si une classe est sélectionnée */}
+      <section
+        aria-labelledby="class-section-title"
+        className="metal-card p-6 border-2 border-metal-gray relative overflow-hidden"
+      >
         {classMeta && (
           <div
             className="absolute -top-10 -right-10 w-64 h-64 opacity-10 pointer-events-none rounded-full blur-3xl"
@@ -75,7 +77,6 @@ export default function ProfilePage() {
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
           {classMeta && classProgress ? (
             <>
-              {/* Avatar de classe */}
               <div
                 className="w-24 h-24 rounded-full flex items-center justify-center text-5xl border-4 shadow-lg shrink-0 transition-transform hover:scale-105"
                 style={{
@@ -88,9 +89,7 @@ export default function ProfilePage() {
                 {classMeta.icon}
               </div>
 
-              {/* Infos de classe */}
               <div className="flex-1 w-full text-center md:text-left">
-                {/* Badge de distinction */}
                 <div className="mb-3 flex flex-col sm:flex-row sm:items-center gap-2 justify-center md:justify-start">
                   <span className="px-2 py-1 bg-metal-fire/10 text-metal-fire text-[10px] font-bold rounded uppercase tracking-wider border border-metal-fire/30">
                     ⚔️ Maîtrise de Classe
@@ -108,7 +107,6 @@ export default function ProfilePage() {
                   {classMeta.name}
                 </h2>
 
-                {/* Badge de titre actuel */}
                 <p
                   className="text-sm font-semibold mb-4 inline-block px-3 py-1 rounded-full border"
                   style={{
@@ -120,7 +118,6 @@ export default function ProfilePage() {
                   🏆 {getClassTitle(classMeta.id, classProgress.currentLevel)}
                 </p>
 
-                {/* Barre d'XP de classe */}
                 <div className="max-w-md mx-auto md:mx-0">
                   <div className="flex justify-between text-xs text-gray-400 mb-1">
                     <span className="font-semibold text-gray-300">
@@ -151,7 +148,6 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Description du bonus actif */}
                 <div className="mt-4 text-xs text-gray-400 bg-metal-black/50 p-3 rounded-lg border border-metal-gray/50 inline-block">
                   ✨ <span className="text-gray-200 font-semibold">Bonus actif :</span>{' '}
                   <span className="text-metal-fire font-bold">
@@ -161,7 +157,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Bouton changer de classe */}
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="shrink-0 px-4 py-2 text-sm text-gray-400 hover:text-metal-fire border border-metal-gray hover:border-metal-fire rounded-lg transition-all bg-metal-black/30 focus:outline-none focus:ring-2 focus:ring-metal-fire/50"
@@ -171,16 +166,13 @@ export default function ProfilePage() {
               </button>
             </>
           ) : (
-            /* État vide : Aucune classe choisie */
             <>
               <div className="text-6xl opacity-30 shrink-0" aria-hidden="true">⚔️</div>
               <div className="flex-1 text-center md:text-left">
-                <h2 className="font-metal text-2xl text-gray-400 mb-2">
-                  Aucune classe choisie
-                </h2>
+                <h2 className="font-metal text-2xl text-gray-400 mb-2">Aucune classe choisie</h2>
                 <p className="text-sm text-gray-500 mb-4 max-w-md">
-                  Le Conseil des Neuf Genres t'attend. Choisis ta destinée pour débloquer
-                  des bonus d'XP uniques et des quêtes spéciales.
+                  Le Conseil des Neuf Genres t'attend. Choisis ta destinée pour débloquer des bonus
+                  d'XP uniques et des quêtes spéciales.
                 </p>
                 <button
                   onClick={() => setIsModalOpen(true)}
@@ -195,7 +187,7 @@ export default function ProfilePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          3. BOÎTE D'INFO : DOUBLE PROGRESSION (Contexte)
+          3. BOÎTE D'INFO : DOUBLE PROGRESSION
       ═══════════════════════════════════════════════════════════ */}
       <section aria-label="Explication du système de progression" className="max-w-2xl mx-auto">
         <div className="bg-metal-fire/5 border border-metal-fire/20 rounded-lg p-4 text-left flex gap-3 items-start">
@@ -209,8 +201,8 @@ export default function ProfilePage() {
               </li>
               <li>
                 <span className="text-gray-200">Maîtrise de Classe</span> : Monte{' '}
-                <strong>uniquement</strong> lorsque tu déclenches ton bonus de classe
-                spécifique (ex: explorer des groupes obscurs pour le Nécromancien).
+                <strong>uniquement</strong> lorsque tu déclenches ton bonus de classe spécifique (ex:
+                explorer des groupes obscurs pour le Nécromancien).
               </li>
             </ul>
           </div>
@@ -218,17 +210,17 @@ export default function ProfilePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          4. VOIE DE L'ASCENSION (Titres de classe)
+          4. VOIE DE L'ASCENSION
       ═══════════════════════════════════════════════════════════ */}
       {selectedClass && <ClassMilestones />}
 
       {/* ═══════════════════════════════════════════════════════════
-          5. PANTHÉON DES ANCIENS (Niveau MAX par classe)
+          5. PANTHÉON DES ANCIENS
       ═══════════════════════════════════════════════════════════ */}
       <PantheonSection />
 
       {/* ═══════════════════════════════════════════════════════════
-          6. GRILLE PRINCIPALE (Stats, Quêtes, Badges)
+          6. GRILLE PRINCIPALE
       ═══════════════════════════════════════════════════════════ */}
       <div className="grid lg:grid-cols-2 gap-8">
         <div className="space-y-6">
@@ -242,22 +234,18 @@ export default function ProfilePage() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          7. TABLE DU SAVOIR (Visualisation des fragments)
+          7. TABLE DU SAVOIR (Visualisation des 85 fragments)
       ═══════════════════════════════════════════════════════════ */}
       <section aria-labelledby="table-title" className="text-center">
         <h2 id="table-title" className="font-metal text-3xl md:text-4xl text-metal-rust mb-4">
           📜 La Table du Savoir
         </h2>
         <p className="text-gray-400 font-serif mb-6">
-          Les 85 fragments du Metalverse que tu as gravés dans ta mémoire
+          Les 85 fragments du Metalverse que tu as gravés dans ta mémoire en explorant la Timeline
         </p>
 
-        {/* Zone immersive avec runes en arrière-plan */}
         <div className="relative p-6 md:p-8 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
-          {/* Calque d'arrière-plan : Runes flottantes */}
           <FloatingRunes preset="parchment" />
-
-          {/* Calque de premier plan : Table du Savoir */}
           <div className="relative z-10">
             <TableOfKnowledge />
           </div>
@@ -265,7 +253,26 @@ export default function ProfilePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════
-          8. BANNIÈRE DE CONNEXION (Si non connecté)
+          8. GRIMOIRE DU LORE (Section immersive)
+      ═══════════════════════════════════════════════════════════ */}
+      <section aria-labelledby="grimoire-title" className="text-center">
+        <h2 id="grimoire-title" className="font-metal text-3xl md:text-4xl text-metal-rust mb-4">
+          🪶 Le Grimoire du Metalverse
+        </h2>
+        <p className="text-gray-400 font-serif mb-6">
+          Les récits et légendes que tu as découverts au fil de tes explorations
+        </p>
+
+        <div className="relative p-6 md:p-8 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
+          <FloatingRunes preset="parchment" />
+          <div className="relative z-10">
+            <LoreGrimoire />
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════════
+          9. BANNIÈRE DE CONNEXION (Si non connecté)
       ═══════════════════════════════════════════════════════════ */}
       {!user && (
         <section
@@ -279,9 +286,9 @@ export default function ProfilePage() {
                 Sauvegarde ta progression dans le cloud
               </h2>
               <p className="text-gray-300 text-sm">
-                Crée un compte pour synchroniser ton XP, tes badges, ta classe et tes
-                favoris sur tous tes appareils. Actuellement, tes données sont
-                sauvegardées localement dans ton navigateur.
+                Crée un compte pour synchroniser ton XP, tes badges, ta classe et tes favoris sur
+                tous tes appareils. Actuellement, tes données sont sauvegardées localement dans ton
+                navigateur.
               </p>
             </div>
             <Link
