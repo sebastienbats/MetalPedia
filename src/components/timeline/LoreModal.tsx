@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useClassStore } from '@/stores/classStore';
 import { useFragmentStore } from '@/stores/fragmentStore';
 import { CHARACTER_CLASSES } from '@/lib/gamification/classes';
@@ -17,11 +17,11 @@ export interface MetalverseEvent {
   type?: 'point' | 'range';
   pillar: string;
   className: string;
-  icon?: string;
-  color?: string;
+  icon?: string;           // Icône du pilier (injectée par TimelineClient)
+  color?: string;          // Couleur du pilier (injectée par TimelineClient)
   act: string;
-  rune?: string;
-  fragment_title?: string;
+  rune?: string;           // Rune gravée sur ce fragment de Table
+  fragment_title?: string; // Nom poétique du fragment
   real_lore: string;
   metalverse_echo: string;
   xp: number;
@@ -34,7 +34,7 @@ interface LoreModalProps {
 }
 
 // ═══════════════════════════════════════════════════════════
-// MAPPING PILIER → CLASSE ASSOCIÉE
+// MAPPING PILIER → CLASSE ASSOCIÉE (pour le verrouillage)
 // ═══════════════════════════════════════════════════════════
 const PILLAR_TO_CLASS: Record<string, CharacterClass> = {
   'Heavy Metal': 'paladin',
@@ -48,6 +48,9 @@ const PILLAR_TO_CLASS: Record<string, CharacterClass> = {
   'Metalcore': 'chain_breaker',
 };
 
+// ═══════════════════════════════════════════════════════════
+// COMPOSANT LORE MODAL
+// ═══════════════════════════════════════════════════════════
 export default function LoreModal({ event, onClose }: LoreModalProps) {
   const [activeTab, setActiveTab] = useState<'real' | 'echo' | 'class'>('real');
   const [showCollectAnimation, setShowCollectAnimation] = useState(false);
@@ -57,35 +60,8 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
   const isCollected = useFragmentStore((state) => event ? state.isCollected(event.id) : false);
 
   // ═══════════════════════════════════════════════════════════
-  // ✅ CALCULS CRITIQUES AVANT LE EARLY RETURN
-  // Évite le crash "Cannot access 'f' before initialization"
+  // EFFETS : Fermeture Échap + Scroll lock
   // ═══════════════════════════════════════════════════════════
-  const requiredClass = event ? PILLAR_TO_CLASS[event.pillar] : undefined;
-  
-  const hasExclusiveLore = !!(
-    event &&
-    selectedClass && 
-    requiredClass &&
-    selectedClass === requiredClass && 
-    event.class_lore && 
-    event.class_lore[selectedClass]
-  );
-  
-  // ✅ Simplification avec optional chaining
-  const exclusiveLore = hasExclusiveLore && selectedClass
-    ? event?.class_lore?.[selectedClass] ?? null
-    : null;
-
-  // ✅ Extraction de la logique de date avec useMemo
-  const dateLabel = useMemo(() => {
-    if (!event) return '';
-    const isRange = event.type === 'range';
-    return isRange
-      ? `${new Date(event.start).getFullYear()} → ${new Date(event.end || '').getFullYear()}`
-      : new Date(event.start).getFullYear();
-  }, [event]);
-
-  // Fermer avec la touche Échap
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -106,24 +82,48 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
     setShowCollectAnimation(false);
   }, [event]);
 
-  // Déclencher la collecte quand on ouvre la Révélation avec la bonne classe
-  useEffect(() => {
-    if (activeTab === 'class' && hasExclusiveLore && event) {
-      const isNew = collectFragment(event.id);
-      if (isNew) {
-        setShowCollectAnimation(true);
-        setTimeout(() => setShowCollectAnimation(false), 3500);
-      }
-    }
-  }, [activeTab, hasExclusiveLore, event, collectFragment]);
-
   if (!event) return null;
+
+  // ═══════════════════════════════════════════════════════════
+  // CALCULS DÉRIVÉS
+  // ═══════════════════════════════════════════════════════════
+  const isRange = event.type === 'range';
+  const dateLabel = isRange
+    ? `${new Date(event.start).getFullYear()} → ${new Date(event.end || '').getFullYear()}`
+    : new Date(event.start).getFullYear();
+
+  const requiredClass = PILLAR_TO_CLASS[event.pillar];
+  const hasExclusiveLore = !!(
+    selectedClass && 
+    requiredClass &&
+    selectedClass === requiredClass && 
+    event.class_lore && 
+    event.class_lore[selectedClass]
+  );
+  
+  const exclusiveLore = hasExclusiveLore && selectedClass
+    ? event.class_lore[selectedClass] ?? null
+    : null;
+
+  // ═══════════════════════════════════════════════════════════
+  // GESTIONNAIRE DE COLLECTE DE FRAGMENT
+  // ═══════════════════════════════════════════════════════════
+  const handleCollectFragment = () => {
+    if (!event) return;
+    const isNew = collectFragment(event.id);
+    if (isNew) {
+      setShowCollectAnimation(true);
+      setTimeout(() => setShowCollectAnimation(false), 3500);
+    }
+  };
 
   return (
     <div className="lore-overlay" onClick={onClose}>
       <div className="lore-modal" onClick={(e) => e.stopPropagation()}>
         
-        {/* ═══════════════ EN-TÊTE ═══════════════ */}
+        {/* ═══════════════════════════════════════════════════════════
+            EN-TÊTE : Icône du PILIER en gros
+            ═══════════════════════════════════════════════════════════ */}
         <div 
           className="lore-header" 
           style={{ 
@@ -141,7 +141,6 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
               {event.rune && <span className="lore-rune-mini"> • {event.rune}</span>}
             </p>
           </div>
-          {/* ✅ Accessibilité : aria-label */}
           <button 
             className="lore-close" 
             onClick={onClose}
@@ -151,7 +150,9 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           </button>
         </div>
 
-        {/* ═══════════════ ONGLETS ═══════════════ */}
+        {/* ═══════════════════════════════════════════════════════════
+            ONGLETS
+            ═══════════════════════════════════════════════════════════ */}
         <div className="lore-tabs">
           <button 
             className={`lore-tab ${activeTab === 'real' ? 'active' : ''}`} 
@@ -169,7 +170,6 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
             <button 
               className={`lore-tab ${activeTab === 'class' ? 'active' : ''} ${!hasExclusiveLore ? 'locked' : ''}`} 
               onClick={() => hasExclusiveLore && setActiveTab('class')}
-              // ✅ Accessibilité : aria-disabled
               aria-disabled={!hasExclusiveLore}
               title={!hasExclusiveLore 
                 ? `Réservé à la classe ${requiredClass ? CHARACTER_CLASSES[requiredClass].name : event.pillar}` 
@@ -180,13 +180,17 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           )}
         </div>
 
-        {/* ═══════════════ CONTENU DES ONGLETS ═══════════════ */}
+        {/* ═══════════════════════════════════════════════════════════
+            CONTENU DES ONGLETS
+            ═══════════════════════════════════════════════════════════ */}
         <div className="lore-body">
           
+          {/* Onglet Chronique Réelle */}
           {activeTab === 'real' && (
             <p className="lore-text">{event.real_lore}</p>
           )}
 
+          {/* Onglet Écho Metalverse */}
           {activeTab === 'echo' && (
             <div className="echo-container">
               <div className="echo-glow"></div>
@@ -194,9 +198,11 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
             </div>
           )}
 
+          {/* Onglet Révélation : accessible seulement si bonne classe */}
           {activeTab === 'class' && hasExclusiveLore && selectedClass && (
             <div className="class-lore-container">
               
+              {/* Animation de collecte */}
               {showCollectAnimation && (
                 <div className="fragment-collected-banner">
                   <span className="banner-icon">✨</span>
@@ -207,6 +213,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
                 </div>
               )}
 
+              {/* Fragment de Table : visible uniquement ici */}
               {event.rune && event.fragment_title && (
                 <div className={`fragment-block ${isCollected ? 'fragment-collected' : ''}`}>
                   <div className="fragment-rune">{event.rune}</div>
@@ -219,6 +226,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
                 </div>
               )}
 
+              {/* Icône de la CLASSE du joueur + nom */}
               <div className="class-lore-badge">
                 <span className="class-icon">{CHARACTER_CLASSES[selectedClass].icon}</span>
                 <span>Révélation exclusive : {CHARACTER_CLASSES[selectedClass].name}</span>
@@ -226,13 +234,24 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
               
               <p className="lore-text class-lore-text">{exclusiveLore}</p>
               
+              {/* Bouton de collecte */}
+              {!isCollected && (
+                <button 
+                  onClick={handleCollectFragment}
+                  className="fragment-collect-btn"
+                >
+                  🔮 Graver ce Fragment
+                </button>
+              )}
+              
               <div className="class-lore-footer">
-                <span className="class-lore-xp">✨ +{Math.floor(event.xp * 1.5)} XP Bonus</span>
-                <span className="class-lore-rarity">🏆 Contenu Légendaire</span>
+                <span className="class-lore-xp">✨ +{Math.floor(event.xp * 1.5)} XP Global</span>
+                <span className="class-lore-rarity">🏆 +{event.xp} XP Maîtrise</span>
               </div>
             </div>
           )}
 
+          {/* Onglet Révélation verrouillé */}
           {activeTab === 'class' && !hasExclusiveLore && (
             <div className="class-locked-container">
               <div className="class-locked-icon">🔒</div>
@@ -248,7 +267,9 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           )}
         </div>
 
-        {/* ═══════════════ FOOTER XP ═══════════════ */}
+        {/* ═══════════════════════════════════════════════════════════
+            FOOTER XP - Adapté selon l'onglet actif
+            ═══════════════════════════════════════════════════════════ */}
         {(() => {
           let footerXp: number;
           let footerStatus: string;
