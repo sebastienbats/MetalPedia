@@ -5,6 +5,9 @@ import { useClassStore } from '@/stores/classStore';
 import { CHARACTER_CLASSES } from '@/lib/gamification/classes';
 import type { CharacterClass } from '@/types/api';
 
+// ═══════════════════════════════════════════════════════════
+// INTERFACE DES ÉVÉNEMENTS DU METALVERSE
+// ═══════════════════════════════════════════════════════════
 export interface MetalverseEvent {
   id: number;
   content: string;
@@ -29,7 +32,9 @@ interface LoreModalProps {
   onClose: () => void;
 }
 
-// ✅ Mapping pilier → classe associée
+// ═══════════════════════════════════════════════════════════
+// MAPPING PILIER → CLASSE ASSOCIÉE (pour le verrouillage)
+// ═══════════════════════════════════════════════════════════
 const PILLAR_TO_CLASS: Record<string, CharacterClass> = {
   'Heavy Metal': 'paladin',
   'Thrash Metal': 'berserker',
@@ -46,6 +51,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
   const [activeTab, setActiveTab] = useState<'real' | 'echo' | 'class'>('real');
   const { selectedClass } = useClassStore();
 
+  // Fermer avec la touche Échap
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -60,6 +66,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
     };
   }, [event, onClose]);
 
+  // Réinitialiser l'onglet à chaque nouvel événement
   useEffect(() => {
     setActiveTab('real');
   }, [event]);
@@ -75,6 +82,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
   const requiredClass = PILLAR_TO_CLASS[event.pillar];
   const hasExclusiveLore = !!(
     selectedClass && 
+    requiredClass &&
     selectedClass === requiredClass && 
     event.class_lore && 
     event.class_lore[selectedClass]
@@ -86,20 +94,33 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
     <div className="lore-overlay" onClick={onClose}>
       <div className="lore-modal" onClick={(e) => e.stopPropagation()}>
         
-        {/* EN-TÊTE : Icône du pilier */}
-        <div className="lore-header" style={{ background: `linear-gradient(135deg, ${event.color || '#8b0000'} 0%, #0a0a0a 100%)` }}>
+        {/* ═══════════════════════════════════════════════════════════
+            EN-TÊTE : Icône du PILIER en gros
+            ═══════════════════════════════════════════════════════════ */}
+        <div 
+          className="lore-header" 
+          style={{ 
+            background: `linear-gradient(135deg, ${event.color || '#8b0000'} 0%, #0a0a0a 100%)` 
+          }}
+        >
           <div className="lore-header-top">
+            {/* Icône du pilier en gros */}
             <div className="lore-icon-pillar">{event.icon || '🎸'}</div>
             <div className="lore-act-badge">🎭 {event.act}</div>
           </div>
           <div className="lore-header-content">
             <h2 className="lore-title">{event.content}</h2>
-            <p className="lore-date">{dateLabel} • {event.pillar}</p>
+            <p className="lore-date">
+              {dateLabel} • {event.pillar}
+              {event.rune && <span className="lore-rune-mini"> • {event.rune}</span>}
+            </p>
           </div>
           <button className="lore-close" onClick={onClose}>✕</button>
         </div>
 
-        {/* ONGLETS */}
+        {/* ═══════════════════════════════════════════════════════════
+            ONGLETS
+            ═══════════════════════════════════════════════════════════ */}
         <div className="lore-tabs">
           <button 
             className={`lore-tab ${activeTab === 'real' ? 'active' : ''}`} 
@@ -118,7 +139,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
               className={`lore-tab ${activeTab === 'class' ? 'active' : ''} ${!hasExclusiveLore ? 'locked' : ''}`} 
               onClick={() => hasExclusiveLore && setActiveTab('class')}
               title={!hasExclusiveLore 
-                ? `Réserve à la classe ${requiredClass ? CHARACTER_CLASSES[requiredClass].name : event.pillar}` 
+                ? `Réservé à la classe ${requiredClass ? CHARACTER_CLASSES[requiredClass].name : event.pillar}` 
                 : "Accéder à la Révélation"}
             >
               {hasExclusiveLore ? '🗝️ Révélation' : '🔒 Verrouillé'}
@@ -126,15 +147,17 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           )}
         </div>
 
-        {/* CONTENU */}
+        {/* ═══════════════════════════════════════════════════════════
+            CONTENU DES ONGLETS
+            ═══════════════════════════════════════════════════════════ */}
         <div className="lore-body">
           
-          {/* Chronique Réelle */}
+          {/* Onglet Chronique Réelle */}
           {activeTab === 'real' && (
             <p className="lore-text">{event.real_lore}</p>
           )}
 
-          {/* Écho Metalverse */}
+          {/* Onglet Écho Metalverse */}
           {activeTab === 'echo' && (
             <div className="echo-container">
               <div className="echo-glow"></div>
@@ -142,11 +165,11 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
             </div>
           )}
 
-          {/* ✅ Révélation : accessible seulement si bonne classe */}
+          {/* ✅ Onglet Révélation : accessible seulement si bonne classe */}
           {activeTab === 'class' && hasExclusiveLore && selectedClass && (
             <div className="class-lore-container">
               
-              {/* Fragment de Table */}
+              {/* Fragment de Table : visible uniquement ici */}
               {event.rune && event.fragment_title && (
                 <div className="fragment-block">
                   <div className="fragment-rune">{event.rune}</div>
@@ -157,7 +180,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
                 </div>
               )}
 
-              {/* Badge classe + icône */}
+              {/* Icône de la CLASSE du joueur + nom */}
               <div className="class-lore-badge">
                 <span className="class-icon">{CHARACTER_CLASSES[selectedClass].icon}</span>
                 <span>Révélation exclusive : {CHARACTER_CLASSES[selectedClass].name}</span>
@@ -172,7 +195,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
             </div>
           )}
 
-          {/* ✅ Verrouillé : message explicatif */}
+          {/* Onglet Révélation verrouillé */}
           {activeTab === 'class' && !hasExclusiveLore && (
             <div className="class-locked-container">
               <div className="class-locked-icon">🔒</div>
@@ -188,35 +211,37 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           )}
         </div>
 
-        {/* FOOTER XP - Adapté selon l'onglet actif */}
-{(() => {
-  // Calcul dynamique selon l'onglet actif
-  let footerXp: number;
-  let footerStatus: string;
+        {/* ═══════════════════════════════════════════════════════════
+            FOOTER XP - Adapté selon l'onglet actif
+            ═══════════════════════════════════════════════════════════ */}
+        {(() => {
+          let footerXp: number;
+          let footerStatus: string;
 
-  if (activeTab === 'real') {
-    // Onglet Chronique Réelle : 100 XP, statut Commun
-    footerXp = 100;
-    footerStatus = '🥉 Commun';
-  } else if (activeTab === 'echo') {
-    // Onglet Écho Metalverse : 150 XP, statut Rare
-    footerXp = 150;
-    footerStatus = '🥇 Rare';
-  } else {
-    // Onglet Révélation : XP de base × 1.5, statut basé sur la valeur
-    footerXp = Math.floor(event.xp * 1.5);
-    footerStatus = event.xp >= 500 ? '🏆 Légendaire' : event.xp >= 200 ? '🥇 Rare' : '🥉 Commun';
-  }
+          if (activeTab === 'real') {
+            footerXp = 100;
+            footerStatus = '🥉 Commun';
+          } else if (activeTab === 'echo') {
+            footerXp = 150;
+            footerStatus = '🥇 Rare';
+          } else {
+            footerXp = Math.floor(event.xp * 1.5);
+            footerStatus = event.xp >= 500 ? '🏆 Légendaire' : event.xp >= 200 ? '🥇 Rare' : '🥉 Commun';
+          }
 
-  return (
-    <div className="lore-footer">
-      <div className="xp-reward">
-        <span className="xp-icon">✨</span>
-        <span className="xp-text">+{footerXp} XP</span>
-      </div>
-      <div className="lore-status">
-        {footerStatus}
+          return (
+            <div className="lore-footer">
+              <div className="xp-reward">
+                <span className="xp-icon">✨</span>
+                <span className="xp-text">+{footerXp} XP</span>
+              </div>
+              <div className="lore-status">
+                {footerStatus}
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
-})()}
+}
