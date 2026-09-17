@@ -8,15 +8,15 @@ import LoreModal, { type MetalverseEvent } from './LoreModal';
 // MÉTADONNÉES DES PILIERS
 // ═══════════════════════════════════════════════════════════
 const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
-  'Heavy Metal':        { icon: '🎸', color: '#8b0000' },
-  'Thrash Metal':       { icon: '⚡', color: '#d63031' },
-  'Death Metal':        { icon: '🩸', color: '#2d3436' },
-  'Black Metal':        { icon: '💀', color: '#000000' },
-  'Power Metal':        { icon: '🔥', color: '#e17055' },
-  'Doom Metal':         { icon: '🧟', color: '#636e72' },
-  'Progressive Metal':  { icon: '🌀', color: '#00b894' },
-  'Folk Metal':         { icon: '🍀', color: '#27ae60' },
-  'Metalcore':          { icon: '💥', color: '#6c5ce7' },
+  'Heavy Metal':        { icon: '🎸', color: '#c9a227' },
+  'Thrash Metal':       { icon: '⚡', color: '#ff6f00' },
+  'Death Metal':        { icon: '🩸', color: '#8b0000' },
+  'Black Metal':        { icon: '💀', color: '#4a148c' },
+  'Power Metal':        { icon: '🔥', color: '#d63031' },
+  'Doom Metal':         { icon: '🧟', color: '#2d3436' },
+  'Progressive Metal':  { icon: '🌀', color: '#0277bd' },
+  'Folk Metal':         { icon: '🍀', color: '#2e7d32' },
+  'Metalcore':          { icon: '💥', color: '#6a1b9a' },
 };
 
 // ═══════════════════════════════════════════════════════════
