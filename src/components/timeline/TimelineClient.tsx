@@ -1738,7 +1738,7 @@ export default function TimelineClient() {
           template: function (item: any) {
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
             const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸' };
-            return `<span style="font-size:16px;margin-right:4px;">${pillarData.icon}</span><span>${item.content}</span>`;
+            return `<span style="font-size:16px;margin-right:4px;">${pillarData.icon}</span>`;
           },
         };
 
@@ -1813,10 +1813,6 @@ export default function TimelineClient() {
 
   return (
     <div className="w-full px-4 md:px-8">
-      <h2 className="text-white text-xl mb-4 text-center font-serif">
-        Timeline MetalPedia — Clique sur un événement pour découvrir son histoire
-      </h2>
-
       {/* ✅ Conteneur avec styles explicites */}
       <div
         ref={containerRef}
