@@ -704,3 +704,63 @@
   font-family: var(--font-medieval), serif;
   box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
 }
+/* ═══════════════════════════════════════════════════════════
+   FRAGMENT DE TABLE (visible uniquement dans l'onglet Révélation)
+   ═══════════════════════════════════════════════════════════ */
+.fragment-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.08) 0%, rgba(139, 0, 0, 0.12) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.06);
+  animation: fragment-reveal 0.6s ease-out;
+}
+
+@keyframes fragment-reveal {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.fragment-rune {
+  font-size: 3rem;
+  line-height: 1;
+  color: #ffd700;
+  text-shadow: 0 0 18px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 140, 0, 0.3);
+  animation: rune-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes rune-pulse {
+  0%, 100% { text-shadow: 0 0 18px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 140, 0, 0.3); }
+  50%      { text-shadow: 0 0 28px rgba(255, 215, 0, 0.9), 0 0 60px rgba(255, 140, 0, 0.5); }
+}
+
+.fragment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fragment-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255, 215, 0, 0.7);
+  font-weight: 600;
+}
+
+.fragment-title {
+  font-family: var(--font-medieval), serif;
+  font-size: 1.2rem;
+  color: #ffd700;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+@media (max-width: 767px) {
+  .fragment-rune { font-size: 2.2rem; }
+  .fragment-title { font-size: 1rem; }
+}
