@@ -401,6 +401,11 @@
   font-size: 0.9rem;
 }
 
+.lore-rune-mini {
+  color: #ffd700;
+  font-size: 1rem;
+}
+
 .lore-close {
   position: absolute;
   top: 16px;
@@ -732,6 +737,34 @@
   color: #ffd700;
   font-weight: bold;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+/* Bouton de collecte de fragment */
+.fragment-collect-btn {
+  width: 100%;
+  padding: 12px 24px;
+  margin: 16px 0;
+  background: linear-gradient(135deg, #8b0000 0%, #d63031 100%);
+  color: #fff;
+  font-family: var(--font-medieval), serif;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(139, 0, 0, 0.4);
+}
+
+.fragment-collect-btn:hover {
+  background: linear-gradient(135deg, #a00000 0%, #e63946 100%);
+  border-color: #ffd700;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+}
+
+.fragment-collect-btn:active {
+  transform: translateY(0);
 }
 
 /* ═══════════════════════════════════════════════════════════
