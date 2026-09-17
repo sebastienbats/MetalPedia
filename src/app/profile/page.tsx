@@ -242,27 +242,24 @@ export default function ProfilePage() {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          7. GRIMOIRE DU LORE (Section immersive en fin de page)
+          7. TABLE DU SAVOIR (Visualisation des fragments)
       ═══════════════════════════════════════════════════════════ */}
-      <section aria-labelledby="grimoire-title" className="text-center">
-        <h2 id="grimoire-title" className="font-metal text-3xl md:text-4xl text-metal-rust mb-4">
-          🪶 Le Grimoire du Metalverse
+      <section aria-labelledby="table-title" className="text-center">
+        <h2 id="table-title" className="font-metal text-3xl md:text-4xl text-metal-rust mb-4">
+          📜 La Table du Savoir
         </h2>
         <p className="text-gray-400 font-serif mb-6">
-          Les fragments de savoir que tu as collectés au fil de tes explorations
+          Les 85 fragments du Metalverse que tu as gravés dans ta mémoire
         </p>
-        export default function Page() {
-          return <TableOfKnowledge />;
-        }
 
         {/* Zone immersive avec runes en arrière-plan */}
         <div className="relative p-6 md:p-8 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
           {/* Calque d'arrière-plan : Runes flottantes */}
           <FloatingRunes preset="parchment" />
 
-          {/* Calque de premier plan : Grimoire */}
+          {/* Calque de premier plan : Table du Savoir */}
           <div className="relative z-10">
-            <LoreGrimoire />
+            <TableOfKnowledge />
           </div>
         </div>
       </section>
