@@ -127,9 +127,9 @@ export default function TableOfKnowledge() {
     <div className="w-full max-w-6xl mx-auto px-4 py-8">
       {/* En-tête */}
       <div className="text-center mb-8">
-        <h2 id="decouvertes-title" class="font-metal text-2xl sm:text-3xl md:text-4xl text-metal-rust mb-2">📜 La Table du Savoir
+        <h2 id="decouvertes-title" className="font-metal text-2xl sm:text-3xl md:text-4xl text-metal-rust mb-2">📜 La Table du Savoir
         </h2>
-        <p class="text-gray-400 font-serif text-sm sm:text-base mb-6">
+        <p className="text-gray-400 font-serif text-sm sm:text-base mb-6">
           {selectedClass 
             ? `En tant que ${selectedClass}, explore les fragments du Metalverse`
             : 'Choisis une classe pour explorer les fragments du Metalverse'}
