@@ -16,11 +16,11 @@ export interface MetalverseEvent {
   type?: 'point' | 'range';
   pillar: string;
   className: string;
-  icon?: string;
-  color?: string;
+  icon?: string;           // Icône du pilier (injectée par TimelineClient)
+  color?: string;          // Couleur du pilier (injectée par TimelineClient)
   act: string;
-  rune?: string;
-  fragment_title?: string;
+  rune?: string;           // Rune gravée sur ce fragment de Table
+  fragment_title?: string; // Nom poétique du fragment
   real_lore: string;
   metalverse_echo: string;
   xp: number;
@@ -78,7 +78,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
     ? `${new Date(event.start).getFullYear()} → ${new Date(event.end || '').getFullYear()}`
     : new Date(event.start).getFullYear();
 
-  // ✅ CORRECTION : Vérifier que la classe du joueur correspond au pilier de l'événement
+  // ✅ Vérifier que la classe du joueur correspond au pilier de l'événement
   const requiredClass = PILLAR_TO_CLASS[event.pillar];
   const hasExclusiveLore = !!(
     selectedClass && 
@@ -219,14 +219,17 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           let footerStatus: string;
 
           if (activeTab === 'real') {
+            // Onglet Chronique Réelle : 100 XP, statut Commun
             footerXp = 100;
             footerStatus = '🥉 Commun';
           } else if (activeTab === 'echo') {
+            // Onglet Écho Metalverse : 150 XP, statut Rare
             footerXp = 150;
             footerStatus = '🥇 Rare';
           } else {
+            // Onglet Révélation : XP de base × 1.5, statut ÉPIQUE fixe
             footerXp = Math.floor(event.xp * 1.5);
-            footerStatus = event.xp >= 500 ? '🏆 Légendaire' : event.xp >= 200 ? '🥇 Rare' : '🥉 Commun';
+            footerStatus = '🥇 Épique';
           }
 
           return (
