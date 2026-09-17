@@ -11,6 +11,7 @@ import PantheonSection from '@/components/gamification/PantheonSection';
 import PlayerCard from '@/components/gamification/PlayerCard';
 import BadgesPanel from '@/components/gamification/BadgesPanel';
 import QuestsPanel from '@/components/gamification/QuestsPanel';
+import TableOfKnowledge from '@/components/timeline/TableOfKnowledge';
 import LoreGrimoire from '@/components/gamification/LoreGrimoire';
 import FloatingRunes from '@/components/ui/FloatingRunes';
 import StatsPanel from '@/components/visual/StatsPanel';
@@ -250,6 +251,9 @@ export default function ProfilePage() {
         <p className="text-gray-400 font-serif mb-6">
           Les fragments de savoir que tu as collectés au fil de tes explorations
         </p>
+        export default function Page() {
+          return <TableOfKnowledge />;
+        }
 
         {/* Zone immersive avec runes en arrière-plan */}
         <div className="relative p-6 md:p-8 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
