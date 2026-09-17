@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useClassStore } from '@/stores/classStore';
 import { useFragmentStore } from '@/stores/fragmentStore';
 import { CHARACTER_CLASSES } from '@/lib/gamification/classes';
@@ -57,10 +57,11 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
   const isCollected = useFragmentStore((state) => event ? state.isCollected(event.id) : false);
 
   // ═══════════════════════════════════════════════════════════
-  // ✅ CORRECTION CRITIQUE : Calculs AVANT le early return
-  // Cela évite le crash "Cannot access 'f' before initialization"
+  // ✅ CALCULS CRITIQUES AVANT LE EARLY RETURN
+  // Évite le crash "Cannot access 'f' before initialization"
   // ═══════════════════════════════════════════════════════════
   const requiredClass = event ? PILLAR_TO_CLASS[event.pillar] : undefined;
+  
   const hasExclusiveLore = !!(
     event &&
     selectedClass && 
@@ -70,9 +71,19 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
     event.class_lore[selectedClass]
   );
   
-  const exclusiveLore = hasExclusiveLore && selectedClass && event?.class_lore 
-    ? event.class_lore[selectedClass] 
+  // ✅ Simplification avec optional chaining
+  const exclusiveLore = hasExclusiveLore && selectedClass
+    ? event?.class_lore?.[selectedClass] ?? null
     : null;
+
+  // ✅ Extraction de la logique de date avec useMemo
+  const dateLabel = useMemo(() => {
+    if (!event) return '';
+    const isRange = event.type === 'range';
+    return isRange
+      ? `${new Date(event.start).getFullYear()} → ${new Date(event.end || '').getFullYear()}`
+      : new Date(event.start).getFullYear();
+  }, [event]);
 
   // Fermer avec la touche Échap
   useEffect(() => {
@@ -104,20 +115,15 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
         setTimeout(() => setShowCollectAnimation(false), 3500);
       }
     }
-  }, [activeTab, hasExclusiveLore, event, collectFragment]); // ✅ Dépendances complètes
+  }, [activeTab, hasExclusiveLore, event, collectFragment]);
 
   if (!event) return null;
-
-  const isRange = event.type === 'range';
-  const dateLabel = isRange
-    ? `${new Date(event.start).getFullYear()} → ${new Date(event.end || '').getFullYear()}`
-    : new Date(event.start).getFullYear();
 
   return (
     <div className="lore-overlay" onClick={onClose}>
       <div className="lore-modal" onClick={(e) => e.stopPropagation()}>
         
-        {/* EN-TÊTE */}
+        {/* ═══════════════ EN-TÊTE ═══════════════ */}
         <div 
           className="lore-header" 
           style={{ 
@@ -135,10 +141,17 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
               {event.rune && <span className="lore-rune-mini"> • {event.rune}</span>}
             </p>
           </div>
-          <button className="lore-close" onClick={onClose}>✕</button>
+          {/* ✅ Accessibilité : aria-label */}
+          <button 
+            className="lore-close" 
+            onClick={onClose}
+            aria-label="Fermer la modale"
+          >
+            ✕
+          </button>
         </div>
 
-        {/* ONGLETS */}
+        {/* ═══════════════ ONGLETS ═══════════════ */}
         <div className="lore-tabs">
           <button 
             className={`lore-tab ${activeTab === 'real' ? 'active' : ''}`} 
@@ -156,6 +169,8 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
             <button 
               className={`lore-tab ${activeTab === 'class' ? 'active' : ''} ${!hasExclusiveLore ? 'locked' : ''}`} 
               onClick={() => hasExclusiveLore && setActiveTab('class')}
+              // ✅ Accessibilité : aria-disabled
+              aria-disabled={!hasExclusiveLore}
               title={!hasExclusiveLore 
                 ? `Réservé à la classe ${requiredClass ? CHARACTER_CLASSES[requiredClass].name : event.pillar}` 
                 : "Accéder à la Révélation"}
@@ -165,7 +180,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           )}
         </div>
 
-        {/* CONTENU DES ONGLETS */}
+        {/* ═══════════════ CONTENU DES ONGLETS ═══════════════ */}
         <div className="lore-body">
           
           {activeTab === 'real' && (
@@ -233,7 +248,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
           )}
         </div>
 
-        {/* FOOTER XP */}
+        {/* ═══════════════ FOOTER XP ═══════════════ */}
         {(() => {
           let footerXp: number;
           let footerStatus: string;
