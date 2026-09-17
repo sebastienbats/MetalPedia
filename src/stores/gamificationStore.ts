@@ -30,7 +30,7 @@ function applyClassBonus(
   actionType: 'view' | 'favorite' | 'review' | 'explore' | 'quest' | 'quiz' | 'daily',
   context?: { band?: {
     listeners?: number | null;
-    formed?: number | string | null; // 🛡️ Accepte string ou number pour une robustesse maximale
+    formed?: number | string | null;
     status?: string | null;
     biography?: string | null;
   } }
@@ -55,7 +55,6 @@ function applyClassBonus(
       isEligible = actionType === 'review';
       break;
     
-    // 🛡️ CORRECTION ROBUSTE : Gestion de l'année (string ou number)
     case 'vintage':
       if (actionType === 'view' && context?.band && context.band.formed) {
         const formedYear = Number(context.band.formed);
@@ -103,6 +102,8 @@ interface GamificationState {
   pendingTrial: { type: 'passage'; level: number; pillar: GamificationPillar } | null;
   trialBonusRemaining: number;
   trialsCompleted: number;
+  
+  timelineEventsRewarded: number[];
 
   recordView: (band: { 
     id: number; name: string; genre: string; genre_pillar?: string | null; country: string;
@@ -114,6 +115,7 @@ interface GamificationState {
   claimDailyBonus: () => void;
   completeQuest: (questId: string) => void;
   recordQuiz: (isCorrect: boolean, baseXp: number) => number;
+  recordTimelineEvent: (eventId: number, eventType: 'real' | 'echo' | 'revelation', baseXp: number) => void;
 
   completeTrial: (success: boolean) => void;
   dismissTrial: () => void;
@@ -149,6 +151,7 @@ export const useGamificationStore = create<GamificationState>()(
       pendingTrial: null,
       trialBonusRemaining: 0,
       trialsCompleted: 0,
+      timelineEventsRewarded: [],
 
       recordView: (band) => {
         const baseXp = calculateXP('VIEW_BAND');
@@ -202,7 +205,6 @@ export const useGamificationStore = create<GamificationState>()(
             pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar(newStats) };
           }
 
-          // 🛡️ Bonus proportionnel à l'XP gagnée pour une progression visible
           if (bonusApplied) {
             const selectedClass = useClassStore.getState().selectedClass;
             if (selectedClass) {
@@ -481,6 +483,63 @@ export const useGamificationStore = create<GamificationState>()(
           };
         });
         return finalXp;
+      },
+
+      recordTimelineEvent: (eventId, eventType, baseXp) => {
+        const currentClass = useClassStore.getState().selectedClass;
+        
+        set((state) => {
+          const rewardKey = eventId * 10 + (eventType === 'real' ? 1 : eventType === 'echo' ? 2 : 3);
+          if (state.timelineEventsRewarded.includes(rewardKey)) {
+            return state;
+          }
+
+          const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'explore');
+          const event = createXPEvent('VIEW_BAND', `Fragment ${eventId} - ${eventType}`);
+
+          const trialMultiplier = state.trialBonusRemaining > 0 ? 2 : 1;
+          const finalXPWithTrial = Math.round(finalXp * trialMultiplier);
+          const newTrialBonusRemaining = state.trialBonusRemaining > 0 ? state.trialBonusRemaining - 1 : 0;
+
+          const newXP = state.stats.totalXP + finalXPWithTrial;
+          const newLevel = getLevelFromXP(newXP);
+          const oldLevel = state.stats.level;
+
+          const newStats: PlayerStats = {
+            ...state.stats,
+            totalXP: newXP,
+            level: newLevel,
+          };
+
+          const completedQuests = QUESTS.filter((q) => !newStats.questsCompleted.includes(q.id) && checkQuestCompleted(q, newStats, currentClass));
+          if (completedQuests.length > 0) {
+            const questXP = completedQuests.reduce((sum, q) => sum + q.xpReward, 0);
+            newStats.totalXP += questXP;
+            newStats.questsCompleted = [...newStats.questsCompleted, ...completedQuests.map((q) => q.id)];
+          }
+
+          let pendingTrial = state.pendingTrial;
+          const crossedTrialThreshold = Math.floor(newLevel / 5) > Math.floor(oldLevel / 5) && newLevel >= 5;
+          if (crossedTrialThreshold && !state.pendingTrial) {
+            pendingTrial = { type: 'passage', level: Math.floor(newLevel / 5) * 5, pillar: getLeastExploredPillar(newStats) };
+          }
+
+          if (eventType === 'revelation' && bonusApplied && currentClass) {
+            const classMeta = getClassMetadata(currentClass);
+            const classBonusXp = Math.round(finalXp * (classMeta.bonus.multiplier - 1));
+            useClassStore.getState().addClassXp(classBonusXp);
+          }
+
+          return {
+            stats: newStats,
+            xpHistory: [event, ...state.xpHistory].slice(0, 100),
+            showLevelUpModal: newLevel > oldLevel,
+            pendingLevelUp: newLevel > oldLevel ? newLevel : null,
+            pendingTrial,
+            trialBonusRemaining: newTrialBonusRemaining,
+            timelineEventsRewarded: [...state.timelineEventsRewarded, rewardKey],
+          };
+        });
       },
 
       completeTrial: (success: boolean) => {
