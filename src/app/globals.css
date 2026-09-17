@@ -779,3 +779,15 @@
   .fragment-rune { font-size: 2.2rem; }
   .fragment-title { font-size: 1rem; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   TABLE DU SAVOIR
+   ═══════════════════════════════════════════════════════════ */
+.table-of-knowledge {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
