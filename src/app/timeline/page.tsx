@@ -1,41 +1,8 @@
-// src/app/[locale]/timeline/page.tsx
-// ou src/app/fr/timeline/page.tsx selon ta structure de routes
-
-import dynamic from 'next/dynamic';
 import type { Metadata } from 'next';
+import TimelineClientWrapper from '@/components/timeline/TimelineClientWrapper';
 
 // ═══════════════════════════════════════════════════════════
-// IMPORT DYNAMIQUE AVEC SSR DÉSACTIVÉ
-// ═══════════════════════════════════════════════════════════
-// ✅ Option A : vis-timeline manipule le DOM directement,
-// donc il NE PEUT PAS fonctionner côté serveur (SSR).
-// Next.js ne pré-rendra PAS ce composant sur le serveur,
-// éliminant définitivement l'erreur d'hydratation React #418.
-// ═══════════════════════════════════════════════════════════
-const TimelineClient = dynamic(
-  () => import('@/components/timeline/TimelineClient'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full px-4 md:px-8">
-        <h2 className="text-white text-xl mb-4 text-center font-serif">
-          Timeline MetalPedia — Chargement du Codex...
-        </h2>
-        <div 
-          className="w-full rounded-xl animate-pulse border-3 border-metal-fire/30"
-          style={{ 
-            height: '500px',
-            background: 'rgba(245, 230, 211, 0.1)',
-            borderColor: '#8b4513'
-          }}
-        />
-      </div>
-    ),
-  }
-);
-
-// ═══════════════════════════════════════════════════════════
-// MÉTADONNÉES SEO DE LA PAGE
+// MÉTADONNÉES SEO DE LA PAGE (Server Component)
 // ═══════════════════════════════════════════════════════════
 export const metadata: Metadata = {
   title: 'Timeline du Metalverse',
@@ -61,12 +28,12 @@ export const metadata: Metadata = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// PAGE TIMELINE
+// PAGE TIMELINE (Server Component)
 // ═══════════════════════════════════════════════════════════
 export default function TimelinePage() {
   return (
     <div className="container mx-auto max-w-7xl py-8">
-      {/* Introduction optionnelle */}
+      {/* Introduction */}
       <div className="text-center mb-8 px-4">
         <h1 className="font-metal text-4xl md:text-5xl text-metal-rust mb-4">
           📜 Le Codex du Metalverse
@@ -78,8 +45,8 @@ export default function TimelinePage() {
         </p>
       </div>
 
-      {/* ✅ Le composant TimelineClient est injecté ici, sans SSR */}
-      <TimelineClient />
+      {/* ✅ Le wrapper Client Component est injecté ici */}
+      <TimelineClientWrapper />
     </div>
   );
 }
