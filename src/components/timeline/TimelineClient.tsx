@@ -5,7 +5,7 @@ import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
 import LoreModal, { type MetalverseEvent } from './LoreModal';
 
 // ═══════════════════════════════════════════════════════════
-// MÉTADONNÉES DES PILIERS (Icônes PILIER pour la timeline)
+// MÉTADONNÉES DES PILIERS
 // ═══════════════════════════════════════════════════════════
 const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
   'Heavy Metal':        { icon: '🎸', color: '#8b0000' },
@@ -20,11 +20,11 @@ const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// LES 80 ÉVÉNEMENTS DU METALVERSE
+// LES 85 ÉVÉNEMENTS DU METALVERSE
 // ═══════════════════════════════════════════════════════════
 const METAL_EVENTS: MetalverseEvent[] = [
-  // ... GARDE TES 80 ÉVÉNEMENTS EXACTEMENT COMME ILS SONT ...
-  // (id: 1 à 85, avec rune, fragment_title, class_lore, etc.)
+  // ... GARDE TES 85 ÉVÉNEMENTS EXACTEMENT COMME ILS SONT ...
+  // (copie-colle ton tableau METAL_EVENTS complet ici)
   // ═══════════════════════════════════════════════════════════
   // 🎸 HEAVY METAL - Fragments de la Table Heavy (IDs 1-7)
   // ═══════════════════════════════════════════════════════════
@@ -1683,16 +1683,16 @@ const CLASS_TO_PILLAR: Record<string, string> = {
 export default function TimelineClient() {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<any>(null);
-  const [isClient, setIsClient] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<MetalverseEvent | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  // ═══════════════════════════════════════════════════════════
+  // ✅ PLUS BESOIN de isClient — le composant est 100% client
+  // grâce au dynamic import avec ssr: false dans la page parente.
+  // ═══════════════════════════════════════════════════════════
 
   useEffect(() => {
-    if (!isClient || !containerRef.current) return;
+    if (!containerRef.current) return;
 
     let timeline: any = null;
     let isMounted = true;
@@ -1700,15 +1700,14 @@ export default function TimelineClient() {
     const initTimeline = async () => {
       try {
         console.log('🔄 Initialisation de vis-timeline...');
-        
-        // ✅ Import dynamique avec fallback
+
         const visModule = await import('vis-timeline/standalone');
         const Timeline = visModule.Timeline;
         const DataSet = visModule.DataSet;
 
         if (!isMounted || !containerRef.current) return;
 
-        // ✅ Construction des items AVEC type explicite
+        // ✅ Construction des items
         const itemsArray = METAL_EVENTS.map((event) => ({
           id: event.id,
           content: event.content,
@@ -1719,8 +1718,8 @@ export default function TimelineClient() {
         }));
 
         const items = new DataSet(itemsArray);
-        
-        // ✅ Options corrigées
+
+        // ✅ Options de la timeline
         const options: any = {
           height: '500px',
           start: '1968-01-01',
@@ -1728,23 +1727,19 @@ export default function TimelineClient() {
           min: '1960-01-01',
           max: '2030-12-31',
           orientation: 'top',
-          timeAxis: { 
-            scale: 'year', 
-            step: 5 
-          },
+          timeAxis: { scale: 'year', step: 5 },
           zoomMin: 1000 * 60 * 60 * 24 * 365,       // 1 an
           zoomMax: 1000 * 60 * 60 * 24 * 365 * 70,  // 70 ans
           moveable: true,
           zoomable: true,
           showCurrentTime: false,
           selectable: true,
-          // ✅ Template corrigé : retourne du HTML complet
-          template: function(item: any) {
+          // ✅ Template : icône + texte
+          template: function (item: any) {
             const pillarName = CLASS_TO_PILLAR[item.className] || 'Heavy Metal';
             const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸' };
-            // ✅ Retourne du HTML avec icône
-            return `<span style="font-size:16px;margin-right:4px;">${pillarData.icon}</span>`;
-          }
+            return `<span style="font-size:16px;margin-right:4px;">${pillarData.icon}</span><span>${item.content}</span>`;
+          },
         };
 
         console.log('📊 Création de la timeline avec', itemsArray.length, 'événements');
@@ -1752,7 +1747,7 @@ export default function TimelineClient() {
         // ✅ Création de la timeline
         timeline = new Timeline(containerRef.current, items, options);
         timelineRef.current = timeline;
-        
+
         // ✅ Gestion de la sélection
         timeline.on('select', (properties: any) => {
           if (properties.items && properties.items.length > 0) {
@@ -1761,7 +1756,6 @@ export default function TimelineClient() {
             if (eventData) {
               const pillarName = CLASS_TO_PILLAR[eventData.className] || 'Heavy Metal';
               const pillarData = PILLAR_METADATA[pillarName] || { icon: '🎸', color: '#8b0000' };
-              
               setSelectedEvent({
                 ...eventData,
                 icon: pillarData.icon,
@@ -1770,7 +1764,7 @@ export default function TimelineClient() {
             }
           }
         });
-        
+
         // ✅ Application des styles sur les dates
         const applyDateStyles = () => {
           if (typeof window !== 'undefined') {
@@ -1787,7 +1781,7 @@ export default function TimelineClient() {
         setTimeout(applyDateStyles, 100);
         timeline.on('rangechanged', applyDateStyles);
         timeline.on('changed', applyDateStyles);
-        
+
         console.log('✅ Timeline initialisée avec le Codex du Metalverse !');
       } catch (err) {
         console.error('❌ Erreur lors de l\'initialisation de la timeline:', err);
@@ -1805,17 +1799,7 @@ export default function TimelineClient() {
         timelineRef.current = null;
       }
     };
-  }, [isClient]);
-
-  // ✅ Affichage du chargement
-  if (!isClient) {
-    return (
-      <div className="w-full p-8">
-        <h2 className="text-white text-xl mb-4 text-center">Chargement de la Timeline...</h2>
-        <div className="bg-gray-800 rounded animate-pulse" style={{ height: '500px' }} />
-      </div>
-    );
-  }
+  }, []); // ✅ Dépendance vide — s'exécute une seule fois au montage
 
   // ✅ Affichage en cas d'erreur
   if (error) {
@@ -1829,17 +1813,15 @@ export default function TimelineClient() {
 
   return (
     <div className="w-full px-4 md:px-8">
-      <h3 className="text-white text-xl mb-4 text-center font-serif">
-        Grimoire des Anciens
-        Clique sur un événement pour découvrir son histoire et son écho dans le Metalverse
-        Réunis les runes pour reconstruire les Tables du Savoir
-      </h3>
-      
+      <h2 className="text-white text-xl mb-4 text-center font-serif">
+        Timeline MetalPedia — Clique sur un événement pour découvrir son histoire
+      </h2>
+
       {/* ✅ Conteneur avec styles explicites */}
-      <div 
-        ref={containerRef} 
+      <div
+        ref={containerRef}
         className="timeline-container"
-        style={{ 
+        style={{
           width: '100%',
           height: '500px',
           minHeight: '500px',
@@ -1848,10 +1830,10 @@ export default function TimelineClient() {
           borderRadius: '12px',
           border: '3px solid #8b4513',
           boxShadow: '0 8px 32px rgba(139, 69, 19, 0.3)',
-          overflow: 'hidden'
+          overflow: 'hidden',
         }}
       />
-      
+
       <LoreModal
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
