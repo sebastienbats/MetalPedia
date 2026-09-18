@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useClassStore } from '@/stores/classStore';
 import { useFragmentStore } from '@/stores/fragmentStore';
 import { useGamificationStore } from '@/stores/gamificationStore';
+import { useNotificationStore } from '@/stores/notificationStore';
 import { CHARACTER_CLASSES } from '@/lib/gamification/classes';
 import type { CharacterClass } from '@/types/api';
 
@@ -18,11 +19,11 @@ export interface MetalverseEvent {
   type?: 'point' | 'range';
   pillar: string;
   className: string;
-  icon?: string;           // Icône du pilier (injectée par TimelineClient)
-  color?: string;          // Couleur du pilier (injectée par TimelineClient)
+  icon?: string;
+  color?: string;
   act: string;
-  rune?: string;           // Rune gravée sur ce fragment de Table
-  fragment_title?: string; // Nom poétique du fragment
+  rune?: string;
+  fragment_title?: string;
   real_lore: string;
   metalverse_echo: string;
   xp: number;
@@ -35,7 +36,7 @@ interface LoreModalProps {
 }
 
 // ═══════════════════════════════════════════════════════════
-// MAPPING PILIER → CLASSE ASSOCIÉE (pour le verrouillage)
+// MAPPING PILIER → CLASSE ASSOCIÉE
 // ═══════════════════════════════════════════════════════════
 const PILLAR_TO_CLASS: Record<string, CharacterClass> = {
   'Heavy Metal': 'paladin',
@@ -60,6 +61,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
   const collectFragment = useFragmentStore((state) => state.collectFragment);
   const isCollected = useFragmentStore((state) => (event ? state.isCollected(event.id) : false));
   const recordTimelineEvent = useGamificationStore((state) => state.recordTimelineEvent);
+  const pushNotification = useNotificationStore((s) => s.pushNotification);
 
   // ═══════════════════════════════════════════════════════════
   // CALCULS DÉRIVÉS
@@ -104,7 +106,7 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
     }
   }, [activeTab, event, recordTimelineEvent]);
 
-  // ✅ XP GLOBALE + MAÎTRISE : Révélation
+  // ✅ XP GLOBALE + MAÎTRISE + NOTIFICATION : Révélation
   useEffect(() => {
     if (activeTab === 'class' && hasExclusiveLore && event) {
       // XP Globale (1.5× l'XP de l'événement)
@@ -117,11 +119,22 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
       // Collecte automatique du fragment
       const isNew = collectFragment(event.id);
       if (isNew) {
+        // 🆕 Notification toast
+        pushNotification({
+          type: 'fragment',
+          rarity: 'epique',
+          icon: event.icon || '🔮',
+          title: `${event.fragment_title || 'Fragment'} gravé !`,
+          description: `Table ${event.pillar} • ${event.rune || '✦'}`,
+          xpGained: globalXp + event.xp,
+          duration: 5000,
+        });
+
         setShowCollectAnimation(true);
         setTimeout(() => setShowCollectAnimation(false), 3500);
       }
     }
-  }, [activeTab, hasExclusiveLore, event, recordTimelineEvent, addClassXp, collectFragment]);
+  }, [activeTab, hasExclusiveLore, event, recordTimelineEvent, addClassXp, collectFragment, pushNotification]);
 
   // ═══════════════════════════════════════════════════════════
   // EFFETS : Fermeture Échap + Scroll lock
@@ -155,6 +168,18 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
     if (!event) return;
     const isNew = collectFragment(event.id);
     if (isNew) {
+      // 🆕 Notification toast aussi pour la collecte manuelle
+      const globalXp = Math.floor(event.xp * 1.5);
+      pushNotification({
+        type: 'fragment',
+        rarity: 'epique',
+        icon: event.icon || '🔮',
+        title: `${event.fragment_title || 'Fragment'} gravé !`,
+        description: `Table ${event.pillar} • ${event.rune || '✦'}`,
+        xpGained: globalXp + event.xp,
+        duration: 5000,
+      });
+
       setShowCollectAnimation(true);
       setTimeout(() => setShowCollectAnimation(false), 3500);
     }
