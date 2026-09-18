@@ -9,6 +9,8 @@ import CommandPalette from '@/components/ui/CommandPalette';
 import XPBar from '@/components/gamification/XPBar';
 import LevelUpModal from '@/components/gamification/LevelUpModal';
 import TrialWatcher from '@/components/gamification/TrialWatcher';
+import NotificationHub from '@/components/ui/NotificationHub';
+import CelebrationOverlay from '@/components/ui/CelebrationOverlay';
 import '@/i18n';
 import './globals.css';
 
@@ -35,12 +37,11 @@ const fontMetalMania = Metal_Mania({
   display: 'swap',
 });
 
-// 🆕 Police manuscrite pour le Parchemin du Temps (Timeline)
 const fontMedievalSharp = MedievalSharp({
   subsets: ['latin'],
   weight: '400',
   variable: '--font-medieval',
-  display: 'swap', // ✅ AJOUT CRUCIAL : force l'affichage immédiat
+  display: 'swap',
 });
 
 // ═══════════════════════════════════════════
@@ -170,13 +171,11 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: themeInitializer }}
         />
 
-        {/* 🧹 NETTOYÉ : Suppression des preconnect/dns-prefetch vers metal-api.dev */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://open.spotify.com" />
       </head>
 
-      {/* 🛡️ BLINDAGE 1 : Fond solide global pour éviter toute transparence indésirable */}
       <body
         className={`${fontInter.className} antialiased min-h-screen flex flex-col bg-metal-black text-gray-100`}
         suppressHydrationWarning
@@ -191,8 +190,6 @@ export default function RootLayout({
         <Providers>
           <Header />
 
-          {/* 🛡️ BLINDAGE 2 : flex-1 pousse le footer vers le bas. 
-              pb-32 (128px) réserve un espace de sécurité pour les widgets fixes en bas de page. */}
           <main
             id="main-content"
             className="flex-1 container mx-auto px-4 py-8 max-w-7xl pb-32"
@@ -201,8 +198,6 @@ export default function RootLayout({
             {children}
           </main>
 
-          {/* 🛡️ BLINDAGE 3 : Le footer a un z-index (50) SUPÉRIEUR à la XPBar (40). 
-              Le bg-metal-black assure qu'il est 100% opaque et recouvre proprement la XPBar au scroll. */}
           <div className="relative z-50 bg-metal-black border-t border-metal-gray">
             <Footer />
           </div>
@@ -212,14 +207,17 @@ export default function RootLayout({
               ═══════════════════════════════════════════ */}
           <CommandPalette />
           <OfflineIndicator />
-          
-          {/* La XPBar reste en z-40, elle sera donc en dessous du footer (z-50) en bas de page */}
           <XPBar />
-          
           <LevelUpModal />
-          
-          {/* 🆕 SYSTÈME D'ÉPREUVES : Surveille pendingTrial et affiche le modal automatiquement */}
           <TrialWatcher />
+
+          {/* ═══════════════════════════════════════════
+              🆕 SYSTÈME DE NOTIFICATIONS & CÉLÉBRATIONS
+              - NotificationHub : toasts en z-[9998]
+              - CelebrationOverlay : plein écran en z-[9999]
+              ═══════════════════════════════════════════ */}
+          <NotificationHub />
+          <CelebrationOverlay />
         </Providers>
       </body>
     </html>
