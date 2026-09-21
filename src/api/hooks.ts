@@ -1,5 +1,5 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import type { BandDetail, BandSearchResult } from '@/types/api';
+import type { BandDetail, BandSearchResult, Album, BandMember } from '@/types/api';
 
 const API_BASE = '/api';
 
@@ -8,6 +8,13 @@ export const QUERY_KEYS = {
   bandsByGenre: (genre: string) => ['bands', 'genre', genre] as const,
   searchBands: (query: string) => ['bands', 'search', query] as const,
 };
+
+// 🆕 Type de réponse complet
+export interface BandDetailResponse {
+  band: BandDetail;
+  albums: Album[];
+  members: BandMember[];
+}
 
 export function useSearchBands(
   query: string,
@@ -43,9 +50,10 @@ export function useBandsByGenre(
   });
 }
 
+// 🆕 Retourne maintenant { band, albums, members }
 export function useBandDetails(
   bandId: number | undefined,
-  options?: Omit<UseQueryOptions<BandDetail>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<BandDetailResponse>, 'queryKey' | 'queryFn'>
 ) {
   return useQuery({
     queryKey: QUERY_KEYS.band(bandId!),
