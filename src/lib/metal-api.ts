@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import type { 
   Band, 
+  Album,
+  BandMember,
   Genre, 
   BioLang, 
   BandStatus, 
@@ -32,6 +34,30 @@ type BandRow = {
   mbid: string | null;
   country_source: string | null;
   formed_source: string | null;
+};
+
+// 🆕 Type pour les albums (Supabase)
+type AlbumRow = {
+  id: number;
+  band_id: number;
+  name: string;
+  title?: string;
+  type: string;
+  year?: number | null;
+  release_date?: string | null;
+  releaseDate?: string;
+  image_url?: string | null;
+  cover_url?: string | null;
+};
+
+// 🆕 Type pour les membres (Supabase)
+type BandMemberRow = {
+  id: number;
+  band_id: number;
+  name: string;
+  role: string;
+  years_active?: string | null;
+  is_current?: boolean;
 };
 
 export type Review = {
@@ -77,6 +103,54 @@ export const metalServerApi = {
     }
 
     return mapRowToBand(data);
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 🆕 ALBUMS & MEMBRES (pour BandDetailClient)
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * 🆕 Récupère tous les albums d'un groupe, triés par année (décroissant)
+   */
+  async getBandAlbums(bandId: number): Promise<Album[]> {
+    const { data, error } = await (supabase as any)
+      .from('albums')
+      .select('*')
+      .eq('band_id', bandId)
+      .order('year', { ascending: false }) as { 
+        data: AlbumRow[] | null; 
+        error: any 
+      };
+
+    if (error || !data) {
+      console.error(`Error fetching albums for band ${bandId}:`, error);
+      return [];
+    }
+
+    return data.map(mapRowToAlbum);
+  },
+
+  /**
+   * 🆕 Récupère tous les membres d'un groupe
+   * Triés : membres actuels d'abord, puis par rôle
+   */
+  async getBandMembers(bandId: number): Promise<BandMember[]> {
+    const { data, error } = await (supabase as any)
+      .from('band_members')
+      .select('*')
+      .eq('band_id', bandId)
+      .order('is_current', { ascending: false })
+      .order('role', { ascending: true }) as { 
+        data: BandMemberRow[] | null; 
+        error: any 
+      };
+
+    if (error || !data) {
+      console.error(`Error fetching members for band ${bandId}:`, error);
+      return [];
+    }
+
+    return data.map(mapRowToMember);
   },
 
   // ─────────────────────────────────────────────────────
@@ -131,7 +205,7 @@ export const metalServerApi = {
   // ─────────────────────────────────────────────────────
 
   /**
-   * 🆕 Récupère les statistiques des 9 piliers avec leurs sous-genres.
+   * Récupère les statistiques des 9 piliers avec leurs sous-genres.
    * Utilisé par la page /genres pour afficher les cards.
    */
   async getGenrePillarsStats(): Promise<GenrePillarStats[]> {
@@ -147,7 +221,6 @@ export const metalServerApi = {
       return [];
     }
 
-    // Grouper par pilier, puis par sous-genre
     const pillarsMap = new Map<string, Map<string, number>>();
 
     for (const band of data) {
@@ -162,7 +235,6 @@ export const metalServerApi = {
       subgenres.set(genre, (subgenres.get(genre) || 0) + 1);
     }
 
-    // Convertir en format structuré
     const result: GenrePillarStats[] = [];
 
     for (const [pillar, subgenresMap] of pillarsMap) {
@@ -179,12 +251,11 @@ export const metalServerApi = {
       });
     }
 
-    // Trier par nombre de groupes (décroissant)
     return result.sort((a, b) => b.count - a.count);
   },
 
   /**
-   * 🆕 Récupère les groupes d'un pilier, avec filtrage optionnel par sous-genre.
+   * Récupère les groupes d'un pilier, avec filtrage optionnel par sous-genre.
    * Utilisé par la page /genres/[pillar] pour afficher la liste.
    */
   async getBandsByPillar(pillar: string, subgenre?: string): Promise<Band[]> {
@@ -193,12 +264,10 @@ export const metalServerApi = {
       .select('*')
       .eq('genre_pillar', pillar);
 
-    // Filtrer par sous-genre si spécifié
     if (subgenre) {
       query = query.eq('genre', subgenre);
     }
 
-    // Trier par popularité (listeners décroissants)
     query = query.order('listeners', { ascending: false }).limit(100);
 
     const { data, error } = await query as { 
@@ -282,7 +351,7 @@ export const metalServerApi = {
       .from('reviews')
       .delete()
       .eq('id', reviewId)
-      .eq('user_id', userId); // Double sécurité : vérification côté client ET RLS
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Error deleting review:', error);
@@ -291,7 +360,7 @@ export const metalServerApi = {
   },
 
   // ─────────────────────────────────────────────────────
-  // SYSTÈME DE QUIZ (NOUVEAU)
+  // SYSTÈME DE QUIZ
   // ─────────────────────────────────────────────────────
 
   /**
@@ -314,7 +383,6 @@ export const metalServerApi = {
       return [];
     }
 
-    // Mélange simple côté client pour garantir l'aléatoire à chaque appel
     return data.sort(() => Math.random() - 0.5);
   },
 
@@ -404,12 +472,11 @@ export const metalServerApi = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// MAPPER : BandRow (Supabase) → Band (TypeScript)
+// MAPPERS
 // ═══════════════════════════════════════════════════════════
 
 function mapRowToBand(row: BandRow): Band {
   return {
-    // Identifiants & infos de base
     id: row.id,
     name: row.name,
     genre: (row.genre || 'Metal') as Genre,
@@ -417,21 +484,43 @@ function mapRowToBand(row: BandRow): Band {
     country: row.country || 'Unknown',
     formed: row.formed,
     status: (row.status || 'Unknown') as BandStatus,
-    
-    // Contenu principal
     biography: row.biography,
     image_url: row.image_url,
-    
-    // Champs Last.fm
     bio_lang: (row.bio_lang || null) as BioLang | null,
     listeners: row.listeners || 0,
     source_tag: row.source_tag,
     fetched_at: row.fetched_at,
     original_name: row.original_name,
-    
-    // Champs MusicBrainz
     mbid: row.mbid,
     country_source: (row.country_source || 'unknown') as CountrySource,
     formed_source: (row.formed_source || 'unknown') as FormedSource,
+  };
+}
+
+// 🆕 MAPPER : AlbumRow → Album (compatible avec le type Album de api.ts)
+function mapRowToAlbum(row: AlbumRow): Album {
+  return {
+    id: row.id,
+    band_id: row.band_id,
+    name: row.name,
+    title: row.title || row.name,
+    type: row.type || 'Album',
+    year: row.year,
+    // ✅ Fusionne releaseDate et release_date en un seul champ releaseDate
+    releaseDate: row.releaseDate || row.release_date || (row.year ? String(row.year) : undefined),
+    image_url: row.image_url || row.cover_url,
+    cover_url: row.cover_url || row.image_url,
+  };
+}
+
+// 🆕 MAPPER : BandMemberRow → BandMember (compatible avec le type BandMember de api.ts)
+function mapRowToMember(row: BandMemberRow): BandMember {
+  return {
+    id: row.id,
+    band_id: row.band_id,
+    name: row.name,
+    role: row.role,
+    years_active: row.years_active,
+    is_current: row.is_current,
   };
 }
