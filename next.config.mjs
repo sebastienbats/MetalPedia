@@ -93,8 +93,8 @@ const cspDirectives = [
   // Autorise les scripts de ton domaine + Vercel (pour les previews SSO)
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.com https://*.vercel.app",
   "style-src 'self' 'unsafe-inline'",
-  // 🌍 CRITIQUE CARTE : Autorise les CDN de textures 3D + tes domaines d'images
-  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com",
+  // 🌍 CRITIQUE : Ajout de Last.fm pour les images de groupes/albums
+  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm.freetls.fastly.net",
   "font-src 'self' data: https://fonts.gstatic.com",
   // Autorise les connexions réseau vers tes APIs + les CDN de ressources + Vercel
   "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app",
@@ -124,6 +124,8 @@ const nextConfig = {
       { protocol: 'https', hostname: 'i.scdn.co', pathname: '/**' },
       { protocol: 'https', hostname: 'cdn.jsdelivr.net', pathname: '/**' },
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
+      // 🆕 Ajout de Last.fm pour les images de groupes/albums
+      { protocol: 'https', hostname: 'lastfm.freetls.fastly.net', pathname: '/i/u/**' },
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
