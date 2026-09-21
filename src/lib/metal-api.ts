@@ -473,11 +473,12 @@ function mapRowToAlbum(row: AlbumRow): Album {
   };
 }
 
-// 🆕 MAPPER : BandMemberRow → BandMember
+// 🆕 MAPPER : BandMemberRow → BandMember (compatible api.ts actuel)
 function mapRowToMember(row: BandMemberRow): BandMember {
   return {
-    id: row.id,
-    band_id: row.band_id,
+    // ✅ id et band_id retirés (pas dans le type BandMember)
+    // id: row.id,
+    // band_id: row.band_id,
     name: row.name,
     role: row.role,
     years_active: row.years_active ?? undefined, // ✅ null → undefined
