@@ -480,7 +480,7 @@ function mapRowToMember(row: BandMemberRow): BandMember {
     band_id: row.band_id,
     name: row.name,
     role: row.role,
-    years_active: row.years_active,
+    years_active: row.years_active ?? undefined, // ✅ null → undefined
     is_current: row.is_current,
   };
 }
