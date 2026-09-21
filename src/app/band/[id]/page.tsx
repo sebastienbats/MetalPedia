@@ -8,20 +8,19 @@ import Loader from '@/components/ui/Loader';
 // ═══════════════════════════════════════════
 // CONFIGURATION ISR
 // ═══════════════════════════════════════════
-export const revalidate = 3600; // Revalidation toutes les heures
+export const revalidate = 3600;
 
 // ═══════════════════════════════════════════
-// PARAMS (Next.js 15 : params est une Promise)
+// PARAMS (Next.js 15)
 // ═══════════════════════════════════════════
 interface Props {
   params: Promise<{ id: string }>;
 }
 
 // ═══════════════════════════════════════════
-// GÉNÉRATION STATIQUE (groupes populaires)
+// GÉNÉRATION STATIQUE
 // ═══════════════════════════════════════════
 export async function generateStaticParams() {
-  // IDs des groupes les plus populaires (pré-rendus)
   const popularBandIds = [1, 42, 123, 456, 789, 1000];
   return popularBandIds.map((id) => ({ id: String(id) }));
 }
@@ -33,13 +32,17 @@ export default async function BandPage({ params }: Props) {
   const { id } = await params;
   const bandId = parseInt(id, 10);
 
-  // Validation de l'ID
   if (isNaN(bandId) || bandId <= 0) {
     notFound();
   }
 
   try {
-    const band = await metalServerApi.getBand(bandId);
+    // 🆕 Fetch parallèle : band + albums + members
+    const [band, albums, members] = await Promise.all([
+      metalServerApi.getBand(bandId),
+      metalServerApi.getBandAlbums(bandId),
+      metalServerApi.getBandMembers(bandId),
+    ]);
 
     if (!band) {
       notFound();
@@ -47,7 +50,11 @@ export default async function BandPage({ params }: Props) {
 
     return (
       <Suspense fallback={<Loader text="Chargement de la fiche groupe..." />}>
-        <BandDetailClient band={band} />
+        <BandDetailClient 
+          band={band} 
+          albums={albums}
+          members={members}
+        />
       </Suspense>
     );
   } catch (error) {
@@ -67,9 +74,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const band = await metalServerApi.getBand(bandId);
 
     if (!band) {
-      return {
-        title: 'Groupe introuvable',
-      };
+      return { title: 'Groupe introuvable' };
     }
 
     return {
@@ -79,16 +84,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: `${band.name} | MetalPedia`,
         description: `${band.genre} — ${band.country}`,
         type: 'article',
+        images: band.image_url ? [band.image_url] : [],
       },
       twitter: {
         card: 'summary_large_image',
         title: `${band.name} | MetalPedia`,
         description: `${band.genre} — Formé en ${band.formed}`,
+        images: band.image_url ? [band.image_url] : [],
       },
     };
   } catch {
-    return {
-      title: 'Groupe introuvable — MetalPedia',
-    };
+    return { title: 'Groupe introuvable — MetalPedia' };
   }
 }
