@@ -203,30 +203,6 @@ Grâce à une base de données Supabase robuste et une architecture moderne, Met
 
 ## 🏗 Architecture
 
-### Vue d'ensemble
-┌─────────────────────────────────────────────────────────────┐
-│ CLIENT (Browser) │
-│ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ │
-│ │ Next.js App │ │ Zustand │ │ IndexedDB │ │
-│ │ Router │ │ Stores │ │ (offline) │ │
-│ └──────┬───────┘ └──────────────┘ └──────────────┘ │
-└─────────┼──────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────┐
-│ NEXT.JS API ROUTES │
-│ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ │
-│ │ /api/bands │ │/api/audio- │ │ /api/similar │ │
-│ │ │ │ features │ │ │ │
-│ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ │
-└─────────┼──────────────────┼──────────────────┼────────────┘
-│ │ │
-▼ ▼ ▼
-┌──────────────┐ ┌──────────────────┐ ┌──────────────────┐
-│ Supabase │ │ AcousticBrainz │ │ Last.fm API │
-│ (PostgreSQL)│ │ + MusicBrainz │ │ (tags, similar) │
-└──────────────┘ └──────────────────┘ └──────────────────┘
-
 ### Flux de données
 
 1. **Recherche/Consultation** : Supabase Database (Données maîtrisées)
