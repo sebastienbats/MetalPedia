@@ -228,10 +228,11 @@ Avant de commencer, assurez-vous d'avoir installé :
 
 - **Node.js** ≥ 20.0.0 ([télécharger](https://nodejs.org))
 - **npm** ≥ 10.0.0 ou **pnpm** ≥ 8
-- **Python** ≥ 3.11 (pour le ML Service)
+- **Python** ≥ 3.11 (pour les scripts d'ingestion))
 - **Docker** & **Docker Compose** (optionnel, pour l'orchestration)
 - Un compte [Supabase](https://supabase.com) (gratuit)
-- Une clé [OpenAI API](https://platform.openai.com) (optionnel)
+- Une clé API [Last.fm](https://www.last.fm/api/account/create) (gratuit)
+- Une clé [OpenAI API](https://platform.openai.com) (optionnel - Non implémenté)
 
 ---
 
@@ -357,7 +358,7 @@ UPSTASH_REDIS_REST_TOKEN=
 | `/favorites` | Vos favoris |
 | `/profile` | Votre profil gamifié (XP, badges, quêtes) |
 | `/graph/:bandId` | Graphe de similarité ML |
-| `/audio/:bandId` | Analyse audio Spotify |
+| `/audio/:bandId` | Analyse audio Last.fm |
 | `/map` | Metal Map 3D |
 | `/timeline` | Timeline historique |
 | `/ai` | Générateur de logos IA |
@@ -546,17 +547,11 @@ metal-pedia/
 |---------|----------|-------------|
 | GET | `/api/bands/:id` | Détails d'un groupe (cache 1h) |
 | GET | `/api/search?q=...` | Recherche de groupes |
-| POST | `/api/recommendations` | Recommandations ML |
+| GET | `/api/audio-features/:bandId` | 🆕 Empreinte audio (AcousticBrainz + Last.fm) 1h|
+| GET | `/api/similar/:bandId` | 🆕 Groupes similaires (Last.fm + résolution Supabase) 1h|
+| POST | `/api/reviews` | Créer une review |
+|DELETE| `/api/reviews/:id` | Supprimer une review |
 | POST | `/api/ai/logo` | Génération de logo IA |
-
-### ML Service (FastAPI)
-
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/health` | Health check |
-| POST | `/similar-bands` | Groupes similaires |
-| POST | `/recommendations` | Recommandations personnalisées |
-| POST | `/audio-features` | Features audio Spotify |
 
 ### Exemple d'appel
 
@@ -564,10 +559,11 @@ metal-pedia/
 # Recherche de groupes
 curl "http://localhost:3000/api/search?q=iron+maiden"
 
-# Recommandations ML
-curl -X POST "http://localhost:8000/similar-bands" \
-  -H "Content-Type: application/json" \
-  -d '{"band": {"band_id": 1, "name": "Iron Maiden", "genre": "Heavy Metal", "country": "UK"}, "limit": 5}'
+# Empreinte audio
+curl "http://localhost:3000/api/audio-features/1"
+
+# Groupes similaires
+curl "http://localhost:3000/api
 ```
 
 ---
