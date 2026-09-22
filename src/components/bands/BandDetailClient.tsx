@@ -34,6 +34,13 @@ export default function BandDetailClient({
 
   const pillarMeta = PILLAR_METADATA[band.genre_pillar as GamificationPillar] || PILLAR_METADATA['Heavy Metal'];
 
+  //TEST DEBUG
+// 🔍 DEBUG TEMPORAIRE — à retirer ensuite
+useEffect(() => {
+  console.log('🎸 Band reçu :', { id: band.id, name: band.name });
+  console.log('💿 Albums reçus :', albums?.length, albums);
+  console.log('👥 Membres reçus :', members?.length, members);
+},
   // ✅ Enregistrement de la vue (une seule fois au montage)
   useEffect(() => {
     if (band?.id) {
