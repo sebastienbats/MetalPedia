@@ -137,6 +137,8 @@ export interface Album {
 }
 
 export interface BandMember {
+  id: number;
+  band_id: number;
   name: string;
   role: string;
   years_active?: string;
