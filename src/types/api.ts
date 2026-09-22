@@ -116,6 +116,10 @@ export interface Band extends BandSearchResult {
   mbid?: string | null;
   country_source?: CountrySource;
   formed_source?: FormedSource;
+  
+  // 🆕 Relations optionnelles (chargées sur la fiche détaillée)
+  albums?: Album[];
+  members?: BandMember[];
 }
 
 export type BandDetail = Band;
@@ -137,8 +141,8 @@ export interface Album {
 }
 
 export interface BandMember {
-  id: number;
-  band_id: number;
+  id: number;                    // ✅ AJOUTÉ
+  band_id: number;               // ✅ AJOUTÉ
   name: string;
   role: string;
   years_active?: string;
@@ -263,7 +267,7 @@ export interface TimelineEvent {
   pillar?: GamificationPillar;
   className?: string;
   loreSnippet?: string;
-  }
+}
 
 export interface DecadeMetadata {
   year: string;
