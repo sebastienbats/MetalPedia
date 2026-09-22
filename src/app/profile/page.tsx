@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/api/authApi';
 import { useClassStore, useClassMetadata, useClassProgress } from '@/stores/classStore';
+import { useAchievementStore } from '@/stores/achievementStore'; // 🆕 Pour la migration rétroactive
+import { useFragmentStore } from '@/stores/fragmentStore'; // 🆕 Pour la migration rétroactive
 import { getClassTitle } from '@/lib/gamification/classes';
 import ClassSelectionModal from '@/components/gamification/ClassSelectionModal';
 import ClassMilestones from '@/components/gamification/ClassMilestones';
 import PantheonSection from '@/components/gamification/PantheonSection';
 import PlayerCard from '@/components/gamification/PlayerCard';
 import BadgesPanel from '@/components/gamification/BadgesPanel';
+import TimelineBadgesPanel from '@/components/gamification/TimelineBadgesPanel'; // 🆕 Panel des badges Timeline
 import QuestsPanel from '@/components/gamification/QuestsPanel';
 import TableOfKnowledge from '@/components/timeline/TableOfKnowledge';
 import LoreGrimoire from '@/components/gamification/LoreGrimoire';
@@ -99,6 +102,16 @@ export default function ProfilePage() {
   const classProgress = useClassProgress();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // 🆕 Migration rétroactive : vérifier les badges pour les fragments déjà collectés
+  // avant l'implémentation du système de succès Timeline.
+  useEffect(() => {
+    const collectedIds = useFragmentStore.getState().collectedIds;
+    if (collectedIds.length > 0) {
+      useAchievementStore.getState().checkTimelineAchievements(collectedIds);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="space-y-6 sm:space-y-8 lg:space-y-10 pb-12">
@@ -315,7 +328,7 @@ export default function ProfilePage() {
 
       {/* ═══════════════════════════════════════════════════════════
           CHAPITRE III : TES EXPLOITS
-          👤 Stats globales + 🏛️ Panthéon + 📋 Quêtes + 🏆 Badges
+          👤 Stats globales + 🏛️ Panthéon + 🏆 Badges Timeline + 📋 Quêtes + 🏆 Badges
       ═══════════════════════════════════════════════════════════ */}
       <section id="exploits" aria-labelledby="exploits-title" className="scroll-mt-24 space-y-6">
         <ChapterDivider number="III" title="Tes Exploits" />
@@ -332,7 +345,10 @@ export default function ProfilePage() {
         {/* Panthéon des Anciens (niveau MAX par classe) */}
         <PantheonSection />
 
-        {/* Quêtes + Badges */}
+        {/* 🆕 BADGES DE LA TIMELINE */}
+        <TimelineBadgesPanel />
+
+        {/* Quêtes + Badges classiques */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <QuestsPanel />
           <BadgesPanel />
