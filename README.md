@@ -205,11 +205,20 @@ Grâce à une base de données Supabase robuste et une architecture moderne, Met
 
 ### Flux de données
 
-1. **Recherche/Consultation** : Supabase Database (Données maîtrisées)
-2. **Recommandations ML** : Next.js → ML Service → Spotify API → Embeddings
-3. **Authentification** : Next.js → Supabase Auth → JWT
-4. **Reviews/Favoris** : Next.js → Supabase Database (RLS)
-5. **Offline** : IndexedDB → Sync automatique au retour en ligne
+1. **Recherche/Consultation** : Client → Next.js API Route → Supabase Database
+2. **Recommandations** : Client → `/api/similar/[bandId]` → Last.fm API → Résolution batch Supabase
+3. **Analyse Audio** : Client → `/api/audio-features/[bandId]` → AcousticBrainz (via MBID) → Fallback Last.fm
+4. **Authentification** : Next.js → Supabase Auth → JWT
+5. **Reviews/Favoris** : Next.js → Supabase Database (RLS)
+6. **Offline** : IndexedDB → Sync automatique au retour en ligne
+
+### Optimisations
+
+- **Cache ISR** : 1 heure pour les données stables (audio features, similarité)
+- **React Query** : Cache client avec `staleTime` et `cacheTime` configurés
+- **Images** : Formats AVIF/WebP servis automatiquement par `next/image`
+- **Lazy Loading** : Composants lourds (D3, Globe) chargés dynamiquement
+- **Code Splitting** : App Router Next.js avec chargement par route
 
 ---
 
