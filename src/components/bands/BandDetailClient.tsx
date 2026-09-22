@@ -19,13 +19,6 @@ interface Props {
   members?: BandMember[];
 }
 
-// 🔍 DEBUG TEMPORAIRE — à retirer ensuite
-useEffect(() => {
-  console.log('🎸 Band reçu :', { id: band.id, name: band.name });
-  console.log('💿 Albums reçus :', albums?.length, albums);
-  console.log('👥 Membres reçus :', members?.length, members);
-},
-
 // ═══════════════════════════════════════════
 // COMPOSANT PRINCIPAL
 // ═══════════════════════════════════════════
