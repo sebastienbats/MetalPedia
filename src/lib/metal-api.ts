@@ -47,13 +47,17 @@ type AlbumRow = {
   image_url?: string | null;
 };
 
+// ✅ Structure réelle de la table 'members'
 type BandMemberRow = {
   id: number;
   band_id: number;
   name: string;
   role: string;
-  years_active?: string | null;
-  is_current?: boolean;
+  source?: string | null;
+  created_at?: string | null;
+  begin_date?: string | null;
+  end_date?: string | null;
+  is_active?: boolean;
 };
 
 export type Review = {
@@ -127,15 +131,15 @@ export const metalServerApi = {
   },
 
   /**
-   * 🆕 Récupère tous les membres d'un groupe
-   * Triés : membres actuels d'abord, puis par rôle
+   * 🆕 Récupère tous les membres d'un groupe depuis la table 'members'
+   * Triés : membres actifs d'abord, puis par rôle
    */
   async getBandMembers(bandId: number): Promise<BandMember[]> {
     const { data, error } = await (supabase as any)
-      .from('band_members')
+      .from('members')  // ✅ Nom réel de la table
       .select('*')
       .eq('band_id', bandId)
-      .order('is_current', { ascending: false })
+      .order('is_active', { ascending: false })  // ✅ is_active au lieu de is_current
       .order('role', { ascending: true }) as { 
         data: BandMemberRow[] | null; 
         error: any 
@@ -459,7 +463,7 @@ function mapRowToBand(row: BandRow): Band {
   };
 }
 
-// 🆕 MAPPER : AlbumRow → Album
+// ✅ MAPPER ALBUM : avec id et band_id
 function mapRowToAlbum(row: AlbumRow): Album {
   return {
     id: row.id,
@@ -468,20 +472,35 @@ function mapRowToAlbum(row: AlbumRow): Album {
     title: row.title || row.name,
     type: row.type || 'Album',
     year: row.year,
+    release_date: row.release_date,
     releaseDate: row.release_date || (row.year ? String(row.year) : undefined),
     image_url: row.image_url || null,
   };
 }
 
-// 🆕 MAPPER : BandMemberRow → BandMember (compatible api.ts actuel)
+// ✅ MAPPER BANDMEMBER : conversion DB → Frontend
 function mapRowToMember(row: BandMemberRow): BandMember {
+  // Construire years_active depuis begin_date et end_date
+  let years_active: string | undefined = undefined;
+  
+  if (row.begin_date) {
+    if (row.is_active) {
+      years_active = `${row.begin_date} - Présent`;
+    } else if (row.end_date) {
+      years_active = `${row.begin_date} - ${row.end_date}`;
+    } else {
+      years_active = row.begin_date;
+    }
+  } else if (row.end_date) {
+    years_active = `Jusqu'en ${row.end_date}`;
+  }
+
   return {
-    // ✅ id et band_id retirés (pas dans le type BandMember)
-    // id: row.id,
-    // band_id: row.band_id,
+    id: row.id,
+    band_id: row.band_id,
     name: row.name,
     role: row.role,
-    years_active: row.years_active ?? undefined, // ✅ null → undefined
-    is_current: row.is_current,
+    years_active,
+    is_current: row.is_active ?? false,  // ✅ is_active → is_current
   };
 }
