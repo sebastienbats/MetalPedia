@@ -14,6 +14,8 @@
 
 **Explorez les groupes de metal, gagnez de l'XP, collectionnez des reliques et devenez le DIEU DU METALVERSE.**
 
+[Demo](https://metalpedia.vercel.app) • [Documentation](#-fonctionnalités-implémentées) • [Contribuer](#-contribuer)
+
 </div>
 
 ---
@@ -24,10 +26,12 @@
 - [Fonctionnalités Implémentées](#-fonctionnalités-implémentées)
 - [Système de Gamification](#-système-de-gamification)
 - [Stack Technique](#-stack-technique)
+- [Architecture](#-architecture)
 - [Installation](#-installation)
 - [Variables d'environnement](#-variables-denvironnement)
 - [Pipeline de Données Python](#-pipeline-de-données-python)
 - [Structure du Projet](#-structure-du-projet)
+- [API](#-api)
 - [Roadmap](#-roadmap)
 - [Contribuer](#-contribuer)
 - [Licence](#-licence)
@@ -40,6 +44,15 @@
 
 Grâce à une base de données Supabase robuste et une architecture moderne, MetalPedia offre une expérience fluide, fonctionnant même hors ligne, avec des visualisations de données avancées et un système de progression profondément immersif.
 
+### 🌟 Points forts
+
+- **170 000+ groupes** de metal catalogués avec données enrichies
+- **Gamification complète** : 8 rangs, 14 badges Timeline, quêtes épiques
+- **Recommandations intelligentes** : Graphe de similarité avec résolution d'IDs Supabase
+- **Analyse audio** : Empreinte sonore via AcousticBrainz + Last.fm
+- **PWA complète** : Fonctionne hors ligne, installable sur mobile
+- **Optimisé** : Images AVIF/WebP, cache ISR, lazy loading
+
 ---
 
 ## ✨ Fonctionnalités Implémentées
@@ -48,25 +61,43 @@ Grâce à une base de données Supabase robuste et une architecture moderne, Met
 - ✅ **Double système de genres** : Genre original (Last.fm) + **9 Piliers de Gamification** (Black, Death, Heavy, Thrash, Power, Doom, Progressive, Folk, Metalcore).
 - ✅ **Navigation par Piliers** : Pages dédiées `/genres` avec grille interactive et filtres dynamiques par sous-genre.
 - ✅ **Fiches de groupes enrichies** : Biographies multi-langues, pays vérifiés (MusicBrainz), année de formation, statut, et compteur d'auditeurs.
+- ✅ **Discographie complète** : Albums avec pochettes optimisées (AVIF/WebP), types (Album, EP, Single, etc.).
+- ✅ **Membres du groupe** : Liste avec rôles, périodes d'activité, badge "Actuel" pour les membres courants.
 - ✅ **Recherche intelligente** : Autocomplétion avec debounce et Command Palette (`Ctrl+K`).
 
 ### 🎮 Système de Gamification (RPG)
 - ✅ **Moteur d'XP local-first** : Calcul en temps réel via Zustand + persistance IndexedDB (`idb-keyval`), fonctionnant même hors ligne.
 - ✅ **8 Rangs épiques** : De "Novice du Silence" à "DIEU DU METALVERSE" 👑.
+- ✅ **9 Classes de personnages** : Nécromancien (Black), Exécuteur (Death), Paladin (Heavy), Berserker (Thrash), Barde (Power), Gardien du Néant (Doom), Architecte du Chaos (Prog), Chaman (Folk), Briseur de Chaînes (Metalcore).
+- ✅ **Système de Succès Timeline** : 14 badges à débloquer (5 de progression + 9 de maîtrise de pilier).
 - ✅ **Badges & Quêtes** : Déblocage conditionnel basé sur les actions (vues, favoris, exploration de genres).
 - ✅ **Lore immersif** : Chaque action est narrativisée (ex: "Rune déchiffrée", "Sortilège lancé").
+- ✅ **Migration rétroactive** : Les badges sont automatiquement débloqués pour les fragments déjà collectés.
+
+### 🎵 Analyse Audio & Recommandations
+- ✅ **AudioRadar** : Empreinte sonore avec 7 métriques (danse, énergie, humeur, acoustique, instrumental, live, tempo).
+  - 🧬 **Source primaire** : AcousticBrainz (vraies analyses audio via MusicBrainz ID)
+  - 🎯 **Fallback intelligent** : Last.fm tags + heuristiques de genre si MBID absent
+  - 🔀 **Mode hybride** : Fusion des deux sources avec indicateur de couverture
+- ✅ **SimilarityGraph** : Graphe D3.js force-directed des groupes similaires.
+  - 🎯 **Résolution batch** : Recherche des IDs Supabase réels (1 requête SQL optimisée)
+  - 📚 **Indicateur de couverture** : "X/Y groupes catalogués (Z%)"
+  - 🔗 **Liens intelligents** : Nœuds rouges = cliquables, gris = non catalogués
+  - 💾 **Cache ISR** : 1 heure pour minimiser les appels API
 
 ### 🌍 Visualisations & Data
 - ✅ **Metal Map 3D** : Globe interactif (`react-globe.gl`) montrant la densité réelle des groupes par pays, connecté en temps réel à Supabase.
-- ✅ **Graphe de similarité** : Visualisation D3.js force-directed des groupes liés.
-- ✅ **Timeline historique** : Chronologie interactive de l'histoire du metal.
+- ✅ **Timeline historique** : Chronologie interactive de l'histoire du metal avec 85 fragments à collectionner.
+- ✅ **Stats Panel** : Visualisation Recharts des statistiques de progression.
 
 ### 📱 Expérience Utilisateur & PWA
+- ✅ **Images optimisées** : `next/image` avec formats AVIF/WebP, lazy loading, fallback gracieux.
 - ✅ **Favoris Local-First** : Système de favoris robuste avec compteur dynamique dans le Header, résistant au rechargement et fonctionnant hors ligne.
 - ✅ **PWA Complète** : Installable, page de fallback offline, et service worker configuré via `next-pwa`.
 - ✅ **Thèmes dynamiques** : Système de thèmes avec persistance et script anti-flash.
 - ✅ **Layout optimisé** : Flexbox strict garantissant que le Footer ne chevauche jamais les widgets flottants (comme la XPBar).
 - ✅ **Widget Concerts** : Intégration des événements à venir sur les fiches des groupes.
+- ✅ **Sécurité renforcée** : CSP stricte, headers de sécurité, validation des entrées.
 
 ---
 
@@ -104,14 +135,45 @@ Grâce à une base de données Supabase robuste et une architecture moderne, Met
 | Compléter une quête | +50 à +1200 |
 | Bonus quotidien | +50 |
 
-### 🏅 Reliques (Badges)
+### 🏅 Système de Badges Timeline
 
-| Rareté | Nombre | Exemples |
-|--------|--------|----------|
-| ⚪ Common | 3 | Premier Sang, Esprit Curieux, Collectionneur |
-| 🔵 Rare | 5 | True Necro, Thrash Berserker, Explorateur des Royaumes |
-| 🟣 Epic | 3 | Gardien du Savoir, Chef de Horde, Maître du Lore |
-| 🟠 Legendary | 2 | Élu des Anciens, Restaureur des Tables |
+#### 📈 Badges de Progression (5)
+
+| Badge | Condition | Rareté |
+|-------|-----------|--------|
+| 🌱 Premier Pas | 1 fragment collecté | Commun |
+| 📜 Chroniqueur | 10 fragments collectés | Rare |
+| 🗺️ Explorateur du Metalverse | 25 fragments collectés | Épique |
+| 🏛️ Archiviste des Âges | 50 fragments collectés | Épique |
+| 👑 Grand Sage du Metalverse | 85 fragments (toutes Tables complètes) | Légendaire |
+
+#### 🏛️ Badges de Maîtrise (9)
+
+| Pilier | Badge | Condition |
+|--------|-------|-----------|
+| 🎸 Heavy Metal | Érudit du Heavy Metal | Table Heavy Metal complète (7/7) |
+| ⚡ Thrash Metal | Maître du Thrash | Table Thrash complète (11/11) |
+| 🩸 Death Metal | Seigneur du Death | Table Death complète (11/11) |
+| 💀 Black Metal | Hérétique du Black | Table Black complète (10/10) |
+| 🔥 Power Metal | Barde du Power | Table Power complète (9/9) |
+| 🧟 Doom Metal | Gardien du Doom | Table Doom complète (7/7) |
+| 🌀 Progressive Metal | Architecte du Progressif | Table Prog complète (8/8) |
+| 🍀 Folk Metal | Chaman du Folk | Table Folk complète (7/7) |
+| 💥 Metalcore | Briseur du Metalcore | Table Metalcore complète (10/10) |
+
+### ⚔️ Classes de Personnages
+
+| Classe | Pilier | Bonus | Icône |
+|--------|--------|-------|-------|
+| Nécromancien | Black Metal | +50% XP sur groupes obscurs | 💀 |
+| Exécuteur | Death Metal | +50% XP sur reviews | 🩸 |
+| Paladin | Heavy Metal | +50% XP global | 🎸 |
+| Berserker | Thrash Metal | +50% XP sur groupes actifs | ⚡ |
+| Barde | Power Metal | +50% XP sur favoris | 🔥 |
+| Gardien du Néant | Doom Metal | +50% XP sur groupes anciens | 🧟 |
+| Architecte du Chaos | Progressive Metal | +50% XP sur biographies | 🌀 |
+| Chaman | Folk Metal | +50% XP sur pays rares | 🍀 |
+| Briseur de Chaînes | Metalcore | +50% XP sur quiz | 💥 |
 
 ### 📜 Quêtes Épiques
 
@@ -129,15 +191,41 @@ Grâce à une base de données Supabase robuste et une architecture moderne, Met
 | Catégorie | Technologies |
 |-----------|--------------|
 | **Frontend** | Next.js 15 (App Router), React 18, TypeScript, Tailwind CSS |
-| **State & Cache** | Zustand, TanStack Query, IndexedDB (`idb-keyval`) |
-| **Backend / DB** | Supabase (PostgreSQL, Auth, RLS, Source de données principale), Python 3.12 (Scripts d'ingestion) |
+| **State & Cache** | Zustand, TanStack Query, IndexedDB (`idb-keyval`), React Query cache |
+| **Backend / DB** | Supabase (PostgreSQL, Auth, RLS, Edge Functions), Python 3.12 (Scripts d'ingestion) |
 | **Visualisation** | `react-globe.gl`, D3.js, Recharts, `vis-timeline` |
-| **APIs Externes** | Last.fm, MusicBrainz, Spotify Web API (ML Service) |
+| **APIs Externes** | Last.fm (tags, similarité), MusicBrainz (métadonnées), AcousticBrainz (analyse audio) |
+| **Images** | `next/image` (AVIF/WebP), Fastly CDN (Last.fm), Wikimedia Commons |
 | **DevOps** | Vercel, Docker, GitHub Actions (CI/CD), ESLint, Prettier, Husky |
+| **Sécurité** | CSP stricte, headers de sécurité, validation des entrées, RLS Supabase |
 
 ---
 
 ## 🏗 Architecture
+
+### Vue d'ensemble
+┌───────────────────────────────────────────────────────────┐
+│ CLIENT (Browser)                                          │
+│ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐        │
+│ │ Next.js App  │ │      Zustand │ │    IndexedDB │        │
+│ │       Router │ │ Stores       | │   (offline)  │        │
+│ └──────┬───────┘ └──────────────┘ └──────────────┘        │
+└────────┼──────────────────────────────────────────────────┘
+         │
+         ▼
+┌────────────────────────────────────────────────────────────┐
+│ NEXT.JS API ROUTES                                         │
+│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐    │
+│  │ /api/bands   │   │/api/audio-   │   │ /api/similar │    │
+│  │              │   │ features     │   │              │    │
+│  └──────┬───────┘   └──────┬───────┘   └──────┬───────┘    │
+└─────────┼──────────────────┼──────────────────┼────────────┘
+          │                  │                  │
+          ▼                  ▼                  ▼
+┌──────────────┐ ┌──────────────────┐ ┌──────────────────┐
+│ Supabase     │ │ AcousticBrainz   │ │ Last.fm API      │
+│ (PostgreSQL) │ │ + MusicBrainz     │ │ (tags, similar) │
+└──────────────┘ └──────────────────┘ └──────────────────┘
 
 ### Flux de données
 
@@ -374,14 +462,6 @@ metal-pedia/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml                 # Pipeline CI/CD
-├── ml-service/                    # Microservice Python FastAPI
-│   ├── app/
-│   │   ├── main.py               # Endpoints API
-│   │   ├── spotify_client.py     # Client Spotify
-│   │   ├── embeddings.py         # Génération embeddings
-│   │   └── recommendations.py    # Moteur de reco
-│   ├── Dockerfile
-│   └── requirements.txt
 ├── public/
 │   ├── icon.svg                  # Icône source
 │   ├── icons/                    # Icônes PWA générées
@@ -390,15 +470,16 @@ metal-pedia/
 ├── scripts/
 │   ├── generate-icons.mjs        # Génération icônes
 │   ├── export_dataset.py         # Export dataset
-│   └── upload_huggingface.py     # Upload HuggingFace
-|   └── fetch_metal_bands.py      # 🐍 fetch_metal_bands.py (fetch)
-|   └── import_to_supabase.py     # 🐍 Pipeline Python (import)
+│   ├── upload_huggingface.py     # Upload HuggingFace
+│   ├── fetch_metal_bands.py      # 🐍 Fetch depuis Last.fm + Discogs
+│   ├── import_to_supabase.py     # 🐍 Pipeline Python (import)
+│   └── import-lastfm-images.py   # 🐍 Import images Last.fm
 ├── src/
 │   ├── app/                      # App Router Next.js
-|   |   ├── genres/              # 🆕 Navigation par 9 piliers + filtres
+│   │   ├── genres/              # 🆕 Navigation par 9 piliers + filtres
 │   │   ├── layout.tsx           # Layout racine
 │   │   ├── page.tsx             # Accueil
-│   │   ├── band/[id]/           # Fiche groupe
+│   │   ├── band/[id]/           # Fiche groupe (bio, albums, membres, audio, similaires)
 │   │   ├── search/[query]/      # Recherche
 │   │   ├── favorites/           # Favoris
 │   │   ├── profile/             # Profil gamifié
@@ -409,43 +490,51 @@ metal-pedia/
 │   │   ├── ai/                  # Studio IA
 │   │   ├── opengraph-image.tsx  # OG image dynamique
 │   │   └── api/                 # Route Handlers
-│   │       ├── bands/[id]/
-│   │       ├── search/
-│   │       ├── recommendations/
-│   │       └── ai/logo/
+│   │       ├── bands/[id]/      # Détails groupe
+│   │       ├── audio-features/[bandId]/  # 🆕 Empreinte audio (AcousticBrainz + Last.fm)
+│   │       ├── similar/[bandId]/         # 🆕 Groupes similaires (Last.fm + résolution Supabase)
+│   │       ├── search/          # Recherche
+│   │       ├── reviews/         # Reviews
+│   │       └── ai/logo/         # Génération logo IA
 │   ├── components/
 │   │   ├── layout/              # Header, Footer
 │   │   ├── ui/                  # Loader, ErrorBoundary, etc.
-│   │   ├── bands/               # BandCard, AlbumCard, etc.
-│   │   ├── search/              # SearchBar
-│   │   ├── gamification/        # XPBar, LevelUpModal, etc.
-│   │   ├── social/              # ReviewForm, AuthModal
+│   │   ├── bands/               # BandCard, BandDetailClient, AlbumCard, etc.
+│   │   ├── search/              # SearchBar, SearchResultsClient
+│   │   ├── gamification/        # XPBar, LevelUpModal, PlayerCard, TimelineBadgesPanel, etc.
+│   │   ├── reviews/             # ReviewForm, ReviewList
 │   │   ├── widgets/             # ConcertsWidget, SpotifyEmbed
 │   │   ├── visual/              # StatsPanel, AudioRadar, SimilarityGraph
 │   │   ├── map/                 # MetalMapClient
-│   │   ├── timeline/            # TimelineClient
+│   │   ├── timeline/            # TimelineClient, TableOfKnowledge
+│   │   ├── graph/               # GraphClient (wrapper SimilarityGraph)
+│   │   ├── audio/               # AudioClient (wrapper AudioRadar)
 │   │   └── ai/                  # AILogoGenerator
 │   ├── stores/                  # Zustand stores
-│   │   ├── favoritesStore.ts
-│   │   ├── statsStore.ts
-│   │   ├── uiStore.ts
-│   │   └── gamificationStore.ts
+│   │   ├── favoritesStore.ts    # Favoris local-first
+│   │   ├── statsStore.ts        # Statistiques
+│   │   ├── uiStore.ts           # UI state
+│   │   ├── gamificationStore.ts # XP, rangs, quêtes
+│   │   ├── fragmentStore.ts     # 🆕 Fragments Timeline (85 à collecter)
+│   │   ├── achievementStore.ts  # 🆕 Badges Timeline (14 badges)
+│   │   ├── classStore.ts        # 🆕 Classes de personnages
+│   │   └── notificationStore.ts # Toasts et célébrations
 │   ├── lib/
 │   │   ├── supabase.ts          # Client Supabase
-│   │   ├── metal-api.ts         # Client metal-api.dev
+│   │   ├── metal-api.ts         # Client API interne
 │   │   ├── cache.ts             # Cache mémoire
 │   │   ├── offline-sync.ts      # Sync offline
 │   │   ├── d3-utils.ts          # Utilitaires D3
-│   │   └── gamification/        # Lore, badges, quests, engine
+│   │   ├── audio/               # 🆕 audioMetrics.ts (logique AcousticBrainz + Last.fm)
+│   │   └── gamification/        # Lore, badges, quests, engine, timeline-badges.ts
 │   ├── api/                     # Hooks React Query
-│   │   ├── hooks.ts
-│   │   ├── authApi.ts
-│   │   ├── reviewsApi.ts
-│   │   ├── concertsApi.ts
-│   │   └── spotify.ts
+│   │   ├── hooks.ts             # 🆕 useAudioFeatures, useSimilarBands
+│   │   ├── authApi.ts           # Authentification
+│   │   ├── reviewsApi.ts        # Reviews
+│   │   └── concertsApi.ts       # Concerts
 │   ├── types/                   # Types TypeScript
-│   │   ├── api.ts
-│   │   └── supabase.ts
+│   │   ├── api.ts               # 🆕 Band, Album, BandMember, etc.
+│   │   └── supabase.ts          # Types Supabase générés
 │   └── i18n/                    # Internationalisation
 │       ├── index.ts
 │       └── locales/
@@ -456,7 +545,7 @@ metal-pedia/
 ├── .prettierrc
 ├── docker-compose.yml
 ├── Dockerfile
-├── next.config.mjs
+├── next.config.mjs              # Config Next.js (CSP, images, PWA)
 ├── package.json
 ├── tailwind.config.js
 ├── tsconfig.json
