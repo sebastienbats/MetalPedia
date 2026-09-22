@@ -1,8 +1,6 @@
 'use client';
 
-import { useAudioFeatures } from '@/api/spotify';
 import AudioRadar from '@/components/visual/AudioRadar';
-import Loader from '@/components/ui/Loader';
 import Link from 'next/link';
 
 interface Props {
@@ -10,37 +8,27 @@ interface Props {
   bandId: number;
 }
 
+// ═══════════════════════════════════════════════════════════
+// COMPOSANT PRINCIPAL
+// ═══════════════════════════════════════════════════════════
 export default function AudioClient({ bandName, bandId }: Props) {
-  const { data: features, isLoading, error } = useAudioFeatures(bandName);
-
-  if (isLoading) {
-    return <Loader text="Récupération des données Spotify..." />;
-  }
-
-  if (error || !features) {
-    return (
-      <div className="metal-card p-8 text-center">
-        <div className="text-5xl mb-3">🎵</div>
-        <h3 className="font-serif text-xl mb-2">Groupe introuvable sur Spotify</h3>
-        <p className="text-gray-400 mb-6">
-          Ce groupe n'est pas disponible dans la base Spotify ou n'a pas de
-          données audio analysables.
-        </p>
-        <div className="flex gap-3 justify-center">
-          <Link href={`/band/${bandId}`} className="metal-button">
-            ← Retour à la fiche
-          </Link>
-          <Link href={`/graph/${bandId}`} className="metal-button">
-            🕸️ Voir le graphe
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // ✅ AudioRadar gère maintenant son propre fetch via useAudioFeatures
+  // Il ne peut JAMAIS échouer grâce au fallback Last.fm + heuristiques
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <AudioRadar features={features} bandName={bandName} />
+      {/* Header narratif */}
+      <div className="text-center">
+        <h2 className="font-metal text-2xl sm:text-3xl text-metal-rust mb-2">
+          🎵 Empreinte Sonore
+        </h2>
+        <p className="text-gray-400 font-serif text-sm sm:text-base">
+          L'analyse acoustique de <span className="text-metal-fire font-semibold">{bandName}</span>
+        </p>
+      </div>
+
+      {/* 🆕 AudioRadar en mode autonome (fetch par bandId) */}
+      <AudioRadar bandId={bandId} bandName={bandName} />
 
       {/* Actions supplémentaires */}
       <div className="metal-card p-5">
