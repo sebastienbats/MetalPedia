@@ -46,7 +46,7 @@ Grâce à une base de données Supabase robuste et une architecture moderne, Met
 
 ### 🌟 Points forts
 
-- **170 000+ groupes** de metal catalogués avec données enrichies
+- **10 000+ groupes** de metal catalogués avec données enrichies
 - **Gamification complète** : 8 rangs, 14 badges Timeline, quêtes épiques
 - **Recommandations intelligentes** : Graphe de similarité avec résolution d'IDs Supabase
 - **Analyse audio** : Empreinte sonore via AcousticBrainz + Last.fm
