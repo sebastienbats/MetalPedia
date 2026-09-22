@@ -116,16 +116,15 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
-      { protocol: 'https', hostname: 'www.metal-archives.com', pathname: '/**' },
-      { protocol: 'https', hostname: 'cdn.metal-api.dev', pathname: '/**' },
-      { protocol: 'https', hostname: 'i.scdn.co', pathname: '/**' },
-      { protocol: 'https', hostname: 'cdn.jsdelivr.net', pathname: '/**' },
-      { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
-      // 🆕 Last.fm pour les images de groupes/albums
-      { protocol: 'https', hostname: 'lastfm.freetls.fastly.net', pathname: '/i/u/**' },
-      // 🆕 Wikimedia Commons pour les images de groupes
-      { protocol: 'https', hostname: 'upload.wikimedia.org', pathname: '/wikipedia/commons/**' },
-    ],
+    { protocol: 'https', hostname: 'www.metal-archives.com', pathname: '/**' },
+    { protocol: 'https', hostname: 'cdn.metal-api.dev', pathname: '/**' },
+    { protocol: 'https', hostname: 'i.scdn.co', pathname: '/**' },
+    { protocol: 'https', hostname: 'cdn.jsdelivr.net', pathname: '/**' },
+    { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
+    { protocol: 'https', hostname: 'upload.wikimedia.org', pathname: '/wikipedia/commons/**' },
+    // ✅ Wildcard pour couvrir tous les sous-domaines Last.fm Fastly
+    { protocol: 'https', hostname: '*.freetls.fastly.net', pathname: '/**' },
+  ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
