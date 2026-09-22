@@ -93,7 +93,7 @@ const cspDirectives = [
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.com https://*.vercel.app",
   "style-src 'self' 'unsafe-inline'",
   // 🆕 Ajout de Wikimedia Commons + Last.fm
-  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm.freetls.fastly.net https://upload.wikimedia.org",
+  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://*.freetls.fastly.net https://*.wikimedia.org",
   "font-src 'self' data: https://fonts.gstatic.com",
   "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app",
   "frame-src 'self' https://open.spotify.com https://www.youtube.com https://vercel.com https://*.vercel.app",
@@ -121,7 +121,7 @@ const nextConfig = {
     { protocol: 'https', hostname: 'i.scdn.co', pathname: '/**' },
     { protocol: 'https', hostname: 'cdn.jsdelivr.net', pathname: '/**' },
     { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
-    { protocol: 'https', hostname: 'upload.wikimedia.org', pathname: '/wikipedia/commons/**' },
+    { protocol: 'https', hostname: '*.wikimedia.org', pathname: '/wikipedia/commons/**' },
     // ✅ Wildcard pour couvrir tous les sous-domaines Last.fm Fastly
     { protocol: 'https', hostname: '*.freetls.fastly.net', pathname: '/**' },
   ],
