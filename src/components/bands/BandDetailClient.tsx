@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import Image from 'next/image';
 import { useAuth } from '@/api/authApi';
 import { useGamificationStore } from '@/stores/gamificationStore';
 import type { BandDetail, Album, BandMember, GamificationPillar } from '@/types/api';
@@ -31,12 +32,20 @@ export default function BandDetailClient({
   const { recordView } = useGamificationStore();
   
   const [activeTab, setActiveTab] = useState<'about' | 'albums' | 'members' | 'reviews'>('about');
+  const [isMounted, setIsMounted] = useState(false);
+  const [bandImageError, setBandImageError] = useState(false);
+  const [albumImageErrors, setAlbumImageErrors] = useState<Set<number>>(new Set());
 
   const pillarMeta = PILLAR_METADATA[band.genre_pillar as GamificationPillar] || PILLAR_METADATA['Heavy Metal'];
 
+  // ✅ Marquer comme monté après l'hydratation
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // ✅ Enregistrement de la vue (une seule fois au montage)
   useEffect(() => {
-    if (band?.id) {
+    if (isMounted && band?.id) {
       recordView({
         id: band.id,
         name: band.name,
@@ -50,7 +59,24 @@ export default function BandDetailClient({
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [band?.id]);
+  }, [isMounted, band?.id]);
+
+  // Gestion de l'erreur de chargement de l'image du groupe
+  const handleBandImageError = () => {
+    setBandImageError(true);
+  };
+
+  // Gestion de l'erreur de chargement d'une pochette d'album
+  const handleAlbumImageError = (albumId: number) => {
+    setAlbumImageErrors(prev => new Set(prev).add(albumId));
+  };
+
+  // Vérification robuste de l'image du groupe
+  const hasValidBandImage = isMounted && 
+    !bandImageError && 
+    band.image_url && 
+    typeof band.image_url === 'string' && 
+    band.image_url.trim() !== '';
 
   // Statut
   const statusConfig = useMemo(() => {
@@ -80,7 +106,7 @@ export default function BandDetailClient({
   return (
     <div className="space-y-8 animate-fade-in" suppressHydrationWarning>
       {/* ═══════════════════════════════════════════════════════════
-          HEADER DU GROUPE (avec image réelle si disponible)
+          HEADER DU GROUPE (avec image optimisée)
       ═══════════════════════════════════════════════════════════ */}
       <div className="metal-card p-6 md:p-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
@@ -88,22 +114,26 @@ export default function BandDetailClient({
         </div>
         
         <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
-          {/* 🖼️ IMAGE DU GROUPE (z-index corrigé) */}
-          <div className="w-32 h-32 md:w-48 md:h-48 rounded-lg overflow-hidden shrink-0 shadow-2xl border border-metal-gray bg-gradient-to-br from-metal-blood to-metal-rust flex items-center justify-center relative">
+          {/* 🖼️ IMAGE DU GROUPE OPTIMISÉE */}
+          <div 
+            className="w-32 h-32 md:w-48 md:h-48 rounded-lg overflow-hidden shrink-0 shadow-2xl border border-metal-gray bg-gradient-to-br from-metal-blood to-metal-rust flex items-center justify-center relative"
+            suppressHydrationWarning
+          >
             {/* ✅ Placeholder EN ARRIÈRE-PLAN (z-0) */}
             <span className="absolute inset-0 flex items-center justify-center text-4xl md:text-6xl font-black text-white drop-shadow-lg z-0">
               {band.name.substring(0, 2).toUpperCase()}
             </span>
             
-            {/* ✅ Image AU-DESSUS (z-10) */}
-            {band.image_url && (
-              <img 
-                src={band.image_url} 
+            {/* ✅ Image optimisée AU-DESSUS (z-10) */}
+            {hasValidBandImage && (
+              <Image
+                src={band.image_url!}
                 alt={`Photo de ${band.name}`}
-                className="absolute inset-0 w-full h-full object-cover z-10"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
+                fill
+                sizes="(max-width: 768px) 128px, 192px"
+                className="object-cover z-10"
+                priority={true}
+                onError={handleBandImageError}
               />
             )}
           </div>
@@ -200,40 +230,52 @@ export default function BandDetailClient({
             </div>
           )}
 
-          {/* ✅ Discographie (z-index corrigé pour les pochettes) */}
+          {/* ✅ Discographie avec pochettes optimisées */}
           {activeTab === 'albums' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
               {albums.length > 0 ? (
-                albums.map((album) => (
-                  <div key={album.id} className="metal-card p-4 hover:border-metal-fire/50 transition-colors">
-                    <div className="flex items-start gap-3">
-                      {/* Pochette de l'album (z-index corrigé) */}
-                      <div className="w-16 h-16 rounded bg-metal-gray flex items-center justify-center text-2xl shrink-0 overflow-hidden relative">
-                        {/* ✅ Emoji EN ARRIÈRE-PLAN (z-0) */}
-                        <span className="absolute inset-0 flex items-center justify-center z-0">💿</span>
-                        
-                        {/* ✅ Image AU-DESSUS (z-10) */}
-                        {album.image_url && (
-                          <img 
-                            src={album.image_url} 
-                            alt={`Pochette ${album.name || album.title}`}
-                            className="absolute inset-0 w-full h-full object-cover z-10"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold truncate">{album.name || album.title}</h4>
-                        <p className="text-xs text-metal-fire mt-1 capitalize">{album.type}</p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {album.releaseDate || album.year || 'Année inconnue'}
-                        </p>
+                albums.map((album) => {
+                  const hasAlbumImage = isMounted && 
+                    !albumImageErrors.has(album.id) &&
+                    album.image_url && 
+                    typeof album.image_url === 'string' && 
+                    album.image_url.trim() !== '';
+                  
+                  return (
+                    <div key={album.id} className="metal-card p-4 hover:border-metal-fire/50 transition-colors">
+                      <div className="flex items-start gap-3">
+                        {/* Pochette de l'album optimisée */}
+                        <div 
+                          className="w-16 h-16 rounded bg-metal-gray flex items-center justify-center text-2xl shrink-0 overflow-hidden relative"
+                          suppressHydrationWarning
+                        >
+                          {/* ✅ Emoji EN ARRIÈRE-PLAN (z-0) */}
+                          <span className="absolute inset-0 flex items-center justify-center z-0">💿</span>
+                          
+                          {/* ✅ Image optimisée AU-DESSUS (z-10) */}
+                          {hasAlbumImage && (
+                            <Image
+                              src={album.image_url!}
+                              alt={`Pochette de ${album.name || album.title}`}
+                              fill
+                              sizes="64px"
+                              className="object-cover z-10"
+                              loading="lazy"
+                              onError={() => handleAlbumImageError(album.id)}
+                            />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold truncate">{album.name || album.title}</h4>
+                          <p className="text-xs text-metal-fire mt-1 capitalize">{album.type}</p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {album.releaseDate || album.year || 'Année inconnue'}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="col-span-full metal-card p-12 text-center text-gray-500">
                   Aucune discographie enregistrée pour ce groupe.
@@ -247,8 +289,8 @@ export default function BandDetailClient({
             <div className="metal-card p-6 animate-slide-up">
               {members.length > 0 ? (
                 <ul className="space-y-3">
-                  {members.map((member, idx) => (
-                    <li key={idx} className="flex items-center justify-between py-2 border-b border-metal-gray last:border-0">
+                  {members.map((member) => (
+                    <li key={member.id} className="flex items-center justify-between py-2 border-b border-metal-gray last:border-0">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-gray-200">{member.name}</span>
                         {member.is_current && (
