@@ -231,7 +231,6 @@ Avant de commencer, assurez-vous d'avoir installé :
 - **Python** ≥ 3.11 (pour le ML Service)
 - **Docker** & **Docker Compose** (optionnel, pour l'orchestration)
 - Un compte [Supabase](https://supabase.com) (gratuit)
-- Un compte [Spotify Developer](https://developer.spotify.com) (gratuit)
 - Une clé [OpenAI API](https://platform.openai.com) (optionnel)
 
 ---
