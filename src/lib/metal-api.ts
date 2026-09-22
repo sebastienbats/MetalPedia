@@ -47,7 +47,6 @@ type AlbumRow = {
   image_url?: string | null;
 };
 
-// ✅ Structure réelle de la table 'members'
 type BandMemberRow = {
   id: number;
   band_id: number;
@@ -106,12 +105,9 @@ export const metalServerApi = {
   },
 
   // ═══════════════════════════════════════════════════════════
-  // 🆕 ALBUMS & MEMBRES
+  // ALBUMS & MEMBRES
   // ═══════════════════════════════════════════════════════════
 
-  /**
-   * 🆕 Récupère tous les albums d'un groupe, triés par année (décroissant)
-   */
   async getBandAlbums(bandId: number): Promise<Album[]> {
     const { data, error } = await (supabase as any)
       .from('albums')
@@ -130,16 +126,12 @@ export const metalServerApi = {
     return data.map(mapRowToAlbum);
   },
 
-  /**
-   * 🆕 Récupère tous les membres d'un groupe depuis la table 'members'
-   * Triés : membres actifs d'abord, puis par rôle
-   */
   async getBandMembers(bandId: number): Promise<BandMember[]> {
     const { data, error } = await (supabase as any)
-      .from('members')  // ✅ Nom réel de la table
+      .from('members')
       .select('*')
       .eq('band_id', bandId)
-      .order('is_active', { ascending: false })  // ✅ is_active au lieu de is_current
+      .order('is_active', { ascending: false })
       .order('role', { ascending: true }) as { 
         data: BandMemberRow[] | null; 
         error: any 
@@ -463,7 +455,7 @@ function mapRowToBand(row: BandRow): Band {
   };
 }
 
-// ✅ MAPPER ALBUM : avec id et band_id
+// ✅ MAPPER ALBUM : release_date DB fusionné dans releaseDate (seul champ valide du type Album)
 function mapRowToAlbum(row: AlbumRow): Album {
   return {
     id: row.id,
@@ -472,15 +464,13 @@ function mapRowToAlbum(row: AlbumRow): Album {
     title: row.title || row.name,
     type: row.type || 'Album',
     year: row.year,
-    release_date: row.release_date,
     releaseDate: row.release_date || (row.year ? String(row.year) : undefined),
     image_url: row.image_url || null,
   };
 }
 
-// ✅ MAPPER BANDMEMBER : conversion DB → Frontend
+// ✅ MAPPER BANDMEMBER : conversion DB → Frontend (begin_date/end_date → years_active, is_active → is_current)
 function mapRowToMember(row: BandMemberRow): BandMember {
-  // Construire years_active depuis begin_date et end_date
   let years_active: string | undefined = undefined;
   
   if (row.begin_date) {
@@ -501,6 +491,6 @@ function mapRowToMember(row: BandMemberRow): BandMember {
     name: row.name,
     role: row.role,
     years_active,
-    is_current: row.is_active ?? false,  // ✅ is_active → is_current
+    is_current: row.is_active ?? false,
   };
 }
