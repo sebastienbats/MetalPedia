@@ -1,35 +1,42 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import { useAuth } from '@/api/authApi';
+import { useGamificationStore } from '@/stores/gamificationStore';
 import type { BandDetail, Album, BandMember, GamificationPillar } from '@/types/api';
 import { PILLAR_METADATA } from '@/types/api';
 import Loader from '@/components/ui/Loader';
 import FavoriteButton from '@/components/bands/FavoriteButton';
 import ConcertsWidget from '@/components/widgets/ConcertsWidget';
 import ReviewList from '@/components/reviews/ReviewList';
-import { useGamificationStore } from '@/stores/gamificationStore';
 
+// ═══════════════════════════════════════════
+// PROPS
+// ═══════════════════════════════════════════
 interface Props {
   band: BandDetail;
   albums?: Album[];
   members?: BandMember[];
 }
 
+// ═══════════════════════════════════════════
+// COMPOSANT PRINCIPAL
+// ═══════════════════════════════════════════
 export default function BandDetailClient({ 
   band, 
   albums = [], 
   members = [] 
 }: Props) {
+  const { data: user } = useAuth();
+  const { recordView } = useGamificationStore();
+  
   const [activeTab, setActiveTab] = useState<'about' | 'albums' | 'members' | 'reviews'>('about');
-  const [isMounted, setIsMounted] = useState(false);
-  const recordView = useGamificationStore((state) => state.recordView);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const pillarMeta = PILLAR_METADATA[band.genre_pillar as GamificationPillar] || PILLAR_METADATA['Heavy Metal'];
 
+  // ✅ Enregistrement de la vue (une seule fois au montage)
   useEffect(() => {
-    if (isMounted && band?.id) {
+    if (band?.id) {
       recordView({
         id: band.id,
         name: band.name,
@@ -42,10 +49,10 @@ export default function BandDetailClient({
         biography: band.biography,
       });
     }
-  }, [isMounted, band, recordView]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [band?.id]);
 
-  const pillarMeta = PILLAR_METADATA[band.genre_pillar as GamificationPillar] || PILLAR_METADATA['Heavy Metal'];
-
+  // Statut
   const statusConfig = useMemo(() => {
     const configs: Record<string, { label: string; icon: string; color: string }> = {
       'Active': { label: 'Actif', icon: '🟢', color: 'text-green-500' },
@@ -53,10 +60,12 @@ export default function BandDetailClient({
       'Split-up': { label: 'Séparé', icon: '🔴', color: 'text-red-500' },
       'Unknown': { label: 'Inconnu', icon: '❓', color: 'text-gray-500' },
     };
+    
     const statusKey = (band.status && band.status in configs) ? band.status : 'Unknown';
     return configs[statusKey];
   }, [band.status]);
 
+  // Onglets
   const tabs = useMemo(() => [
     { id: 'about', label: 'Biographie' },
     { id: 'albums', label: `Discographie (${albums.length})` },
@@ -71,7 +80,7 @@ export default function BandDetailClient({
   return (
     <div className="space-y-8 animate-fade-in" suppressHydrationWarning>
       {/* ═══════════════════════════════════════════════════════════
-          HEADER DU GROUPE (IMAGE CORRIGÉE)
+          HEADER DU GROUPE (avec image réelle si disponible)
       ═══════════════════════════════════════════════════════════ */}
       <div className="metal-card p-6 md:p-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
@@ -79,9 +88,14 @@ export default function BandDetailClient({
         </div>
         
         <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
-          {/* ✅ IMAGE DU GROUPE : Structure corrigée */}
+          {/* 🖼️ IMAGE DU GROUPE (z-index corrigé) */}
           <div className="w-32 h-32 md:w-48 md:h-48 rounded-lg overflow-hidden shrink-0 shadow-2xl border border-metal-gray bg-gradient-to-br from-metal-blood to-metal-rust flex items-center justify-center relative">
-            {/* Image en arrière-plan (z-0) */}
+            {/* ✅ Placeholder EN ARRIÈRE-PLAN (z-0) */}
+            <span className="absolute inset-0 flex items-center justify-center text-4xl md:text-6xl font-black text-white drop-shadow-lg z-0">
+              {band.name.substring(0, 2).toUpperCase()}
+            </span>
+            
+            {/* ✅ Image AU-DESSUS (z-10) */}
             {band.image_url && (
               <img 
                 src={band.image_url} 
@@ -92,10 +106,6 @@ export default function BandDetailClient({
                 }}
               />
             )}
-            {/* Placeholder (z-0, visible seulement si pas d'image) */}
-            <span className="text-4xl md:text-6xl font-black text-white drop-shadow-lg relative z-0">
-              {band.name.substring(0, 2).toUpperCase()}
-            </span>
           </div>
 
           {/* Infos principales */}
@@ -114,6 +124,7 @@ export default function BandDetailClient({
               <span className="flex items-center gap-1 text-gray-300">
                 🎸 {band.genre}
               </span>
+
               <span 
                 className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border"
                 style={{ 
@@ -144,7 +155,9 @@ export default function BandDetailClient({
         </div>
       </div>
 
-      {/* Onglets de navigation */}
+      {/* ═══════════════════════════════════════════════════════════
+          ONGLETS DE NAVIGATION
+      ═══════════════════════════════════════════════════════════ */}
       <div className="border-b border-metal-gray">
         <nav className="flex gap-6 overflow-x-auto">
           {tabs.map((tab) => (
@@ -163,9 +176,14 @@ export default function BandDetailClient({
         </nav>
       </div>
 
-      {/* Contenu des onglets */}
+      {/* ═══════════════════════════════════════════════════════════
+          CONTENU DES ONGLETS
+      ═══════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
         <div className="lg:col-span-2 min-h-[300px]" suppressHydrationWarning>
+          
+          {/* Biographie */}
           {activeTab === 'about' && (
             <div className="metal-card p-6 animate-slide-up">
               <h3 className="font-serif text-xl mb-4 text-metal-rust flex items-center gap-2">
@@ -182,23 +200,23 @@ export default function BandDetailClient({
             </div>
           )}
 
-          {/* ✅ DISCOGRAPHIE : Images corrigées (z-index fixé) */}
+          {/* ✅ Discographie (z-index corrigé pour les pochettes) */}
           {activeTab === 'albums' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
               {albums.length > 0 ? (
                 albums.map((album) => (
                   <div key={album.id} className="metal-card p-4 hover:border-metal-fire/50 transition-colors">
                     <div className="flex items-start gap-3">
-                      {/* ✅ POCHETTE : Image en z-10, emoji en z-0 */}
+                      {/* Pochette de l'album (z-index corrigé) */}
                       <div className="w-16 h-16 rounded bg-metal-gray flex items-center justify-center text-2xl shrink-0 overflow-hidden relative">
-                        {/* Placeholder emoji (z-0, en arrière-plan) */}
+                        {/* ✅ Emoji EN ARRIÈRE-PLAN (z-0) */}
                         <span className="absolute inset-0 flex items-center justify-center z-0">💿</span>
                         
-                        {/* Image réelle (z-10, au-dessus) */}
+                        {/* ✅ Image AU-DESSUS (z-10) */}
                         {album.image_url && (
                           <img 
                             src={album.image_url} 
-                            alt={`Pochette de ${album.name}`}
+                            alt={`Pochette ${album.name || album.title}`}
                             className="absolute inset-0 w-full h-full object-cover z-10"
                             onError={(e) => {
                               (e.target as HTMLImageElement).style.display = 'none';
@@ -224,6 +242,7 @@ export default function BandDetailClient({
             </div>
           )}
 
+          {/* Membres (avec badge "Actuel") */}
           {activeTab === 'members' && (
             <div className="metal-card p-6 animate-slide-up">
               {members.length > 0 ? (
@@ -255,6 +274,7 @@ export default function BandDetailClient({
             </div>
           )}
 
+          {/* Avis */}
           {activeTab === 'reviews' && (
             <div className="animate-slide-up">
               <ReviewList bandId={band.id} />
@@ -262,6 +282,7 @@ export default function BandDetailClient({
           )}
         </div>
 
+        {/* Colonne latérale */}
         <div className="space-y-6">
           <ConcertsWidget bandId={band.id} bandName={band.name} />
           
