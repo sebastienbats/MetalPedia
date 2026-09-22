@@ -87,13 +87,18 @@ const securityHeaders = [
   { key: 'X-XSS-Protection', value: '1; mode=block' },
 ];
 
-// 🛡️ CSP COMPLET (avec Wikimedia Commons ajouté)
+// 🛡️ CSP COMPLET
+// Sources d'images autorisées :
+//   - Metal Archives (données historiques)
+//   - Last.fm Fastly (images principales via script Python)
+//   - Discogs (fallback #2 via script Python) 🆕
+//   - Wikimedia Commons (fallback #3 et #4)
+//   - Spotify CDN (pochettes audio)
 const cspDirectives = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.com https://*.vercel.app",
   "style-src 'self' 'unsafe-inline'",
-  // 🆕 Ajout de Wikimedia Commons + Last.fm
-  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm-img.freetls.fastly.net https://*.freetls.fastly.net https://*.wikimedia.org",
+  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm-img.freetls.fastly.net https://*.freetls.fastly.net https://img.discogs.com https://*.wikimedia.org",
   "font-src 'self' data: https://fonts.gstatic.com",
   "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app",
   "frame-src 'self' https://open.spotify.com https://www.youtube.com https://vercel.com https://*.vercel.app",
@@ -116,16 +121,30 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
-    { protocol: 'https', hostname: 'www.metal-archives.com', pathname: '/**' },
-    { protocol: 'https', hostname: 'cdn.metal-api.dev', pathname: '/**' },
-    { protocol: 'https', hostname: 'i.scdn.co', pathname: '/**' },
-    { protocol: 'https', hostname: 'cdn.jsdelivr.net', pathname: '/**' },
-    { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
-    { protocol: 'https', hostname: '*.wikimedia.org', pathname: '/wikipedia/commons/**' },
-    // ✅ Wildcard pour couvrir tous les sous-domaines Last.fm Fastly
-    { protocol: 'https', hostname: 'lastfm-img.freetls.fastly.net', pathname: '/**' },
-    { protocol: 'https', hostname: '*.freetls.fastly.net', pathname: '/**' },
-  ],
+      // Metal Archives & metal-api.dev
+      { protocol: 'https', hostname: 'www.metal-archives.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'cdn.metal-api.dev', pathname: '/**' },
+
+      // Spotify (pochettes audio)
+      { protocol: 'https', hostname: 'i.scdn.co', pathname: '/**' },
+
+      // JSDELIVR / Unpkg (assets CDN)
+      { protocol: 'https', hostname: 'cdn.jsdelivr.net', pathname: '/**' },
+
+      // Unsplash (images génériques)
+      { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
+
+      // Wikimedia Commons (médias libres - fallback #3 et #4)
+      // Restreint à /wikipedia/commons/ pour éviter les uploads non libres
+      { protocol: 'https', hostname: '*.wikimedia.org', pathname: '/wikipedia/commons/**' },
+
+      // Last.fm via Fastly CDN (source principale des images)
+      { protocol: 'https', hostname: 'lastfm-img.freetls.fastly.net', pathname: '/**' },
+      { protocol: 'https', hostname: '*.freetls.fastly.net', pathname: '/**' },
+
+      // 🆕 Discogs (fallback #2 pour le metal underground)
+      { protocol: 'https', hostname: 'img.discogs.com', pathname: '/**' },
+    ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
