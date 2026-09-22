@@ -917,3 +917,48 @@
     transition: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   15. BADGES DE LA TIMELINE
+   ═══════════════════════════════════════════════════════════ */
+.badge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  min-height: 200px;
+}
+
+.badge-card .line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Animation d'apparition des badges débloqués */
+@keyframes badge-unlock-pulse {
+  0%, 100% { 
+    transform: scale(1);
+    filter: drop-shadow(0 0 10px currentColor);
+  }
+  50% { 
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 20px currentColor);
+  }
+}
+
+.badge-card:hover .text-5xl {
+  animation: badge-unlock-pulse 1.5s ease-in-out infinite;
+}
+
+/* Responsive mobile */
+@media (max-width: 479px) {
+  .badge-card {
+    min-height: 180px;
+    padding: 12px;
+  }
+  .badge-card .text-5xl {
+    font-size: 2.5rem;
+  }
+}
