@@ -613,16 +613,17 @@ npm run test:coverage
 
 ## 🗺 Roadmap
 
-- [x] **Phase 1** : Stabilisation (React Query, Error Boundaries)
-- [x] **Phase 2** : UX avancée (Favoris, thèmes, i18n, Command Palette)
-- [x] **Phase 3** : Communauté (Auth, Reviews, Concerts)
-- [x] **Phase 4** : Performance (Next.js 15, PWA, virtualisation)
-- [x] **Phase 5** : Intelligence (ML, D3, Spotify, IA)
-- [x] **Phase 6** : Gamification (Système RPG complet avec lore)
-- [x] **Phase 7** : Industrialisation (Docker, CI/CD, ESLint)
-- [ ] **Phase 8** : Tests complets (Jest + Playwright)
-- [ ] **Phase 9** : Mobile App (React Native)
-- [ ] **Phase 10** : API GraphQL unifiée
+✅ Complété
+Phase 1 : Stabilisation (React Query, Error Boundaries)
+Phase 2 : UX avancée (Favoris, thèmes, i18n, Command Palette)
+Phase 3 : Communauté (Auth, Reviews, Concerts)
+Phase 4 : Performance (Next.js 15, PWA, virtualisation)
+Phase 5 : Intelligence (D3, recommandations, analyse audio)
+Phase 6 : Gamification (Système RPG complet avec lore)
+Phase 7 : Industrialisation (Docker, CI/CD, ESLint)
+Phase 8 : Audio Analysis (AcousticBrainz + Last.fm fallback)
+Phase 9 : Similarity Graph (résolution batch Supabase)
+Phase 10 : Timeline Badges (14 badges avec migration rétroactive)
 
 ---
 
