@@ -10,6 +10,7 @@ import Loader from '@/components/ui/Loader';
 import FavoriteButton from '@/components/bands/FavoriteButton';
 import ConcertsWidget from '@/components/widgets/ConcertsWidget';
 import ReviewList from '@/components/reviews/ReviewList';
+import GraphClient from '@/components/graph/GraphClient'; // 🆕 Import du graphe de similarité
 
 // ═══════════════════════════════════════════
 // PROPS
@@ -31,7 +32,8 @@ export default function BandDetailClient({
   const { data: user } = useAuth();
   const { recordView } = useGamificationStore();
   
-  const [activeTab, setActiveTab] = useState<'about' | 'albums' | 'members' | 'reviews'>('about');
+  // 🆕 Ajout de 'similar' au type activeTab
+  const [activeTab, setActiveTab] = useState<'about' | 'albums' | 'members' | 'reviews' | 'similar'>('about');
   const [isMounted, setIsMounted] = useState(false);
   const [bandImageError, setBandImageError] = useState(false);
   const [albumImageErrors, setAlbumImageErrors] = useState<Set<number>>(new Set());
@@ -91,12 +93,13 @@ export default function BandDetailClient({
     return configs[statusKey];
   }, [band.status]);
 
-  // Onglets
+  // 🆕 Onglets avec "Groupes similaires" EN DERNIER
   const tabs = useMemo(() => [
     { id: 'about', label: 'Biographie' },
     { id: 'albums', label: `Discographie (${albums.length})` },
     { id: 'members', label: `Membres (${members.length})` },
     { id: 'reviews', label: 'Avis' },
+    { id: 'similar', label: 'Groupes similaires 🕸️' },
   ], [albums.length, members.length]);
 
   if (!band) {
@@ -320,6 +323,20 @@ export default function BandDetailClient({
           {activeTab === 'reviews' && (
             <div className="animate-slide-up">
               <ReviewList bandId={band.id} />
+            </div>
+          )}
+
+          {/* 🆕 GROUPES SIMILAIRES (graphe interactif) - EN DERNIER */}
+          {activeTab === 'similar' && (
+            <div className="animate-slide-up">
+              <GraphClient
+                sourceBand={{
+                  band_id: band.id,
+                  name: band.name,
+                  genre: band.genre,
+                  country: band.country,
+                }}
+              />
             </div>
           )}
         </div>
