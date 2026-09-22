@@ -87,21 +87,18 @@ const securityHeaders = [
   { key: 'X-XSS-Protection', value: '1; mode=block' },
 ];
 
-// 🛡️ SOLUTION ULTIME CSP (Conforme web.dev)
+// 🛡️ CSP COMPLET (avec Wikimedia Commons ajouté)
 const cspDirectives = [
   "default-src 'self'",
-  // Autorise les scripts de ton domaine + Vercel (pour les previews SSO)
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.com https://*.vercel.app",
   "style-src 'self' 'unsafe-inline'",
-  // 🌍 CRITIQUE : Ajout de Last.fm pour les images de groupes/albums
-  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm.freetls.fastly.net",
+  // 🆕 Ajout de Wikimedia Commons + Last.fm
+  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm.freetls.fastly.net https://upload.wikimedia.org",
   "font-src 'self' data: https://fonts.gstatic.com",
-  // Autorise les connexions réseau vers tes APIs + les CDN de ressources + Vercel
   "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app",
   "frame-src 'self' https://open.spotify.com https://www.youtube.com https://vercel.com https://*.vercel.app",
   "media-src 'self' https://open.spotify.com https://*.scdn.co",
   "worker-src 'self' blob:",
-  // 📜 CRITIQUE MANIFESTE : Autorise le manifeste de ton domaine + celui de Vercel SSO
   "manifest-src 'self' https://vercel.com https://*.vercel.app",
   "object-src 'none'",
   "base-uri 'self'",
@@ -124,8 +121,10 @@ const nextConfig = {
       { protocol: 'https', hostname: 'i.scdn.co', pathname: '/**' },
       { protocol: 'https', hostname: 'cdn.jsdelivr.net', pathname: '/**' },
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
-      // 🆕 Ajout de Last.fm pour les images de groupes/albums
+      // 🆕 Last.fm pour les images de groupes/albums
       { protocol: 'https', hostname: 'lastfm.freetls.fastly.net', pathname: '/i/u/**' },
+      // 🆕 Wikimedia Commons pour les images de groupes
+      { protocol: 'https', hostname: 'upload.wikimedia.org', pathname: '/wikipedia/commons/**' },
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -169,9 +168,6 @@ const nextConfig = {
     ];
   },
 
-  // ═══════════════════════════════════════════════════════════
-  // EXPERIMENTAL (uniquement features stables de Next.js 15.1.x)
-  // ═══════════════════════════════════════════════════════════
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
@@ -194,9 +190,6 @@ const nextConfig = {
     NEXT_PUBLIC_APP_VERSION: process.env.npm_package_version || '3.0.0',
   },
 
-  // ═══════════════════════════════════════════════════════════
-  // WEBPACK CUSTOM (SIMPLIFIÉ)
-  // ═══════════════════════════════════════════════════════════
   webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
       config.resolve.fallback = {
