@@ -202,7 +202,7 @@ export default function SearchBar() {
           id="search-suggestions"
           ref={listRef}
           role="listbox"
-          className="absolute z-50 w-[calc(100%+4rem)] -left-4 sm:w-full sm:left-0 mt-2 metal-card max-h-80 overflow-y-auto border border-metal-gray rounded-lg shadow-2xl"
+          className="absolute z-50 w-[calc(100%+4rem)] -left-8 sm:w-full sm:left-0 mt-2 metal-card max-h-80 overflow-y-auto border border-metal-gray rounded-lg shadow-2xl"
         >
           {suggestions.slice(0, 8).map((band, index) => (
             <li
