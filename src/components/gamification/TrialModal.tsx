@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { metalServerApi, type QuizQuestion } from '@/lib/metal-api';
 import { useGamificationStore } from '@/stores/gamificationStore';
-import { GAMIFICATION_PILLARS, type GamificationPillar } from '@/types/api';
+import type { GamificationPillar } from '@/types/api';
 import { getClassMetadata } from '@/lib/gamification/classes';
 
 interface Props {
