@@ -135,7 +135,7 @@ export default function SearchBar() {
             aria-controls="search-suggestions"
             aria-autocomplete="list"
             role="combobox"
-            className="metal-input pl-10 pr-10 sm:pr-20"
+            className="metal-input pl-10 pr-10 sm:pr-8"
           />
           
           {isLoading && debouncedQuery.length > 0 && (
