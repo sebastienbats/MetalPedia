@@ -178,7 +178,7 @@ export default function BandDetailClient({
               )}
               {typeof band.listeners === 'number' && band.listeners > 0 && (
                 <span className="flex items-center gap-1">
-                  👥 {band.listeners.toLocaleString()} auditeurs
+                  👥 {band.listeners.toLocaleString('fr-FR')} auditeurs
                 </span>
               )}
             </div>
