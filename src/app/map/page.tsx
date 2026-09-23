@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import dynamic from 'next/dynamic';
 import MetalMapClient from '@/components/map/MetalMapClient';
 
 export const metadata: Metadata = {
