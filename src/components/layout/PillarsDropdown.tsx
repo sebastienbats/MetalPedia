@@ -4,9 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { PILLAR_METADATA, GAMIFICATION_PILLARS } from '@/types/api';
 
-// ═══════════════════════════════════════════════════════════
-// 🏛️ MENU DÉROULANT DES 9 PILIERS
-// ═══════════════════════════════════════════════════════════
 function shortLabel(pillar: string): string {
   if (pillar === 'Progressive Metal') return 'Prog';
   if (pillar === 'Metalcore') return 'Core';
@@ -17,7 +14,6 @@ export default function PillarsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Fermeture : clic extérieur + Escape
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -38,14 +34,13 @@ export default function PillarsDropdown() {
 
   return (
     <div className="relative shrink-0" ref={containerRef}>
-      {/* Bouton d'ouverture */}
       <button
         onClick={() => setIsOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={isOpen}
         title="Les 9 Piliers du Metalverse"
         aria-label="Ouvrir le menu des 9 piliers"
-        className={`flex items-center gap-1 px-2 h-9 md:h-10 rounded-lg border text-lg md:text-xl transition-all focus:outline-none focus:ring-2 focus:ring-metal-fire/50 ${
+        className={`flex items-center gap-1 px-1.5 sm:px-2 h-8 sm:h-9 md:h-10 rounded-lg border text-base sm:text-lg md:text-xl transition-all focus:outline-none focus:ring-2 focus:ring-metal-fire/50 ${
           isOpen
             ? 'border-metal-fire bg-metal-fire/10'
             : 'border-metal-gray bg-metal-black/40 hover:border-metal-fire/60 hover:bg-metal-fire/10'
@@ -62,7 +57,6 @@ export default function PillarsDropdown() {
         </span>
       </button>
 
-      {/* Menu déroulant */}
       {isOpen && (
         <div
           role="menu"
