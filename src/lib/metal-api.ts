@@ -9,7 +9,8 @@ import type {
   CountrySource, 
   FormedSource, 
   GamificationPillar, 
-  GenrePillarStats 
+  GenrePillarStats,
+  DataSource,
 } from '@/types/api';
 
 // ═══════════════════════════════════════════════════════════
@@ -34,29 +35,50 @@ type BandRow = {
   mbid: string | null;
   country_source: string | null;
   formed_source: string | null;
+
+  // 🆕 Nouveaux champs DB (supabase gen types)
+  formed_date: string | null;
+  disbanded_date: string | null;
+  discogs_id: number | null;
+  discogs_uri: string | null;
+  rating: number | null;
+  rating_votes: number | null;
+  albums_source: string | null;
+  genre_source: string | null;
+  image_source: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 type AlbumRow = {
   id: number;
   band_id: number;
-  name: string;
-  title?: string;
-  type: string;
-  year?: number | null;
-  release_date?: string | null;
-  image_url?: string | null;
+  title: string;                        // ✅ Champ principal
+  release_type: string | null;          // ✅ Album, EP, Single, Demo...
+  year: number | null;
+  image_url: string | null;
+  image_source: string | null;
+  mbid: string | null;
+  artist: string | null;
+  playcount: number | null;
+  source: string | null;
+  url: string | null;
+  uri: string | null;
+  raw_data: unknown | null;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 type BandMemberRow = {
   id: number;
   band_id: number;
   name: string;
-  role: string;
-  source?: string | null;
-  created_at?: string | null;
-  begin_date?: string | null;
-  end_date?: string | null;
-  is_active?: boolean;
+  role: string | null;
+  begin_date: string | null;
+  end_date: string | null;
+  is_active: boolean | null;
+  source: string | null;
+  created_at: string | null;
 };
 
 export type Review = {
@@ -452,45 +474,70 @@ function mapRowToBand(row: BandRow): Band {
     mbid: row.mbid,
     country_source: (row.country_source || 'unknown') as CountrySource,
     formed_source: (row.formed_source || 'unknown') as FormedSource,
+
+    // 🆕 Nouveaux champs DB
+    formed_date: row.formed_date,
+    disbanded_date: row.disbanded_date,
+    discogs_id: row.discogs_id,
+    discogs_uri: row.discogs_uri,
+    rating: row.rating,
+    rating_votes: row.rating_votes,
+    albums_source: (row.albums_source || null) as DataSource | string | null,
+    genre_source: (row.genre_source || null) as DataSource | string | null,
+    image_source: (row.image_source || null) as DataSource | string | null,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
   };
 }
 
-// ✅ MAPPER ALBUM : release_date DB fusionné dans releaseDate (seul champ valide du type Album)
+/**
+ * ✅ MAPPER ALBUM : aligné sur l'interface Album (title, release_type, year)
+ */
 function mapRowToAlbum(row: AlbumRow): Album {
   return {
     id: row.id,
     band_id: row.band_id,
-    name: row.name,
-    title: row.title || row.name,
-    type: row.type || 'Album',
+
+    // Champs principaux
+    title: row.title || 'Titre inconnu',
+    release_type: row.release_type || 'Album',
     year: row.year,
-    releaseDate: row.release_date || (row.year ? String(row.year) : undefined),
+
+    // Image
     image_url: row.image_url || null,
+    image_source: (row.image_source || null) as DataSource | string | null,
+    mbid: row.mbid,
+
+    // Métadonnées Last.fm
+    artist: row.artist,
+    playcount: row.playcount,
+    source: (row.source || null) as DataSource | string | null,
+    url: row.url,
+    uri: row.uri,
+
+    // Données brutes
+    raw_data: (row.raw_data || null) as Record<string, unknown> | null,
+
+    // Timestamps
+    created_at: row.created_at,
+    updated_at: row.updated_at,
   };
 }
 
-// ✅ MAPPER BANDMEMBER : conversion DB → Frontend (begin_date/end_date → years_active, is_active → is_current)
+/**
+ * ✅ MAPPER BANDMEMBER : aligné sur l'interface BandMember
+ * (Plus de transformation : les noms DB correspondent directement à l'interface)
+ */
 function mapRowToMember(row: BandMemberRow): BandMember {
-  let years_active: string | undefined = undefined;
-  
-  if (row.begin_date) {
-    if (row.is_active) {
-      years_active = `${row.begin_date} - Présent`;
-    } else if (row.end_date) {
-      years_active = `${row.begin_date} - ${row.end_date}`;
-    } else {
-      years_active = row.begin_date;
-    }
-  } else if (row.end_date) {
-    years_active = `Jusqu'en ${row.end_date}`;
-  }
-
   return {
     id: row.id,
     band_id: row.band_id,
     name: row.name,
     role: row.role,
-    years_active,
-    is_current: row.is_active ?? false,
+    begin_date: row.begin_date,
+    end_date: row.end_date,
+    is_active: row.is_active,
+    source: (row.source || null) as DataSource | string | null,
+    created_at: row.created_at,
   };
 }
