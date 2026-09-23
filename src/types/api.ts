@@ -4,14 +4,14 @@
 
 // Les 9 piliers stricts utilisés pour la gamification et la navigation
 export const GAMIFICATION_PILLARS = [
-  'Black Metal', 
-  'Death Metal', 
-  'Heavy Metal', 
+  'Black Metal',
+  'Death Metal',
+  'Heavy Metal',
   'Thrash Metal',
-  'Power Metal', 
-  'Doom Metal', 
-  'Progressive Metal', 
-  'Folk Metal', 
+  'Power Metal',
+  'Doom Metal',
+  'Progressive Metal',
+  'Folk Metal',
   'Metalcore'
 ] as const;
 
@@ -85,6 +85,9 @@ export type CountrySource = 'musicbrainz' | 'lastfm_tags' | 'unknown';
 
 export type FormedSource = 'musicbrainz' | 'unknown';
 
+// Source des données (pour traçabilité)
+export type DataSource = 'lastfm' | 'musicbrainz' | 'discogs' | 'metal_archives' | 'wikipedia' | 'commons' | 'unknown';
+
 // ═══════════════════════════════════════════════════════════
 // 3. INTERFACES PRINCIPALES (GROUPES)
 // ═══════════════════════════════════════════════════════════
@@ -93,8 +96,8 @@ export type FormedSource = 'musicbrainz' | 'unknown';
 export interface BandSearchResult {
   id: number;
   name: string;
-  genre: Genre;                                    // Sous-genre original (ex: "Viking Metal")
-  genre_pillar?: GamificationPillar | string | null; // Pilier de gamification (ex: "Folk Metal")
+  genre: Genre;
+  genre_pillar?: GamificationPillar | string | null;
   country: string;
   formed?: number | null;
   status?: BandStatus | string;
@@ -102,22 +105,44 @@ export interface BandSearchResult {
 }
 
 // Version complète pour les fiches détaillées
+// ✅ Alignée avec la table Supabase `bands` (supabase gen types)
 export interface Band extends BandSearchResult {
   biography: string | null;
-  
+
   // Champs enrichis via Last.fm
   bio_lang?: BioLang | null;
   listeners?: number | null;
   source_tag?: string | null;
   fetched_at?: string | null;
   original_name?: string | null;
-  
+
   // Champs enrichis via MusicBrainz
   mbid?: string | null;
   country_source?: CountrySource;
   formed_source?: FormedSource;
-  
-  // 🆕 Relations optionnelles (chargées sur la fiche détaillée)
+
+  // 🆕 Dates précises (DB bands)
+  formed_date?: string | null;
+  disbanded_date?: string | null;
+
+  // 🆕 Discogs (DB bands)
+  discogs_id?: number | null;
+  discogs_uri?: string | null;
+
+  // 🆕 Système de notation communautaire (DB bands)
+  rating?: number | null;
+  rating_votes?: number | null;
+
+  // 🆕 Traçabilité des sources (DB bands)
+  albums_source?: DataSource | string | null;
+  genre_source?: DataSource | string | null;
+  image_source?: DataSource | string | null;
+
+  // 🆕 Timestamps DB
+  created_at?: string | null;
+  updated_at?: string | null;
+
+  // Relations optionnelles (chargées sur la fiche détaillée)
   albums?: Album[];
   members?: BandMember[];
 }
@@ -128,29 +153,76 @@ export type BandDetail = Band;
 // 4. ENTITÉS ASSOCIÉES
 // ═══════════════════════════════════════════════════════════
 
+/**
+ * Album - aligné sur la table Supabase `albums`
+ *
+ * ⚠️ MAPPING DEPUIS L'ANCIENNE VERSION :
+ *   - `name`       → `title` (champ principal)
+ *   - `releaseDate`→ retiré (utiliser `year` ou `raw_data.date`)
+ *   - `type`       → `release_type`
+ */
 export interface Album {
   id: number;
   band_id: number;
-  name?: string;
-  title?: string;
+
+  // Champs principaux (DB-aligned)
+  title: string;
   year?: number | null;
-  releaseDate?: string;
-  type: string;
-  reviews?: number | any;
+  release_type?: string | null;  // Album, EP, Single, Demo, Live, Compilation...
+
+  // Pochette / média
   image_url?: string | null;
+  image_source?: DataSource | string | null;
+  mbid?: string | null;
+
+  // Métadonnées Last.fm
+  artist?: string | null;
+  playcount?: number | null;
+  source?: DataSource | string;
+  url?: string | null;
+  uri?: string | null;
+
+  // Données brutes Last.fm (contient les tracks, date précise, etc.)
+  raw_data?: Record<string, unknown> | null;
+
+  // Timestamps DB
+  created_at?: string | null;
+  updated_at?: string | null;
 }
 
+/**
+ * Membre de groupe - aligné sur la table Supabase `members`
+ *
+ * ⚠️ MAPPING DEPUIS L'ANCIENNE VERSION :
+ *   - `is_current`   → `is_active` (DB: boolean | null)
+ *   - `years_active` → `begin_date` + `end_date` (à formater côté UI)
+ *
+ * Pour afficher "années actives" dans l'UI, calculer :
+ *   const yearsActive = member.begin_date && member.end_date
+ *     ? `${member.begin_date} - ${member.end_date}`
+ *     : member.begin_date ? `${member.begin_date} - présent` : null;
+ */
 export interface BandMember {
-  id: number;                    // ✅ AJOUTÉ
-  band_id: number;               // ✅ AJOUTÉ
+  id: number;
+  band_id: number;
   name: string;
-  role: string;
-  years_active?: string;
-  is_current?: boolean;
+  role?: string | null;
+
+  // Dates de présence (DB-aligned)
+  begin_date?: string | null;
+  end_date?: string | null;
+  is_active?: boolean | null;  // true = membre actuel
+
+  // Traçabilité
+  source?: DataSource | string | null;
+  created_at?: string | null;
 }
 
 export type Member = BandMember;
 
+/**
+ * Concert (via Songkick ou autre API externe)
+ */
 export interface Concert {
   id: string;
   band_id: number;
@@ -164,6 +236,9 @@ export interface Concert {
   status?: 'upcoming' | 'past' | 'cancelled';
 }
 
+/**
+ * Recommandation (graphe de similarité)
+ */
 export interface Recommendation {
   band_id: number;
   name: string;
@@ -190,7 +265,7 @@ export interface GenrePillarStats {
 }
 
 // ═══════════════════════════════════════════════════════════
-// SYSTÈME DE CLASSES (Phase 1 - Gamification Avancée)
+// 6. SYSTÈME DE CLASSES (Phase 1 - Gamification Avancée)
 // ═══════════════════════════════════════════════════════════
 
 /**
@@ -210,7 +285,6 @@ export type CharacterClass =
 
 /**
  * Types de bonus applicables par classe.
- * Chaque bonus modifie les gains d'XP selon des critères spécifiques.
  */
 export type ClassBonusType =
   | 'low_listeners'     // Groupes peu connus
@@ -244,6 +318,7 @@ export interface ClassMetadata {
 
 /**
  * Classe d'utilisateur telle que stockée en base de données.
+ * ✅ Alignée avec la table Supabase `user_classes`
  */
 export interface UserClass {
   id: string;
@@ -254,9 +329,69 @@ export interface UserClass {
   chosen_at: string;
 }
 
-// ═══════════════════════════════════════════
-// TYPES DE LA TIMELINE
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// 7. SYSTÈME DE QUIZ (Phase gamification)
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Types de questions supportées
+ */
+export type QuizQuestionType =
+  | 'multiple_choice'    // QCM classique
+  | 'true_false'         // Vrai/Faux
+  | 'year_guess'         // Deviner l'année de sortie
+  | 'genre_guess'        // Deviner le genre/pilier
+  | 'member_identify'    // Identifier un membre
+  | 'album_identify';    // Identifier un album
+
+/**
+ * Difficulté de la question (1 = facile, 5 = expert)
+ */
+export type QuizDifficulty = 1 | 2 | 3 | 4 | 5;
+
+/**
+ * Question de quiz - alignée sur la table Supabase `quiz_questions`
+ */
+export interface QuizQuestion {
+  id: string;
+  pillar_id: string;
+  question_type: QuizQuestionType | string;
+  question_text: string;
+  correct_answer: string;
+  wrong_answers: string[];
+  band_id?: number | null;
+  difficulty?: QuizDifficulty | null;
+  created_at?: string | null;
+}
+
+/**
+ * Tentative de réponse - alignée sur la table Supabase `quiz_attempts`
+ */
+export interface QuizAttempt {
+  id: string;
+  user_id?: string | null;
+  question_id?: string | null;
+  user_answer: string;
+  is_correct: boolean;
+  xp_earned?: number | null;
+  answered_at?: string | null;
+}
+
+/**
+ * Résultat agrégé d'une session de quiz (côté frontend)
+ */
+export interface QuizSessionResult {
+  total_questions: number;
+  correct_answers: number;
+  wrong_answers: number;
+  total_xp_earned: number;
+  duration_seconds: number;
+  pillar?: GamificationPillar | null;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 8. TYPES DE LA TIMELINE
+// ═══════════════════════════════════════════════════════════
 
 export interface TimelineEvent {
   id: number;
