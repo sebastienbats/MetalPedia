@@ -6,7 +6,6 @@ import type { Concert } from '@/types/api';
 // ═══════════════════════════════════════════════════════════
 // Remplacez par votre vraie clé API (ex: Songkick) si vous en avez une
 const API_KEY = process.env.NEXT_PUBLIC_SONGKICK_API_KEY || '';
-const BASE_URL = 'https://api.songkick.com/api/3.0';
 
 // ═══════════════════════════════════════════════════════════
 // FONCTIONS UTILITAIRES
