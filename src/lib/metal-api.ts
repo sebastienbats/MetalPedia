@@ -482,9 +482,9 @@ function mapRowToBand(row: BandRow): Band {
     discogs_uri: row.discogs_uri,
     rating: row.rating,
     rating_votes: row.rating_votes,
-    albums_source: (row.albums_source || null) as DataSource | string | null,
-    genre_source: (row.genre_source || null) as DataSource | string | null,
-    image_source: (row.image_source || null) as DataSource | string | null,
+    albums_source: row.albums_source as DataSource | string | null,
+    genre_source: row.genre_source as DataSource | string | null,
+    image_source: row.image_source as DataSource | string | null,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -492,6 +492,8 @@ function mapRowToBand(row: BandRow): Band {
 
 /**
  * ✅ MAPPER ALBUM : aligné sur l'interface Album (title, release_type, year)
+ * ⚠️  Attention aux champs optionnels : l'interface Album utilise `?:` (undefined),
+ *     pas `| null`. On caste donc en `undefined` pour les champs optionnels.
  */
 function mapRowToAlbum(row: AlbumRow): Album {
   return {
@@ -505,18 +507,18 @@ function mapRowToAlbum(row: AlbumRow): Album {
 
     // Image
     image_url: row.image_url || null,
-    image_source: (row.image_source || null) as DataSource | string | null,
+    image_source: row.image_source as DataSource | string | null,
     mbid: row.mbid,
 
     // Métadonnées Last.fm
     artist: row.artist,
     playcount: row.playcount,
-    source: (row.source || null) as DataSource | string | null,
+    source: row.source as DataSource | string | undefined,  // ✅ Cast vers undefined (champs optionnel)
     url: row.url,
     uri: row.uri,
 
     // Données brutes
-    raw_data: (row.raw_data || null) as Record<string, unknown> | null,
+    raw_data: row.raw_data as Record<string, unknown> | null,
 
     // Timestamps
     created_at: row.created_at,
@@ -537,7 +539,7 @@ function mapRowToMember(row: BandMemberRow): BandMember {
     begin_date: row.begin_date,
     end_date: row.end_date,
     is_active: row.is_active,
-    source: (row.source || null) as DataSource | string | null,
+    source: row.source as DataSource | string | null,
     created_at: row.created_at,
   };
 }
