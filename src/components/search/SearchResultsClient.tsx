@@ -1,6 +1,5 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import { useSearchBands } from '@/api/hooks';
 import BandGrid from '@/components/bands/BandGrid';
 import Link from 'next/link';
