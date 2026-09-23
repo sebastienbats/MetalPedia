@@ -11,6 +11,7 @@ export default function RandomBandButton() {
   const [isRolling, setIsRolling] = useState(false);
 
   const rollTheDice = async () => {
+    // Empêcher les clics multiples pendant un roll
     if (isRolling) return;
     setIsRolling(true);
 
@@ -18,8 +19,15 @@ export default function RandomBandButton() {
       const res = await fetch('/api/bands/random');
       if (!res.ok) throw new Error('Random fetch failed');
       const band = await res.json();
+
+      // ✅ CORRECTION : Reset AVANT la navigation
+      // pour éviter que le dé reste bloqué en mode "spin"
+      setIsRolling(false);
+
       router.push(`/band/${band.id}`);
-    } catch {
+    } catch (error) {
+      console.error('[RandomBandButton] Erreur:', error);
+      // Reset en cas d'erreur également
       setIsRolling(false);
     }
   };
