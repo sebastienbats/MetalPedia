@@ -1,7 +1,7 @@
 'use client';
 
 import { useGamificationStore } from '@/stores/gamificationStore';
-import { getRankForLevel, RANKS } from '@/lib/gamification/lore';
+import { RANKS } from '@/lib/gamification/lore';
 
 export default function PlayerCard() {
   const { stats } = useGamificationStore();
