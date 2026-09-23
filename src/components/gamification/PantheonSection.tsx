@@ -2,7 +2,6 @@
 
 import { ALL_CLASSES, getClassMetadata, getClassTitle } from '@/lib/gamification/classes';
 import { usePantheon, useSelectedClass } from '@/stores/classStore';
-import type { CharacterClass } from '@/types/api';
 
 export default function PantheonSection() {
   const pantheon = usePantheon();
