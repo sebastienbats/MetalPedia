@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, FormEvent, KeyboardEvent } from 'react';
+import { useState, useEffect, useRef, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSearchBands } from '@/api/hooks';
+import Image from 'next/image'; // ✅ Ajout pour l'optimisation des images
+import { useSearchBands } from '@/api/hooks'; // Assure-toi que ce chemin correspond à ton hook de recherche
 
 // ═══════════════════════════════════════════════════════════
 // 🔍 BARRE DE RECHERCHE ACCESSIBLE & NAVIGABLE AU CLAVIER
@@ -41,7 +42,8 @@ export default function SearchBar() {
 
   // 3. Raccourci clavier Ctrl+K (ou ⌘K sur Mac)
   useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+    // ✅ CORRECTION : Utilisation de globalThis.KeyboardEvent pour éviter le conflit avec React
+    const handleGlobalKeyDown = (e: globalThis.KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         inputRef.current?.focus();
@@ -76,7 +78,7 @@ export default function SearchBar() {
   };
 
   // 7. Navigation clavier dans les suggestions
-  const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!suggestions || suggestions.length === 0) return;
 
     switch (e.key) {
@@ -182,10 +184,16 @@ export default function SearchBar() {
                   : 'hover:bg-metal-gray/30 border-l-4 border-transparent'
               }`}
             >
-              {/* Miniature ou fallback */}
+              {/* Miniature ou fallback optimisée avec Next/Image */}
               <div className="w-8 h-8 rounded bg-metal-gray flex items-center justify-center text-xs shrink-0 overflow-hidden">
                 {band.image_url ? (
-                  <img src={band.image_url} alt="" className="w-full h-full object-cover" />
+                  <Image 
+                    src={band.image_url} 
+                    alt="" 
+                    width={32} 
+                    height={32} 
+                    className="w-full h-full object-cover" 
+                  />
                 ) : (
                   <span>🎸</span>
                 )}
