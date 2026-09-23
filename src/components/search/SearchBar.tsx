@@ -196,13 +196,13 @@ export default function SearchBar() {
         </div>
       </form>
 
-      {/* ✅ Suggestions avec largeur élargie sur mobile */}
+      {/* ✅ Suggestions : plein écran sur mobile, normal sur desktop */}
       {hasSuggestions && (
         <ul
           id="search-suggestions"
           ref={listRef}
           role="listbox"
-          className="absolute z-50 w-[calc(100%+2rem)] -left-4 sm:w-full sm:left-0 mt-2 metal-card max-h-80 overflow-y-auto border border-metal-gray rounded-lg shadow-2xl"
+          className="absolute left-1/2 -translate-x-1/2 w-[95vw] max-w-[95vw] sm:w-full sm:left-0 sm:translate-x-0 sm:max-w-none z-50 mt-2 metal-card max-h-[60vh] sm:max-h-80 overflow-y-auto border border-metal-gray rounded-lg shadow-2xl"
         >
           {suggestions.slice(0, 8).map((band, index) => (
             <li
@@ -242,14 +242,16 @@ export default function SearchBar() {
         </ul>
       )}
 
+      {/* Erreur : même logique d'élargissement */}
       {isError && showSuggestions && debouncedQuery.length > 0 && (
-        <div className="absolute z-50 w-[calc(100%+2rem)] -left-4 sm:w-full sm:left-0 mt-2 metal-card p-4 text-center text-sm text-red-400 border border-red-900/50 rounded-lg">
+        <div className="absolute left-1/2 -translate-x-1/2 w-[95vw] max-w-[95vw] sm:w-full sm:left-0 sm:translate-x-0 sm:max-w-none z-50 mt-2 metal-card p-4 text-center text-sm text-red-400 border border-red-900/50 rounded-lg">
           Erreur lors de la recherche. Réessayez plus tard.
         </div>
       )}
 
+      {/* Aucun résultat : même logique d'élargissement */}
       {!isLoading && !isError && showSuggestions && debouncedQuery.length > 2 && suggestions && suggestions.length === 0 && (
-        <div className="absolute z-50 w-[calc(100%+2rem)] -left-4 sm:w-full sm:left-0 mt-2 metal-card p-4 text-center text-sm text-gray-400 border border-metal-gray rounded-lg">
+        <div className="absolute left-1/2 -translate-x-1/2 w-[95vw] max-w-[95vw] sm:w-full sm:left-0 sm:translate-x-0 sm:max-w-none z-50 mt-2 metal-card p-4 text-center text-sm text-gray-400 border border-metal-gray rounded-lg">
           Aucun groupe trouvé pour "{debouncedQuery}"
         </div>
       )}
