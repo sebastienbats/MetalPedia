@@ -16,7 +16,6 @@ import {
   getContainerDimensions,
 } from '@/lib/d3-utils';
 import type { Genre } from '@/types/api';
-import Loader from '@/components/ui/Loader';
 
 // ═══════════════════════════════════════════
 // PROPS
