@@ -91,14 +91,14 @@ const securityHeaders = [
 // Sources d'images autorisées :
 //   - Metal Archives (données historiques)
 //   - Last.fm Fastly (images principales via script Python)
-//   - Discogs (fallback #2 via script Python) 🆕
+//   - Discogs (fallback #2 via script Python) - wildcard pour i.discogs.com ET img.discogs.com
 //   - Wikimedia Commons (fallback #3 et #4)
 //   - Spotify CDN (pochettes audio)
 const cspDirectives = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.com https://*.vercel.app",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm-img.freetls.fastly.net https://*.freetls.fastly.net https://img.discogs.com https://*.wikimedia.org",
+  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm-img.freetls.fastly.net https://*.freetls.fastly.net https://*.discogs.com https://*.wikimedia.org",
   "font-src 'self' data: https://fonts.gstatic.com",
   "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app",
   "frame-src 'self' https://open.spotify.com https://www.youtube.com https://vercel.com https://*.vercel.app",
@@ -142,8 +142,9 @@ const nextConfig = {
       { protocol: 'https', hostname: 'lastfm-img.freetls.fastly.net', pathname: '/**' },
       { protocol: 'https', hostname: '*.freetls.fastly.net', pathname: '/**' },
 
-      // 🆕 Discogs (fallback #2 pour le metal underground)
-      { protocol: 'https', hostname: 'img.discogs.com', pathname: '/**' },
+      // 🎯 Discogs : wildcard pour couvrir i.discogs.com ET img.discogs.com
+      // (Le script Python utilise principalement i.discogs.com, l'ancien domaine img.discogs.com est aussi supporté)
+      { protocol: 'https', hostname: '*.discogs.com', pathname: '/**' },
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
