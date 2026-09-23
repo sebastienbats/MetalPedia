@@ -152,7 +152,7 @@ export default function SearchBar() {
             aria-controls="search-suggestions"
             aria-autocomplete="list"
             role="combobox"
-            className="metal-input pl-10 pr-10 sm:pr-28" // ✅ Mobile: pr-10 (juste pour le dé), Desktop: pr-28 (dé + Ctrl+K)
+            className="metal-input pl-10 pr-10 sm:pr-28"
           />
 
           {/* 🎲 Bouton recherche aléatoire */}
@@ -172,7 +172,7 @@ export default function SearchBar() {
             </span>
           </button>
           
-          {/* Spinner de chargement (même position que le dé) */}
+          {/* Spinner de chargement */}
           {isLoading && debouncedQuery.length > 0 && (
             <div className="absolute right-2 sm:right-20 top-1/2 -translate-y-1/2">
               <svg className="animate-spin h-4 w-4 text-metal-fire" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -182,7 +182,7 @@ export default function SearchBar() {
             </div>
           )}
 
-          {/* ✅ Badge Ctrl+K : COMPLÈTEMENT SUPPRIMÉ sur mobile */}
+          {/* Badge Ctrl+K (desktop uniquement) */}
           {!query && !isLoading && !isMobile && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 pointer-events-none">
               <kbd className="px-1.5 py-0.5 bg-metal-gray/50 border border-metal-gray rounded text-[10px] text-gray-400 font-mono">
@@ -196,13 +196,13 @@ export default function SearchBar() {
         </div>
       </form>
 
-      {/* Suggestions */}
+      {/* ✅ Suggestions avec largeur élargie sur mobile */}
       {hasSuggestions && (
         <ul
           id="search-suggestions"
           ref={listRef}
           role="listbox"
-          className="absolute z-50 w-full mt-2 metal-card max-h-80 overflow-y-auto border border-metal-gray rounded-lg shadow-2xl"
+          className="absolute z-50 w-[calc(100%+2rem)] -left-4 sm:w-full sm:left-0 mt-2 metal-card max-h-80 overflow-y-auto border border-metal-gray rounded-lg shadow-2xl"
         >
           {suggestions.slice(0, 8).map((band, index) => (
             <li
@@ -243,13 +243,13 @@ export default function SearchBar() {
       )}
 
       {isError && showSuggestions && debouncedQuery.length > 0 && (
-        <div className="absolute z-50 w-full mt-2 metal-card p-4 text-center text-sm text-red-400 border border-red-900/50 rounded-lg">
+        <div className="absolute z-50 w-[calc(100%+2rem)] -left-4 sm:w-full sm:left-0 mt-2 metal-card p-4 text-center text-sm text-red-400 border border-red-900/50 rounded-lg">
           Erreur lors de la recherche. Réessayez plus tard.
         </div>
       )}
 
       {!isLoading && !isError && showSuggestions && debouncedQuery.length > 2 && suggestions && suggestions.length === 0 && (
-        <div className="absolute z-50 w-full mt-2 metal-card p-4 text-center text-sm text-gray-400 border border-metal-gray rounded-lg">
+        <div className="absolute z-50 w-[calc(100%+2rem)] -left-4 sm:w-full sm:left-0 mt-2 metal-card p-4 text-center text-sm text-gray-400 border border-metal-gray rounded-lg">
           Aucun groupe trouvé pour "{debouncedQuery}"
         </div>
       )}
