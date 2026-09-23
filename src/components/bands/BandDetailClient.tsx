@@ -10,7 +10,7 @@ import Loader from '@/components/ui/Loader';
 import FavoriteButton from '@/components/bands/FavoriteButton';
 import ConcertsWidget from '@/components/widgets/ConcertsWidget';
 import ReviewList from '@/components/reviews/ReviewList';
-import GraphClient from '@/components/graph/GraphClient'; // 🆕 Import du graphe de similarité
+import GraphClient from '@/components/graph/GraphClient';
 
 // ═══════════════════════════════════════════
 // PROPS
@@ -19,6 +19,22 @@ interface Props {
   band: BandDetail;
   albums?: Album[];
   members?: BandMember[];
+}
+
+// ═══════════════════════════════════════════
+// HELPER : Calculer les années actives depuis begin_date/end_date
+// ═══════════════════════════════════════════
+function formatYearsActive(member: BandMember): string {
+  if (member.begin_date && member.end_date) {
+    return `${member.begin_date} - ${member.end_date}`;
+  }
+  if (member.begin_date) {
+    return `${member.begin_date} - présent`;
+  }
+  if (member.end_date) {
+    return `? - ${member.end_date}`;
+  }
+  return 'Années inconnues';
 }
 
 // ═══════════════════════════════════════════
@@ -32,7 +48,6 @@ export default function BandDetailClient({
   const { data: user } = useAuth();
   const { recordView } = useGamificationStore();
   
-  // 🆕 Ajout de 'similar' au type activeTab
   const [activeTab, setActiveTab] = useState<'about' | 'albums' | 'members' | 'reviews' | 'similar'>('about');
   const [isMounted, setIsMounted] = useState(false);
   const [bandImageError, setBandImageError] = useState(false);
@@ -40,12 +55,12 @@ export default function BandDetailClient({
 
   const pillarMeta = PILLAR_METADATA[band.genre_pillar as GamificationPillar] || PILLAR_METADATA['Heavy Metal'];
 
-  // ✅ Marquer comme monté après l'hydratation
+  // Marquer comme monté après l'hydratation
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // ✅ Enregistrement de la vue (une seule fois au montage)
+  // Enregistrement de la vue (une seule fois au montage)
   useEffect(() => {
     if (isMounted && band?.id) {
       recordView({
@@ -93,7 +108,7 @@ export default function BandDetailClient({
     return configs[statusKey];
   }, [band.status]);
 
-  // 🆕 Onglets avec "Groupes similaires" EN DERNIER
+  // Onglets avec "Groupes similaires" EN DERNIER
   const tabs = useMemo(() => [
     { id: 'about', label: 'Biographie' },
     { id: 'albums', label: `Discographie (${albums.length})` },
@@ -122,12 +137,12 @@ export default function BandDetailClient({
             className="w-32 h-32 md:w-48 md:h-48 rounded-lg overflow-hidden shrink-0 shadow-2xl border border-metal-gray bg-gradient-to-br from-metal-blood to-metal-rust flex items-center justify-center relative"
             suppressHydrationWarning
           >
-            {/* ✅ Placeholder EN ARRIÈRE-PLAN (z-0) */}
+            {/* Placeholder EN ARRIÈRE-PLAN (z-0) */}
             <span className="absolute inset-0 flex items-center justify-center text-4xl md:text-6xl font-black text-white drop-shadow-lg z-0">
               {band.name.substring(0, 2).toUpperCase()}
             </span>
             
-            {/* ✅ Image optimisée AU-DESSUS (z-10) */}
+            {/* Image optimisée AU-DESSUS (z-10) */}
             {hasValidBandImage && (
               <Image
                 src={band.image_url!}
@@ -233,7 +248,7 @@ export default function BandDetailClient({
             </div>
           )}
 
-          {/* ✅ Discographie avec pochettes optimisées */}
+          {/* ✅ Discographie avec pochettes optimisées - CORRIGÉ */}
           {activeTab === 'albums' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
               {albums.length > 0 ? (
@@ -252,14 +267,14 @@ export default function BandDetailClient({
                           className="w-16 h-16 rounded bg-metal-gray flex items-center justify-center text-2xl shrink-0 overflow-hidden relative"
                           suppressHydrationWarning
                         >
-                          {/* ✅ Emoji EN ARRIÈRE-PLAN (z-0) */}
+                          {/* Emoji EN ARRIÈRE-PLAN (z-0) */}
                           <span className="absolute inset-0 flex items-center justify-center z-0">💿</span>
                           
-                          {/* ✅ Image optimisée AU-DESSUS (z-10) */}
+                          {/* Image optimisée AU-DESSUS (z-10) */}
                           {hasAlbumImage && (
                             <Image
                               src={album.image_url!}
-                              alt={`Pochette de ${album.name || album.title}`}
+                              alt={`Pochette de ${album.title}`}
                               fill
                               sizes="64px"
                               className="object-cover z-10"
@@ -269,10 +284,12 @@ export default function BandDetailClient({
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold truncate">{album.name || album.title}</h4>
-                          <p className="text-xs text-metal-fire mt-1 capitalize">{album.type}</p>
+                          <h4 className="font-semibold truncate">{album.title}</h4>
+                          <p className="text-xs text-metal-fire mt-1 capitalize">
+                            {album.release_type || 'Album'}
+                          </p>
                           <p className="text-xs text-gray-400 mt-1">
-                            {album.releaseDate || album.year || 'Année inconnue'}
+                            {album.year || 'Année inconnue'}
                           </p>
                         </div>
                       </div>
@@ -287,7 +304,7 @@ export default function BandDetailClient({
             </div>
           )}
 
-          {/* Membres (avec badge "Actuel") */}
+          {/* ✅ Membres (avec badge "Actuel") - CORRIGÉ */}
           {activeTab === 'members' && (
             <div className="metal-card p-6 animate-slide-up">
               {members.length > 0 ? (
@@ -296,17 +313,17 @@ export default function BandDetailClient({
                     <li key={member.id} className="flex items-center justify-between py-2 border-b border-metal-gray last:border-0">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-gray-200">{member.name}</span>
-                        {member.is_current && (
+                        {member.is_active && (
                           <span className="text-[10px] px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded border border-green-500/30">
                             Actuel
                           </span>
                         )}
                       </div>
                       <div className="text-right">
-                        <span className="text-sm text-metal-fire block">{member.role}</span>
-                        {member.years_active && (
-                          <span className="text-xs text-gray-500">{member.years_active}</span>
-                        )}
+                        <span className="text-sm text-metal-fire block">{member.role || 'Rôle inconnu'}</span>
+                        <span className="text-xs text-gray-500">
+                          {formatYearsActive(member)}
+                        </span>
                       </div>
                     </li>
                   ))}
@@ -326,7 +343,7 @@ export default function BandDetailClient({
             </div>
           )}
 
-          {/* 🆕 GROUPES SIMILAIRES (graphe interactif) - EN DERNIER */}
+          {/* GROUPES SIMILAIRES (graphe interactif) - EN DERNIER */}
           {activeTab === 'similar' && (
             <div className="animate-slide-up">
               <GraphClient
