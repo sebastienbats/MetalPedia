@@ -196,13 +196,13 @@ export default function SearchBar() {
         </div>
       </form>
 
-      {/* Suggestions : plein écran sur mobile */}
+      {/* ✅ Suggestions avec largeur élargie sur mobile */}
       {hasSuggestions && (
         <ul
           id="search-suggestions"
           ref={listRef}
           role="listbox"
-          className="absolute left-1/2 -translate-x-1/2 w-[95vw] max-w-[95vw] sm:w-full sm:left-0 sm:translate-x-0 sm:max-w-none z-50 mt-2 metal-card max-h-[60vh] sm:max-h-80 overflow-y-auto border border-metal-gray rounded-lg shadow-2xl"
+          className="absolute z-50 w-[calc(100%+2rem)] -left-4 sm:w-full sm:left-0 mt-2 metal-card max-h-80 overflow-y-auto border border-metal-gray rounded-lg shadow-2xl"
         >
           {suggestions.slice(0, 8).map((band, index) => (
             <li
@@ -222,16 +222,9 @@ export default function SearchBar() {
                   : 'hover:bg-metal-gray/30 border-l-4 border-transparent'
               }`}
             >
-              {/* ✅ Image corrigée avec fill prop */}
-              <div className="relative w-8 h-8 rounded bg-metal-gray flex items-center justify-center text-xs shrink-0 overflow-hidden">
+              <div className="w-8 h-8 rounded bg-metal-gray flex items-center justify-center text-xs shrink-0 overflow-hidden">
                 {band.image_url ? (
-                  <Image 
-                    src={band.image_url} 
-                    alt="" 
-                    fill
-                    sizes="32px"
-                    className="object-cover" 
-                  />
+                  <Image src={band.image_url} alt="" width={32} height={32} className="w-full h-full object-cover" />
                 ) : (
                   <span>🎸</span>
                 )}
@@ -251,14 +244,14 @@ export default function SearchBar() {
 
       {/* Erreur */}
       {isError && showSuggestions && debouncedQuery.length > 0 && (
-        <div className="absolute left-1/2 -translate-x-1/2 w-[95vw] max-w-[95vw] sm:w-full sm:left-0 sm:translate-x-0 sm:max-w-none z-50 mt-2 metal-card p-4 text-center text-sm text-red-400 border border-red-900/50 rounded-lg">
+        <div className="absolute z-50 w-[calc(100%+2rem)] -left-4 sm:w-full sm:left-0 mt-2 metal-card p-4 text-center text-sm text-red-400 border border-red-900/50 rounded-lg">
           Erreur lors de la recherche. Réessayez plus tard.
         </div>
       )}
 
       {/* Aucun résultat */}
       {!isLoading && !isError && showSuggestions && debouncedQuery.length > 2 && suggestions && suggestions.length === 0 && (
-        <div className="absolute left-1/2 -translate-x-1/2 w-[95vw] max-w-[95vw] sm:w-full sm:left-0 sm:translate-x-0 sm:max-w-none z-50 mt-2 metal-card p-4 text-center text-sm text-gray-400 border border-metal-gray rounded-lg">
+        <div className="absolute z-50 w-[calc(100%+2rem)] -left-4 sm:w-full sm:left-0 mt-2 metal-card p-4 text-center text-sm text-gray-400 border border-metal-gray rounded-lg">
           Aucun groupe trouvé pour "{debouncedQuery}"
         </div>
       )}
