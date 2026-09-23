@@ -1,4 +1,4 @@
-import type { TimelineEvent, GamificationPillar } from '@/types/api';
+import type { TimelineEvent } from '@/types/api';
 
 // Calculer le nombre d'événements dans une décennie
 export const countEventsInDecade = (
