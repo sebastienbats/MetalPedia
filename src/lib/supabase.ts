@@ -8,7 +8,6 @@ import type { Database } from '@/types/supabase';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Validation des variables d'environnement
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn(
     '⚠️ Supabase non configuré. ' +
@@ -18,6 +17,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 // ═══════════════════════════════════════════
 // CLIENT SUPABASE (Browser)
+// Pour composants React côté client
 // ═══════════════════════════════════════════
 
 export const supabase: SupabaseClient<Database> = createClient<Database>(
@@ -25,19 +25,10 @@ export const supabase: SupabaseClient<Database> = createClient<Database>(
   supabaseAnonKey || 'placeholder-key',
   {
     auth: {
-      // Persistance de session entre les rechargements
       persistSession: true,
-
-      // Rafraîchissement automatique du token JWT
       autoRefreshToken: true,
-
-      // Détection de session dans l'URL (pour OAuth callbacks)
       detectSessionInUrl: true,
-
-      // Stockage sécurisé (localStorage par défaut)
       storageKey: 'metalpedia-auth',
-
-      // Flow type: 'pkce' recommandé pour SPA/SSR
       flowType: 'pkce',
     },
     realtime: {
@@ -55,7 +46,7 @@ export const supabase: SupabaseClient<Database> = createClient<Database>(
 
 // ═══════════════════════════════════════════
 // CLIENT SUPABASE (Server - Admin)
-// À utiliser uniquement côté serveur (Route Handlers, Server Actions)
+// Pour Server Actions et composants serveur
 // ⚠️ NE JAMAIS exposer la service role key côté client
 // ═══════════════════════════════════════════
 
@@ -78,7 +69,22 @@ export function createServerClient(): SupabaseClient<Database> | null {
       persistSession: false,
       autoRefreshToken: false,
     },
+    global: {
+      headers: {
+        'x-metalpedia-client': 'server',
+      },
+    },
   });
+}
+
+// ═══════════════════════════════════════════
+// 🆕 CLIENT SUPABASE (API Routes)
+// Alias de createServerClient() pour les API routes Next.js
+// Usage : import { createApiClient } from '@/lib/supabase';
+// ═══════════════════════════════════════════
+
+export function createApiClient(): SupabaseClient<Database> | null {
+  return createServerClient();
 }
 
 // ═══════════════════════════════════════════
@@ -99,6 +105,7 @@ export async function isAuthenticated(): Promise<boolean> {
 
 /**
  * Récupère l'utilisateur courant (null si non connecté)
+ * ✅ Utilise getUser() (méthode moderne, valide le token)
  */
 export async function getCurrentUser() {
   try {
@@ -110,10 +117,14 @@ export async function getCurrentUser() {
 }
 
 /**
- * Récupère la session active
+ * 🆕 Récupère la session active (tokens + user)
+ * Remplace l'ancien getSession() déprécié
  */
-export async function getSession() {
+export async function getCurrentSession() {
   try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) return null;
+    
     const { data: { session } } = await supabase.auth.getSession();
     return session;
   } catch {
@@ -133,17 +144,36 @@ export async function signOut(): Promise<void> {
 }
 
 // ═══════════════════════════════════════════
-// STORAGE HELPERS
+// STORAGE HELPERS (avec validation renforcée)
 // ═══════════════════════════════════════════
 
 /**
- * Upload un avatar utilisateur
+ * Upload un avatar utilisateur avec validation MIME + taille
+ * 🛡️ Sécurité : seulement images JPEG/PNG/WebP, max 2MB
  */
 export async function uploadAvatar(
   userId: string,
   file: File
 ): Promise<string | null> {
   try {
+    // 🆕 Validation MIME stricte
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error(
+        `Type de fichier non autorisé: ${file.type}. ` +
+        `Seuls JPEG, PNG et WebP sont acceptés.`
+      );
+    }
+
+    // 🆕 Validation taille (max 2MB)
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSize) {
+      throw new Error(
+        `Fichier trop volumineux: ${(file.size / 1024 / 1024).toFixed(2)}MB. ` +
+        `Maximum autorisé: 2MB.`
+      );
+    }
+
     const fileExt = file.name.split('.').pop();
     const fileName = `${userId}/avatar.${fileExt}`;
 
@@ -152,6 +182,7 @@ export async function uploadAvatar(
       .upload(fileName, file, {
         upsert: true,
         cacheControl: '3600',
+        contentType: file.type,
       });
 
     if (uploadError) throw uploadError;
