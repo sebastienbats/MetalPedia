@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import { useAuth } from '@/api/authApi';
 import { useGamificationStore } from '@/stores/gamificationStore';
 import type { BandDetail, Album, BandMember, GamificationPillar } from '@/types/api';
 import { PILLAR_METADATA } from '@/types/api';
@@ -45,7 +44,6 @@ export default function BandDetailClient({
   albums = [], 
   members = [] 
 }: Props) {
-  const { data: user } = useAuth();
   const { recordView } = useGamificationStore();
   
   const [activeTab, setActiveTab] = useState<'about' | 'albums' | 'members' | 'reviews' | 'similar'>('about');
