@@ -1,7 +1,6 @@
 import {
   set as idbSet,
   get as idbGet,
-  del as idbDel,
   createStore,
 } from 'idb-keyval';
 
@@ -12,7 +11,6 @@ import {
 const idbStore = createStore('metalpedia', 'offline-sync');
 const PENDING_OPS_KEY = 'metalpedia-pending-ops';
 const MAX_RETRY_COUNT = 5;
-const RETRY_DELAY_MS = 5000; // 5 secondes entre les tentatives
 
 // ═══════════════════════════════════════════
 // TYPES
