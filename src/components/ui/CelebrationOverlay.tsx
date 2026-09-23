@@ -49,12 +49,15 @@ export default function CelebrationOverlay() {
     if (celebration) {
       setIsVisible(true);
       // Auto-close après 8s
-      const timer = setTimeout(() => handleClose(), 8000);
+      const timer = setTimeout(() => {
+         setIsVisible(false);
+         setTimeout(closeCelebration, 300);
+       }, 8000);
       return () => clearTimeout(timer);
     } else {
       setIsVisible(false);
     }
-  }, [celebration]);
+  }, [celebration, closeCelebration]);
 
   if (!celebration) return null;
 
