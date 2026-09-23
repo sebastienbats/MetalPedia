@@ -7,7 +7,6 @@ import { useFavoritesCount, useFavoritesHydration } from '@/stores/favoritesStor
 import { useAuth, useSignOut } from '@/api/authApi';
 import SearchBar from '@/components/search/SearchBar';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
-import RandomBandButton from '@/components/layout/RandomBandButton';
 import PillarsDropdown from '@/components/layout/PillarsDropdown';
 
 function UserMenu() {
@@ -101,7 +100,6 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-metal-black/90 border-b border-metal-gray">
       <div className="container mx-auto px-2 sm:px-4 max-w-7xl">
-        {/* ✅ Gap réduit sur mobile (gap-1 au lieu de gap-1.5) */}
         <div className="flex items-center gap-1 sm:gap-2 md:gap-3 h-14 md:h-16">
           <Link
             href="/"
@@ -125,7 +123,7 @@ export default function Header() {
             <SearchBar />
           </div>
 
-          <RandomBandButton />
+          {/* ✅ RandomBandButton supprimé (maintenant dans SearchBar) */}
 
           <PillarsDropdown />
 
