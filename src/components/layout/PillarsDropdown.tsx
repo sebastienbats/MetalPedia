@@ -7,7 +7,6 @@ import { PILLAR_METADATA, GAMIFICATION_PILLARS } from '@/types/api';
 // ═══════════════════════════════════════════════════════════
 // 🏛️ MENU DÉROULANT DES 9 PILIERS
 // ═══════════════════════════════════════════════════════════
-// Reprend tes labels courts existants (Prog, Core, Black, Thrash...)
 function shortLabel(pillar: string): string {
   if (pillar === 'Progressive Metal') return 'Prog';
   if (pillar === 'Metalcore') return 'Core';
