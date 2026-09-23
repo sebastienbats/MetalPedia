@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { metalServerApi } from '@/lib/metal-api';
 import SearchResultsClient from '@/components/search/SearchResultsClient';
 import Loader from '@/components/ui/Loader';
 
