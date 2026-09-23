@@ -2,12 +2,9 @@
 
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image'; // ✅ Ajout pour l'optimisation des images
-import { useSearchBands } from '@/api/hooks'; // Assure-toi que ce chemin correspond à ton hook de recherche
+import Image from 'next/image';
+import { useSearchBands } from '@/api/hooks'; // Adapte ce chemin si nécessaire
 
-// ═══════════════════════════════════════════════════════════
-// 🔍 BARRE DE RECHERCHE ACCESSIBLE & NAVIGABLE AU CLAVIER
-// ═══════════════════════════════════════════════════════════
 export default function SearchBar() {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -19,16 +16,13 @@ export default function SearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
-  // Hook de recherche (React Query)
   const { data: suggestions, isLoading, isError } = useSearchBands(debouncedQuery);
 
-  // 1. Debounce de la requête (400ms)
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(query), 400);
     return () => clearTimeout(timer);
   }, [query]);
 
-  // 2. Fermeture au clic extérieur
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
@@ -40,9 +34,7 @@ export default function SearchBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 3. Raccourci clavier Ctrl+K (ou ⌘K sur Mac)
   useEffect(() => {
-    // ✅ CORRECTION : Utilisation de globalThis.KeyboardEvent pour éviter le conflit avec React
     const handleGlobalKeyDown = (e: globalThis.KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
@@ -54,12 +46,10 @@ export default function SearchBar() {
     return () => document.removeEventListener('keydown', handleGlobalKeyDown);
   }, []);
 
-  // 4. Reset de la sélection quand les suggestions changent
   useEffect(() => {
     setSelectedIndex(-1);
   }, [suggestions]);
 
-  // 5. Scroll automatique vers l'élément sélectionné au clavier
   useEffect(() => {
     if (selectedIndex >= 0 && listRef.current) {
       const selectedElement = listRef.current.children[selectedIndex] as HTMLElement;
@@ -67,7 +57,6 @@ export default function SearchBar() {
     }
   }, [selectedIndex]);
 
-  // 6. Soumission du formulaire
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
@@ -77,7 +66,6 @@ export default function SearchBar() {
     }
   };
 
-  // 7. Navigation clavier dans les suggestions
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!suggestions || suggestions.length === 0) return;
 
@@ -131,22 +119,21 @@ export default function SearchBar() {
             aria-controls="search-suggestions"
             aria-autocomplete="list"
             role="combobox"
-            className="metal-input pr-20" // pr-20 pour laisser place au spinner + raccourci
+            className="metal-input pr-10 sm:pr-20" /* ✅ MODIFIÉ : padding adaptatif */
           />
           
-          {/* 🔄 Indicateur de chargement (résout le warning isLoading unused) */}
           {isLoading && debouncedQuery.length > 0 && (
-            <div className="absolute right-12 top-1/2 -translate-y-1/2">
-              <svg className="animate-spin h-4 w-4 text-metal-fire" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <div className="absolute right-10 sm:right-12 top-1/2 -translate-y-1/2"> {/* ✅ MODIFIÉ */}
+              <svg className="animate-spin h-4 w-4 text-metal-fire" xmlns="http://www.w3.org2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </div>
           )}
 
-          {/* ⌨️ Indicateur de raccourci Ctrl+K / ⌘K */}
+          {/* ✅ MODIFIÉ : hidden sm:flex masque le badge sur mobile */}
           {!query && !isLoading && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 pointer-events-none">
               <kbd className="px-1.5 py-0.5 bg-metal-gray/50 border border-metal-gray rounded text-[10px] text-gray-400 font-mono">
                 {isMac ? '⌘' : 'Ctrl'}
               </kbd>
@@ -158,7 +145,6 @@ export default function SearchBar() {
         </div>
       </form>
 
-      {/* 📋 Liste de suggestions (Accessible) */}
       {hasSuggestions && (
         <ul
           id="search-suggestions"
@@ -184,16 +170,9 @@ export default function SearchBar() {
                   : 'hover:bg-metal-gray/30 border-l-4 border-transparent'
               }`}
             >
-              {/* Miniature ou fallback optimisée avec Next/Image */}
               <div className="w-8 h-8 rounded bg-metal-gray flex items-center justify-center text-xs shrink-0 overflow-hidden">
                 {band.image_url ? (
-                  <Image 
-                    src={band.image_url} 
-                    alt="" 
-                    width={32} 
-                    height={32} 
-                    className="w-full h-full object-cover" 
-                  />
+                  <Image src={band.image_url} alt="" width={32} height={32} className="w-full h-full object-cover" />
                 ) : (
                   <span>🎸</span>
                 )}
@@ -211,14 +190,12 @@ export default function SearchBar() {
         </ul>
       )}
 
-      {/* ❌ État d'erreur */}
       {isError && showSuggestions && debouncedQuery.length > 0 && (
         <div className="absolute z-50 w-full mt-2 metal-card p-4 text-center text-sm text-red-400 border border-red-900/50 rounded-lg">
           Erreur lors de la recherche. Réessayez plus tard.
         </div>
       )}
 
-      {/* 🔍 Aucun résultat */}
       {!isLoading && !isError && showSuggestions && debouncedQuery.length > 2 && suggestions && suggestions.length === 0 && (
         <div className="absolute z-50 w-full mt-2 metal-card p-4 text-center text-sm text-gray-400 border border-metal-gray rounded-lg">
           Aucun groupe trouvé pour "{debouncedQuery}"
