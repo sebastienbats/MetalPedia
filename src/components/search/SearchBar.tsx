@@ -11,7 +11,7 @@ export default function SearchBar() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [isMobile, setIsMobile] = useState(false);
-  const [isRolling, setIsRolling] = useState(false); // ✅ État du dé
+  const [isRolling, setIsRolling] = useState(false);
   
   const router = useRouter();
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -20,7 +20,6 @@ export default function SearchBar() {
 
   const { data: suggestions, isLoading, isError } = useSearchBands(debouncedQuery);
 
-  // ✅ Fonction de recherche aléatoire (déplacée depuis RandomBandButton)
   const rollTheDice = async () => {
     if (isRolling) return;
     setIsRolling(true);
@@ -153,17 +152,17 @@ export default function SearchBar() {
             aria-controls="search-suggestions"
             aria-autocomplete="list"
             role="combobox"
-            className="metal-input pl-10 pr-24 sm:pr-36" // ✅ Padding ajusté pour 🎲 + [Ctrl+K]
+            className="metal-input pl-10 pr-10 sm:pr-28" // ✅ Mobile: pr-10 (juste pour le dé), Desktop: pr-28 (dé + Ctrl+K)
           />
 
-          {/* 🎲 Bouton recherche aléatoire (intégré dans le champ) */}
+          {/* 🎲 Bouton recherche aléatoire */}
           <button
             type="button"
             onClick={rollTheDice}
             disabled={isRolling}
             title="Groupe aléatoire"
             aria-label="Découvrir un groupe aléatoire"
-            className="absolute right-14 sm:right-20 top-1/2 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-md text-sm hover:bg-metal-fire/20 transition-all focus:outline-none focus:ring-2 focus:ring-metal-fire/50 disabled:opacity-60 disabled:cursor-wait"
+            className="absolute right-2 sm:right-20 top-1/2 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-md text-sm hover:bg-metal-fire/20 transition-all focus:outline-none focus:ring-2 focus:ring-metal-fire/50 disabled:opacity-60 disabled:cursor-wait"
           >
             <span
               className={`inline-block ${isRolling ? 'animate-spin' : 'transition-transform hover:rotate-12'}`}
@@ -173,9 +172,9 @@ export default function SearchBar() {
             </span>
           </button>
           
-          {/* Spinner de chargement */}
+          {/* Spinner de chargement (même position que le dé) */}
           {isLoading && debouncedQuery.length > 0 && (
-            <div className="absolute right-14 sm:right-20 top-1/2 -translate-y-1/2">
+            <div className="absolute right-2 sm:right-20 top-1/2 -translate-y-1/2">
               <svg className="animate-spin h-4 w-4 text-metal-fire" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -183,8 +182,8 @@ export default function SearchBar() {
             </div>
           )}
 
-          {/* Badge Ctrl+K (desktop uniquement) */}
-          {!query && !isLoading && (
+          {/* ✅ Badge Ctrl+K : COMPLÈTEMENT SUPPRIMÉ sur mobile */}
+          {!query && !isLoading && !isMobile && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 pointer-events-none">
               <kbd className="px-1.5 py-0.5 bg-metal-gray/50 border border-metal-gray rounded text-[10px] text-gray-400 font-mono">
                 {isMac ? '⌘' : 'Ctrl'}
