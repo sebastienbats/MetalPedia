@@ -10,9 +10,6 @@ import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 import RandomBandButton from '@/components/layout/RandomBandButton';
 import PillarsDropdown from '@/components/layout/PillarsDropdown';
 
-// ═══════════════════════════════════════════════════════════
-// 👤 MENU UTILISATEUR (connexion OU dropdown profil/déconnexion)
-// ═══════════════════════════════════════════════════════════
 function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,7 +17,6 @@ function UserMenu() {
   const signOutMutation = useSignOut();
   const router = useRouter();
 
-  // Fermeture : clic extérieur + Escape
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -45,21 +41,19 @@ function UserMenu() {
     router.push('/');
   };
 
-  // ── Non connecté : bouton Connexion ──────────────────────
   if (!user) {
     return (
       <Link
         href="/login"
         title="Se connecter"
-        className="shrink-0 flex items-center justify-center h-9 md:h-10 px-2.5 md:px-4 bg-metal-fire text-white font-semibold rounded-lg hover:bg-metal-fire/80 transition-all text-sm"
+        className="shrink-0 flex items-center justify-center h-8 sm:h-9 md:h-10 px-2 sm:px-2.5 md:px-4 bg-metal-fire text-white font-semibold rounded-lg hover:bg-metal-fire/80 transition-all text-sm"
       >
-        <span className="md:hidden text-lg">🔑</span>
-        <span className="hidden md:inline">Connexion</span>
+        <span className="sm:hidden text-base">🔑</span>
+        <span className="hidden sm:inline">Connexion</span>
       </Link>
     );
   }
 
-  // ── Connecté : dropdown Profil / Déconnexion ─────────────
   return (
     <div className="relative shrink-0" ref={containerRef}>
       <button
@@ -67,9 +61,9 @@ function UserMenu() {
         aria-haspopup="menu"
         aria-expanded={isOpen}
         title="Mon compte"
-        className="flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg text-gray-300 hover:text-metal-fire hover:bg-metal-gray/30 transition-all focus:outline-none focus:ring-2 focus:ring-metal-fire/50"
+        className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-lg text-gray-300 hover:text-metal-fire hover:bg-metal-gray/30 transition-all focus:outline-none focus:ring-2 focus:ring-metal-fire/50"
       >
-        <span className="text-xl">👤</span>
+        <span className="text-lg sm:text-xl">👤</span>
       </button>
 
       {isOpen && (
@@ -100,10 +94,6 @@ function UserMenu() {
   );
 }
 
-// ═══════════════════════════════════════════════════════════
-// HEADER COMPACT — UNE SEULE LIGNE (PC + MOBILE)
-// ═══════════════════════════════════════════════════════════
-// [🔥] [recherche flex-1] [🎲] [🏛️▼] [❤️] [👤/🔑] [thème]
 export default function Header() {
   const favCount = useFavoritesCount();
   const { isHydrated } = useFavoritesHydration();
@@ -111,9 +101,8 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-metal-black/90 border-b border-metal-gray">
       <div className="container mx-auto px-2 sm:px-4 max-w-7xl">
-        {/* ═══ LIGNE UNIQUE : h-14 mobile / h-16 desktop ═══ */}
-        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 h-14 md:h-16">
-          {/* Logo compact (titre masqué sous lg pour gagner la place) */}
+        {/* ✅ Gap réduit sur mobile (gap-1 au lieu de gap-1.5) */}
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-3 h-14 md:h-16">
           <Link
             href="/"
             className="shrink-0 flex items-center gap-2 group"
@@ -132,25 +121,21 @@ export default function Header() {
             </div>
           </Link>
 
-          {/* Champ de recherche : occupe tout l'espace restant */}
           <div className="flex-1 min-w-0">
             <SearchBar />
           </div>
 
-          {/* 🎲 Groupe aléatoire */}
           <RandomBandButton />
 
-          {/* 🏛️ Accès rapide aux 9 Piliers (menu déroulant) */}
           <PillarsDropdown />
 
-          {/* ❤️ Favoris (compteur conservé) */}
           <Link
             href="/favorites"
-            className="relative shrink-0 flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-lg text-gray-300 hover:text-metal-fire hover:bg-metal-gray/30 transition-all"
+            className="relative shrink-0 flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-lg text-gray-300 hover:text-metal-fire hover:bg-metal-gray/30 transition-all"
             aria-label="Mes favoris"
             title="Mes favoris"
           >
-            <span className="text-xl">❤️</span>
+            <span className="text-lg sm:text-xl">❤️</span>
             {isHydrated && favCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-metal-fire text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-metal-black">
                 {favCount > 99 ? '99+' : favCount}
@@ -158,10 +143,8 @@ export default function Header() {
             )}
           </Link>
 
-          {/* 👤 / 🔑 Compte (connexion OU dropdown profil) */}
           <UserMenu />
 
-          {/* 🌙 Sélecteur de thème (conservé tel quel) */}
           <ThemeSwitcher />
         </div>
       </div>
