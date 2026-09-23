@@ -20,7 +20,6 @@ export default function RandomBandButton() {
       const band = await res.json();
       router.push(`/band/${band.id}`);
     } catch {
-      // Échec silencieux : le dé s'arrête, l'utilisateur peut relancer
       setIsRolling(false);
     }
   };
