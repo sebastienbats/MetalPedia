@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { metalServerApi } from '@/lib/metal-api';
 import PillarsGrid from '@/components/genres/PillarsGrid';
 import Loader from '@/components/ui/Loader';
-import FloatingRunes from '@/components/ui/FloatingRunes'; // 🆕 Import du composant
+import FloatingRunes from '@/components/ui/FloatingRunes';
 
 // Métadonnées spécifiques à la page d'accueil (bon pour le SEO)
 export const metadata = {
@@ -23,24 +23,23 @@ export default async function HomePage() {
       {/* 🌌 CALQUE D'ARRIÈRE-PLAN : Ambiance Metalverse subtile */}
       {/* z-10 : AU-DESSUS du fond opaque du body, mais DERRIÈRE le contenu */}
       <div className="fixed inset-0 z-10 pointer-events-none overflow-hidden">
-        <FloatingRunes 
-          preset="vortex" 
-          family="musical" 
+        <FloatingRunes
+          preset="vortex"
+          family="musical"
           colorClass="text-amber-300"
           opacityFactor={0.10} // Très subtil pour l'accueil
         />
       </div>
-      
+
       {/* 📜 CALQUE DE PREMIER PLAN : Contenu principal */}
       {/* z-20 : AU-DESSUS des runes pour garantir la lisibilité */}
-      <div className="relative z-20 container mx-auto px-4 py-12">
-        
+      <div className="relative z-20 container mx-auto px-4 py-12 lg:py-16">
         {/* En-tête d'accueil */}
-        <div className="text-center mb-12">
-          <h1 className="font-metal text-5xl md:text-6xl text-metal-fire mb-4 drop-shadow-lg">
+        <div className="text-center mb-8">
+          <h1 className="font-metal text-5xl lg:text-7xl text-metal-fire mb-8 drop-shadow-lg">
             Bienvenue dans le Metalverse
           </h1>
-          <p className="text-gray-300 text-lg max-w-2xl mx-auto drop-shadow-md">
+          <p className="text-metal-bone font-serif text-base lg:text-lg max-w-2xl mx-auto drop-shadow-md">
             Explorez les 9 grands piliers du metal et découvrez des milliers de groupes 
             classés par sous-genre. Chaque pilier représente une tradition unique du metal.
           </p>
@@ -50,7 +49,6 @@ export default async function HomePage() {
         <Suspense fallback={<Loader text="Chargement des piliers..." />}>
           <PillarsGrid pillarsStats={pillarsStats} />
         </Suspense>
-        
       </div>
     </>
   );
