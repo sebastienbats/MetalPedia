@@ -11,7 +11,7 @@ export default function FavoritesPage() {
   return (
     <div className="container mx-auto px-4 py-12 lg:py-16">
       <div className="mb-8">
-        <h1 className="font-metal text-3xl lg:text-6xl text-metal-fire mb-8">
+        <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">
           ❤️ Mes Favoris
         </h1>
         <p className="text-metal-bone font-serif text-base lg:text-lg">
@@ -28,7 +28,7 @@ export default function FavoritesPage() {
       ) : (
         <div className="metal-card p-6 lg:p-8 text-center border border-metal-gray">
           <div className="text-6xl mb-4">🎸</div>
-          <h2 className="font-metal text-2xl lg:text-3xl text-metal-fire mb-4">
+          <h2 className="font-metal text-xl lg:text-3xl text-metal-fire mb-4">
             Aucun favori pour le moment
           </h2>
           <p className="text-metal-bone font-serif text-base lg:text-lg mb-6">
