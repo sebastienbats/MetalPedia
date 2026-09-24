@@ -1,3 +1,4 @@
+// src/app/favorites/page.tsx
 'use client';
 
 import { useFavoriteBands, useFavoritesCount } from '@/stores/favoritesStore';
@@ -9,8 +10,8 @@ export default function FavoritesPage() {
   const count = useFavoritesCount();
 
   return (
-    <div className="container mx-auto px-4 py-12 lg:py-16">
-      <div className="mb-8 text-center"> {/* ✅ AJOUT text-center */}
+    <div className="container mx-auto">
+      <div className="mb-8 text-center">
         <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">
           ❤️ Mes Favoris
         </h1>
