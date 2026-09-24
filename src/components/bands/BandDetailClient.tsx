@@ -122,7 +122,7 @@ export default function BandDetailClient({
   return (
     <div className="container mx-auto space-y-8 animate-fade-in" suppressHydrationWarning>
       {/* ═══════════════════════════════════════════════════════════
-          ✅ HEADER DE PAGE (Design System validé)
+          ✅ HEADER DE PAGE (Titre plus grand que le nom du groupe)
       ═══════════════════════════════════════════════════════════ */}
       <header className="text-center mb-8">
         <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-2">
@@ -166,7 +166,8 @@ export default function BandDetailClient({
           {/* Infos principales */}
           <div className="flex-1 space-y-3">
             <div className="flex flex-wrap items-center gap-3">
-              <h2 className="font-metal text-3xl md:text-5xl text-metal-rust">
+              {/* ✅ NOM DU GROUPE : Réduit pour être plus petit que le H1 de la page */}
+              <h2 className="font-metal text-xl md:text-3xl text-metal-rust">
                 {band.name}
               </h2>
               <span className={`px-3 py-1 rounded-full text-xs font-bold bg-metal-gray/50 border border-metal-gray flex items-center gap-1 ${statusConfig.color}`}>
@@ -255,7 +256,7 @@ export default function BandDetailClient({
             </div>
           )}
 
-          {/* ✅ Discographie avec pochettes optimisées - CORRIGÉ */}
+          {/* Discographie avec pochettes optimisées */}
           {activeTab === 'albums' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
               {albums.length > 0 ? (
@@ -311,7 +312,7 @@ export default function BandDetailClient({
             </div>
           )}
 
-          {/* ✅ Membres (avec badge "Actuel") - CORRIGÉ */}
+          {/* Membres (avec badge "Actuel") */}
           {activeTab === 'members' && (
             <div className="metal-card p-6 animate-slide-up">
               {members.length > 0 ? (
