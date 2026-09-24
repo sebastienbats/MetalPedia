@@ -10,7 +10,7 @@ export default function FavoritesPage() {
 
   return (
     <div className="container mx-auto px-4 py-12 lg:py-16">
-      <div className="mb-8">
+      <div className="mb-8 text-center"> {/* ✅ AJOUT text-center */}
         <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">
           ❤️ Mes Favoris
         </h1>
