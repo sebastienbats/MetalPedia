@@ -11,7 +11,7 @@ export default function QuizPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedPillar, setSelectedPillar] = useState<GamificationPillar | 'all'>('all');
   const [results, setResults] = useState<{ totalXp: number; correctCount: number; totalCount: number } | null>(null);
-  
+
   const userClass = useClassMetadata();
 
   const handleStart = () => {
@@ -40,12 +40,12 @@ export default function QuizPage() {
     else if (percentage >= 40) message = "Tu as encore beaucoup à apprendre des Anciens.";
 
     return (
-      <div className="max-w-2xl mx-auto py-12 px-4">
-        <div className="metal-card p-8 md:p-12 text-center border-2 border-metal-fire animate-fade-in">
+      <div className="container mx-auto px-4 py-12 lg:py-16 max-w-2xl">
+        <div className="metal-card p-6 lg:p-8 text-center border-2 border-metal-fire animate-fade-in">
           <div className="text-6xl mb-4">🏆</div>
-          <h1 className="font-metal text-4xl text-metal-rust mb-2">Épreuve Terminée !</h1>
-          <p className="text-gray-400 text-lg mb-8 italic">"{message}"</p>
-
+          <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">Épreuve Terminée !</h1>
+          <p className="text-metal-bone font-serif text-base lg:text-lg mb-8 italic">"{message}"</p>
+          
           <div className="grid grid-cols-3 gap-4 mb-8">
             <div className="p-4 bg-metal-black/50 rounded-lg border border-metal-gray">
               <div className="text-3xl font-bold text-metal-fire">{results.correctCount}/{results.totalCount}</div>
@@ -85,10 +85,10 @@ export default function QuizPage() {
   // ─────────────────────────────────────────────────────
   if (isPlaying) {
     return (
-      <div className="max-w-3xl mx-auto py-8 px-4">
+      <div className="container mx-auto px-4 py-12 lg:py-16 max-w-3xl">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="font-metal text-3xl text-metal-rust">⚔️ Épreuve des Anciens</h1>
-          <button 
+          <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire">⚔️ Épreuve des Anciens</h1>
+          <button
             onClick={() => setIsPlaying(false)}
             className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1"
           >
@@ -107,11 +107,11 @@ export default function QuizPage() {
   // ÉCRAN DE SÉLECTION
   // ─────────────────────────────────────────────────────
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 space-y-8">
+    <div className="container mx-auto px-4 py-12 lg:py-16 max-w-4xl space-y-12">
       <div className="text-center space-y-4">
-        <h1 className="font-metal text-4xl md:text-5xl text-metal-rust">⚔️ Épreuve des Anciens</h1>
-        <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-          Teste tes connaissances sur les groupes du Metalverse. Chaque bonne réponse te rapporte de l'XP. 
+        <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire">⚔️ Épreuve des Anciens</h1>
+        <p className="text-metal-bone font-serif text-base lg:text-lg max-w-2xl mx-auto">
+          Teste tes connaissances sur les groupes du Metalverse. Chaque bonne réponse te rapporte de l'XP.
           {userClass && (
             <span className="block mt-2 text-metal-fire font-semibold">
               ✨ Bonus actif : En tant que {userClass.name}, tu gagnes plus d'XP sur les quiz !
@@ -120,11 +120,10 @@ export default function QuizPage() {
         </p>
       </div>
 
-      <div className="metal-card p-6 md:p-8 border-2 border-metal-gray">
-        <h2 className="font-serif text-xl text-gray-200 mb-6 text-center">Choisis ton domaine d'épreuve</h2>
+      <div className="metal-card p-6 lg:p-8 border-2 border-metal-gray">
+        <h2 className="font-metal text-xl lg:text-3xl text-metal-fire mb-4 text-center">Choisis ton domaine d'épreuve</h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {/* Option Tous */}
           <button
             onClick={() => setSelectedPillar('all')}
             className={`p-4 rounded-lg border-2 transition-all text-left ${
@@ -134,11 +133,10 @@ export default function QuizPage() {
             }`}
           >
             <div className="text-3xl mb-2">🌍</div>
-            <div className="font-bold text-gray-200">Tous les Piliers</div>
+            <div className="font-bold text-metal-bone">Tous les Piliers</div>
             <div className="text-xs text-gray-500 mt-1">Questions aléatoires sur tous les genres</div>
           </button>
 
-          {/* Options par Pilier */}
           {GAMIFICATION_PILLARS.map((pillar) => {
             const classMeta = getClassMetadata(pillar as any);
             return (
@@ -152,7 +150,7 @@ export default function QuizPage() {
                 }`}
               >
                 <div className="text-3xl mb-2">{classMeta?.icon || '🎸'}</div>
-                <div className="font-bold text-gray-200">{pillar}</div>
+                <div className="font-bold text-metal-bone">{pillar}</div>
                 <div className="text-xs text-gray-500 mt-1">Spécialisé dans ce pilier</div>
               </button>
             );
