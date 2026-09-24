@@ -17,7 +17,7 @@ export default async function GenresPage() {
   return (
     <>
       {/* 🌌 CALQUE D'ARRIÈRE-PLAN : Subtil et élégant */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+      <div className="fixed inset-0 z-10 pointer-events-none overflow-hidden">
         <FloatingRunes 
           family="musical"
           colorClass="text-yellow-300"
@@ -30,12 +30,12 @@ export default async function GenresPage() {
       </div>
       
       {/* 📜 CALQUE DE PREMIER PLAN : Contenu principal */}
-      <div className="relative z-10 container mx-auto px-4 py-12">
-        <div className="text-center mb-12">
-          <h1 className="font-metal text-5xl md:text-6xl text-metal-fire mb-4 drop-shadow-lg">
+      <div className="relative z-20 container mx-auto px-4 py-12 lg:py-16">
+        <div className="text-center mb-8">
+          <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8 drop-shadow-lg">
             Les 9 Piliers du Metal
           </h1>
-          <p className="text-gray-300 text-lg max-w-2xl mx-auto drop-shadow-md">
+          <p className="text-metal-bone font-serif text-base lg:text-lg max-w-2xl mx-auto drop-shadow-md">
             Explorez les grands courants du metal et découvrez des milliers de groupes 
             classés par sous-genre. Chaque pilier représente une tradition unique du metal.
           </p>
