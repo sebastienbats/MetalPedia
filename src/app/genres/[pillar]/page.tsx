@@ -103,9 +103,8 @@ export default async function PillarPage({ params, searchParams }: Props) {
         />
       </div>
 
-      <div className="relative z-20 container mx-auto px-4 py-12 lg:py-16">
+      <div className="relative z-20 container mx-auto">
         <div className="mb-8">
-          {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
             <Link href="/genres" className="hover:text-metal-fire transition-colors">
               Piliers
@@ -120,7 +119,6 @@ export default async function PillarPage({ params, searchParams }: Props) {
             )}
           </div>
 
-          {/* ✅ Header centré : flex-col sur mobile, flex-row sur desktop */}
           <div className="flex flex-col sm:flex-row items-center gap-4 mb-4 text-center sm:text-left">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-4xl border-2 shrink-0"
@@ -145,7 +143,6 @@ export default async function PillarPage({ params, searchParams }: Props) {
             </div>
           </div>
 
-          {/* Stats centrées */}
           <div className="text-metal-bone font-serif text-base lg:text-lg text-center">
             <span className="text-metal-fire font-bold text-2xl">{bands.length}</span>
             {' '}groupe{bands.length > 1 ? 's' : ''}
