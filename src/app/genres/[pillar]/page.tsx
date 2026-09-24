@@ -105,6 +105,7 @@ export default async function PillarPage({ params, searchParams }: Props) {
 
       <div className="relative z-20 container mx-auto">
         <div className="mb-8">
+          {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
             <Link href="/genres" className="hover:text-metal-fire transition-colors">
               Piliers
@@ -119,7 +120,8 @@ export default async function PillarPage({ params, searchParams }: Props) {
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4 mb-4 text-center sm:text-left">
+          {/* ✅ Header centré : icône + titre + description */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4 text-center">
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-4xl border-2 shrink-0"
               style={{
@@ -130,7 +132,7 @@ export default async function PillarPage({ params, searchParams }: Props) {
             >
               {pillarMetadata.icon}
             </div>
-            <div>
+            <div className="text-center">
               <h1
                 className="font-metal text-2xl lg:text-4xl drop-shadow-lg"
                 style={{ color: pillarMetadata.color }}
@@ -143,6 +145,7 @@ export default async function PillarPage({ params, searchParams }: Props) {
             </div>
           </div>
 
+          {/* Stats centrées */}
           <div className="text-metal-bone font-serif text-base lg:text-lg text-center">
             <span className="text-metal-fire font-bold text-2xl">{bands.length}</span>
             {' '}groupe{bands.length > 1 ? 's' : ''}
