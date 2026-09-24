@@ -1,4 +1,3 @@
-// src/app/favorites/page.tsx
 'use client';
 
 import { useFavoriteBands, useFavoritesCount } from '@/stores/favoritesStore';
@@ -10,27 +9,29 @@ export default function FavoritesPage() {
   const count = useFavoritesCount();
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12 lg:py-16">
       <div className="mb-8">
-        <h1 className="font-metal text-4xl md:text-5xl text-metal-fire mb-2">
+        <h1 className="font-metal text-3xl lg:text-6xl text-metal-fire mb-8">
           ❤️ Mes Favoris
         </h1>
-        <p className="text-gray-400 text-lg">
+        <p className="text-metal-bone font-serif text-base lg:text-lg">
           {count} groupe{count > 1 ? 's' : ''} sauvegardé{count > 1 ? 's' : ''} dans ton Metalverse.
         </p>
       </div>
 
       {favorites.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
           {favorites.map((band) => (
             <BandCard key={band.id} band={band} />
           ))}
         </div>
       ) : (
-        <div className="metal-card p-12 text-center border border-metal-gray">
+        <div className="metal-card p-6 lg:p-8 text-center border border-metal-gray">
           <div className="text-6xl mb-4">🎸</div>
-          <h2 className="text-2xl font-bold text-gray-200 mb-2">Aucun favori pour le moment</h2>
-          <p className="text-gray-400 mb-6">
+          <h2 className="font-metal text-2xl lg:text-3xl text-metal-fire mb-4">
+            Aucun favori pour le moment
+          </h2>
+          <p className="text-metal-bone font-serif text-base lg:text-lg mb-6">
             Explore l'encyclopédie et ajoute des groupes à ta collection personnelle.
           </p>
           <Link 
