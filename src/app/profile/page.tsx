@@ -49,7 +49,7 @@ function ChapterNav() {
   return (
     <nav
       aria-label="Navigation des chapitres"
-      className="sticky top-2 z-30 -mx-4 px-4 sm:mx-0 sm:px-0"
+      className="sticky top-2 z-30"
     >
       <div className="flex gap-2 overflow-x-auto scrollbar-hide bg-metal-black/90 backdrop-blur-md border border-metal-gray rounded-lg p-2 shadow-lg">
         {chapters.map((chapter) => (
@@ -98,7 +98,7 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-12 lg:py-16 space-y-12">
+    <div className="container mx-auto space-y-12">
       <header className="text-center">
         <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">
           ⚔️ Ta Légende
