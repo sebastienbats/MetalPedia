@@ -28,7 +28,7 @@ export default async function HomePage() {
 
       <div className="relative z-20 container mx-auto px-4 py-12 lg:py-16">
         <div className="text-center mb-8">
-          <h1 className="font-metal text-3xl lg:text-6xl text-metal-fire mb-8 drop-shadow-lg">
+          <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8 drop-shadow-lg">
             Bienvenue dans le Metalverse
           </h1>
           <p className="text-metal-bone font-serif text-base lg:text-lg max-w-2xl mx-auto drop-shadow-md">
