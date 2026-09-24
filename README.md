@@ -613,41 +613,17 @@ npm run test:coverage
 
 ## 🗺 Roadmap
 
-✅ Complété
-Phase 1 : Stabilisation (React Query, Error Boundaries)
-Phase 2 : UX avancée (Favoris, thèmes, i18n, Command Palette)
-Phase 3 : Communauté (Auth, Reviews, Concerts)
-Phase 4 : Performance (Next.js 15, PWA, virtualisation)
-Phase 5 : Intelligence (D3, recommandations, analyse audio)
-Phase 6 : Gamification (Système RPG complet avec lore)
-Phase 7 : Industrialisation (Docker, CI/CD, ESLint)
-Phase 8 : Audio Analysis (AcousticBrainz + Last.fm fallback)
-Phase 9 : Similarity Graph (résolution batch Supabase)
-Phase 10 : Timeline Badges (14 badges avec migration rétroactive)
-
----
-
-## 🤝 Contribuer
-
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
-
-1. **Fork** le projet
-2. **Créez** une branche (`git checkout -b feature/amelioration`)
-3. **Commit** vos changements (`git commit -m 'Ajout fonctionnalité'`)
-4. **Push** vers la branche (`git push origin feature/amelioration`)
-5. **Ouvrez** une Pull Request
-
-### Convention de commits
-
-```
-feat: ajout d'une nouvelle fonctionnalité
-fix: correction d'un bug
-docs: modification de la documentation
-style: formatage du code
-refactor: refactoring
-test: ajout de tests
-chore: tâches de maintenance
-```
+### ✅ Complété
+- Phase 1 : Stabilisation (React Query, Error Boundaries)
+- Phase 2 : UX avancée (Favoris, thèmes, i18n, Command Palette)
+- Phase 3 : Communauté (Auth, Reviews, Concerts)
+- Phase 4 : Performance (Next.js 15, PWA, virtualisation)
+- Phase 5 : Intelligence (D3, recommandations, analyse audio)
+- Phase 6 : Gamification (Système RPG complet avec lore)
+- Phase 7 : Industrialisation (Docker, CI/CD, ESLint)
+- Phase 8 : Audio Analysis (AcousticBrainz + Last.fm fallback)
+- Phase 9 : Similarity Graph (résolution batch Supabase)
+- Phase 10 : Timeline Badges (14 badges avec migration rétroactive)
 
 ---
 
