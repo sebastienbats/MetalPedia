@@ -4,6 +4,8 @@ Importe les groupes metal vers Supabase avec :
 - Gestion robuste des doublons (hash stable + contrainte UNIQUE)
 - Normalisation des genres, pays, langues, dates et sources
 - ✨ Mapping intelligent des genres vers les 9 piliers du metal (genre_pillar)
+- ✨ Support du champ genre_source (musicbrainz, lastfm_tags, unknown)
+- ✨ Filtrage strict par piliers (--strict-pillars)
 - Checkpoint pour reprise sur interruption
 - Filtrage par popularité (listeners)
 - Résolution des homonymes
@@ -20,6 +22,7 @@ Importe les groupes metal vers Supabase avec :
 Usage:
   python import_to_supabase.py                                  # Import standard
   python import_to_supabase.py --min-listeners 1000            # Qualité élevée
+  python import_to_supabase.py --strict-pillars                # 9 piliers uniquement
   python import_to_supabase.py --dry-run                       # Test sans import
   python import_to_supabase.py --reset-checkpoint              # Reprendre depuis 0
   python import_to_supabase.py --stats-only                    # Juste les stats
@@ -65,6 +68,7 @@ VALID_STATUSES = {'Active', 'On hold', 'Split-up', 'Unknown', 'Changed name', 'D
 VALID_BIO_LANGS = {'fr', 'en', 'de', 'es', 'it', 'pl', 'pt', 'ru', 'sv', 'ja', 'zh', 'none'}
 VALID_COUNTRY_SOURCES = {'musicbrainz', 'lastfm_tags', 'unknown'}
 VALID_FORMED_SOURCES = {'musicbrainz', 'unknown'}
+VALID_GENRE_SOURCES = {'musicbrainz', 'lastfm_tags', 'unknown'}
 VALID_ALBUM_SOURCES = {'lastfm', 'discogs'}
 VALID_MEMBER_SOURCES = {'musicbrainz', 'discogs'}
 VALID_IMAGE_SOURCES = {
@@ -97,13 +101,27 @@ GENRE_NORMALIZATION: Dict[str, str] = {
     'True Metal': 'Heavy Metal',
     'Post-Metal': 'Progressive Metal',
     'Djent': 'Progressive Metal',
+    'Industrial Metal': 'Industrial Metal',
+    'Industrial': 'Industrial Metal',
+    'Cyber Metal': 'Industrial Metal',
+    'Neue Deutsche Härte': 'Industrial Metal',
+    'NDH': 'Industrial Metal',
+    'Grindcore': 'Death Metal',
+    'Grind': 'Death Metal',
+    'Goregrind': 'Death Metal',
+    'Pornogrind': 'Death Metal',
+    'Noisecore': 'Death Metal',
+    'Avant-Garde Metal': 'Progressive Metal',
+    'Avant-Garde': 'Progressive Metal',
+    'Experimental Metal': 'Progressive Metal',
+    'Experimental': 'Progressive Metal',
 }
 
 VALID_TYPESCRIPT_GENRES = {
     'Black Metal', 'Death Metal', 'Heavy Metal', 'Thrash Metal',
     'Power Metal', 'Doom Metal', 'Progressive Metal', 'Folk Metal',
     'Symphonic Metal', 'Gothic Metal', 'Nu Metal', 'Metalcore',
-    'Sludge Metal', 'Stoner Metal', 'Groove Metal',
+    'Sludge Metal', 'Stoner Metal', 'Groove Metal', 'Industrial Metal',
 }
 
 # ═══════════════════════════════════════════════════════════
@@ -129,13 +147,14 @@ GENRE_PILLAR_MAPPING: Dict[str, str] = {
     'Folk Metal': 'Folk Metal',
     'Metalcore': 'Metalcore',
     # Sous-genres → piliers
-    'Symphonic Metal': 'Power Metal',       # Symphonique ≈ Power metal symphonique
-    'Gothic Metal': 'Doom Metal',           # Gothic ≈ Doom/Atmosphérique
-    'Nu Metal': 'Metalcore',                # Nu Metal ≈ Metal alternatif/Metalcore
-    'Sludge Metal': 'Doom Metal',           # Sludge = sous-genre du Doom
-    'Stoner Metal': 'Doom Metal',           # Stoner ≈ Doom/Stoner
-    'Groove Metal': 'Thrash Metal',         # Groove = évolution du Thrash
-    'Metal': 'Heavy Metal',                 # "Metal" générique → Heavy Metal
+    'Symphonic Metal': 'Power Metal',
+    'Gothic Metal': 'Doom Metal',
+    'Nu Metal': 'Metalcore',
+    'Sludge Metal': 'Doom Metal',
+    'Stoner Metal': 'Doom Metal',
+    'Groove Metal': 'Thrash Metal',
+    'Industrial Metal': 'Thrash Metal',
+    'Metal': 'Heavy Metal',
 }
 
 
@@ -152,55 +171,34 @@ def normalize_genre(genre: str) -> str:
 def normalize_genre_pillar(genre: str) -> str:
     """
     ✨ Mappe un genre (même non normalisé) vers l'un des 9 piliers du metal.
-
-    Piliers valides :
-    Black Metal, Death Metal, Heavy Metal, Thrash Metal,
-    Power Metal, Doom Metal, Progressive Metal, Folk Metal, Metalcore
-
-    Logique :
-    1. Normalise d'abord le genre via normalize_genre()
-    2. Cherche le mapping direct dans GENRE_PILLAR_MAPPING
-    3. Fallback : cherche des mots-clés dans le genre original
-    4. Dernier recours : 'Heavy Metal'
     """
     if not genre:
         return 'Heavy Metal'
 
-    # Étape 1 : Normaliser le genre
     normalized = normalize_genre(genre)
 
-    # Étape 2 : Mapping direct
     if normalized in GENRE_PILLAR_MAPPING:
         return GENRE_PILLAR_MAPPING[normalized]
 
-    # Étape 3 : Si c'est déjà un pilier, le retourner directement
     if normalized in GENRE_PILLARS:
         return normalized
 
-    # Étape 4 : Fallback par mots-clés dans le genre original
     genre_lower = genre.lower()
 
     keyword_mapping = [
-        # Black Metal
         (['black metal', 'blackened', 'blackmetal'], 'Black Metal'),
-        # Death Metal
-        (['death metal', 'deathmetal', 'brutal death', 'technical death',
-          'melodic death', 'swedish death', 'finnish death'], 'Death Metal'),
-        # Thrash Metal
-        (['thrash', 'speed metal', 'crossover', 'groove metal', 'groove'], 'Thrash Metal'),
-        # Power Metal
+        (['death metal', 'deathmetal', 'deathcore', 'brutal death', 'technical death',
+          'melodic death', 'swedish death', 'finnish death', 'grindcore', 'goregrind',
+          'pornogrind', 'noisecore'], 'Death Metal'),
+        (['thrash', 'speed metal', 'crossover', 'groove metal', 'groove',
+          'industrial metal', 'industrial'], 'Thrash Metal'),
         (['power metal', 'symphonic metal', 'symphonic', 'epic metal', 'neoclassical'], 'Power Metal'),
-        # Doom Metal
         (['doom', 'sludge', 'stoner', 'gothic metal', 'gothic', 'funeral'], 'Doom Metal'),
-        # Progressive Metal
         (['progressive', 'prog metal', 'djent', 'math metal', 'post-metal',
-          'post metal', 'avant-garde', 'experimental'], 'Progressive Metal'),
-        # Folk Metal
-        (['folk metal', 'folk', 'viking', 'pagan', 'celtic', 'medieval'], 'Folk Metal'),
-        # Metalcore
+          'post metal', 'avant-garde', 'avant garde', 'experimental'], 'Progressive Metal'),
+        (['folk metal', 'folk', 'viking', 'pagan', 'celtic', 'medieval', 'pagan metal'], 'Folk Metal'),
         (['metalcore', 'nu metal', 'numetal', 'hardcore', 'metallic hardcore',
-          'mathcore', 'deathcore'], 'Metalcore'),
-        # Heavy Metal (le plus large, en dernier)
+          'mathcore'], 'Metalcore'),
         (['heavy metal', 'heavy', 'traditional metal', 'nwobhm', 'true metal',
           'classic metal', 'classic'], 'Heavy Metal'),
     ]
@@ -210,7 +208,6 @@ def normalize_genre_pillar(genre: str) -> str:
             if keyword in genre_lower:
                 return pillar
 
-    # Étape 5 : Dernier recours
     return 'Heavy Metal'
 
 
@@ -278,6 +275,14 @@ def normalize_formed_source(source: Optional[str]) -> str:
         return 'unknown'
     cleaned = source.strip().lower()
     return cleaned if cleaned in VALID_FORMED_SOURCES else 'unknown'
+
+
+def normalize_genre_source(source: Optional[str]) -> str:
+    """Normalise la source du genre."""
+    if not source:
+        return 'unknown'
+    cleaned = source.strip().lower()
+    return cleaned if cleaned in VALID_GENRE_SOURCES else 'unknown'
 
 
 def normalize_bio_lang(bio_lang: Optional[str]) -> Optional[str]:
@@ -439,6 +444,27 @@ def resolve_homonyms(bands: List[Dict]) -> Tuple[List[Dict], int]:
 
 
 # ═══════════════════════════════════════════════════════════
+# ✨ FILTRAGE STRICT PAR PILIERS
+# ═══════════════════════════════════════════════════════════
+
+def filter_by_pillars(bands: List[Dict]) -> Tuple[List[Dict], int]:
+    """
+    ✨ Filtre les groupes pour ne garder que ceux dont le genre
+    correspond à l'un des 9 piliers du metal.
+    """
+    filtered = []
+    removed = 0
+    for band in bands:
+        genre = band.get('genre', 'Metal')
+        pillar = normalize_genre_pillar(genre)
+        if pillar in GENRE_PILLARS:
+            filtered.append(band)
+        else:
+            removed += 1
+    return filtered, removed
+
+
+# ═══════════════════════════════════════════════════════════
 # HASH STABLE & PRÉPARATION
 # ═══════════════════════════════════════════════════════════
 
@@ -467,7 +493,6 @@ def prepare_for_supabase(band: Dict, existing_ids: Optional[Set[int]] = None,
                          existing_band_ids: Optional[Dict[str, int]] = None) -> Dict:
     name = (band.get('name') or '').strip()
 
-    # Utiliser l'ID existant si le band est déjà en base
     if existing_band_ids and name in existing_band_ids:
         band_id = existing_band_ids[name]
     else:
@@ -484,6 +509,7 @@ def prepare_for_supabase(band: Dict, existing_ids: Optional[Set[int]] = None,
     bio_lang = normalize_bio_lang(band.get('bio_lang'))
     country_source = normalize_country_source(band.get('country_source'))
     formed_source = normalize_formed_source(band.get('formed_source'))
+    genre_source = normalize_genre_source(band.get('genre_source'))
     image_source = normalize_image_source(band.get('image_source'))
     albums_source = normalize_albums_source(band.get('albums_source'))
 
@@ -524,7 +550,8 @@ def prepare_for_supabase(band: Dict, existing_ids: Optional[Set[int]] = None,
         'id': band_id,
         'name': name[:200],
         'genre': normalize_genre(band.get('genre', 'Metal'))[:50],
-        'genre_pillar': normalize_genre_pillar(band.get('genre', 'Metal')),  # ✨ AJOUT
+        'genre_pillar': normalize_genre_pillar(band.get('genre', 'Metal')),
+        'genre_source': genre_source,
         'country': normalize_country(band.get('country'))[:50],
         'formed': formed,
         'formed_date': formed_date,
@@ -700,7 +727,7 @@ def reset_checkpoint(checkpoint_path: str):
 
 
 # ═══════════════════════════════════════════════════════════
-# CHARGEMENT DES DONNÉES (supporte les 2 formats)
+# CHARGEMENT DES DONNÉES
 # ═══════════════════════════════════════════════════════════
 
 def load_bands_from_json(input_path: str) -> List[Dict]:
@@ -715,14 +742,10 @@ def load_bands_from_json(input_path: str) -> List[Dict]:
 
 
 # ═══════════════════════════════════════════════════════════
-# ✨ DÉDUPLICATION DES ALBUMS ET MEMBERS PAR BATCH
+# DÉDUPLICATION DES ALBUMS ET MEMBERS
 # ═══════════════════════════════════════════════════════════
 
 def deduplicate_albums(albums: List[Dict]) -> List[Dict]:
-    """
-    Déduplique les albums par ID ET par (band_id, title).
-    Double protection : évite les collisions de hash ET les doublons logiques.
-    """
     seen_ids = set()
     seen_band_title = set()
     unique = []
@@ -739,10 +762,6 @@ def deduplicate_albums(albums: List[Dict]) -> List[Dict]:
 
 
 def deduplicate_members(members: List[Dict]) -> List[Dict]:
-    """
-    Déduplique les membres par ID ET par (band_id, name).
-    Double protection : évite les collisions de hash ET les doublons logiques.
-    """
     seen_ids = set()
     seen_band_name = set()
     unique = []
@@ -759,15 +778,11 @@ def deduplicate_members(members: List[Dict]) -> List[Dict]:
 
 
 # ═══════════════════════════════════════════════════════════
-# ✨ VIDAGE DES TABLES PAR LOTS (évite le timeout)
+# VIDAGE DES TABLES PAR LOTS
 # ═══════════════════════════════════════════════════════════
 
 def purge_table(supabase: Client, table: str, batch_size: int = PURGE_BATCH_SIZE,
                 use_truncate: bool = False) -> int:
-    """
-    Vide une table par lots de `batch_size` enregistrements.
-    Retourne le nombre total d'enregistrements supprimés.
-    """
     if use_truncate:
         try:
             supabase.rpc(f'truncate_{table}').execute()
@@ -797,14 +812,10 @@ def purge_table(supabase: Client, table: str, batch_size: int = PURGE_BATCH_SIZE
 
 
 # ═══════════════════════════════════════════════════════════
-# ✨ RÉCUPÉRATION DES IDs EXISTANTS DES BANDS
+# RÉCUPÉRATION DES IDs EXISTANTS
 # ═══════════════════════════════════════════════════════════
 
 def get_existing_band_ids(supabase: Client) -> Dict[str, int]:
-    """
-    Récupère tous les bands existants en base avec leur ID.
-    Retourne un dict {name: id}.
-    """
     band_id_map = {}
     try:
         offset = 0
@@ -829,17 +840,14 @@ def get_existing_band_ids(supabase: Client) -> Dict[str, int]:
 
 def _upsert_with_retry(supabase: Client, table: str, batch: List[Dict],
                        conflict_field: str = 'id') -> Tuple[int, int]:
-    """
-    Upsert avec retry élément par élément en cas de conflit.
-    Loggue les erreurs détaillées et retry pour TOUS les types d'erreurs.
-    """
     success = 0
     errors = 0
     try:
         supabase.table(table).upsert(batch, on_conflict=conflict_field).execute()
         return len(batch), 0
     except Exception as e:
-        print(f"\n⚠️  Erreur {table} (batch de {len(batch)}) : {str(e)[:200]}")
+        if errors == 0:
+            print(f"\n⚠️  Erreur {table} (batch de {len(batch)}) : {str(e)[:200]}")
         for item in batch:
             try:
                 supabase.table(table).upsert([item], on_conflict=conflict_field).execute()
@@ -861,7 +869,7 @@ def import_to_supabase(
     import_albums: bool = True,
     import_members: bool = True,
     truncate_before_import: bool = False,
-    truncate_bands: bool = False,  # ✨ AJOUT
+    truncate_bands: bool = False,
 ) -> Dict[str, int]:
     supabase: Optional[Client] = None
     existing_band_ids: Dict[str, int] = {}
@@ -876,17 +884,14 @@ def import_to_supabase(
             print(f"❌ Erreur de connexion à Supabase: {e}")
             return {'success': 0, 'errors': 0, 'updated': 0, 'albums': 0, 'members': 0}
 
-        # ✨ Vider la table bands si demandé (AVANT de récupérer les IDs existants)
         if truncate_bands:
             print(f"\n🧹 Vidage de la table bands...")
             deleted = purge_table(supabase, 'bands', use_truncate=truncate_before_import)
             if deleted >= 0:
                 print(f"✅ Table bands vidée ({deleted:,} enregistrements)")
 
-        # Récupérer les IDs existants des bands en base
         existing_band_ids = get_existing_band_ids(supabase)
 
-        # Vider les tables albums et members avant l'import (par lots)
         if import_albums:
             print(f"\n🧹 Vidage de la table albums...")
             deleted = purge_table(supabase, 'albums', use_truncate=truncate_before_import)
@@ -951,12 +956,10 @@ def import_to_supabase(
                 if import_members:
                     members_count += len(prepare_members(prepared['id'], band_data))
         else:
-            # Upsert des bands avec on_conflict='name'
             s, e = _upsert_with_retry(supabase, 'bands', prepared_bands, conflict_field='name')
             success_count += s
             error_count += e
 
-            # Récupérer les IDs réels des bands en base
             band_names_in_batch = [p['name'] for p in prepared_bands]
             try:
                 result = supabase.table('bands').select('id, name').in_('name', band_names_in_batch).execute()
@@ -965,7 +968,6 @@ def import_to_supabase(
                 print(f"⚠️  Erreur récupération IDs réels: {e}")
                 band_id_map = {}
 
-            # 2. Import des albums
             if import_albums and s > 0:
                 all_albums = []
                 for band_data, prepared in zip(batch, prepared_bands):
@@ -981,7 +983,6 @@ def import_to_supabase(
                         albums_count += s_a
                         error_count += e_a
 
-            # 3. Import des membres
             if import_members and s > 0:
                 all_members = []
                 for band_data, prepared in zip(batch, prepared_bands):
@@ -1059,6 +1060,16 @@ def print_statistics(bands: List[Dict], filtered_bands: List[Dict],
         bar = "█" * (count * 40 // max(len(filtered_bands), 1))
         print(f"   {pillar:25s} {bar} {count:,}")
 
+    # ✨ Statistiques par source de genre
+    genre_sources: Dict[str, int] = {}
+    for band in filtered_bands:
+        src = normalize_genre_source(band.get('genre_source'))
+        genre_sources[src] = genre_sources.get(src, 0) + 1
+
+    print(f"\n🏷️  Sources des genres :")
+    for src, count in sorted(genre_sources.items(), key=lambda x: x[1], reverse=True):
+        print(f"   {src:25s} : {count:,}")
+
     total_albums = 0
     albums_with_covers = 0
     bands_with_albums = 0
@@ -1106,6 +1117,9 @@ def print_statistics(bands: List[Dict], filtered_bands: List[Dict],
     with_image = sum(1 for b in filtered_bands if b.get('image_url'))
     with_mbid = sum(1 for b in filtered_bands if b.get('mbid'))
     with_formed_date = sum(1 for b in filtered_bands if _clean_date(b.get('formed_date')))
+    with_disbanded_date = sum(1 for b in filtered_bands if _clean_date(b.get('disbanded_date')))
+    with_original_name = sum(1 for b in filtered_bands if b.get('original_name'))
+    with_genre_source = sum(1 for b in filtered_bands if b.get('genre_source'))
 
     print(f"\n📈 Qualité des données :")
     total = max(len(filtered_bands), 1)
@@ -1113,6 +1127,9 @@ def print_statistics(bands: List[Dict], filtered_bands: List[Dict],
     print(f"   Avec image         : {with_image:,} ({100 * with_image // total}%)")
     print(f"   Avec MBID          : {with_mbid:,} ({100 * with_mbid // total}%)")
     print(f"   Avec date complète : {with_formed_date:,} ({100 * with_formed_date // total}%)")
+    print(f"   Avec disbanded_date: {with_disbanded_date:,} ({100 * with_disbanded_date // total}%)")
+    print(f"   Avec original_name : {with_original_name:,} ({100 * with_original_name // total}%)")
+    print(f"   Avec genre_source  : {with_genre_source:,} ({100 * with_genre_source // total}%)")
 
     print("=" * 60 + "\n")
 
@@ -1139,7 +1156,9 @@ def main():
     parser.add_argument('--truncate-before-import', action='store_true',
                         help='Utilise TRUNCATE au lieu de DELETE (plus rapide)')
     parser.add_argument('--truncate-bands', action='store_true',
-                        help='Tronque aussi la table bands avant l\'import (attention : supprime tous les bands)')
+                        help='Tronque aussi la table bands avant l\'import')
+    parser.add_argument('--strict-pillars', action='store_true',
+                        help='Filtre strict : ne garde que les groupes appartenant aux 9 piliers du metal')
     args = parser.parse_args()
 
     print("\n" + "=" * 60)
@@ -1181,6 +1200,15 @@ def main():
     else:
         removed = 0
 
+    # ✨ Filtrage strict par piliers
+    removed_by_pillars = 0
+    if args.strict_pillars:
+        print(f"\n🏛️  Filtrage strict des 9 piliers du metal...")
+        before_count = len(bands)
+        bands, removed_by_pillars = filter_by_pillars(bands)
+        print(f"   ✅ {len(bands):,} groupes conservés (9 piliers)")
+        print(f"   ❌ {removed_by_pillars:,} groupes écartés (hors piliers)")
+
     print_statistics([], bands, removed, args.min_listeners)
 
     if args.stats_only:
@@ -1198,7 +1226,7 @@ def main():
         bands, args.batch_size, args.checkpoint_file, args.dry_run,
         import_albums=import_albums, import_members=import_members,
         truncate_before_import=args.truncate_before_import,
-        truncate_bands=args.truncate_bands,  # ✨ AJOUT
+        truncate_bands=args.truncate_bands,
     )
     elapsed = time.time() - start_time
 
@@ -1211,6 +1239,8 @@ def main():
         print(f"   💿 Albums importés            : {stats['albums']:,}")
     if import_members:
         print(f"   👥 Membres importés           : {stats['members']:,}")
+    if args.strict_pillars:
+        print(f"   🏛️  Groupes hors piliers écartés: {removed_by_pillars:,}")
     print(f"   ⏱️  Durée                      : {elapsed:.1f}s")
     print("=" * 60 + "\n")
 

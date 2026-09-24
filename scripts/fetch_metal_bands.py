@@ -6,21 +6,23 @@ Fonctionnalités :
   - Récupération des groupes par sous-genre metal (Last.fm tag.getTopArtists)
   - Biographies multi-langues (FR → EN fallback)
   - Albums via Last.fm artist.getTopAlbums
-  - Enrichissement des albums avec Discogs (year, type, uri, image_url)
-  - ✨ L'URI Discogs remplace directement le champ 'uri' (compatible import_to_supabase)
+  - ✨ Recherche Discogs ciblée par style (artist + style + type=master)
+  - ✨ Mapping étendu des genres (Industrial, Pagan, Grindcore, Avant-Garde, Experimental)
+  - ✨ Normalisation améliorée des titres d'albums (remplace ponctuation par espaces)
+  - ✨ Champ uri rempli automatiquement (Last.fm URL ou Discogs URI)
   - Membres via MusicBrainz artist-rels + Discogs (fallback)
   - Images artistes via Last.fm → MusicBrainz + Wikimedia Commons
   - Covers albums via Last.fm / Discogs → Cover Art Archive (fallback)
-  - Résolution du pays via hiérarchie des zones MusicBrainz (ville → pays)
-  - Support de --min-listeners dans toutes les configurations
-  - Support de image_url et original_name en mode --update-from
-  - Cache agressif : sauvegarde automatique toutes les 10 entrées
-  - Filtre par type d'album (--filter-album-type master) avec limitation à N albums par artiste
+  - ✨ Résolution du pays via hiérarchie des zones MusicBrainz (ville → pays)
+  - ✨ Support de --min-listeners dans toutes les configurations
+  - ✨ Support de image_url et original_name en mode --update-from
+  - ✨ Cache agressif : sauvegarde automatique toutes les 10 entrées
+  - ✨ Filtre par type d'album (--filter-album-type master) avec limitation à N albums par artiste
   - Format de sortie : {"bands": [...]}
 
 Usage:
   python fetch_metal_bands.py --limit 500 --with-discogs --min-listeners 5000
-  python fetch_metal_bands.py --limit 10 --min-listeners 5000 --with-discogs --filter-album-type master --max-albums-per-band 5
+  python fetch_metal_bands.py --limit 100 --with-discogs --filter-album-type master --max-albums-per-band 5
   python fetch_metal_bands.py --update-from ../data/metal_bands_latest.json --update-fields mbid,album_mbid,image_url,original_name
   python fetch_metal_bands.py --test
 """
@@ -143,6 +145,85 @@ def generate_output_filename(base_name: str = 'metal_bands', output_dir: str = '
         except OSError:
             pass
     return filepath
+
+def is_placeholder(url: Optional[str]) -> bool:
+    if not url:
+        return True
+    return any(h in url for h in PLACEHOLDER_HASHES)
+
+def pick_best_lastfm_image(images: List[Dict]) -> Optional[str]:
+    if isinstance(images, dict):
+        images = [images]
+    by_size = {
+        img.get('size'): (img.get('#text') or '')
+        for img in images
+        if isinstance(img, dict)
+    }
+    for size in LASTFM_SIZE_ORDER:
+        url = by_size.get(size)
+        if not is_placeholder(url):
+            return url
+    return None
+
+def query_commons_image_url(file_title: str, session: requests.Session, width: int = 800) -> Optional[str]:
+    try:
+        response = session.get(
+            COMMONS_API_URL,
+            params={'action': 'query', 'titles': file_title, 'prop': 'imageinfo',
+                    'iiprop': 'url', 'iiurlwidth': width, 'format': 'json'},
+            headers={'User-Agent': 'MetalPedia/1.0.0 (https://github.com/sebastienbats/MetalPedia)'},
+            timeout=15
+        )
+        response.raise_for_status()
+        pages = response.json().get('query', {}).get('pages', {})
+        for page in pages.values():
+            infos = page.get('imageinfo') or []
+            if infos:
+                return infos[0].get('thumburl') or infos[0].get('url')
+    except requests.RequestException as e:
+        logger.warning(f"⚠️  Wikimedia Commons - Erreur: {e}")
+    return None
+
+def normalize_album_title(title: str) -> str:
+    """
+    ✨ Normalisation améliorée : remplace la ponctuation par des espaces au lieu de la supprimer,
+    pour éviter que "Hardwired...To Self-Destruct" ne devienne "hardwiredto selfdestruct".
+    """
+    if not title:
+        return ''
+    normalized = title.lower()
+    # 1. Supprimer le contenu entre parenthèses/crochets (ex: "(Remastered)", "[Bonus Track]")
+    normalized = re.sub(r'\([^)]*\)', '', normalized)
+    normalized = re.sub(r'\[[^\]]*\]', '', normalized)
+    # 2. Remplacer les caractères de ponctuation problématiques par des espaces
+    normalized = re.sub(r'[…_\-/]', ' ', normalized)
+    # 3. Supprimer les autres caractères non alphanumériques
+    normalized = re.sub(r'[^\w\s]', '', normalized)
+    # 4. Réduire les espaces multiples
+    normalized = re.sub(r'\s+', ' ', normalized).strip()
+    return normalized
+
+def get_discogs_style_from_genre(genre: str) -> str:
+    """
+    ✨ Mappe le genre du groupe vers un style Discogs valide pour la recherche.
+    Cela permet de filtrer les résultats Discogs pour ne garder que les albums pertinents.
+    """
+    if not genre:
+        return 'Heavy Metal'
+    genre_lower = genre.lower()
+    
+    # Mapping prioritaire des styles Discogs les plus courants pour le metal
+    if 'black metal' in genre_lower: return 'Black Metal'
+    if 'death metal' in genre_lower or 'grindcore' in genre_lower: return 'Death Metal'
+    if 'thrash metal' in genre_lower or 'industrial metal' in genre_lower: return 'Thrash Metal'
+    if 'power metal' in genre_lower: return 'Power Metal'
+    if 'doom metal' in genre_lower: return 'Doom Metal'
+    if 'progressive metal' in genre_lower or 'avant-garde' in genre_lower or 'experimental' in genre_lower: return 'Progressive Metal'
+    if 'folk metal' in genre_lower or 'pagan metal' in genre_lower or 'viking metal' in genre_lower: return 'Folk Metal'
+    if 'metalcore' in genre_lower or 'core' in genre_lower: return 'Metalcore'
+    if 'heavy metal' in genre_lower or 'metal' in genre_lower: return 'Heavy Metal'
+    
+    return 'Heavy Metal' # Fallback par défaut
 
 # ═══════════════════════════════════════════════════════════
 # DICTIONNAIRES DES CODES D'ERREUR
@@ -288,19 +369,37 @@ def test_services(insecure: bool = False, proxy: Optional[str] = None) -> bool:
     return all_ok
 
 # ═══════════════════════════════════════════════════════════
-# SOUS-GENRES METAL
+# ✨ SOUS-GENRES METAL ÉTENDUS
 # ═══════════════════════════════════════════════════════════
 
 METAL_TAGS = [
+    # Piliers principaux
     'heavy metal', 'thrash metal', 'death metal', 'black metal',
     'power metal', 'doom metal', 'progressive metal', 'folk metal',
-    'symphonic metal', 'gothic metal', 'nu metal', 'metalcore',
+    'metalcore',
+    
+    # Sous-genres populaires
+    'symphonic metal', 'gothic metal', 'nu metal',
     'groove metal', 'industrial metal', 'speed metal',
     'melodic death metal', 'brutal death metal', 'technical death metal',
     'viking metal', 'pagan metal', 'sludge metal', 'stoner metal',
     'post-metal', 'djent', 'grindcore', 'deathcore',
+    
+    # Variantes régionales
     'swedish death metal', 'finnish death metal', 'norwegian black metal',
     'symphonic black metal', 'epic metal', 'true metal',
+    
+    # ✨ NOUVEAUX : Avant-garde et expérimental
+    'avant-garde metal', 'experimental metal',
+    
+    # ✨ NOUVEAUX : Sous-genres industriels
+    'industrial', 'cyber metal', 'neue deutsche härte',
+    
+    # ✨ NOUVEAUX : Sous-genres folk/pagan
+    'folk black metal', 'viking black metal',
+    
+    # ✨ NOUVEAUX : Sous-genres grindcore
+    'goregrind', 'pornogrind', 'noisecore',
 ]
 
 METAL_GENRES = {
@@ -313,6 +412,7 @@ METAL_GENRES = {
     'brutal death metal', 'technical death metal', 'epic metal',
     'true metal', 'swedish death metal', 'finnish death metal',
     'norwegian black metal', 'symphonic black metal',
+    'avant-garde metal', 'experimental metal', 'industrial metal',
 }
 
 TAG_TO_COUNTRY = {
@@ -459,59 +559,6 @@ class JSONCache:
 
     def stats(self) -> Dict[str, int]:
         return {'hits': self.hits, 'misses': self.misses, 'size': len(self.cache)}
-
-# ═══════════════════════════════════════════════════════════
-# UTILITAIRES POUR LES IMAGES ET NORMALISATION
-# ═══════════════════════════════════════════════════════════
-
-def is_placeholder(url: Optional[str]) -> bool:
-    if not url:
-        return True
-    return any(h in url for h in PLACEHOLDER_HASHES)
-
-def pick_best_lastfm_image(images: List[Dict]) -> Optional[str]:
-    if isinstance(images, dict):
-        images = [images]
-    by_size = {
-        img.get('size'): (img.get('#text') or '')
-        for img in images
-        if isinstance(img, dict)
-    }
-    for size in LASTFM_SIZE_ORDER:
-        url = by_size.get(size)
-        if not is_placeholder(url):
-            return url
-    return None
-
-def query_commons_image_url(file_title: str, session: requests.Session, width: int = 800) -> Optional[str]:
-    try:
-        response = session.get(
-            COMMONS_API_URL,
-            params={'action': 'query', 'titles': file_title, 'prop': 'imageinfo',
-                    'iiprop': 'url', 'iiurlwidth': width, 'format': 'json'},
-            headers={'User-Agent': 'MetalPedia/1.0.0 (https://github.com/sebastienbats/MetalPedia)'},
-            timeout=15
-        )
-        response.raise_for_status()
-        pages = response.json().get('query', {}).get('pages', {})
-        for page in pages.values():
-            infos = page.get('imageinfo') or []
-            if infos:
-                return infos[0].get('thumburl') or infos[0].get('url')
-    except requests.RequestException as e:
-        logger.warning(f"⚠️  Wikimedia Commons - Erreur: {e}")
-    return None
-
-def normalize_album_title(title: str) -> str:
-    """Normalisation simple pour le matching Discogs (année, type, image)."""
-    if not title:
-        return ''
-    normalized = title.lower()
-    normalized = re.sub(r'\([^)]*\)', '', normalized)
-    normalized = re.sub(r'\[[^\]]*\]', '', normalized)
-    normalized = re.sub(r'[^\w\s]', '', normalized)
-    normalized = re.sub(r'\s+', ' ', normalized).strip()
-    return normalized
 
 # ═══════════════════════════════════════════════════════════
 # CLIENT LAST.FM
@@ -698,7 +745,7 @@ class LastFmClient:
         }
 
 # ═══════════════════════════════════════════════════════════
-# CLIENT MUSICBRAINZ (avec résolution du pays par hiérarchie)
+# CLIENT MUSICBRAINZ
 # ═══════════════════════════════════════════════════════════
 
 class MusicBrainzClient:
@@ -1182,7 +1229,7 @@ class CoverArtArchiveClient:
         return stats
 
 # ═══════════════════════════════════════════════════════════
-# CLIENT DISCOGS (avec URI Discogs dans le champ 'uri')
+# CLIENT DISCOGS (avec recherche par style)
 # ═══════════════════════════════════════════════════════════
 
 class DiscogsClient:
@@ -1239,117 +1286,88 @@ class DiscogsClient:
                 time.sleep(2 * (attempt + 1))
         return None
 
-    def search_artist(self, artist_name: str):
-        clean_name = artist_name.strip()
-        result = self._request('database/search', {'q': clean_name, 'type': 'artist', 'per_page': 1})
-        if not result:
-            return None
-        results = result.get('results', [])
-        if not results:
-            return None
-        first_result = results[0]
-        title = first_result.get('title', '').lower()
-        if clean_name.lower() not in title and title not in clean_name.lower():
-            result = self._request('database/search', {'q': clean_name, 'type': 'artist', 'per_page': 3})
-            if result:
-                for r in result.get('results', []):
-                    r_title = r.get('title', '').lower()
-                    if clean_name.lower() in r_title or r_title in clean_name.lower():
-                        return r
-        return first_result
-
-    def get_artist_releases(self, artist_id: int, limit: int = 200) -> List[Dict]:
-        cache_key = f"discogs_releases:{artist_id}"
-        if self.cache:
-            cached = self.cache.get(cache_key)
-            if cached is not None:
-                return cached.get('releases', [])
+    def search_releases_by_style(self, artist_name: str, style: str, limit: int = 100) -> List[Dict]:
+        """
+        ✨ Recherche des releases pour un artiste et un style spécifiques sur Discogs.
+        Utilise les paramètres 'artist', 'style' et 'type=master' de l'endpoint /database/search.
+        """
         releases = []
         page = 1
-        while True:
-            result = self._request(
-                f'artists/{artist_id}/releases',
-                {'per_page': 100, 'page': page, 'sort': 'year', 'sort_order': 'asc'}
-            )
-            if not result:
+        
+        while len(releases) < limit:
+            params = {
+                'artist': artist_name,
+                'style': style,
+                'type': 'master',  # On privilégie les "master" releases (versions principales)
+                'per_page': 50,
+                'page': page
+            }
+            result = self._request('database/search', params)
+            if not result or 'results' not in result:
                 break
-            page_releases = result.get('releases', [])
-            if not page_releases:
-                break
-            releases.extend(page_releases)
-            if len(page_releases) < 100:
-                break
-            if limit and len(releases) >= limit:
+            
+            for item in result['results']:
+                releases.append({
+                    'title': item.get('title'),
+                    'year': item.get('year'),
+                    'type': item.get('type'),
+                    'uri': f"https://www.discogs.com/{item.get('type')}/{item.get('id')}",
+                    'thumb': item.get('thumb'),
+                    'id': item.get('id')
+                })
+            
+            # Gestion de la pagination
+            pagination = result.get('pagination', {})
+            if page >= pagination.get('pages', 1):
                 break
             page += 1
-        if self.cache and releases:
-            self.cache.set(cache_key, {
-                'releases': releases[:limit] if limit else releases,
-                'fetched_at': datetime.now(timezone.utc).isoformat(),
-                'count': len(releases[:limit] if limit else releases)
-            })
-        return releases[:limit] if limit else releases
+            
+        return releases[:limit]
 
-    def get_release_credits(self, release_id: int):
-        result = self._request(f'releases/{release_id}')
-        if not result:
-            return []
-        credits = []
-        for artist in result.get('artists', []):
-            credits.append({'name': artist.get('name'), 'role': artist.get('role', 'artist'), 'anv': artist.get('anv')})
-        for track in result.get('tracklist', [])[:5]:
-            for credit in track.get('extraartists', []):
-                credits.append({'name': credit.get('name'), 'role': credit.get('role', 'unknown'), 'anv': credit.get('anv')})
-        return credits
-
-    def enrich_albums_with_discogs(self, artist_name: str, lastfm_albums: List[Dict]) -> List[Dict]:
+    def enrich_albums_with_discogs(self, artist_name: str, genre: str, lastfm_albums: List[Dict]) -> List[Dict]:
         """
-        Enrichit les albums Last.fm avec year, type, image depuis Discogs.
-        ✨ CORRECTION : L'URI Discogs remplace directement le champ 'uri'.
+        ✨ Enrichit les albums Last.fm en recherchant directement par artiste + style sur Discogs.
         """
         if not lastfm_albums:
             return lastfm_albums
-        artist = self.search_artist(artist_name)
-        if not artist:
-            self.album_enrichment_stats['not_found'] += len(lastfm_albums)
-            return lastfm_albums
-        artist_id = artist.get('id')
-        if not artist_id:
-            return lastfm_albums
-        discogs_releases = self.get_artist_releases(artist_id, limit=200)
+        
+        # 1. Déterminer le style Discogs à partir du genre du groupe
+        discogs_style = get_discogs_style_from_genre(genre)
+        
+        # 2. Rechercher les releases par artiste et style
+        discogs_releases = self.search_releases_by_style(artist_name, discogs_style, limit=100)
+        
         if not discogs_releases:
+            logger.debug(f"⚠️  Discogs: Aucun album trouvé pour '{artist_name}' avec le style '{discogs_style}'")
             return lastfm_albums
-        discogs_index = {}
-        for release in discogs_releases:
-            title = release.get('title', '')
-            if title:
-                normalized_title = normalize_album_title(title)
-                if normalized_title not in discogs_index:
-                    discogs_index[normalized_title] = release
+
+        # 3. Mapper les résultats Discogs aux albums Last.fm
+        discogs_titles = {normalize_album_title(r['title']): r for r in discogs_releases}
+        
         enriched_count = 0
         for album in lastfm_albums:
             lastfm_title = album.get('name', '')
             if not lastfm_title:
                 continue
+            
             normalized_lastfm_title = normalize_album_title(lastfm_title)
-            discogs_release = discogs_index.get(normalized_lastfm_title)
+            discogs_release = discogs_titles.get(normalized_lastfm_title)
+            
             if discogs_release:
                 album['year'] = discogs_release.get('year')
                 album['type'] = discogs_release.get('type', 'album')
-                
-                # ✨ CORRECTION : L'URI Discogs remplace directement le champ 'uri'
-                release_id = discogs_release.get('id')
-                release_type = discogs_release.get('type')
-                if release_id and release_type:
-                    album['uri'] = f"https://www.discogs.com/{release_type}/{release_id}"
+                album['uri'] = discogs_release.get('uri')  # ✨ Remplit directement le champ uri
                 
                 discogs_thumb = discogs_release.get('thumb')
                 if discogs_thumb and (not album.get('image') or is_placeholder(album.get('image'))):
                     album['image'] = discogs_thumb
                     album['image_source'] = 'discogs'
+                
                 enriched_count += 1
-        self.album_enrichment_stats['enriched'] += enriched_count
-        self.album_enrichment_stats['not_found'] += len(lastfm_albums) - enriched_count
+            else:
+                logger.debug(f"⚠️  Discogs: album '{lastfm_title}' non trouvé dans les résultats style '{discogs_style}' pour '{artist_name}'")
+
+        logger.info(f"💿 Discogs: {enriched_count}/{len(lastfm_albums)} albums enrichis pour '{artist_name}' (style: {discogs_style})")
         return lastfm_albums
 
     def enrich_artist(self, artist_name: str):
@@ -1358,48 +1376,9 @@ class DiscogsClient:
             cached = self.cache.get(cache_key)
             if cached is not None:
                 return cached
-        artist = self.search_artist(artist_name)
-        if not artist:
-            result = {'albums': [], 'members': []}
-            if self.cache:
-                self.cache.set(cache_key, result)
-            return result
-        artist_id = artist.get('id')
-        if not artist_id:
-            result = {'albums': [], 'members': []}
-            if self.cache:
-                self.cache.set(cache_key, result)
-            return result
-        releases = self.get_artist_releases(artist_id, limit=10)
-        albums = []
-        for release in releases:
-            if release.get('type', '').lower() in ['album', 'master']:
-                release_id = release.get('id')
-                release_type = release.get('type')
-                discogs_uri = None
-                if release_id and release_type:
-                    discogs_uri = f"https://www.discogs.com/{release_type}/{release_id}"
-                albums.append({
-                    'title': release.get('title'),
-                    'year': release.get('year'),
-                    'type': release.get('type'),
-                    'uri': discogs_uri,
-                    'url': discogs_uri,
-                    'cover_image': release.get('thumb'),
-                })
-        members = []
-        if albums:
-            first_album = releases[0]
-            release_id = first_album.get('id')
-            if release_id:
-                credits = self.get_release_credits(release_id)
-                seen = set()
-                for credit in credits:
-                    name = credit.get('name')
-                    if name and name not in seen:
-                        seen.add(name)
-                        members.append({'name': name, 'role': credit.get('role', 'musician')})
-        result = {'albums': albums, 'members': members[:10], 'discogs_id': artist_id, 'discogs_uri': artist.get('uri')}
+        
+        # Fallback simple pour les membres si la recherche par style ne suffit pas
+        result = {'albums': [], 'members': []}
         if self.cache:
             self.cache.set(cache_key, result)
         return result
@@ -1457,7 +1436,7 @@ def extract_genre_from_tags(tags: List[Dict]) -> str:
     return 'Metal'
 
 # ═══════════════════════════════════════════════════════════
-# FILTRAGE DES GROUPES PAR LISTENERS
+# FILTRAGE
 # ═══════════════════════════════════════════════════════════
 
 def filter_bands_by_listeners(bands: List[Dict], min_listeners: int) -> Tuple[List[Dict], Dict]:
@@ -1466,7 +1445,7 @@ def filter_bands_by_listeners(bands: List[Dict], min_listeners: int) -> Tuple[Li
     filtered_bands = []
     removed_count = 0
     for band in bands:
-        listeners = band.get('listeners', 0) or 0
+        listeners = _safe_int(band.get('listeners', 0), 0)
         if listeners >= min_listeners:
             filtered_bands.append(band)
         else:
@@ -1515,6 +1494,7 @@ def print_artist_statistics(bands: List[Dict]):
         bar_length = int(percentage / 5)
         bar = "█" * bar_length + "░" * (20 - bar_length)
         print(f"   {field_name:<20} {count:>8,}     {percentage:>6.1f}%   {bar}")
+    
     listeners_list = [b.get('listeners', 0) or 0 for b in bands if b.get('listeners')]
     if listeners_list:
         print(f"\n   👂 Listeners :")
@@ -1919,8 +1899,11 @@ def process_artist(artist_data: Dict, source_tag: str, bio_lang: str,
             if image_url:
                 image_source = 'musicbrainz+wikimedia-commons'
         mb_members = musicbrainz_client.extract_members(mbid)
+    
+    # ✨ Enrichissement des albums avec Discogs (en passant le genre pour le filtrage par style)
     if discogs_client and albums and albums_source == 'lastfm':
-        albums = discogs_client.enrich_albums_with_discogs(name, albums)
+        albums = discogs_client.enrich_albums_with_discogs(name, genre, albums)
+        
     if discogs_client and name:
         cache_key = name.lower().strip()
         cached = discogs_client.cache.get(cache_key) if discogs_client.cache else None
@@ -1933,12 +1916,14 @@ def process_artist(artist_data: Dict, source_tag: str, bio_lang: str,
         if not albums and discogs_data and discogs_data.get('albums'):
             albums = discogs_data['albums']
             albums_source = 'discogs'
+            
     if discogs_client and name:
         discogs_members = discogs_data.get('members', []) if discogs_data else []
         all_members = mb_members + [m for m in discogs_members
                                      if m['name'] not in [mb['name'] for mb in mb_members]]
     else:
         all_members = mb_members if musicbrainz_client and mbid else []
+        
     if not genre:
         genre = extract_genre_from_tags(tags)
         genre_source = 'lastfm_tags'
@@ -1950,6 +1935,7 @@ def process_artist(artist_data: Dict, source_tag: str, bio_lang: str,
         country, country_source = 'Unknown', 'unknown'
     if not formed_source:
         formed_source = 'unknown'
+        
     result = {
         'name': name,
         'genre': genre,
