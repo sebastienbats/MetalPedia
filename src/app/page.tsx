@@ -5,38 +5,30 @@ import PillarsGrid from '@/components/genres/PillarsGrid';
 import Loader from '@/components/ui/Loader';
 import FloatingRunes from '@/components/ui/FloatingRunes';
 
-// Métadonnées spécifiques à la page d'accueil (bon pour le SEO)
 export const metadata = {
   title: 'MetalPedia - L\'Encyclopédie du Metal',
   description: 'Explorez les 9 grands piliers du metal, découvrez des milliers de groupes classés par sous-genre et progressez dans votre quête metal.',
 };
 
-// Force le rendu dynamique pour récupérer les dernières statistiques en temps réel
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  // On récupère exactement les mêmes données que la page /genres
   const pillarsStats = await metalServerApi.getGenrePillarsStats();
 
   return (
     <>
-      {/* 🌌 CALQUE D'ARRIÈRE-PLAN : Ambiance Metalverse subtile */}
-      {/* z-10 : AU-DESSUS du fond opaque du body, mais DERRIÈRE le contenu */}
       <div className="fixed inset-0 z-10 pointer-events-none overflow-hidden">
         <FloatingRunes
           preset="vortex"
           family="musical"
           colorClass="text-amber-300"
-          opacityFactor={0.10} // Très subtil pour l'accueil
+          opacityFactor={0.10}
         />
       </div>
 
-      {/* 📜 CALQUE DE PREMIER PLAN : Contenu principal */}
-      {/* z-20 : AU-DESSUS des runes pour garantir la lisibilité */}
       <div className="relative z-20 container mx-auto px-4 py-12 lg:py-16">
-        {/* En-tête d'accueil */}
         <div className="text-center mb-8">
-          <h1 className="font-metal text-5xl lg:text-7xl text-metal-fire mb-8 drop-shadow-lg">
+          <h1 className="font-metal text-3xl lg:text-6xl text-metal-fire mb-8 drop-shadow-lg">
             Bienvenue dans le Metalverse
           </h1>
           <p className="text-metal-bone font-serif text-base lg:text-lg max-w-2xl mx-auto drop-shadow-md">
@@ -45,7 +37,6 @@ export default async function HomePage() {
           </p>
         </div>
 
-        {/* Grille des piliers */}
         <Suspense fallback={<Loader text="Chargement des piliers..." />}>
           <PillarsGrid pillarsStats={pillarsStats} />
         </Suspense>
