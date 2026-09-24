@@ -2,16 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
 // ═══════════════════════════════════════════════════════════
-// CONFIGURATION
-// ═══════════════════════════════════════════════════════════
-
-export async function POST(req: Request) {
-  // L'initialisation ne se fait que lorsqu'une requête est réellement reçue
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-
-// ═══════════════════════════════════════════════════════════
 // TYPES
 // ═══════════════════════════════════════════════════════════
 
@@ -48,7 +38,7 @@ function generatePrompt(bandName: string, genre: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    // Vérification de la clé API
+    // 1. Vérification de la clé API
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
         { error: 'OpenAI API key not configured' },
@@ -56,11 +46,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parsing du body
+    // 2. Initialisation du client OpenAI À L'INTÉRIEUR de la fonction
+    // C'est CE QUI RÈGLE L'ERREUR DE BUILD : Next.js n'exécute cette ligne 
+    // qu'au moment de la requête, pas pendant la compilation.
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    // 3. Parsing du body
     const body: LogoRequest = await request.json();
     const { bandName, genre } = body;
 
-    // Validation des paramètres
+    // 4. Validation des paramètres
     if (!bandName || typeof bandName !== 'string') {
       return NextResponse.json(
         { error: 'bandName is required and must be a string' },
@@ -75,10 +72,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Génération du prompt
+    // 5. Génération du prompt
     const prompt = generatePrompt(bandName, genre);
 
-    // Appel à l'API OpenAI
+    // 6. Appel à l'API OpenAI
     const response = await openai.images.generate({
       model: 'dall-e-3',
       prompt: prompt,
@@ -88,7 +85,7 @@ export async function POST(request: NextRequest) {
       response_format: 'url',
     });
 
-    // ✅ Vérifications robustes pour satisfaire TypeScript strict
+    // 7. Vérifications robustes pour satisfaire TypeScript strict
     if (!response.data || response.data.length === 0) {
       throw new Error('No image data received from OpenAI');
     }
@@ -103,7 +100,7 @@ export async function POST(request: NextRequest) {
       throw new Error('Image URL is missing from response');
     }
 
-    // Retour de l'URL
+    // 8. Retour de l'URL
     return NextResponse.json({ 
       imageUrl,
       revisedPrompt: firstImage.revised_prompt,
