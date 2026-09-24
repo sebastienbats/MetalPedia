@@ -29,9 +29,6 @@ export default function QuizPage() {
     setIsPlaying(true);
   };
 
-  // ─────────────────────────────────────────────────────
-  // ÉCRAN DE RÉSULTATS
-  // ─────────────────────────────────────────────────────
   if (results) {
     const percentage = Math.round((results.correctCount / results.totalCount) * 100);
     let message = "Les ténèbres t'ont trompé...";
@@ -40,7 +37,7 @@ export default function QuizPage() {
     else if (percentage >= 40) message = "Tu as encore beaucoup à apprendre des Anciens.";
 
     return (
-      <div className="container mx-auto px-4 py-12 lg:py-16 max-w-2xl">
+      <div className="container mx-auto max-w-2xl">
         <div className="metal-card p-6 lg:p-8 text-center border-2 border-metal-fire animate-fade-in">
           <div className="text-6xl mb-4">🏆</div>
           <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">Épreuve Terminée !</h1>
@@ -80,12 +77,9 @@ export default function QuizPage() {
     );
   }
 
-  // ─────────────────────────────────────────────────────
-  // ÉCRAN DE JEU
-  // ─────────────────────────────────────────────────────
   if (isPlaying) {
     return (
-      <div className="container mx-auto px-4 py-12 lg:py-16 max-w-3xl">
+      <div className="container mx-auto max-w-3xl">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire">⚔️ Épreuve des Anciens</h1>
           <button
@@ -103,11 +97,8 @@ export default function QuizPage() {
     );
   }
 
-  // ─────────────────────────────────────────────────────
-  // ÉCRAN DE SÉLECTION
-  // ─────────────────────────────────────────────────────
   return (
-    <div className="container mx-auto px-4 py-12 lg:py-16 max-w-4xl space-y-12">
+    <div className="container mx-auto max-w-4xl space-y-12">
       <div className="text-center space-y-4">
         <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire">⚔️ Épreuve des Anciens</h1>
         <p className="text-metal-bone font-serif text-base lg:text-lg max-w-2xl mx-auto">
