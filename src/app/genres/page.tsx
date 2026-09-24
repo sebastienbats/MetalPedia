@@ -30,7 +30,7 @@ export default async function GenresPage() {
       </div>
       
       {/* 📜 CALQUE DE PREMIER PLAN : Contenu principal */}
-      <div className="relative z-20 container mx-auto px-4 py-12 lg:py-16">
+      <div className="relative z-20 container mx-auto px-4 pt-4 pb-12 lg:pb-16">
         <div className="text-center mb-8">
           <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8 drop-shadow-lg">
             Les 9 Piliers du Metal
