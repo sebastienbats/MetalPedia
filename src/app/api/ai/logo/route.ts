@@ -5,9 +5,11 @@ import OpenAI from 'openai';
 // CONFIGURATION
 // ═══════════════════════════════════════════════════════════
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+export async function POST(req: Request) {
+  // L'initialisation ne se fait que lorsqu'une requête est réellement reçue
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
 
 // ═══════════════════════════════════════════════════════════
 // TYPES
