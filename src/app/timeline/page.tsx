@@ -1,9 +1,6 @@
 import type { Metadata } from 'next';
 import TimelineClientWrapper from '@/components/timeline/TimelineClientWrapper';
 
-// ═══════════════════════════════════════════════════════════
-// MÉTADONNÉES SEO DE LA PAGE (Server Component)
-// ═══════════════════════════════════════════════════════════
 export const metadata: Metadata = {
   title: 'Timeline du Metalverse',
   description:
@@ -27,25 +24,20 @@ export const metadata: Metadata = {
   },
 };
 
-// ═══════════════════════════════════════════════════════════
-// PAGE TIMELINE (Server Component)
-// ═══════════════════════════════════════════════════════════
 export default function TimelinePage() {
   return (
-    <div className="container mx-auto max-w-7xl py-8">
-      {/* Introduction */}
-      <div className="text-center mb-8 px-4">
-        <h1 className="font-metal text-4xl md:text-5xl text-metal-rust mb-4">
+    <div className="container mx-auto max-w-7xl px-4 py-12 lg:py-16">
+      <div className="text-center mb-8">
+        <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">
           📜 Le Codex du Metalverse
         </h1>
-        <p className="text-gray-400 max-w-3xl mx-auto text-base md:text-lg leading-relaxed">
-          Quatre-vingt-cinq fragments arrachés à l'Oubli. Chaque événement révèle 
-          neuf visions narratives — une par classe du Conseil. Choisis ta destinée 
+        <p className="text-metal-bone font-serif text-base lg:text-lg max-w-3xl mx-auto leading-relaxed">
+          Quatre-vingt-cinq fragments arrachés à l'Oubli. Chaque événement révèle
+          neuf visions narratives — une par classe du Conseil. Choisis ta destinée
           et découvre ce que les autres ne peuvent pas voir.
         </p>
       </div>
 
-      {/* ✅ Le wrapper Client Component est injecté ici */}
       <TimelineClientWrapper />
     </div>
   );
