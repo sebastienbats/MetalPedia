@@ -98,7 +98,7 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <div className="container mx-auto space-y-6">
+    <div className="container mx-auto px-0 space-y-6">
       <header className="text-center">
         <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-4">
           ⚔️ Ta Légende
