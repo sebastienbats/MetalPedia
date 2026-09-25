@@ -919,14 +919,15 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   15. BADGES DE LA TIMELINE
-   ═══════════════════════════════════════════════════════════ */
+15. BADGES DE LA TIMELINE
+═══════════════════════════════════════════════════════════ */
 .badge-card {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  min-height: 200px;
+  align-items: center; /* Centré pour correspondre au design du composant */
+  text-align: center;
+  min-height: auto; /* ✅ SUPPRESSION de la hauteur fixe de 200px */
+  height: 100%; /* Assure une hauteur uniforme dans la grille */
 }
 
 .badge-card .line-clamp-3 {
@@ -938,27 +939,26 @@
 
 /* Animation d'apparition des badges débloqués */
 @keyframes badge-unlock-pulse {
-  0%, 100% { 
+  0%, 100% {
     transform: scale(1);
     filter: drop-shadow(0 0 10px currentColor);
   }
-  50% { 
+  50% {
     transform: scale(1.05);
     filter: drop-shadow(0 0 20px currentColor);
   }
 }
 
-.badge-card:hover .text-5xl {
+/* ✅ Mise à jour des sélecteurs pour correspondre aux nouvelles tailles d'icônes */
+.badge-card:hover .text-3xl,
+.badge-card:hover .text-4xl {
   animation: badge-unlock-pulse 1.5s ease-in-out infinite;
 }
 
 /* Responsive mobile */
 @media (max-width: 479px) {
   .badge-card {
-    min-height: 180px;
-    padding: 12px;
-  }
-  .badge-card .text-5xl {
-    font-size: 2.5rem;
+    min-height: auto;
+    padding: 8px;
   }
 }
