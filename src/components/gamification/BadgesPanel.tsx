@@ -11,7 +11,9 @@ import { RARITY_CONFIG } from '@/stores/notificationStore';
 function RelicModal({ badge, onClose }: { badge: typeof BADGES[0]; onClose: () => void }) {
   const isUnlocked = useGamificationStore((s) => s.stats.badgesUnlocked.includes(badge.id));
   const rarityColor = getBadgeRarityColor(badge.rarity);
-  const config = RARITY_CONFIG[badge.rarity as keyof typeof RARITY_CONFIG] || RARITY_CONFIG.common;
+  
+  // ✅ CORRECTION : 'commun' au lieu de 'common'
+  const config = RARITY_CONFIG[badge.rarity as keyof typeof RARITY_CONFIG] || RARITY_CONFIG.commun;
 
   return (
     <div 
