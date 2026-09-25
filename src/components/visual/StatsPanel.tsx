@@ -52,11 +52,11 @@ export default function StatsPanel() {
   const topGenre = getMostViewedGenre();
 
   // ─────────────────────────────────────────
-  // ÉTAT VIDE
+  // ÉTAT VIDE (Padding réduit de -75% : p-8 → p-2)
   // ─────────────────────────────────────────
   if (totalViews === 0) {
     return (
-      <div className="metal-card p-8 text-center">
+      <div className="metal-card p-2 text-center">
         <div className="text-5xl mb-3 animate-bounce-subtle">🧬</div>
         <h3 className="font-serif text-xl mb-2">Votre ADN Metal</h3>
         <p className="text-gray-400 text-sm">
@@ -68,13 +68,13 @@ export default function StatsPanel() {
   }
 
   // ─────────────────────────────────────────
-  // ÉTAT AVEC DONNÉES
+  // ÉTAT AVEC DONNÉES (Padding réduit de -75% : p-6 → p-1.5)
   // ─────────────────────────────────────────
   const topCountry = countries[0];
   const genreData = genres.slice(0, 6);
 
   return (
-    <div className="metal-card p-6 space-y-6">
+    <div className="metal-card p-1.5 space-y-4">
       {/* Header */}
       <div>
         <h3 className="font-metal text-2xl text-metal-fire mb-2 flex items-center gap-2">
@@ -86,9 +86,9 @@ export default function StatsPanel() {
         </p>
       </div>
 
-      {/* Stats rapides */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-metal-black/50 rounded-lg p-4 border border-metal-gray">
+      {/* Stats rapides (Padding interne réduit : p-4 → p-2, gap-4 → gap-2) */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="bg-metal-black/50 rounded-lg p-2 border border-metal-gray">
           <div className="text-xs text-gray-400 mb-1">Genre dominant</div>
           <div className="text-lg font-bold truncate" title={topGenre || undefined}>
             {topGenre || '—'}
@@ -98,7 +98,7 @@ export default function StatsPanel() {
           )}
         </div>
 
-        <div className="bg-metal-black/50 rounded-lg p-4 border border-metal-gray">
+        <div className="bg-metal-black/50 rounded-lg p-2 border border-metal-gray">
           <div className="text-xs text-gray-400 mb-1">Pays favori</div>
           <div className="text-lg font-bold truncate" title={topCountry?.country}>
             {topCountry?.country || '—'}
@@ -197,8 +197,8 @@ export default function StatsPanel() {
         </div>
       )}
 
-      {/* Footer : Niveau gamification */}
-      <div className="pt-4 border-t border-metal-gray flex items-center justify-between">
+      {/* Footer : Niveau gamification (Padding réduit : pt-4 → pt-3) */}
+      <div className="pt-3 border-t border-metal-gray flex items-center justify-between">
         <span className="text-sm text-gray-400">Progression totale</span>
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">Niv. {level}</span>
