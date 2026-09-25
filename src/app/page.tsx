@@ -1,4 +1,3 @@
-// src/app/page.tsx
 import { Suspense } from 'react';
 import { metalServerApi } from '@/lib/metal-api';
 import PillarsGrid from '@/components/genres/PillarsGrid';
@@ -26,7 +25,7 @@ export default async function HomePage() {
         />
       </div>
 
-      <div className="relative z-20 container mx-auto">
+      <div className="relative z-20 container mx-auto px-4 py-12 lg:py-16">
         <div className="text-center mb-8">
           <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8 drop-shadow-lg">
             Bienvenue dans le Metalverse
