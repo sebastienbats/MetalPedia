@@ -5,9 +5,6 @@ import { useFragmentStore } from '@/stores/fragmentStore';
 import { useClassStore } from '@/stores/classStore';
 import { CHARACTER_CLASSES } from '@/lib/gamification/classes';
 
-// ═══════════════════════════════════════════════════════════
-// MÉTADONNÉES DES PILIERS
-// ═══════════════════════════════════════════════════════════
 const PILLARS = [
   { id: 'Heavy Metal', icon: '🎸', color: '#8b0000', fragments: [
     { id: 1, rune: 'ᚦ', title: "L'Enclume du Néant" },
@@ -109,18 +106,13 @@ const PILLARS = [
   ]},
 ];
 
-// ═══════════════════════════════════════════════════════════
-// COMPOSANT PRINCIPAL
-// ═══════════════════════════════════════════════════════════
 export default function TableOfKnowledge() {
   const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
   const collectedIds = useFragmentStore((state) => state.collectedIds);
   const { selectedClass } = useClassStore();
 
-  // Nom lisible de la classe
   const className = selectedClass ? CHARACTER_CLASSES[selectedClass]?.name : null;
 
-  // Calculer la progression globale
   const totalFragments = PILLARS.reduce((sum, p) => sum + p.fragments.length, 0);
   const collectedCount = PILLARS.reduce((sum, p) => 
     sum + p.fragments.filter(f => collectedIds.includes(f.id)).length, 0
@@ -128,30 +120,23 @@ export default function TableOfKnowledge() {
   const globalProgress = totalFragments > 0 ? (collectedCount / totalFragments) * 100 : 0;
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 py-8">
-      {/* En-tête */}
-      <div className="text-center mb-8">
-        {/* ✅ className au lieu de class */}
-        <h2 
-          id="decouvertes-title" 
-          className="font-metal text-2xl sm:text-3xl md:text-4xl text-metal-rust mb-2"
-        >
+    <div className="w-full max-w-6xl mx-auto px-2 py-4">
+      <div className="text-center mb-4">
+        <h2 className="font-metal text-xl sm:text-2xl text-metal-rust mb-1">
           📜 La Table du Savoir
         </h2>
-        {/* ✅ className au lieu de class */}
-        <p className="text-gray-400 font-serif text-sm sm:text-base mb-6">
+        <p className="text-gray-400 font-serif text-xs sm:text-sm mb-2">
           {className
             ? `En tant que ${className}, explore les fragments du Metalverse`
             : 'Choisis une classe pour explorer les fragments du Metalverse'}
         </p>
         
-        {/* Progression globale */}
         <div className="max-w-md mx-auto">
-          <div className="flex justify-between text-sm mb-1">
+          <div className="flex justify-between text-xs mb-1">
             <span className="text-gray-300">Progression globale</span>
             <span className="text-gray-400">{collectedCount}/{totalFragments} fragments</span>
           </div>
-          <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 transition-all duration-500"
               style={{ width: `${globalProgress}%` }}
@@ -160,13 +145,11 @@ export default function TableOfKnowledge() {
         </div>
       </div>
 
-      {/* Grille des 9 Tables */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* ✅ Grille en liste sur mobile (grid-cols-1), puis 2 ou 3 colonnes sur écrans plus larges */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {PILLARS.map((pillar) => {
           const collected = pillar.fragments.filter(f => collectedIds.includes(f.id)).length;
-          const progress = pillar.fragments.length > 0 
-            ? (collected / pillar.fragments.length) * 100 
-            : 0;
+          const progress = pillar.fragments.length > 0 ? (collected / pillar.fragments.length) * 100 : 0;
           const isComplete = collected === pillar.fragments.length;
           const isSelected = selectedPillar === pillar.id;
 
@@ -175,59 +158,53 @@ export default function TableOfKnowledge() {
               key={pillar.id}
               onClick={() => setSelectedPillar(isSelected ? null : pillar.id)}
               className={`
-                rounded-xl p-5 cursor-pointer transition-all duration-300 border-2
-                ${isSelected ? 'ring-2 ring-yellow-400 scale-[1.02]' : 'hover:scale-[1.01]'}
+                rounded-lg p-3 cursor-pointer transition-all duration-300 border-2
+                ${isSelected ? 'ring-1 ring-yellow-400 scale-[1.01]' : 'hover:scale-[1.01]'}
                 ${isComplete ? 'border-yellow-500' : 'border-gray-700'}
               `}
               style={{ backgroundColor: `${pillar.color}15` }}
             >
-              {/* En-tête de la carte */}
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-3xl">{pillar.icon}</span>
-                <div className="flex-1">
-                  <h3 className="font-serif text-lg font-bold" style={{ color: pillar.color }}>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-2xl shrink-0">{pillar.icon}</span>
+                <div className="flex-1 min-w-0">
+                  {/* ✅ break-words au lieu de truncate pour le titre */}
+                  <h3 className="font-serif text-sm sm:text-base font-bold break-words" style={{ color: pillar.color }}>
                     {pillar.id}
                   </h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
                     <span>{collected}/{pillar.fragments.length}</span>
                     {isComplete && <span className="text-yellow-400">✨ Complète !</span>}
                   </div>
                 </div>
               </div>
 
-              {/* Barre de progression */}
-              <div className="h-2 bg-gray-800 rounded-full overflow-hidden mb-3">
+              <div className="h-1 bg-gray-800 rounded-full overflow-hidden mb-2">
                 <div 
                   className="h-full transition-all duration-500"
-                  style={{ 
-                    width: `${progress}%`,
-                    backgroundColor: pillar.color 
-                  }}
+                  style={{ width: `${progress}%`, backgroundColor: pillar.color }}
                 />
               </div>
 
-              {/* Liste des fragments */}
-              <div className="space-y-2">
+              {/* ✅ Liste verticale des fragments avec texte complet (break-words) */}
+              <div className="space-y-1.5">
                 {pillar.fragments.map((fragment) => {
                   const isCollected = collectedIds.includes(fragment.id);
                   return (
                     <div
                       key={fragment.id}
                       className={`
-                        flex items-center gap-2 p-2 rounded-lg text-sm
-                        ${isCollected 
-                          ? 'bg-black/30 text-white' 
-                          : 'bg-black/10 text-gray-500'}
+                        flex items-start gap-2 p-2 rounded text-xs sm:text-sm
+                        ${isCollected ? 'bg-black/30 text-white' : 'bg-black/10 text-gray-500'}
                       `}
                     >
-                      <span className={`text-lg ${isCollected ? '' : 'opacity-30'}`}>
+                      <span className={`text-base sm:text-lg shrink-0 mt-0.5 ${isCollected ? '' : 'opacity-30'}`}>
                         {isCollected ? fragment.rune : '?'}
                       </span>
-                      <span className="flex-1">
+                      <span className="flex-1 break-words leading-snug">
                         {isCollected ? fragment.title : 'Fragment inconnu...'}
                       </span>
                       {isCollected && (
-                        <span className="text-green-400 text-xs">✓</span>
+                        <span className="text-green-400 text-xs shrink-0 mt-1">✓</span>
                       )}
                     </div>
                   );
@@ -238,9 +215,8 @@ export default function TableOfKnowledge() {
         })}
       </div>
 
-      {/* Légende */}
-      <div className="mt-8 text-center text-sm text-gray-500">
-        <p>🔮 Explore la Timeline pour collecter des fragments et compléter les Tables du Savoir</p>
+      <div className="mt-4 text-center text-[10px] sm:text-xs text-gray-500">
+        <p>🔮 Explore la Timeline pour collecter des fragments et compléter les Tables</p>
       </div>
     </div>
   );
