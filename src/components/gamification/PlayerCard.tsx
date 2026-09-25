@@ -11,7 +11,7 @@ export default function PlayerCard() {
   const nextRank = RANKS.find((r) => r.level > stats.level);
 
   return (
-    <div className="metal-card p-6 border-2 border-metal-gray">
+    <div className="metal-card p-1.5 border-2 border-metal-gray">
       {/* 🆕 Badge de distinction */}
       <div className="mb-4 flex items-center gap-2">
         <span className="px-2 py-1 bg-metal-gray/30 text-gray-300 text-[10px] font-bold rounded uppercase tracking-wider border border-metal-gray">
