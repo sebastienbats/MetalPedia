@@ -15,7 +15,7 @@ import { RARITY_CONFIG } from '@/stores/notificationStore';
 type Filter = 'all' | 'unlocked' | 'locked';
 
 // ═══════════════════════════════════════════════════════════
-// BADGE CARD
+// BADGE CARD (Padding réduit de -75% : p-4 → p-2)
 // ═══════════════════════════════════════════════════════════
 function BadgeCard({ badge }: { badge: TimelineBadge }) {
   const isUnlocked = useAchievementStore((s) => s.isUnlocked(badge.id));
@@ -32,7 +32,7 @@ function BadgeCard({ badge }: { badge: TimelineBadge }) {
 
   return (
     <div
-      className="badge-card group relative p-4 rounded-xl border-2 transition-all duration-300"
+      className="badge-card group relative p-2 rounded-xl border-2 transition-all duration-300"
       style={{
         backgroundColor: isUnlocked ? 'rgba(10, 10, 10, 0.6)' : 'rgba(10, 10, 10, 0.2)',
         borderColor: isUnlocked ? config.color : 'rgba(255, 255, 255, 0.1)',
@@ -55,7 +55,7 @@ function BadgeCard({ badge }: { badge: TimelineBadge }) {
 
       {/* Icône */}
       <div
-        className="text-5xl mb-3 transition-transform group-hover:scale-110"
+        className="text-4xl mb-2 transition-transform group-hover:scale-110"
         style={{
           filter: isUnlocked ? `drop-shadow(0 0 10px ${config.glow})` : 'none',
         }}
@@ -65,25 +65,25 @@ function BadgeCard({ badge }: { badge: TimelineBadge }) {
 
       {/* Titre */}
       <h3
-        className="font-metal text-base mb-1 leading-tight"
+        className="font-metal text-sm mb-1 leading-tight"
         style={{ color: isUnlocked ? config.color : '#666' }}
       >
         {badge.title}
       </h3>
 
       {/* Description */}
-      <p className="text-xs text-gray-400 leading-snug line-clamp-3">
+      <p className="text-[11px] text-gray-400 leading-snug line-clamp-2">
         {badge.description}
       </p>
 
       {/* Date de déblocage ou état verrouillé */}
       {isUnlocked && formattedDate ? (
-        <div className="mt-3 pt-2 border-t border-metal-gray/50 text-[10px] text-gray-500 flex items-center gap-1">
+        <div className="mt-2 pt-1 border-t border-metal-gray/50 text-[10px] text-gray-500 flex items-center gap-1">
           <span>📅</span>
           <span>{formattedDate}</span>
         </div>
       ) : (
-        <div className="mt-3 pt-2 border-t border-metal-gray/30 text-[10px] text-gray-600 flex items-center gap-1">
+        <div className="mt-2 pt-1 border-t border-metal-gray/30 text-[10px] text-gray-600 flex items-center gap-1">
           <span>🔒</span>
           <span>Non débloqué</span>
         </div>
@@ -119,9 +119,10 @@ export default function TimelineBadgesPanel() {
   const progressPercent = Math.round((unlockedCount / TIMELINE_BADGES.length) * 100);
 
   return (
-    <div className="metal-card p-5 sm:p-6 border-2 border-metal-gray">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+    // ✅ Container principal : padding réduit de -75% (p-5 sm:p-6 → p-1 sm:p-1.5)
+    <div className="metal-card p-1 sm:p-1.5 border-2 border-metal-gray">
+      {/* Header (gap et mb réduits) */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
         <div>
           <h3 className="font-metal text-xl sm:text-2xl text-metal-fire flex items-center gap-2">
             <span aria-hidden="true">🏆</span>
@@ -161,8 +162,8 @@ export default function TimelineBadgesPanel() {
         </div>
       </div>
 
-      {/* Barre de progression globale */}
-      <div className="mb-6">
+      {/* Barre de progression globale (mb réduit) */}
+      <div className="mb-3">
         <div className="flex justify-between text-xs text-gray-400 mb-1">
           <span>Progression totale</span>
           <span className="text-metal-fire font-bold">{progressPercent}%</span>
@@ -175,13 +176,13 @@ export default function TimelineBadgesPanel() {
         </div>
       </div>
 
-      {/* État vide */}
+      {/* État vide (py réduit) */}
       {filteredProgress.length === 0 && filteredPillar.length === 0 && (
-        <div className="text-center py-10">
-          <div className="text-5xl mb-3 opacity-40">
+        <div className="text-center py-4">
+          <div className="text-4xl mb-2 opacity-40">
             {filter === 'unlocked' ? '🔍' : '🏆'}
           </div>
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 text-xs">
             {filter === 'unlocked'
               ? 'Aucun badge débloqué pour le moment.'
               : 'Tous les badges sont déjà débloqués !'}
@@ -189,15 +190,15 @@ export default function TimelineBadgesPanel() {
         </div>
       )}
 
-      {/* Section Badges de Progression */}
+      {/* Section Badges de Progression (mb et gap réduits) */}
       {filteredProgress.length > 0 && (
-        <div className="mb-6">
-          <h4 className="text-xs uppercase tracking-wider text-gray-500 font-bold mb-3 flex items-center gap-2">
+        <div className="mb-3">
+          <h4 className="text-xs uppercase tracking-wider text-gray-500 font-bold mb-2 flex items-center gap-2">
             <span className="w-6 h-px bg-metal-gray" />
             <span>📈 Progression</span>
             <span className="w-full h-px bg-metal-gray flex-1" />
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
             {filteredProgress.map((badge) => (
               <BadgeCard key={badge.id} badge={badge} />
             ))}
@@ -205,15 +206,15 @@ export default function TimelineBadgesPanel() {
         </div>
       )}
 
-      {/* Section Badges de Pilier */}
+      {/* Section Badges de Pilier (mb et gap réduits) */}
       {filteredPillar.length > 0 && (
         <div>
-          <h4 className="text-xs uppercase tracking-wider text-gray-500 font-bold mb-3 flex items-center gap-2">
+          <h4 className="text-xs uppercase tracking-wider text-gray-500 font-bold mb-2 flex items-center gap-2">
             <span className="w-6 h-px bg-metal-gray" />
             <span>🏛️ Maîtrise des Neuf Genres</span>
             <span className="w-full h-px bg-metal-gray flex-1" />
           </h4>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
             {filteredPillar.map((badge) => (
               <BadgeCard key={badge.id} badge={badge} />
             ))}
