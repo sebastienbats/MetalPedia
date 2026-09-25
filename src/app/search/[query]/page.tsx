@@ -25,7 +25,7 @@ export default async function SearchPage({ params }: Props) {
   const decodedQuery = decodeURIComponent(query);
 
   return (
-    <div className="container mx-auto space-y-12">
+    <div className="container mx-auto px-4 py-12 lg:py-16 space-y-12">
       <header className="border-b border-metal-gray pb-6 text-center">
         <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">
           🔍 Résultats de recherche
