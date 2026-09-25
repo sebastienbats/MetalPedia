@@ -138,7 +138,6 @@ export default function ProfilePage() {
           Ton Incarnation
         </h2>
 
-        {/* ✅ metal-card : padding réduit à -75% (p-4 sm:p-6 → p-1 sm:p-1.5) */}
         <div className="metal-card p-1 sm:p-1.5 border-2 border-metal-gray relative overflow-hidden">
           {classMeta && (
             <div
@@ -291,7 +290,8 @@ export default function ProfilePage() {
           Tes Exploits
         </h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        {/* ✅ Grille 1 : gap réduit à -75% (gap-4 lg:gap-6 → gap-1 lg:gap-1.5) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 lg:gap-1.5">
           <PlayerCard />
           <StatsPanel />
         </div>
@@ -300,7 +300,8 @@ export default function ProfilePage() {
 
         <TimelineBadgesPanel />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        {/* ✅ Grille 2 : gap réduit à -75% (gap-4 lg:gap-6 → gap-1 lg:gap-1.5) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 lg:gap-1.5">
           <QuestsPanel />
           <BadgesPanel />
         </div>
@@ -316,7 +317,6 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      {/* ✅ metal-card CTA : padding réduit à -75% (p-4 sm:p-6 → p-1 sm:p-1.5) */}
       {!user && (
         <section
           aria-label="Invitation à créer un compte"
