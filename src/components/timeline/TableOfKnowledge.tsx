@@ -5,7 +5,26 @@ import { useFragmentStore } from '@/stores/fragmentStore';
 import { useClassStore } from '@/stores/classStore';
 import { CHARACTER_CLASSES } from '@/lib/gamification/classes';
 
-const PILLARS = [
+// ═══════════════════════════════════════════════════════════
+// TYPES
+// ═══════════════════════════════════════════════════════════
+interface Fragment {
+  id: number;
+  rune: string;
+  title: string;
+}
+
+interface Pillar {
+  id: string;
+  icon: string;
+  color: string;
+  fragments: Fragment[];
+}
+
+// ═══════════════════════════════════════════════════════════
+// MÉTADONNÉES DES PILIERS
+// ═══════════════════════════════════════════════════════════
+const PILLARS: Pillar[] = [
   { id: 'Heavy Metal', icon: '🎸', color: '#8b0000', fragments: [
     { id: 1, rune: 'ᚦ', title: "L'Enclume du Néant" },
     { id: 2, rune: 'ᚱ', title: 'Le Grimoire de la Paranoïa' },
@@ -106,8 +125,208 @@ const PILLARS = [
   ]},
 ];
 
+// ═══════════════════════════════════════════════════════════
+// MODALE DE DÉTAIL DU FRAGMENT
+// ═══════════════════════════════════════════════════════════
+function FragmentModal({ 
+  fragment, 
+  pillar, 
+  isCollected, 
+  onClose 
+}: { 
+  fragment: Fragment; 
+  pillar: Pillar; 
+  isCollected: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+    >
+      <div 
+        className="relative w-full max-w-md metal-card border-2 p-6 animate-slide-up"
+        style={{ borderColor: pillar.color }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button 
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors text-xl"
+        >
+          ✕
+        </button>
+
+        <div className="text-center mb-4">
+          {/* Rune en grand */}
+          <div 
+            className="text-7xl mb-3 inline-block font-bold"
+            style={{ 
+              color: isCollected ? pillar.color : '#666',
+              filter: isCollected ? `drop-shadow(0 0 20px ${pillar.color})` : 'grayscale(1) opacity(0.5)',
+              textShadow: isCollected ? `0 0 30px ${pillar.color}80` : 'none',
+            }}
+          >
+            {fragment.rune}
+          </div>
+          
+          {/* Titre complet */}
+          <h3 
+            className="font-metal text-xl mb-2 break-words leading-tight"
+            style={{ color: isCollected ? pillar.color : '#666' }}
+          >
+            {isCollected ? fragment.title : 'Fragment Inconnu'}
+          </h3>
+          
+          {/* Badge du pilier */}
+          <div 
+            className="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded inline-block"
+            style={{ backgroundColor: `${pillar.color}20`, color: pillar.color, border: `1px solid ${pillar.color}40` }}
+          >
+            {pillar.icon} {pillar.id}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {/* Statut */}
+          {isCollected ? (
+            <div className="text-center p-3 bg-green-900/20 rounded border border-green-800/50">
+              <span className="text-green-400 font-semibold text-sm">✓ Fragment collecté</span>
+              <p className="text-xs text-gray-400 mt-1">
+                Ce fragment fait maintenant partie de ta connaissance du Metalverse.
+              </p>
+            </div>
+          ) : (
+            <div className="text-center p-3 bg-metal-black/50 rounded border border-metal-gray/50">
+              <span className="text-gray-500 font-semibold text-sm">🔒 Fragment verrouillé</span>
+              <p className="text-xs text-gray-500 mt-1">
+                Explore la Timeline pour révéler ce fragment du Codex.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// BADGE DE FRAGMENT (Compact)
+// ═══════════════════════════════════════════════════════════
+function FragmentBadge({ 
+  fragment, 
+  pillar, 
+  isCollected, 
+  onClick 
+}: { 
+  fragment: Fragment; 
+  pillar: Pillar; 
+  isCollected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      className={`
+        group relative p-2 rounded-lg border-2 transition-all duration-300 cursor-pointer hover:scale-105
+        ${isCollected 
+          ? 'bg-black/30' 
+          : 'bg-black/10 opacity-50 grayscale'}
+      `}
+      style={{
+        borderColor: isCollected ? `${pillar.color}60` : 'rgba(255, 255, 255, 0.1)',
+        boxShadow: isCollected ? `0 0 10px ${pillar.color}30` : 'none',
+      }}
+    >
+      <div className="text-center">
+        {/* Rune */}
+        <div 
+          className="text-2xl mb-1 transition-transform group-hover:scale-110"
+          style={{ 
+            color: isCollected ? pillar.color : '#666',
+            filter: isCollected ? `drop-shadow(0 0 5px ${pillar.color})` : 'none',
+          }}
+        >
+          {fragment.rune}
+        </div>
+        {/* Statut */}
+        <div className="text-[10px] text-gray-500">
+          {isCollected ? '✓' : '🔒'}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// CARTE DE PILIER
+// ═══════════════════════════════════════════════════════════
+function PillarCard({ 
+  pillar, 
+  collectedIds,
+  onFragmentClick 
+}: { 
+  pillar: Pillar; 
+  collectedIds: number[];
+  onFragmentClick: (fragment: Fragment) => void;
+}) {
+  const collected = pillar.fragments.filter(f => collectedIds.includes(f.id)).length;
+  const progress = pillar.fragments.length > 0 ? (collected / pillar.fragments.length) * 100 : 0;
+  const isComplete = collected === pillar.fragments.length;
+
+  return (
+    <div
+      className={`
+        rounded-lg p-2 sm:p-3 transition-all duration-300 border-2
+        ${isComplete ? 'border-yellow-500' : 'border-gray-700'}
+      `}
+      style={{ backgroundColor: `${pillar.color}15` }}
+    >
+      {/* En-tête de la carte */}
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-2xl shrink-0">{pillar.icon}</span>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-serif text-sm sm:text-base font-bold break-words" style={{ color: pillar.color }}>
+            {pillar.id}
+          </h3>
+          <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
+            <span>{collected}/{pillar.fragments.length}</span>
+            {isComplete && <span className="text-yellow-400">✨ Complète !</span>}
+          </div>
+        </div>
+      </div>
+
+      {/* Barre de progression */}
+      <div className="h-1 bg-gray-800 rounded-full overflow-hidden mb-2">
+        <div 
+          className="h-full transition-all duration-500"
+          style={{ width: `${progress}%`, backgroundColor: pillar.color }}
+        />
+      </div>
+
+      {/* Grille de fragments (badges) */}
+      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-1.5">
+        {pillar.fragments.map((fragment) => {
+          const isCollected = collectedIds.includes(fragment.id);
+          return (
+            <FragmentBadge
+              key={fragment.id}
+              fragment={fragment}
+              pillar={pillar}
+              isCollected={isCollected}
+              onClick={() => onFragmentClick(fragment)}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// COMPOSANT PRINCIPAL
+// ═══════════════════════════════════════════════════════════
 export default function TableOfKnowledge() {
-  const [selectedPillar, setSelectedPillar] = useState<string | null>(null);
+  const [selectedFragment, setSelectedFragment] = useState<{ fragment: Fragment; pillar: Pillar } | null>(null);
   const collectedIds = useFragmentStore((state) => state.collectedIds);
   const { selectedClass } = useClassStore();
 
@@ -119,105 +338,63 @@ export default function TableOfKnowledge() {
   );
   const globalProgress = totalFragments > 0 ? (collectedCount / totalFragments) * 100 : 0;
 
+  const handleFragmentClick = (fragment: Fragment, pillar: Pillar) => {
+    setSelectedFragment({ fragment, pillar });
+  };
+
   return (
-    <div className="w-full max-w-6xl mx-auto px-2 py-4">
-      <div className="text-center mb-4">
-        <h2 className="font-metal text-xl sm:text-2xl text-metal-rust mb-1">
-          📜 La Table du Savoir
-        </h2>
-        <p className="text-gray-400 font-serif text-xs sm:text-sm mb-2">
-          {className
-            ? `En tant que ${className}, explore les fragments du Metalverse`
-            : 'Choisis une classe pour explorer les fragments du Metalverse'}
-        </p>
-        
-        <div className="max-w-md mx-auto">
-          <div className="flex justify-between text-xs mb-1">
-            <span className="text-gray-300">Progression globale</span>
-            <span className="text-gray-400">{collectedCount}/{totalFragments} fragments</span>
+    <>
+      <div className="w-full max-w-6xl mx-auto px-2 py-4">
+        <div className="text-center mb-4">
+          <h2 className="font-metal text-xl sm:text-2xl text-metal-rust mb-1">
+            📜 La Table du Savoir
+          </h2>
+          <p className="text-gray-400 font-serif text-xs sm:text-sm mb-2">
+            {className
+              ? `En tant que ${className}, explore les fragments du Metalverse`
+              : 'Choisis une classe pour explorer les fragments du Metalverse'}
+          </p>
+          
+          <div className="max-w-md mx-auto">
+            <div className="flex justify-between text-xs mb-1">
+              <span className="text-gray-300">Progression globale</span>
+              <span className="text-gray-400">{collectedCount}/{totalFragments} fragments</span>
+            </div>
+            <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 transition-all duration-500"
+                style={{ width: `${globalProgress}%` }}
+              />
+            </div>
           </div>
-          <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 transition-all duration-500"
-              style={{ width: `${globalProgress}%` }}
+        </div>
+
+        {/* Grille des 9 Tables */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {PILLARS.map((pillar) => (
+            <PillarCard
+              key={pillar.id}
+              pillar={pillar}
+              collectedIds={collectedIds}
+              onFragmentClick={(fragment) => handleFragmentClick(fragment, pillar)}
             />
-          </div>
+          ))}
+        </div>
+
+        <div className="mt-4 text-center text-[10px] sm:text-xs text-gray-500">
+          <p>🔮 Explore la Timeline pour collecter des fragments et compléter les Tables</p>
         </div>
       </div>
 
-      {/* ✅ Grille en liste sur mobile (grid-cols-1), puis 2 ou 3 colonnes sur écrans plus larges */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {PILLARS.map((pillar) => {
-          const collected = pillar.fragments.filter(f => collectedIds.includes(f.id)).length;
-          const progress = pillar.fragments.length > 0 ? (collected / pillar.fragments.length) * 100 : 0;
-          const isComplete = collected === pillar.fragments.length;
-          const isSelected = selectedPillar === pillar.id;
-
-          return (
-            <div
-              key={pillar.id}
-              onClick={() => setSelectedPillar(isSelected ? null : pillar.id)}
-              className={`
-                rounded-lg p-3 cursor-pointer transition-all duration-300 border-2
-                ${isSelected ? 'ring-1 ring-yellow-400 scale-[1.01]' : 'hover:scale-[1.01]'}
-                ${isComplete ? 'border-yellow-500' : 'border-gray-700'}
-              `}
-              style={{ backgroundColor: `${pillar.color}15` }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl shrink-0">{pillar.icon}</span>
-                <div className="flex-1 min-w-0">
-                  {/* ✅ break-words au lieu de truncate pour le titre */}
-                  <h3 className="font-serif text-sm sm:text-base font-bold break-words" style={{ color: pillar.color }}>
-                    {pillar.id}
-                  </h3>
-                  <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
-                    <span>{collected}/{pillar.fragments.length}</span>
-                    {isComplete && <span className="text-yellow-400">✨ Complète !</span>}
-                  </div>
-                </div>
-              </div>
-
-              <div className="h-1 bg-gray-800 rounded-full overflow-hidden mb-2">
-                <div 
-                  className="h-full transition-all duration-500"
-                  style={{ width: `${progress}%`, backgroundColor: pillar.color }}
-                />
-              </div>
-
-              {/* ✅ Liste verticale des fragments avec texte complet (break-words) */}
-              <div className="space-y-1.5">
-                {pillar.fragments.map((fragment) => {
-                  const isCollected = collectedIds.includes(fragment.id);
-                  return (
-                    <div
-                      key={fragment.id}
-                      className={`
-                        flex items-start gap-2 p-2 rounded text-xs sm:text-sm
-                        ${isCollected ? 'bg-black/30 text-white' : 'bg-black/10 text-gray-500'}
-                      `}
-                    >
-                      <span className={`text-base sm:text-lg shrink-0 mt-0.5 ${isCollected ? '' : 'opacity-30'}`}>
-                        {isCollected ? fragment.rune : '?'}
-                      </span>
-                      <span className="flex-1 break-words leading-snug">
-                        {isCollected ? fragment.title : 'Fragment inconnu...'}
-                      </span>
-                      {isCollected && (
-                        <span className="text-green-400 text-xs shrink-0 mt-1">✓</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="mt-4 text-center text-[10px] sm:text-xs text-gray-500">
-        <p>🔮 Explore la Timeline pour collecter des fragments et compléter les Tables</p>
-      </div>
-    </div>
+      {/* Modale de détail */}
+      {selectedFragment && (
+        <FragmentModal
+          fragment={selectedFragment.fragment}
+          pillar={selectedFragment.pillar}
+          isCollected={collectedIds.includes(selectedFragment.fragment.id)}
+          onClose={() => setSelectedFragment(null)}
+        />
+      )}
+    </>
   );
 }
