@@ -37,7 +37,7 @@ export default function QuizPage() {
     else if (percentage >= 40) message = "Tu as encore beaucoup à apprendre des Anciens.";
 
     return (
-      <div className="container mx-auto max-w-2xl">
+      <div className="container mx-auto max-w-2xl px-4 py-12 lg:py-16">
         <div className="metal-card p-6 lg:p-8 text-center border-2 border-metal-fire animate-fade-in">
           <div className="text-6xl mb-4">🏆</div>
           <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">Épreuve Terminée !</h1>
@@ -79,7 +79,7 @@ export default function QuizPage() {
 
   if (isPlaying) {
     return (
-      <div className="container mx-auto max-w-3xl">
+      <div className="container mx-auto max-w-3xl px-4 py-12 lg:py-16">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire">⚔️ Épreuve des Anciens</h1>
           <button
@@ -98,7 +98,7 @@ export default function QuizPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl space-y-12">
+    <div className="container mx-auto max-w-4xl px-4 py-12 lg:py-16 space-y-12">
       <div className="text-center space-y-4">
         <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire">⚔️ Épreuve des Anciens</h1>
         <p className="text-metal-bone font-serif text-base lg:text-lg max-w-2xl mx-auto">
