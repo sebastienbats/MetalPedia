@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 export default function TimelinePage() {
   return (
-    <div className="container mx-auto max-w-7xl">
+    <div className="container mx-auto max-w-7xl px-4 py-12 lg:py-16">
       <div className="text-center mb-8">
         <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">
           📜 Le Codex du Metalverse
