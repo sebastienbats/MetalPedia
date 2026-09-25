@@ -69,7 +69,7 @@ function ChapterNav() {
 
 function ChapterDivider({ number, title }: { number: string; title: string }) {
   return (
-    <div className="flex items-center gap-4 my-8 sm:my-10" aria-hidden="true">
+    <div className="flex items-center gap-4 my-4 sm:my-6" aria-hidden="true">
       <div className="flex-1 h-px bg-gradient-to-r from-transparent via-metal-fire/40 to-metal-fire/60" />
       <div className="flex items-center gap-3 px-4 py-1.5 bg-metal-black/60 border border-metal-fire/30 rounded-full">
         <span className="font-metal text-metal-fire text-sm sm:text-base">{number}</span>
@@ -98,9 +98,9 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <div className="container mx-auto space-y-12">
+    <div className="container mx-auto space-y-6">
       <header className="text-center">
-        <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">
+        <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-4">
           ⚔️ Ta Légende
         </h1>
         <p className="text-metal-bone font-serif text-base lg:text-lg">
@@ -110,21 +110,21 @@ export default function ProfilePage() {
 
       <ChapterNav />
 
-      <section id="origines" aria-labelledby="origines-title" className="scroll-mt-24 space-y-4">
+      <section id="origines" aria-labelledby="origines-title" className="scroll-mt-24 space-y-3">
         <ChapterDivider number="I" title="Les Origines" />
         <div className="text-center">
           <h2
             id="origines-title"
-            className="font-metal text-xl lg:text-3xl text-metal-fire mb-4"
+            className="font-metal text-xl lg:text-3xl text-metal-fire mb-3"
           >
             🪶 Le Grimoire du Metalverse
           </h2>
-          <p className="text-metal-bone font-serif text-base lg:text-lg mb-6">
+          <p className="text-metal-bone font-serif text-base lg:text-lg mb-3">
             Les récits fondateurs du monde que tu explores — à lire avant de choisir ta voie
           </p>
         </div>
 
-        <div className="relative p-6 lg:p-8 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
+        <div className="relative p-4 lg:p-5 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
           <FloatingRunes preset="parchment" />
           <div className="relative z-10">
             <LoreGrimoire />
@@ -132,13 +132,13 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <section id="incarnation" aria-labelledby="incarnation-title" className="scroll-mt-24 space-y-6">
+      <section id="incarnation" aria-labelledby="incarnation-title" className="scroll-mt-24 space-y-4">
         <ChapterDivider number="II" title="Ton Incarnation" />
         <h2 id="incarnation-title" className="sr-only">
           Ton Incarnation
         </h2>
 
-        <div className="metal-card p-6 lg:p-8 border-2 border-metal-gray relative overflow-hidden">
+        <div className="metal-card p-4 lg:p-5 border-2 border-metal-gray relative overflow-hidden">
           {classMeta && (
             <div
               className="absolute -top-10 -right-10 w-64 h-64 opacity-10 pointer-events-none rounded-full blur-3xl"
@@ -284,7 +284,7 @@ export default function ProfilePage() {
         {selectedClass && <ClassMilestones />}
       </section>
 
-      <section id="exploits" aria-labelledby="exploits-title" className="scroll-mt-24 space-y-6">
+      <section id="exploits" aria-labelledby="exploits-title" className="scroll-mt-24 space-y-4">
         <ChapterDivider number="III" title="Tes Exploits" />
         <h2 id="exploits-title" className="sr-only">
           Tes Exploits
@@ -305,9 +305,9 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <section id="decouvertes" aria-labelledby="decouvertes-title" className="scroll-mt-24 space-y-4">
+      <section id="decouvertes" aria-labelledby="decouvertes-title" className="scroll-mt-24 space-y-3">
         <ChapterDivider number="IV" title="Tes Découvertes" />
-        <div className="relative p-6 lg:p-8 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
+        <div className="relative p-4 lg:p-5 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
           <FloatingRunes preset="parchment" />
           <div className="relative z-10">
             <TableOfKnowledge />
@@ -318,7 +318,7 @@ export default function ProfilePage() {
       {!user && (
         <section
           aria-label="Invitation à créer un compte"
-          className="metal-card p-6 lg:p-8 border-2 border-metal-fire/50 bg-gradient-to-r from-metal-fire/10 to-transparent"
+          className="metal-card p-4 lg:p-5 border-2 border-metal-fire/50 bg-gradient-to-r from-metal-fire/10 to-transparent"
         >
           <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
             <div className="text-4xl sm:text-5xl shrink-0" aria-hidden="true">
