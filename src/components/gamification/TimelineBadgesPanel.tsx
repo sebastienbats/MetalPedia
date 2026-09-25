@@ -3,13 +3,11 @@
 import { useState, useMemo } from 'react';
 import {
   TIMELINE_BADGES,
-  TOTAL_FRAGMENTS,
   getProgressBadges,
   getPillarBadges,
   type TimelineBadge,
 } from '@/lib/gamification/timeline-badges';
 import { useAchievementStore } from '@/stores/achievementStore';
-import { useFragmentStore } from '@/stores/fragmentStore';
 import { RARITY_CONFIG } from '@/stores/notificationStore';
 
 type Filter = 'all' | 'unlocked' | 'locked';
@@ -65,14 +63,6 @@ function BadgeModal({ badge, onClose }: { badge: TimelineBadge; onClose: () => v
           <p className="text-gray-300 text-sm leading-relaxed text-center">
             {badge.description}
           </p>
-          
-          {badge.lore && (
-            <div className="p-3 bg-metal-black/50 rounded border border-metal-gray/50">
-              <p className="text-xs text-gray-400 italic text-center leading-relaxed">
-                "{badge.lore}"
-              </p>
-            </div>
-          )}
 
           {isUnlocked && formattedDate && (
             <div className="text-center pt-2 border-t border-metal-gray/50">
@@ -130,7 +120,6 @@ export default function TimelineBadgesPanel() {
   const [selectedBadge, setSelectedBadge] = useState<TimelineBadge | null>(null);
   
   const unlockedBadges = useAchievementStore((s) => s.unlockedBadges);
-  const collectedIds = useFragmentStore((s) => s.collectedIds);
   const unlockedCount = unlockedBadges.length;
 
   const progressBadges = useMemo(() => getProgressBadges(), []);
