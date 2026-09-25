@@ -138,7 +138,8 @@ export default function ProfilePage() {
           Ton Incarnation
         </h2>
 
-        <div className="metal-card p-4 lg:p-5 border-2 border-metal-gray relative overflow-hidden">
+        {/* ✅ metal-card : padding réduit à -75% (p-4 sm:p-6 → p-1 sm:p-1.5) */}
+        <div className="metal-card p-1 sm:p-1.5 border-2 border-metal-gray relative overflow-hidden">
           {classMeta && (
             <div
               className="absolute -top-10 -right-10 w-64 h-64 opacity-10 pointer-events-none rounded-full blur-3xl"
@@ -315,10 +316,11 @@ export default function ProfilePage() {
         </div>
       </section>
 
+      {/* ✅ metal-card CTA : padding réduit à -75% (p-4 sm:p-6 → p-1 sm:p-1.5) */}
       {!user && (
         <section
           aria-label="Invitation à créer un compte"
-          className="metal-card p-4 lg:p-5 border-2 border-metal-fire/50 bg-gradient-to-r from-metal-fire/10 to-transparent"
+          className="metal-card p-1 sm:p-1.5 border-2 border-metal-fire/50 bg-gradient-to-r from-metal-fire/10 to-transparent"
         >
           <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
             <div className="text-4xl sm:text-5xl shrink-0" aria-hidden="true">
