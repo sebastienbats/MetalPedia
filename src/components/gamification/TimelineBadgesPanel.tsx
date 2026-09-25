@@ -76,7 +76,7 @@ function BadgeModal({ badge, onClose }: { badge: TimelineBadge; onClose: () => v
 }
 
 // ═══════════════════════════════════════════════════════════
-// CARTE DE BADGE (Compacte)
+// CARTE DE BADGE (Proportions ajustées)
 // ═══════════════════════════════════════════════════════════
 function BadgeCard({ badge, onClick }: { badge: TimelineBadge; onClick: () => void }) {
   const isUnlocked = useAchievementStore((s) => s.isUnlocked(badge.id));
@@ -95,13 +95,15 @@ function BadgeCard({ badge, onClick }: { badge: TimelineBadge; onClick: () => vo
       }}
     >
       <div className="text-center">
+        {/* ✅ Icône ajustée : text-2xl sur mobile, text-3xl sur desktop */}
         <div 
-          className="text-3xl mb-1 transition-transform group-hover:scale-110"
+          className="text-2xl sm:text-3xl mb-1 transition-transform group-hover:scale-110"
           style={{ filter: isUnlocked ? `drop-shadow(0 0 8px ${config.glow})` : 'none' }}
         >
           {badge.icon}
         </div>
-        <h3 className="font-metal text-xs mb-1 leading-tight break-words" style={{ color: isUnlocked ? config.color : '#666' }}>
+        {/* ✅ Titre ajusté : text-[11px] pour éviter les coupures moches */}
+        <h3 className="font-metal text-[11px] sm:text-xs mb-1 leading-tight break-words" style={{ color: isUnlocked ? config.color : '#666' }}>
           {badge.title}
         </h3>
         <div className="text-[10px] text-gray-500">
@@ -224,7 +226,6 @@ export default function TimelineBadgesPanel() {
         )}
       </div>
 
-      {/* Modale de détail */}
       {selectedBadge && (
         <BadgeModal badge={selectedBadge} onClose={() => setSelectedBadge(null)} />
       )}
