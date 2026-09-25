@@ -14,7 +14,7 @@ export default function PantheonSection() {
   const totalLevelSum = Object.values(pantheon).reduce((sum, lvl) => sum + lvl, 0);
 
   return (
-    <div className="metal-card p-6 border-2 border-yellow-600/30 relative overflow-hidden">
+    <div className="metal-card p-1.5 border-2 border-yellow-600/30 relative overflow-hidden">
       {/* Lueur d'arrière-plan dorée */}
       <div 
         className="absolute -top-20 -right-20 w-80 h-80 opacity-10 pointer-events-none rounded-full blur-3xl"
@@ -23,7 +23,7 @@ export default function PantheonSection() {
 
       <div className="relative z-10">
         {/* En-tête du Panthéon */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-yellow-600/20">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-3 pb-2 border-b border-yellow-600/20">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-2xl">🏛️</span>
@@ -37,12 +37,12 @@ export default function PantheonSection() {
           </div>
 
           {/* Stats globales du Panthéon */}
-          <div className="flex gap-3">
-            <div className="bg-metal-black/50 rounded-lg px-4 py-2 border border-yellow-600/20 text-center">
+          <div className="flex gap-2">
+            <div className="bg-metal-black/50 rounded-lg px-1 py-0.5 border border-yellow-600/20 text-center">
               <div className="text-xl font-bold text-yellow-400">{masteredCount}/{totalCount}</div>
               <div className="text-[10px] text-gray-500 uppercase tracking-wider">Classes maîtrisées</div>
             </div>
-            <div className="bg-metal-black/50 rounded-lg px-4 py-2 border border-yellow-600/20 text-center">
+            <div className="bg-metal-black/50 rounded-lg px-1 py-0.5 border border-yellow-600/20 text-center">
               <div className="text-xl font-bold text-yellow-400">{totalLevelSum}</div>
               <div className="text-[10px] text-gray-500 uppercase tracking-wider">Niveaux cumulés</div>
             </div>
@@ -50,7 +50,7 @@ export default function PantheonSection() {
         </div>
 
         {/* Grille des 9 classes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
           {ALL_CLASSES.map((classMeta) => (
             <PantheonCard 
               key={classMeta.id} 
@@ -63,7 +63,7 @@ export default function PantheonSection() {
 
         {/* Message de complétion */}
         {masteredCount === totalCount && (
-          <div className="mt-6 p-4 bg-gradient-to-r from-yellow-500/10 via-yellow-400/20 to-yellow-500/10 border border-yellow-500/50 rounded-lg text-center animate-pulse">
+          <div className="mt-3 p-1 bg-gradient-to-r from-yellow-500/10 via-yellow-400/20 to-yellow-500/10 border border-yellow-500/50 rounded-lg text-center animate-pulse">
             <p className="text-yellow-300 font-bold text-lg">
               👑 PANTHÉON COMPLET 👑
             </p>
@@ -97,7 +97,7 @@ function PantheonCard({ classMeta, maxLevel, isActive }: PantheonCardProps) {
   return (
     <div
       className={`
-        relative p-4 rounded-lg border-2 transition-all
+        relative p-1 rounded-lg border-2 transition-all
         ${isActive 
           ? 'border-metal-fire bg-metal-fire/5 shadow-lg shadow-metal-fire/10' 
           : isMastered
