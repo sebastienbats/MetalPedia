@@ -88,12 +88,6 @@ const securityHeaders = [
 ];
 
 // 🛡️ CSP COMPLET
-// Sources d'images autorisées :
-//   - Metal Archives (données historiques)
-//   - Last.fm Fastly (images principales via script Python)
-//   - Discogs (fallback #2 via script Python) - wildcard pour i.discogs.com ET img.discogs.com
-//   - Wikimedia Commons (fallback #3 et #4)
-//   - Spotify CDN (pochettes audio)
 const cspDirectives = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.com https://*.vercel.app",
@@ -135,7 +129,6 @@ const nextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
 
       // Wikimedia Commons (médias libres - fallback #3 et #4)
-      // Restreint à /wikipedia/commons/ pour éviter les uploads non libres
       { protocol: 'https', hostname: '*.wikimedia.org', pathname: '/wikipedia/commons/**' },
 
       // Last.fm via Fastly CDN (source principale des images)
@@ -143,7 +136,6 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.freetls.fastly.net', pathname: '/**' },
 
       // 🎯 Discogs : wildcard pour couvrir i.discogs.com ET img.discogs.com
-      // (Le script Python utilise principalement i.discogs.com, l'ancien domaine img.discogs.com est aussi supporté)
       { protocol: 'https', hostname: '*.discogs.com', pathname: '/**' },
     ],
     formats: ['image/avif', 'image/webp'],
@@ -176,6 +168,8 @@ const nextConfig = {
     return [
       { source: '/home', destination: '/', permanent: true },
       { source: '/bands/:id', destination: '/band/:id', permanent: true },
+      // 🎯 CORRECTION FAVICON 404 : Rediriger la requête par défaut du navigateur
+      { source: '/favicon.ico', destination: '/icons/favicon-32.png', permanent: true },
     ];
   },
 
