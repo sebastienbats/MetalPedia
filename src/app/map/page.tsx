@@ -9,12 +9,13 @@ export const metadata: Metadata = {
 
 export default function MetalMapPage() {
   return (
-    <div className="container mx-auto px-4 py-12 lg:py-16 space-y-12">
-      <header className="border-b border-metal-gray pb-6 text-center">
-        <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">
+    // ✅ Mobile Full-Width
+    <div className="w-full px-2 py-6 sm:px-4 sm:py-12 space-y-6 sm:space-y-12">
+      <header className="border-b border-metal-gray pb-4 sm:pb-6 text-center">
+        <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2 sm:mb-4">
           🌍 Metal Map
         </h1>
-        <p className="text-metal-bone font-serif text-base lg:text-lg">
+        <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg">
           Densité mondiale des groupes de metal par pays
         </p>
       </header>
