@@ -103,9 +103,10 @@ export default async function PillarPage({ params, searchParams }: Props) {
         />
       </div>
 
-      <div className="relative z-20 container mx-auto px-4 py-12 lg:py-16">
-        <div className="mb-8">
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+      {/* ✅ Mobile Full-Width */}
+      <div className="relative z-20 w-full px-2 py-6 sm:px-4 sm:py-12">
+        <div className="mb-4 sm:mb-8">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
             <Link href="/genres" className="hover:text-metal-fire transition-colors">
               Piliers
             </Link>
@@ -119,9 +120,9 @@ export default async function PillarPage({ params, searchParams }: Props) {
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4 text-center">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-4 text-center">
             <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-4xl border-2 shrink-0"
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-3xl sm:text-4xl border-2 shrink-0"
               style={{
                 borderColor: pillarMetadata.color,
                 backgroundColor: `${pillarMetadata.color}15`,
@@ -132,19 +133,19 @@ export default async function PillarPage({ params, searchParams }: Props) {
             </div>
             <div className="text-center">
               <h1
-                className="font-metal text-2xl lg:text-4xl drop-shadow-lg"
+                className="font-metal text-2xl sm:text-4xl drop-shadow-lg"
                 style={{ color: pillarMetadata.color }}
               >
                 {validPillar}
               </h1>
-              <p className="text-metal-bone font-serif text-base lg:text-lg mt-1 drop-shadow-md">
+              <p className="text-metal-bone font-serif text-sm sm:text-base mt-1 drop-shadow-md">
                 {pillarMetadata.description}
               </p>
             </div>
           </div>
 
-          <div className="text-metal-bone font-serif text-base lg:text-lg text-center">
-            <span className="text-metal-fire font-bold text-2xl">{bands.length}</span>
+          <div className="text-metal-bone font-serif text-sm sm:text-base text-center">
+            <span className="text-metal-fire font-bold text-xl sm:text-2xl">{bands.length}</span>
             {' '}groupe{bands.length > 1 ? 's' : ''}
             {subgenre && (
               <>
@@ -164,21 +165,21 @@ export default async function PillarPage({ params, searchParams }: Props) {
 
         <Suspense fallback={<Loader text="Chargement des groupes..." />}>
           {bands.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
               {bands.map((band) => (
                 <BandCard key={band.id} band={band} />
               ))}
             </div>
           ) : (
-            <div className="metal-card p-6 lg:p-8 text-center border border-metal-gray/50 bg-metal-black/50 backdrop-blur-sm">
-              <div className="text-6xl mb-4">🎸</div>
-              <p className="text-metal-bone font-serif text-base lg:text-lg">
+            <div className="metal-card p-6 sm:p-12 text-center border border-metal-gray/50 bg-metal-black/50 backdrop-blur-sm">
+              <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">🎸</div>
+              <p className="text-metal-bone font-serif text-sm sm:text-lg">
                 Aucun groupe trouvé{subgenre && ` pour le sous-genre "${subgenre}"`}
               </p>
               {subgenre && (
                 <Link
                   href={`/genres/${encodeURIComponent(validPillar)}`}
-                  className="mt-4 inline-block text-metal-fire hover:underline"
+                  className="mt-3 sm:mt-4 inline-block text-metal-fire hover:underline text-sm sm:text-base"
                 >
                   Voir tous les groupes du pilier →
                 </Link>
