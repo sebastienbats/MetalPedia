@@ -346,9 +346,6 @@ export default function TableOfKnowledge() {
     <>
       <div className="w-full max-w-6xl mx-auto px-2 py-4">
         <div className="text-center mb-4">
-          <h2 className="font-metal text-xl sm:text-2xl text-metal-rust mb-1">
-            📜 La Table du Savoir
-          </h2>
           <p className="text-gray-400 font-serif text-xs sm:text-sm mb-2">
             {className
               ? `En tant que ${className}, explore les fragments du Metalverse`
