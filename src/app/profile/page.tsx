@@ -183,8 +183,14 @@ export default function ProfilePage() {
       {/* Chapitre II : Incarnation */}
       <section id="incarnation" aria-labelledby="incarnation-title" className="scroll-mt-24 space-y-3 sm:space-y-4">
         <ChapterDivider number="II" title="Ton Incarnation" />
-        <h2 id="incarnation-title" className="sr-only">Ton Incarnation</h2>
-
+        <div className="text-center">
+          <h2 id="incarnation-title" className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
+            ⚔️ Ton Incarnation
+          </h2>
+          <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
+            Ta classe
+          </p>
+        </div>
         <div className="metal-card p-1 sm:p-1.5 border-2 border-metal-gray relative overflow-hidden">
           {classMeta && (
             <div
