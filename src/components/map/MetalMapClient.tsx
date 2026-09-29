@@ -159,7 +159,9 @@ export default function MetalMapClient() {
             return `
               <div style="background: #1a1a1a; padding: 10px 14px; border-radius: 6px; border: 1px solid #d63031; color: white; font-family: sans-serif; pointer-events: none; min-width: 160px;">
                 <div style="font-weight: bold; font-size: 14px; margin-bottom: 4px;">${d.flag} ${d.name}</div>
-                <div style="color: #d63031; font-size: 12px; margin-bottom: 6px; border-bottom: 1px solid #333; padding-bottom: 4px;">${d.bandCount.toLocaleString()} groupes au total</div>
+                <div style="color: #d63031; font-size: 12px; margin-bottom: 6px; border-bottom: 1px solid #333; padding-bottom: 4px;">
+                  ✅ ${d.bandCount.toLocaleString('fr-FR')} groupes au total
+                </div>
                 <div style="font-size: 11px; color: #9ca3af; margin-bottom: 2px;">Répartition par pilier :</div>
                 ${details}
               </div>
@@ -171,7 +173,9 @@ export default function MetalMapClient() {
           <div className="absolute top-4 left-4 metal-card p-4 pointer-events-none z-10 backdrop-blur-sm bg-metal-black/80 border border-metal-gray">
             <div className="text-3xl mb-1">{hoveredCountry.flag}</div>
             <div className="font-serif font-bold text-lg text-white">{hoveredCountry.name}</div>
-            <div className="text-metal-fire font-semibold">{hoveredCountry.bandCount.toLocaleString()} groupes</div>
+            <div className="text-metal-fire font-semibold">
+              ✅ {hoveredCountry.bandCount.toLocaleString('fr-FR')} groupes
+            </div>
           </div>
         )}
       </div>
@@ -183,7 +187,9 @@ export default function MetalMapClient() {
           <div className="text-sm text-gray-400 mt-1">Pays référencés</div>
         </div>
         <div className="metal-card p-5 text-center border border-metal-gray">
-          <div className="text-3xl font-bold text-metal-fire">{totalBands.toLocaleString()}</div>
+          <div className="text-3xl font-bold text-metal-fire">
+            ✅ {totalBands.toLocaleString('fr-FR')}
+          </div>
           <div className="text-sm text-gray-400 mt-1">Groupes localisés</div>
         </div>
         <div className="metal-card p-5 text-center border border-metal-gray">
@@ -214,7 +220,7 @@ export default function MetalMapClient() {
             <Tooltip 
               contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px', color: '#fff' }}
               cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
-              formatter={(value: number, name: string) => [`${value} groupes`, name]}
+              formatter={(value: number, name: string) => [`${value.toLocaleString('fr-FR')} groupes`, name]}
               labelStyle={{ color: '#d63031', fontWeight: 'bold' }}
             />
             <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '20px' }} />
