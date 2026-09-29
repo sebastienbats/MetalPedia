@@ -26,12 +26,13 @@ export const metadata: Metadata = {
 
 export default function TimelinePage() {
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-12 lg:py-16">
-      <div className="text-center mb-8">
-        <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">
+    // ✅ Mobile Full-Width
+    <div className="w-full px-2 py-6 sm:px-4 sm:py-12 sm:max-w-7xl sm:mx-auto">
+      <div className="text-center mb-4 sm:mb-8">
+        <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2 sm:mb-4">
           📜 Le Codex du Metalverse
         </h1>
-        <p className="text-metal-bone font-serif text-base lg:text-lg max-w-3xl mx-auto leading-relaxed">
+        <p className="text-metal-bone font-serif text-xs sm:text-base sm:text-lg max-w-3xl mx-auto leading-relaxed">
           Quatre-vingt-cinq fragments arrachés à l'Oubli. Chaque événement révèle
           neuf visions narratives — une par classe du Conseil. Choisis ta destinée
           et découvre ce que les autres ne peuvent pas voir.
