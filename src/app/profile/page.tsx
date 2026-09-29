@@ -333,16 +333,16 @@ export default function ProfilePage() {
             🏛️ Maitrîses des classes
           </h2>
           <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
-            Chaque acte de tes destinées seront récompensées et gravées à jamais dans le Grimoire des Anciens
+            Chaque acte des destinées sont récompensés et gravés à jamais dans le Metalverse
           </p>
         </div>
         <PantheonSection />
         <div className="text-center">
           <h2 id="exploits-title" className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
-            🏆 Titres honorifiques du Conseil des Neuf Genres
+            🏆 Titres honorifiques
           </h2>
           <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
-            Le Conseil des Neuf Genres honore tes découvertes de fragments dans le Codex du Metalverse
+            Le Conseil des Neuf Genres honore tes exploits
           </p>
         </div>
         <TimelineBadgesPanel />
@@ -353,10 +353,10 @@ export default function ProfilePage() {
         <ChapterDivider number="IV" title="Tes Découvertes" />
           <div className="text-center">
           <h2 id="decouvertes-title" className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
-            📜 Les 9 Tables du Savoir
+            📜 Tables du Savoir
           </h2>
           <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
-            Collecte les runes dans le Codex des Anciens pour compléter les 9 Tables du Savoir
+            Collecte les fragments dans le Codex des Anciens pour compléter les 9 Tables du Savoir
           </p>
         </div>
         <div className="relative p-3 sm:p-5 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
