@@ -4,7 +4,17 @@ import dynamic from 'next/dynamic';
 import { useState, useMemo, useEffect } from 'react';
 import { metalServerApi } from '@/lib/metal-api';
 import type { Band } from '@/types/api';
+import { PILLAR_METADATA } from '@/types/api';
 import Loader from '@/components/ui/Loader';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 
 const Globe = dynamic(() => import('react-globe.gl'), {
   ssr: false,
@@ -54,6 +64,7 @@ interface CountryData {
 
 export default function MetalMapClient() {
   const [countriesData, setCountriesData] = useState<CountryData[]>([]);
+  const [countryPillarData, setCountryPillarData] = useState<Record<string, Record<string, number>>>({});
   const [loading, setLoading] = useState(true);
   const [hoveredCountry, setHoveredCountry] = useState<CountryData | null>(null);
 
@@ -63,10 +74,19 @@ export default function MetalMapClient() {
         setLoading(true);
         const allBands = await metalServerApi.getAllBands();
         const countryCounts: Record<string, number> = {};
+        const pillarCounts: Record<string, Record<string, number>> = {};
         
         allBands.forEach((band: Band) => {
           if (band.country && band.country !== 'Unknown') {
+            // Comptage global par pays
             countryCounts[band.country] = (countryCounts[band.country] || 0) + 1;
+            
+            // Comptage par pays ET par pilier
+            if (!pillarCounts[band.country]) {
+              pillarCounts[band.country] = {};
+            }
+            const pillar = (band.genre_pillar as keyof typeof PILLAR_METADATA) || 'Heavy Metal';
+            pillarCounts[band.country][pillar] = (pillarCounts[band.country][pillar] || 0) + 1;
           }
         });
 
@@ -79,6 +99,7 @@ export default function MetalMapClient() {
           .sort((a, b) => b.bandCount - a.bandCount);
 
         setCountriesData(mappedCountries);
+        setCountryPillarData(pillarCounts);
       } catch (error) {
         console.error('Erreur chargement carte:', error);
       } finally {
@@ -91,6 +112,17 @@ export default function MetalMapClient() {
   const maxBandCount = useMemo(() => (countriesData.length > 0 ? Math.max(...countriesData.map((c) => c.bandCount)) : 1), [countriesData]);
   const totalBands = useMemo(() => countriesData.reduce((sum, c) => sum + c.bandCount, 0), [countriesData]);
   const topCountries = useMemo(() => countriesData.slice(0, 10), [countriesData]);
+
+  // Préparation des données pour le graphique en barres empilées
+  const chartData = useMemo(() => {
+    return topCountries.map(country => {
+      const data: any = { name: country.name };
+      Object.keys(PILLAR_METADATA).forEach((pillar) => {
+        data[pillar] = countryPillarData[country.name]?.[pillar] || 0;
+      });
+      return data;
+    });
+  }, [topCountries, countryPillarData]);
 
   if (loading) {
     return (
@@ -105,13 +137,8 @@ export default function MetalMapClient() {
       {/* 🛡️ CONTENEUR BLINDÉ : Dimensions explicites pour Three.js */}
       <div className="metal-card overflow-hidden relative w-full" style={{ height: '600px', minHeight: '600px' }}>
         <Globe
-          // 🌍 URL officielle et fiable
           globeImageUrl="https://unpkg.com/three-globe/example/img/earth-night.jpg"
-          
-          // 🔥 CORRECTION CRITIQUE : "transparent" casse le parseur de couleur de Three.js/polished.
-          // On utilise une couleur hex valide qui correspond au thème sombre.
           backgroundColor="#0a0a0a"
-          
           pointsData={countriesData}
           pointLat={(d: any) => d.lat}
           pointLng={(d: any) => d.lng}
@@ -120,12 +147,24 @@ export default function MetalMapClient() {
           pointRadius={(d: any) => 0.3 + Math.sqrt(d.bandCount / maxBandCount) * 0.7}
           pointsMerge={false}
           onPointHover={(point: any) => setHoveredCountry(point as CountryData)}
-          pointLabel={(d: any) => `
-            <div style="background: #1a1a1a; padding: 8px 12px; border-radius: 6px; border: 1px solid #d63031; color: white; font-family: sans-serif; pointer-events: none;">
-              <div style="font-weight: bold; font-size: 14px; margin-bottom: 4px;">${d.flag} ${d.name}</div>
-              <div style="color: #d63031; font-size: 12px;">${d.bandCount.toLocaleString()} groupes</div>
-            </div>
-          `}
+          pointLabel={(d: any) => {
+            const pillars = countryPillarData[d.name] || {};
+            let details = '';
+            Object.entries(pillars).forEach(([pillar, count]) => {
+              if (count > 0) {
+                const color = PILLAR_METADATA[pillar as keyof typeof PILLAR_METADATA]?.color || '#fff';
+                details += `<div style="color: ${color}; font-size: 11px; margin-top: 2px;">• ${pillar}: ${count}</div>`;
+              }
+            });
+            return `
+              <div style="background: #1a1a1a; padding: 10px 14px; border-radius: 6px; border: 1px solid #d63031; color: white; font-family: sans-serif; pointer-events: none; min-width: 160px;">
+                <div style="font-weight: bold; font-size: 14px; margin-bottom: 4px;">${d.flag} ${d.name}</div>
+                <div style="color: #d63031; font-size: 12px; margin-bottom: 6px; border-bottom: 1px solid #333; padding-bottom: 4px;">${d.bandCount.toLocaleString()} groupes au total</div>
+                <div style="font-size: 11px; color: #9ca3af; margin-bottom: 2px;">Répartition par pilier :</div>
+                ${details}
+              </div>
+            `;
+          }}
         />
 
         {hoveredCountry && (
@@ -137,6 +176,7 @@ export default function MetalMapClient() {
         )}
       </div>
 
+      {/* 📊 STATISTIQUES GLOBALES */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="metal-card p-5 text-center border border-metal-gray">
           <div className="text-3xl font-bold text-metal-fire">{countriesData.length}</div>
@@ -147,28 +187,48 @@ export default function MetalMapClient() {
           <div className="text-sm text-gray-400 mt-1">Groupes localisés</div>
         </div>
         <div className="metal-card p-5 text-center border border-metal-gray">
-          <div className="text-3xl font-bold text-metal-fire">{topCountries[0]?.flag} {topCountries[0]?.name}</div>
+          <div className="text-2xl sm:text-3xl font-bold text-metal-fire truncate">
+            {topCountries[0]?.flag} {topCountries[0]?.name}
+          </div>
           <div className="text-sm text-gray-400 mt-1">Pays le plus représenté</div>
         </div>
       </div>
 
-      <div className="metal-card p-6 border border-metal-gray">
-        <h3 className="font-serif text-xl mb-4 text-metal-rust">🏆 Top 10 des pays metal</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {topCountries.map((country, index) => (
-            <div key={country.name} className="flex items-center gap-3 p-3 bg-metal-black/50 rounded-lg border border-metal-gray hover:border-metal-fire transition-colors">
-              <div className="text-xl font-bold text-metal-fire w-8">#{index + 1}</div>
-              <div className="text-2xl">{country.flag}</div>
-              <div className="flex-1">
-                <div className="font-semibold text-gray-200">{country.name}</div>
-                <div className="text-xs text-gray-400">{country.bandCount.toLocaleString()} groupes</div>
-              </div>
-              <div className="text-sm text-metal-fire font-mono">
-                {totalBands > 0 ? ((country.bandCount / totalBands) * 100).toFixed(1) : 0}%
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* 📊 GRAPHIQUE EN COLONNES SEGMENTÉES (Top 10) */}
+      <div className="metal-card p-4 sm:p-6 border border-metal-gray">
+        <h3 className="font-serif text-lg sm:text-xl mb-4 sm:mb-6 text-metal-rust text-center sm:text-left">
+          🏆 Top 10 des pays : Répartition par pilier
+        </h3>
+        <ResponsiveContainer width="100%" height={350}>
+          <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 70 }}>
+            <XAxis 
+              dataKey="name" 
+              stroke="#9ca3af" 
+              angle={-45} 
+              textAnchor="end" 
+              height={80} 
+              interval={0}
+              tick={{ fontSize: 11 }}
+            />
+            <YAxis stroke="#9ca3af" tick={{ fontSize: 11 }} />
+            <Tooltip 
+              contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '8px', color: '#fff' }}
+              cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+              formatter={(value: number, name: string) => [`${value} groupes`, name]}
+              labelStyle={{ color: '#d63031', fontWeight: 'bold' }}
+            />
+            <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '20px' }} />
+            {Object.keys(PILLAR_METADATA).map((pillar) => (
+              <Bar 
+                key={pillar} 
+                dataKey={pillar} 
+                stackId="a" 
+                fill={PILLAR_METADATA[pillar as keyof typeof PILLAR_METADATA].color} 
+                name={pillar}
+              />
+            ))}
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
