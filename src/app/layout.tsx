@@ -11,6 +11,8 @@ import LevelUpModal from '@/components/gamification/LevelUpModal';
 import TrialWatcher from '@/components/gamification/TrialWatcher';
 import NotificationHub from '@/components/ui/NotificationHub';
 import CelebrationOverlay from '@/components/ui/CelebrationOverlay';
+import SwipeNavigationInitializer from '@/components/ui/SwipeNavigationInitializer';
+import SwipeIndicator from '@/components/ui/SwipeIndicator';
 import '@/i18n';
 import './globals.css';
 
@@ -190,9 +192,10 @@ export default function RootLayout({
         <Providers>
           <Header />
 
+          {/* ✅ Mobile Full-Width : le padding (px/py) est maintenant géré par les pages individuelles */}
           <main
             id="main-content"
-            className="flex-1 container mx-auto px-4 py-8 max-w-7xl pb-32"
+            className="flex-1 w-full pb-32"
             tabIndex={-1}
           >
             {children}
@@ -210,6 +213,12 @@ export default function RootLayout({
           <XPBar />
           <LevelUpModal />
           <TrialWatcher />
+
+          {/* ═══════════════════════════════════════════
+              🆕 NAVIGATION PAR SWIPE (Mobile)
+              ═══════════════════════════════════════════ */}
+          <SwipeNavigationInitializer />
+          <SwipeIndicator />
 
           {/* ═══════════════════════════════════════════
               🆕 SYSTÈME DE NOTIFICATIONS & CÉLÉBRATIONS
