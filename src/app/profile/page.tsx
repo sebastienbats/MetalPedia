@@ -185,10 +185,10 @@ export default function ProfilePage() {
         <ChapterDivider number="II" title="Ton Incarnation" />
         <div className="text-center">
           <h2 id="incarnation-title" className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
-            ⚔️ Ton Incarnation
+            ⚔️ Ta classe actuelle
           </h2>
           <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
-            Ta classe actuelle
+            Le Conseil des Neuf Genres observe ta progression et te donne accès aux maîtrises de classes
           </p>
         </div>
         <div className="metal-card p-1 sm:p-1.5 border-2 border-metal-gray relative overflow-hidden">
