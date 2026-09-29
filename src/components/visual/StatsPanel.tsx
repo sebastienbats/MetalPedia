@@ -79,7 +79,7 @@ export default function StatsPanel() {
       <div>
         <h3 className="font-metal text-2xl text-metal-fire mb-2 flex items-center gap-2">
           <span aria-hidden="true">🧬</span>
-          Votre ADN Metal
+          Ton ADN Metal
         </h3>
         <p className="text-sm text-gray-400">
           Basé sur <span className="text-metal-fire font-semibold">{totalViews}</span> groupes consultés
