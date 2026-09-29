@@ -10,6 +10,7 @@ export default function Footer() {
           <Link href="/profile" className="hover:text-metal-fire">Profil</Link>
           <Link href="/map" className="hover:text-metal-fire">Carte</Link>
           <Link href="/timeline" className="hover:text-metal-fire">Timeline</Link>
+          <Link href="/quiz" className="hover:text-metal-fire">Quiz</Link>
         </nav>
         <p>
           🤘 MetalPedia © 2026 — Base de données propulsée par{' '}
