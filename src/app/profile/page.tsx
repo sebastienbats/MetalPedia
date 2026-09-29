@@ -47,10 +47,7 @@ function ChapterNav() {
   };
 
   return (
-    <nav
-      aria-label="Navigation des chapitres"
-      className="sticky top-2 z-30"
-    >
+    <nav aria-label="Navigation des chapitres" className="sticky top-2 z-30">
       <div className="flex gap-2 overflow-x-auto scrollbar-hide bg-metal-black/90 backdrop-blur-md border border-metal-gray rounded-lg p-2 shadow-lg">
         {chapters.map((chapter) => (
           <button
@@ -98,8 +95,11 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    // ✅ Mobile Full-Width
-    <div className="w-full px-2 py-6 sm:px-4 sm:py-12 space-y-4 sm:space-y-6">
+    <div className="w-full px-2 py-6 sm:px-4 sm:py-12 space-y-6 sm:space-y-8">
+      
+      {/* ═══════════════════════════════════════════════════════════
+          1. EN-TÊTE & NAVIGATION
+      ═══════════════════════════════════════════════════════════ */}
       <header className="text-center">
         <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2 sm:mb-4">
           ⚔️ Ta Légende
@@ -111,20 +111,67 @@ export default function ProfilePage() {
 
       <ChapterNav />
 
+      {/* ═══════════════════════════════════════════════════════════
+          2. TABLEAU DE BORD PRINCIPAL (Hors chapitres)
+      ═══════════════════════════════════════════════════════════ */}
+      <div className="space-y-4 sm:space-y-6">
+        {/* Ligne 1 : Player Card & Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <PlayerCard />
+          <StatsPanel />
+        </div>
+
+        {/* Ligne 2 : Quêtes & Badges */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <QuestsPanel />
+          <BadgesPanel />
+        </div>
+
+        {/* Ligne 3 : Invitation Cloud (si non connecté) */}
+        {!user && (
+          <section
+            aria-label="Invitation à créer un compte"
+            className="metal-card p-3 sm:p-5 border-2 border-metal-fire/50 bg-gradient-to-r from-metal-fire/10 to-transparent"
+          >
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
+              <div className="text-3xl sm:text-5xl shrink-0" aria-hidden="true">
+                🔐
+              </div>
+              <div className="flex-1">
+                <h2 className="font-metal text-lg sm:text-3xl text-metal-fire mb-2">
+                  Sauvegarde ta progression dans le cloud
+                </h2>
+                <p className="text-metal-bone font-serif text-xs sm:text-sm lg:text-base">
+                  Crée un compte pour synchroniser ton XP, tes badges, ta classe et tes favoris sur
+                  tous tes appareils. Actuellement, tes données sont sauvegardées localement.
+                </p>
+              </div>
+              <Link
+                href="/login"
+                className="shrink-0 px-6 py-3 bg-metal-fire text-white font-bold rounded-lg hover:bg-metal-fire/80 transition-all shadow-lg shadow-metal-fire/20 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-metal-fire/50 w-full sm:w-auto text-center text-sm sm:text-base"
+              >
+                Se connecter
+              </Link>
+            </div>
+          </section>
+        )}
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          3. CHAPITRES DÉTAILLÉS
+      ═══════════════════════════════════════════════════════════ */}
+      
+      {/* Chapitre I : Origines */}
       <section id="origines" aria-labelledby="origines-title" className="scroll-mt-24 space-y-3">
         <ChapterDivider number="I" title="Les Origines" />
         <div className="text-center">
-          <h2
-            id="origines-title"
-            className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3"
-          >
+          <h2 id="origines-title" className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
             🪶 Le Grimoire du Metalverse
           </h2>
           <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
             Les récits fondateurs du monde que tu explores — à lire avant de choisir ta voie
           </p>
         </div>
-
         <div className="relative p-3 sm:p-5 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
           <FloatingRunes preset="parchment" />
           <div className="relative z-10">
@@ -133,11 +180,10 @@ export default function ProfilePage() {
         </div>
       </section>
 
+      {/* Chapitre II : Incarnation */}
       <section id="incarnation" aria-labelledby="incarnation-title" className="scroll-mt-24 space-y-3 sm:space-y-4">
         <ChapterDivider number="II" title="Ton Incarnation" />
-        <h2 id="incarnation-title" className="sr-only">
-          Ton Incarnation
-        </h2>
+        <h2 id="incarnation-title" className="sr-only">Ton Incarnation</h2>
 
         <div className="metal-card p-1 sm:p-1.5 border-2 border-metal-gray relative overflow-hidden">
           {classMeta && (
@@ -173,10 +219,7 @@ export default function ProfilePage() {
                     </span>
                   </div>
 
-                  <h3
-                    className="font-metal text-xl sm:text-3xl mb-1"
-                    style={{ color: classMeta.color }}
-                  >
+                  <h3 className="font-metal text-xl sm:text-3xl mb-1" style={{ color: classMeta.color }}>
                     {classMeta.name}
                   </h3>
 
@@ -193,9 +236,7 @@ export default function ProfilePage() {
 
                   <div className="max-w-md mx-auto md:mx-0">
                     <div className="flex justify-between text-xs text-gray-400 mb-1">
-                      <span className="font-semibold text-gray-300">
-                        Niveau {classProgress.currentLevel}
-                      </span>
+                      <span className="font-semibold text-gray-300">Niveau {classProgress.currentLevel}</span>
                       <span>
                         {classProgress.nextLevelXp === Infinity
                           ? 'MAX'
@@ -240,16 +281,11 @@ export default function ProfilePage() {
               </>
             ) : (
               <>
-                <div className="text-4xl sm:text-6xl opacity-30 shrink-0" aria-hidden="true">
-                  ⚔️
-                </div>
+                <div className="text-4xl sm:text-6xl opacity-30 shrink-0" aria-hidden="true">⚔️</div>
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="font-metal text-lg sm:text-2xl text-gray-400 mb-2">
-                    Aucune classe choisie
-                  </h3>
+                  <h3 className="font-metal text-lg sm:text-2xl text-gray-400 mb-2">Aucune classe choisie</h3>
                   <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 max-w-md">
-                    Le Conseil des Neuf Genres t'attend. Choisis ta destinée pour débloquer des
-                    bonus d'XP uniques et des quêtes spéciales.
+                    Le Conseil des Neuf Genres t'attend. Choisis ta destinée pour débloquer des bonus d'XP uniques et des quêtes spéciales.
                   </p>
                   <button
                     onClick={() => setIsModalOpen(true)}
@@ -264,9 +300,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="bg-metal-fire/5 border border-metal-fire/20 rounded-lg p-3 sm:p-4 flex gap-3 items-start">
-          <span className="text-lg sm:text-2xl shrink-0" aria-hidden="true">
-            💡
-          </span>
+          <span className="text-lg sm:text-2xl shrink-0" aria-hidden="true">💡</span>
           <div className="text-xs sm:text-sm text-gray-300">
             <p className="font-bold text-metal-fire mb-1">Système de Double Progression :</p>
             <ul className="list-disc list-inside space-y-1 text-gray-400">
@@ -285,27 +319,16 @@ export default function ProfilePage() {
         {selectedClass && <ClassMilestones />}
       </section>
 
+      {/* Chapitre III : Exploits (Contient maintenant uniquement Panthéon et Timeline) */}
       <section id="exploits" aria-labelledby="exploits-title" className="scroll-mt-24 space-y-3 sm:space-y-4">
         <ChapterDivider number="III" title="Tes Exploits" />
-        <h2 id="exploits-title" className="sr-only">
-          Tes Exploits
-        </h2>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 lg:gap-6">
-          <PlayerCard />
-          <StatsPanel />
-        </div>
+        <h2 id="exploits-title" className="sr-only">Tes Exploits</h2>
 
         <PantheonSection />
-
         <TimelineBadgesPanel />
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 lg:gap-6">
-          <QuestsPanel />
-          <BadgesPanel />
-        </div>
       </section>
 
+      {/* Chapitre IV : Découvertes */}
       <section id="decouvertes" aria-labelledby="decouvertes-title" className="scroll-mt-24 space-y-3">
         <ChapterDivider number="IV" title="Tes Découvertes" />
         <div className="relative p-3 sm:p-5 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
@@ -315,34 +338,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </section>
-
-      {!user && (
-        <section
-          aria-label="Invitation à créer un compte"
-          className="metal-card p-3 sm:p-5 border-2 border-metal-fire/50 bg-gradient-to-r from-metal-fire/10 to-transparent"
-        >
-          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
-            <div className="text-3xl sm:text-5xl shrink-0" aria-hidden="true">
-              🔐
-            </div>
-            <div className="flex-1">
-              <h2 className="font-metal text-lg sm:text-3xl text-metal-fire mb-2">
-                Sauvegarde ta progression dans le cloud
-              </h2>
-              <p className="text-metal-bone font-serif text-xs sm:text-sm lg:text-base">
-                Crée un compte pour synchroniser ton XP, tes badges, ta classe et tes favoris sur
-                tous tes appareils. Actuellement, tes données sont sauvegardées localement.
-              </p>
-            </div>
-            <Link
-              href="/login"
-              className="shrink-0 px-6 py-3 bg-metal-fire text-white font-bold rounded-lg hover:bg-metal-fire/80 transition-all shadow-lg shadow-metal-fire/20 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-metal-fire/50 w-full sm:w-auto text-center text-sm sm:text-base"
-            >
-              Se connecter
-            </Link>
-          </div>
-        </section>
-      )}
 
       <ClassSelectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
