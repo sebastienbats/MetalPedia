@@ -25,12 +25,13 @@ export default async function SearchPage({ params }: Props) {
   const decodedQuery = decodeURIComponent(query);
 
   return (
-    <div className="container mx-auto px-4 py-12 lg:py-16 space-y-12">
-      <header className="border-b border-metal-gray pb-6 text-center">
-        <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">
+    // ✅ Mobile Full-Width
+    <div className="w-full px-2 py-6 sm:px-4 sm:py-12 space-y-4 sm:space-y-6">
+      <header className="border-b border-metal-gray pb-4 sm:pb-6 text-center">
+        <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2 sm:mb-4">
           🔍 Résultats de recherche
         </h1>
-        <p className="text-metal-bone font-serif text-base lg:text-lg">
+        <p className="text-metal-bone font-serif text-sm sm:text-base">
           Recherche pour : <span className="text-metal-fire font-semibold">« {decodedQuery} »</span>
         </p>
       </header>
