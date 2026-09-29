@@ -188,7 +188,7 @@ export default function ProfilePage() {
             ⚔️ Ton Incarnation
           </h2>
           <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
-            Ta classe
+            Ta classe actuelle
           </p>
         </div>
         <div className="metal-card p-1 sm:p-1.5 border-2 border-metal-gray relative overflow-hidden">
