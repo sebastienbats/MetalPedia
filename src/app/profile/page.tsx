@@ -328,15 +328,37 @@ export default function ProfilePage() {
       {/* Chapitre III : Exploits (Contient maintenant uniquement Panthéon et Timeline) */}
       <section id="exploits" aria-labelledby="exploits-title" className="scroll-mt-24 space-y-3 sm:space-y-4">
         <ChapterDivider number="III" title="Tes Exploits" />
-        <h2 id="exploits-title" className="sr-only">Tes Exploits</h2>
-
+        <div className="text-center">
+          <h2 id="exploits-title" className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
+            🏛️ Maitrîses des classes
+          </h2>
+          <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
+            Chaque acte de tes destinées seront récompensées et gravées à jamais dans le Grimoire des Anciens
+          </p>
+        </div>
         <PantheonSection />
+        <div className="text-center">
+          <h2 id="exploits-title" className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
+            🏆 Titres honorifiques du Conseil des Neuf Genres
+          </h2>
+          <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
+            Le Conseil des Neuf Genres honore tes découvertes de fragments dans le Codex du Metalverse
+          </p>
+        </div>
         <TimelineBadgesPanel />
       </section>
 
       {/* Chapitre IV : Découvertes */}
       <section id="decouvertes" aria-labelledby="decouvertes-title" className="scroll-mt-24 space-y-3">
         <ChapterDivider number="IV" title="Tes Découvertes" />
+          <div className="text-center">
+          <h2 id="decouvertes-title" className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
+            📜 Les 9 Tables du Savoir
+          </h2>
+          <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
+            Collecte les runes dans le Codex des Anciens pour compléter les 9 Tables du Savoir
+          </p>
+        </div>
         <div className="relative p-3 sm:p-5 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
           <FloatingRunes preset="parchment" />
           <div className="relative z-10">
