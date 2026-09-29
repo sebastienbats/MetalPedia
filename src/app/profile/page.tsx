@@ -188,7 +188,7 @@ export default function ProfilePage() {
             ⚔️ Ta classe actuelle
           </h2>
           <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
-            Le Conseil des Neuf Genres observe ta progression et te donne accès aux maîtrises de classes
+            Choisis ta destinée et le Conseil des Neuf Genres te donne accès aux maîtrises de classes
           </p>
         </div>
         <div className="metal-card p-1 sm:p-1.5 border-2 border-metal-gray relative overflow-hidden">
