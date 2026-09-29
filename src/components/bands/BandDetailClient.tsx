@@ -11,18 +11,12 @@ import ConcertsWidget from '@/components/widgets/ConcertsWidget';
 import ReviewList from '@/components/reviews/ReviewList';
 import GraphClient from '@/components/graph/GraphClient';
 
-// ═══════════════════════════════════════════
-// PROPS
-// ═══════════════════════════════════════════
 interface Props {
   band: BandDetail;
   albums?: Album[];
   members?: BandMember[];
 }
 
-// ═══════════════════════════════════════════
-// HELPER : Calculer les années actives depuis begin_date/end_date
-// ═══════════════════════════════════════════
 function formatYearsActive(member: BandMember): string {
   if (member.begin_date && member.end_date) {
     return `${member.begin_date} - ${member.end_date}`;
@@ -36,9 +30,6 @@ function formatYearsActive(member: BandMember): string {
   return 'Années inconnues';
 }
 
-// ═══════════════════════════════════════════
-// COMPOSANT PRINCIPAL
-// ═══════════════════════════════════════════
 export default function BandDetailClient({ 
   band, 
   albums = [], 
@@ -53,12 +44,10 @@ export default function BandDetailClient({
 
   const pillarMeta = PILLAR_METADATA[band.genre_pillar as GamificationPillar] || PILLAR_METADATA['Heavy Metal'];
 
-  // Marquer comme monté après l'hydratation
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Enregistrement de la vue (une seule fois au montage)
   useEffect(() => {
     if (isMounted && band?.id) {
       recordView({
@@ -73,27 +62,19 @@ export default function BandDetailClient({
         biography: band.biography,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMounted, band?.id]);
 
-  // Gestion de l'erreur de chargement de l'image du groupe
-  const handleBandImageError = () => {
-    setBandImageError(true);
-  };
-
-  // Gestion de l'erreur de chargement d'une pochette d'album
+  const handleBandImageError = () => setBandImageError(true);
   const handleAlbumImageError = (albumId: number) => {
     setAlbumImageErrors(prev => new Set(prev).add(albumId));
   };
 
-  // Vérification robuste de l'image du groupe
   const hasValidBandImage = isMounted && 
     !bandImageError && 
     band.image_url && 
     typeof band.image_url === 'string' && 
     band.image_url.trim() !== '';
 
-  // Statut
   const statusConfig = useMemo(() => {
     const configs: Record<string, { label: string; icon: string; color: string }> = {
       'Active': { label: 'Actif', icon: '🟢', color: 'text-green-500' },
@@ -101,12 +82,10 @@ export default function BandDetailClient({
       'Split-up': { label: 'Séparé', icon: '🔴', color: 'text-red-500' },
       'Unknown': { label: 'Inconnu', icon: '❓', color: 'text-gray-500' },
     };
-    
     const statusKey = (band.status && band.status in configs) ? band.status : 'Unknown';
     return configs[statusKey];
   }, [band.status]);
 
-  // Onglets avec "Groupes similaires" EN DERNIER
   const tabs = useMemo(() => [
     { id: 'about', label: 'Biographie' },
     { id: 'albums', label: `Discographie (${albums.length})` },
@@ -120,42 +99,35 @@ export default function BandDetailClient({
   }
 
   return (
-    <div className="container mx-auto space-y-8 animate-fade-in" suppressHydrationWarning>
-      {/* ═══════════════════════════════════════════════════════════
-          ✅ HEADER DE PAGE (Titre plus grand que le nom du groupe)
-      ═══════════════════════════════════════════════════════════ */}
-      <header className="text-center mb-8">
-        <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-2">
+    // ✅ Mobile Full-Width : w-full px-2 py-6, desktop : sm:px-4 sm:py-12
+    <div className="w-full px-2 py-6 sm:px-4 sm:py-12 space-y-6 sm:space-y-8 animate-fade-in" suppressHydrationWarning>
+      
+      <header className="text-center mb-4 sm:mb-6">
+        <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2">
           Fiche du groupe
         </h1>
       </header>
 
-      {/* ═══════════════════════════════════════════════════════════
-          HEADER DU GROUPE (avec image optimisée)
-      ═══════════════════════════════════════════════════════════ */}
-      <div className="metal-card p-6 md:p-8 relative overflow-hidden">
+      <div className="metal-card p-3 sm:p-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
           <span className="text-9xl font-black text-white">{band.name.charAt(0)}</span>
         </div>
         
-        <div className="relative z-10 flex flex-col md:flex-row gap-6 items-start md:items-center">
-          {/* 🖼️ IMAGE DU GROUPE OPTIMISÉE */}
+        <div className="relative z-10 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
           <div 
-            className="w-32 h-32 md:w-48 md:h-48 rounded-lg overflow-hidden shrink-0 shadow-2xl border border-metal-gray bg-gradient-to-br from-metal-blood to-metal-rust flex items-center justify-center relative"
+            className="w-24 h-24 sm:w-40 sm:h-40 rounded-lg overflow-hidden shrink-0 shadow-2xl border border-metal-gray bg-gradient-to-br from-metal-blood to-metal-rust flex items-center justify-center relative"
             suppressHydrationWarning
           >
-            {/* Placeholder EN ARRIÈRE-PLAN (z-0) */}
-            <span className="absolute inset-0 flex items-center justify-center text-4xl md:text-6xl font-black text-white drop-shadow-lg z-0">
+            <span className="absolute inset-0 flex items-center justify-center text-3xl sm:text-5xl font-black text-white drop-shadow-lg z-0">
               {band.name.substring(0, 2).toUpperCase()}
             </span>
             
-            {/* Image optimisée AU-DESSUS (z-10) */}
             {hasValidBandImage && (
               <Image
                 src={band.image_url!}
                 alt={`Photo de ${band.name}`}
                 fill
-                sizes="(max-width: 768px) 128px, 192px"
+                sizes="(max-width: 768px) 96px, 160px"
                 className="object-cover z-10"
                 priority={true}
                 onError={handleBandImageError}
@@ -163,24 +135,21 @@ export default function BandDetailClient({
             )}
           </div>
 
-          {/* Infos principales */}
-          <div className="flex-1 space-y-3">
-            <div className="flex flex-wrap items-center gap-3">
-              {/* ✅ NOM DU GROUPE : Réduit pour être plus petit que le H1 de la page */}
-              <h2 className="font-metal text-xl md:text-3xl text-metal-rust">
+          <div className="flex-1 space-y-2 sm:space-y-3 w-full">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <h2 className="font-metal text-xl sm:text-3xl text-metal-rust break-words">
                 {band.name}
               </h2>
-              <span className={`px-3 py-1 rounded-full text-xs font-bold bg-metal-gray/50 border border-metal-gray flex items-center gap-1 ${statusConfig.color}`}>
+              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-bold bg-metal-gray/50 border border-metal-gray flex items-center gap-1 ${statusConfig.color}`}>
                 <span>{statusConfig.icon}</span>
                 {statusConfig.label}
               </span>
             </div>
 
-            <div className="flex flex-wrap gap-3 text-sm">
+            <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm">
               <span className="flex items-center gap-1 text-gray-300">
                 🎸 {band.genre}
               </span>
-
               <span 
                 className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold border"
                 style={{ 
@@ -194,7 +163,7 @@ export default function BandDetailClient({
               </span>
             </div>
 
-            <div className="flex flex-wrap gap-4 text-sm text-gray-300" suppressHydrationWarning>
+            <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm text-gray-300" suppressHydrationWarning>
               <span className="flex items-center gap-1">🌍 {band.country}</span>
               {band.formed && (
                 <span className="flex items-center gap-1">📅 Formé en {band.formed}</span>
@@ -211,11 +180,8 @@ export default function BandDetailClient({
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-          ONGLETS DE NAVIGATION
-      ═══════════════════════════════════════════════════════════ */}
       <div className="border-b border-metal-gray">
-        <nav className="flex gap-6 overflow-x-auto">
+        <nav className="flex gap-4 sm:gap-6 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -232,17 +198,11 @@ export default function BandDetailClient({
         </nav>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-          CONTENU DES ONGLETS
-      ═══════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2 min-h-[300px]" suppressHydrationWarning>
-          
-          {/* Biographie */}
           {activeTab === 'about' && (
-            <div className="metal-card p-6 animate-slide-up">
-              <h3 className="font-serif text-xl mb-4 text-metal-rust flex items-center gap-2">
+            <div className="metal-card p-4 sm:p-6 animate-slide-up">
+              <h3 className="font-serif text-lg sm:text-xl mb-3 sm:mb-4 text-metal-rust flex items-center gap-2">
                 📜 Biographie
                 {band.bio_lang && (
                   <span className="text-xs font-sans font-normal text-gray-400 bg-metal-gray/30 px-2 py-1 rounded">
@@ -250,15 +210,14 @@ export default function BandDetailClient({
                   </span>
                 )}
               </h3>
-              <p className="text-gray-300 leading-relaxed whitespace-pre-line">
+              <p className="text-gray-300 text-sm sm:text-base leading-relaxed whitespace-pre-line">
                 {band.biography || 'Aucune biographie disponible pour ce groupe pour le moment.'}
               </p>
             </div>
           )}
 
-          {/* Discographie avec pochettes optimisées */}
           {activeTab === 'albums' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-slide-up">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 animate-slide-up">
               {albums.length > 0 ? (
                 albums.map((album) => {
                   const hasAlbumImage = isMounted && 
@@ -268,17 +227,13 @@ export default function BandDetailClient({
                     album.image_url.trim() !== '';
                   
                   return (
-                    <div key={album.id} className="metal-card p-4 hover:border-metal-fire/50 transition-colors">
+                    <div key={album.id} className="metal-card p-3 sm:p-4 hover:border-metal-fire/50 transition-colors">
                       <div className="flex items-start gap-3">
-                        {/* Pochette de l'album optimisée */}
                         <div 
                           className="w-16 h-16 rounded bg-metal-gray flex items-center justify-center text-2xl shrink-0 overflow-hidden relative"
                           suppressHydrationWarning
                         >
-                          {/* Emoji EN ARRIÈRE-PLAN (z-0) */}
                           <span className="absolute inset-0 flex items-center justify-center z-0">💿</span>
-                          
-                          {/* Image optimisée AU-DESSUS (z-10) */}
                           {hasAlbumImage && (
                             <Image
                               src={album.image_url!}
@@ -305,22 +260,21 @@ export default function BandDetailClient({
                   );
                 })
               ) : (
-                <div className="col-span-full metal-card p-12 text-center text-gray-500">
+                <div className="col-span-full metal-card p-8 sm:p-12 text-center text-gray-500">
                   Aucune discographie enregistrée pour ce groupe.
                 </div>
               )}
             </div>
           )}
 
-          {/* Membres (avec badge "Actuel") */}
           {activeTab === 'members' && (
-            <div className="metal-card p-6 animate-slide-up">
+            <div className="metal-card p-4 sm:p-6 animate-slide-up">
               {members.length > 0 ? (
-                <ul className="space-y-3">
+                <ul className="space-y-2 sm:space-y-3">
                   {members.map((member) => (
                     <li key={member.id} className="flex items-center justify-between py-2 border-b border-metal-gray last:border-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-200">{member.name}</span>
+                        <span className="font-semibold text-gray-200 text-sm sm:text-base">{member.name}</span>
                         {member.is_active && (
                           <span className="text-[10px] px-1.5 py-0.5 bg-green-500/20 text-green-400 rounded border border-green-500/30">
                             Actuel
@@ -328,7 +282,7 @@ export default function BandDetailClient({
                         )}
                       </div>
                       <div className="text-right">
-                        <span className="text-sm text-metal-fire block">{member.role || 'Rôle inconnu'}</span>
+                        <span className="text-xs sm:text-sm text-metal-fire block">{member.role || 'Rôle inconnu'}</span>
                         <span className="text-xs text-gray-500">
                           {formatYearsActive(member)}
                         </span>
@@ -337,21 +291,19 @@ export default function BandDetailClient({
                   ))}
                 </ul>
               ) : (
-                <div className="text-center py-12 text-gray-500">
+                <div className="text-center py-8 sm:py-12 text-gray-500">
                   Aucune information sur les membres disponible.
                 </div>
               )}
             </div>
           )}
 
-          {/* Avis */}
           {activeTab === 'reviews' && (
             <div className="animate-slide-up">
               <ReviewList bandId={band.id} />
             </div>
           )}
 
-          {/* GROUPES SIMILAIRES (graphe interactif) - EN DERNIER */}
           {activeTab === 'similar' && (
             <div className="animate-slide-up">
               <GraphClient
@@ -366,13 +318,12 @@ export default function BandDetailClient({
           )}
         </div>
 
-        {/* Colonne latérale */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <ConcertsWidget bandId={band.id} bandName={band.name} />
           
-          <div className="metal-card p-6 border border-metal-gray">
-            <h3 className="font-serif text-lg text-gray-200 mb-3">💡 Progression</h3>
-            <p className="text-sm text-gray-400">
+          <div className="metal-card p-4 sm:p-6 border border-metal-gray">
+            <h3 className="font-serif text-base sm:text-lg text-gray-200 mb-2 sm:mb-3">💡 Progression</h3>
+            <p className="text-xs sm:text-sm text-gray-400">
               Explorer ce groupe vous a fait gagner <span className="text-metal-fire font-bold">+10 XP</span> 
               et contribue à votre progression dans le pilier{' '}
               <span className="font-semibold" style={{ color: pillarMeta.color }}>
