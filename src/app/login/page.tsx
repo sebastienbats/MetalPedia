@@ -103,20 +103,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center">
-      <div className="metal-card w-full max-w-md p-6 lg:p-8 border border-metal-gray">
-        <div className="text-center mb-8">
-          <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-8">
+    // ✅ Mobile Full-Width : la carte prend toute la largeur sur mobile
+    <div className="min-h-[80vh] flex items-center justify-center w-full px-2 py-6 sm:px-4 sm:py-12">
+      <div className="metal-card w-full sm:max-w-md p-4 sm:p-8 border border-metal-gray">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2">
             {isSignUp ? 'Rejoins la Horde' : 'Accès au Metalverse'}
           </h1>
-          <p className="text-metal-bone font-serif text-sm">
+          <p className="text-metal-bone font-serif text-xs sm:text-sm">
             {isSignUp
               ? 'Crée ton compte pour laisser des avis et suivre ta progression.'
               : 'Connecte-toi pour accéder à toutes les fonctionnalités.'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           {isSignUp && (
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Nom de Métalleux</label>
@@ -192,8 +193,8 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-400 text-sm">
+        <div className="mt-4 sm:mt-6 text-center">
+          <p className="text-gray-400 text-xs sm:text-sm">
             {isSignUp ? 'Déjà un compte ?' : 'Pas encore de compte ?'}{' '}
             <button
               type="button"
@@ -212,8 +213,8 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="mt-8 text-center">
-          <Link href="/" className="text-sm text-gray-500 hover:text-gray-300 transition-colors flex items-center justify-center gap-1">
+        <div className="mt-6 sm:mt-8 text-center">
+          <Link href="/" className="text-xs sm:text-sm text-gray-500 hover:text-gray-300 transition-colors flex items-center justify-center gap-1">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
