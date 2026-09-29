@@ -69,7 +69,7 @@ function ChapterNav() {
 
 function ChapterDivider({ number, title }: { number: string; title: string }) {
   return (
-    <div className="flex items-center gap-4 my-4 sm:my-6" aria-hidden="true">
+    <div className="flex items-center gap-4 my-3 sm:my-6" aria-hidden="true">
       <div className="flex-1 h-px bg-gradient-to-r from-transparent via-metal-fire/40 to-metal-fire/60" />
       <div className="flex items-center gap-3 px-4 py-1.5 bg-metal-black/60 border border-metal-fire/30 rounded-full">
         <span className="font-metal text-metal-fire text-sm sm:text-base">{number}</span>
@@ -98,12 +98,13 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <div className="container mx-auto px-0 space-y-6">
+    // ✅ Mobile Full-Width
+    <div className="w-full px-2 py-6 sm:px-4 sm:py-12 space-y-4 sm:space-y-6">
       <header className="text-center">
-        <h1 className="font-metal text-2xl lg:text-4xl text-metal-fire mb-4">
+        <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2 sm:mb-4">
           ⚔️ Ta Légende
         </h1>
-        <p className="text-metal-bone font-serif text-base lg:text-lg">
+        <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg">
           Le Conseil des Neuf Genres observe ta progression
         </p>
       </header>
@@ -115,16 +116,16 @@ export default function ProfilePage() {
         <div className="text-center">
           <h2
             id="origines-title"
-            className="font-metal text-xl lg:text-3xl text-metal-fire mb-3"
+            className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3"
           >
             🪶 Le Grimoire du Metalverse
           </h2>
-          <p className="text-metal-bone font-serif text-base lg:text-lg mb-3">
+          <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
             Les récits fondateurs du monde que tu explores — à lire avant de choisir ta voie
           </p>
         </div>
 
-        <div className="relative p-4 lg:p-5 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
+        <div className="relative p-3 sm:p-5 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
           <FloatingRunes preset="parchment" />
           <div className="relative z-10">
             <LoreGrimoire />
@@ -132,7 +133,7 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <section id="incarnation" aria-labelledby="incarnation-title" className="scroll-mt-24 space-y-4">
+      <section id="incarnation" aria-labelledby="incarnation-title" className="scroll-mt-24 space-y-3 sm:space-y-4">
         <ChapterDivider number="II" title="Ton Incarnation" />
         <h2 id="incarnation-title" className="sr-only">
           Ton Incarnation
@@ -147,11 +148,11 @@ export default function ProfilePage() {
             />
           )}
 
-          <div className="relative z-10 flex flex-col md:flex-row items-center gap-4 sm:gap-6">
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-3 sm:gap-6">
             {classMeta && classProgress ? (
               <>
                 <div
-                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center text-4xl sm:text-5xl border-4 shadow-lg shrink-0 transition-transform hover:scale-105"
+                  className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center text-3xl sm:text-5xl border-4 shadow-lg shrink-0 transition-transform hover:scale-105"
                   style={{
                     borderColor: classMeta.color,
                     backgroundColor: `${classMeta.color}20`,
@@ -173,14 +174,14 @@ export default function ProfilePage() {
                   </div>
 
                   <h3
-                    className="font-metal text-2xl sm:text-3xl mb-1"
+                    className="font-metal text-xl sm:text-3xl mb-1"
                     style={{ color: classMeta.color }}
                   >
                     {classMeta.name}
                   </h3>
 
                   <p
-                    className="text-xs sm:text-sm font-semibold mb-4 inline-block px-3 py-1 rounded-full border"
+                    className="text-xs sm:text-sm font-semibold mb-3 sm:mb-4 inline-block px-3 py-1 rounded-full border"
                     style={{
                       backgroundColor: `${classMeta.color}15`,
                       borderColor: classMeta.color,
@@ -220,7 +221,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 text-xs text-gray-400 bg-metal-black/50 p-3 rounded-lg border border-metal-gray/50">
+                  <div className="mt-3 sm:mt-4 text-xs text-gray-400 bg-metal-black/50 p-2 sm:p-3 rounded-lg border border-metal-gray/50">
                     ✨ <span className="text-gray-200 font-semibold">Bonus actif :</span>{' '}
                     <span className="text-metal-fire font-bold">
                       +{Math.round((classMeta.bonus.multiplier - 1) * 100)}% XP
@@ -239,14 +240,14 @@ export default function ProfilePage() {
               </>
             ) : (
               <>
-                <div className="text-5xl sm:text-6xl opacity-30 shrink-0" aria-hidden="true">
+                <div className="text-4xl sm:text-6xl opacity-30 shrink-0" aria-hidden="true">
                   ⚔️
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="font-metal text-xl sm:text-2xl text-gray-400 mb-2">
+                  <h3 className="font-metal text-lg sm:text-2xl text-gray-400 mb-2">
                     Aucune classe choisie
                   </h3>
-                  <p className="text-sm text-gray-500 mb-4 max-w-md">
+                  <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4 max-w-md">
                     Le Conseil des Neuf Genres t'attend. Choisis ta destinée pour débloquer des
                     bonus d'XP uniques et des quêtes spéciales.
                   </p>
@@ -262,8 +263,8 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div className="bg-metal-fire/5 border border-metal-fire/20 rounded-lg p-4 flex gap-3 items-start">
-          <span className="text-xl sm:text-2xl shrink-0" aria-hidden="true">
+        <div className="bg-metal-fire/5 border border-metal-fire/20 rounded-lg p-3 sm:p-4 flex gap-3 items-start">
+          <span className="text-lg sm:text-2xl shrink-0" aria-hidden="true">
             💡
           </span>
           <div className="text-xs sm:text-sm text-gray-300">
@@ -284,14 +285,13 @@ export default function ProfilePage() {
         {selectedClass && <ClassMilestones />}
       </section>
 
-      <section id="exploits" aria-labelledby="exploits-title" className="scroll-mt-24 space-y-4">
+      <section id="exploits" aria-labelledby="exploits-title" className="scroll-mt-24 space-y-3 sm:space-y-4">
         <ChapterDivider number="III" title="Tes Exploits" />
         <h2 id="exploits-title" className="sr-only">
           Tes Exploits
         </h2>
 
-        {/* ✅ Grille 1 : gap réduit à -75% (gap-4 lg:gap-6 → gap-1 lg:gap-1.5) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 lg:gap-1.5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 lg:gap-6">
           <PlayerCard />
           <StatsPanel />
         </div>
@@ -300,8 +300,7 @@ export default function ProfilePage() {
 
         <TimelineBadgesPanel />
 
-        {/* ✅ Grille 2 : gap réduit à -75% (gap-4 lg:gap-6 → gap-1 lg:gap-1.5) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-1 lg:gap-1.5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 lg:gap-6">
           <QuestsPanel />
           <BadgesPanel />
         </div>
@@ -309,7 +308,7 @@ export default function ProfilePage() {
 
       <section id="decouvertes" aria-labelledby="decouvertes-title" className="scroll-mt-24 space-y-3">
         <ChapterDivider number="IV" title="Tes Découvertes" />
-        <div className="relative p-4 lg:p-5 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
+        <div className="relative p-3 sm:p-5 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
           <FloatingRunes preset="parchment" />
           <div className="relative z-10">
             <TableOfKnowledge />
@@ -320,24 +319,24 @@ export default function ProfilePage() {
       {!user && (
         <section
           aria-label="Invitation à créer un compte"
-          className="metal-card p-1 sm:p-1.5 border-2 border-metal-fire/50 bg-gradient-to-r from-metal-fire/10 to-transparent"
+          className="metal-card p-3 sm:p-5 border-2 border-metal-fire/50 bg-gradient-to-r from-metal-fire/10 to-transparent"
         >
-          <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-            <div className="text-4xl sm:text-5xl shrink-0" aria-hidden="true">
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 text-center sm:text-left">
+            <div className="text-3xl sm:text-5xl shrink-0" aria-hidden="true">
               🔐
             </div>
             <div className="flex-1">
-              <h2 className="font-metal text-xl lg:text-3xl text-metal-fire mb-2">
+              <h2 className="font-metal text-lg sm:text-3xl text-metal-fire mb-2">
                 Sauvegarde ta progression dans le cloud
               </h2>
-              <p className="text-metal-bone font-serif text-sm lg:text-base">
+              <p className="text-metal-bone font-serif text-xs sm:text-sm lg:text-base">
                 Crée un compte pour synchroniser ton XP, tes badges, ta classe et tes favoris sur
                 tous tes appareils. Actuellement, tes données sont sauvegardées localement.
               </p>
             </div>
             <Link
               href="/login"
-              className="shrink-0 px-6 py-3 bg-metal-fire text-white font-bold rounded-lg hover:bg-metal-fire/80 transition-all shadow-lg shadow-metal-fire/20 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-metal-fire/50 w-full sm:w-auto text-center"
+              className="shrink-0 px-6 py-3 bg-metal-fire text-white font-bold rounded-lg hover:bg-metal-fire/80 transition-all shadow-lg shadow-metal-fire/20 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-metal-fire/50 w-full sm:w-auto text-center text-sm sm:text-base"
             >
               Se connecter
             </Link>
