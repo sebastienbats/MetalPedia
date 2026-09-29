@@ -244,9 +244,10 @@ export default function ProfilePage() {
                     <div className="flex justify-between text-xs text-gray-400 mb-1">
                       <span className="font-semibold text-gray-300">Niveau {classProgress.currentLevel}</span>
                       <span>
+                        {/* ✅ CORRECTION : Ajout de 'fr-FR' pour éviter le mismatch d'hydratation */}
                         {classProgress.nextLevelXp === Infinity
                           ? 'MAX'
-                          : `${classProgress.nextLevelXp.toLocaleString()} XP`}
+                          : `${classProgress.nextLevelXp.toLocaleString('fr-FR')} XP`}
                       </span>
                     </div>
                     <div
@@ -330,15 +331,15 @@ export default function ProfilePage() {
         <ChapterDivider number="III" title="Tes Exploits" />
         <div className="text-center">
           <h2 id="exploits-title" className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
-            🏛️ Maitrîses des classes
+            🏛️ Maîtrises des classes
           </h2>
           <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
-            Chaque acte des destinées sont récompensés et gravés à jamais dans le Metalverse
+            Chaque acte des destinées est récompensé et gravé à jamais dans le Metalverse
           </p>
         </div>
         <PantheonSection />
-        <div className="text-center">
-          <h2 id="exploits-title" className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
+        <div className="text-center mt-6">
+          <h2 className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
             🏆 Titres honorifiques
           </h2>
           <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
@@ -351,7 +352,7 @@ export default function ProfilePage() {
       {/* Chapitre IV : Découvertes */}
       <section id="decouvertes" aria-labelledby="decouvertes-title" className="scroll-mt-24 space-y-3">
         <ChapterDivider number="IV" title="Tes Découvertes" />
-          <div className="text-center">
+        <div className="text-center">
           <h2 id="decouvertes-title" className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
             📜 Tables du Savoir
           </h2>
