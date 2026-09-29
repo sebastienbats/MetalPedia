@@ -82,7 +82,8 @@ export default function StatsPanel() {
           Ton ADN Metal
         </h3>
         <p className="text-sm text-gray-400">
-          Basé sur <span className="text-metal-fire font-semibold">{totalViews}</span> groupes consultés
+          {/* ✅ CORRECTION : Ajout de 'fr-FR' pour éviter le mismatch d'hydratation */}
+          Basé sur <span className="text-metal-fire font-semibold">{totalViews.toLocaleString('fr-FR')}</span> groupes consultés
         </p>
       </div>
 
@@ -203,7 +204,8 @@ export default function StatsPanel() {
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">Niv. {level}</span>
           <span className="text-metal-fire font-bold">
-            {totalXP.toLocaleString()} XP
+            {/* ✅ CORRECTION : Ajout de 'fr-FR' pour éviter le mismatch d'hydratation */}
+            {totalXP.toLocaleString('fr-FR')} XP
           </span>
         </div>
       </div>
