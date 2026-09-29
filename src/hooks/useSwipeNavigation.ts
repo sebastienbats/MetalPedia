@@ -8,12 +8,11 @@ import { useRouter, usePathname } from 'next/navigation';
 // ═══════════════════════════════════════════
 const PAGE_ORDER = [
   '/',                    // Accueil
-  '/genres',              // Genres
-  '/timeline',            // Timeline
-  '/map',                 // Metal Map
-  '/quiz',                // Quiz
-  '/profile',             // Profil
   '/favorites',           // Favoris
+  '/profile',             // Profil
+  '/map',                 // Metal Map
+  '/timeline',            // Timeline
+  '/quiz',                // Quiz
 ];
 
 // ═══════════════════════════════════════════
