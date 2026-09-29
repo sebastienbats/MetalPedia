@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { useGamificationStore } from '@/stores/gamificationStore';
+import { useStatsStore } from '@/stores/statsStore'; // ✅ AJOUT : Import du store de statistiques
 import type { BandDetail, Album, BandMember, GamificationPillar } from '@/types/api';
 import { PILLAR_METADATA } from '@/types/api';
 import Loader from '@/components/ui/Loader';
@@ -35,7 +36,9 @@ export default function BandDetailClient({
   albums = [], 
   members = [] 
 }: Props) {
-  const { recordView } = useGamificationStore();
+  // ✅ RÉCUPÉRATION DES DEUX FONCTIONS D'ENREGISTREMENT
+  const recordGamificationView = useGamificationStore((state) => state.recordView);
+  const recordStatsView = useStatsStore((state) => state.recordView);
   
   const [activeTab, setActiveTab] = useState<'about' | 'albums' | 'members' | 'reviews' | 'similar'>('about');
   const [isMounted, setIsMounted] = useState(false);
@@ -48,9 +51,11 @@ export default function BandDetailClient({
     setIsMounted(true);
   }, []);
 
+  // ✅ ENREGISTREMENT DOUBLE : Gamification (XP/Badges) + Statistiques (Graphiques)
   useEffect(() => {
     if (isMounted && band?.id) {
-      recordView({
+      // 1️⃣ Notifie le store de Gamification (nécessite toutes les données pour les bonus de classe)
+      recordGamificationView({
         id: band.id,
         name: band.name,
         genre: band.genre,
@@ -60,6 +65,14 @@ export default function BandDetailClient({
         listeners: band.listeners,
         status: band.status,
         biography: band.biography,
+      });
+
+      // 2️⃣ Notifie le store de Statistiques (nécessite uniquement l'essentiel pour les graphiques)
+      recordStatsView({
+        id: band.id,
+        name: band.name,
+        genre: band.genre,
+        country: band.country,
       });
     }
   }, [isMounted, band?.id]);
