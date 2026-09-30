@@ -35,8 +35,6 @@ type BandRow = {
   mbid: string | null;
   country_source: string | null;
   formed_source: string | null;
-
-  // 🆕 Nouveaux champs DB (supabase gen types)
   formed_date: string | null;
   disbanded_date: string | null;
   discogs_id: number | null;
@@ -53,8 +51,8 @@ type BandRow = {
 type AlbumRow = {
   id: number;
   band_id: number;
-  title: string;                        // ✅ Champ principal
-  release_type: string | null;          // ✅ Album, EP, Single, Demo...
+  title: string;
+  release_type: string | null;
   year: number | null;
   image_url: string | null;
   image_source: string | null;
@@ -107,10 +105,6 @@ export interface QuizQuestion {
 // ═══════════════════════════════════════════════════════════
 
 export const metalServerApi = {
-  // ─────────────────────────────────────────────────────
-  // REQUÊTE UNITAIRE
-  // ─────────────────────────────────────────────────────
-  
   async getBand(id: number): Promise<Band | null> {
     const { data, error } = await (supabase as any)
       .from('bands')
@@ -118,33 +112,18 @@ export const metalServerApi = {
       .eq('id', id)
       .single() as { data: BandRow | null; error: any };
 
-    if (error || !data) {
-      console.error(`Error fetching band ${id}:`, error);
-      return null;
-    }
-
+    if (error || !data) return null;
     return mapRowToBand(data);
   },
-
-  // ═══════════════════════════════════════════════════════════
-  // ALBUMS & MEMBRES
-  // ═══════════════════════════════════════════════════════════
 
   async getBandAlbums(bandId: number): Promise<Album[]> {
     const { data, error } = await (supabase as any)
       .from('albums')
       .select('*')
       .eq('band_id', bandId)
-      .order('year', { ascending: false }) as { 
-        data: AlbumRow[] | null; 
-        error: any 
-      };
+      .order('year', { ascending: false }) as { data: AlbumRow[] | null; error: any };
 
-    if (error || !data) {
-      console.error(`Error fetching albums for band ${bandId}:`, error);
-      return [];
-    }
-
+    if (error || !data) return [];
     return data.map(mapRowToAlbum);
   },
 
@@ -154,22 +133,11 @@ export const metalServerApi = {
       .select('*')
       .eq('band_id', bandId)
       .order('is_active', { ascending: false })
-      .order('role', { ascending: true }) as { 
-        data: BandMemberRow[] | null; 
-        error: any 
-      };
+      .order('role', { ascending: true }) as { data: BandMemberRow[] | null; error: any };
 
-    if (error || !data) {
-      console.error(`Error fetching members for band ${bandId}:`, error);
-      return [];
-    }
-
+    if (error || !data) return [];
     return data.map(mapRowToMember);
   },
-
-  // ─────────────────────────────────────────────────────
-  // RECHERCHE & FILTRES
-  // ─────────────────────────────────────────────────────
 
   async searchBands(query: string): Promise<Band[]> {
     const { data, error } = await (supabase as any)
@@ -178,11 +146,7 @@ export const metalServerApi = {
       .ilike('name', `%${query}%`)
       .limit(20) as { data: BandRow[] | null; error: any };
 
-    if (error || !data) {
-      console.error(`Error searching bands for "${query}":`, error);
-      return [];
-    }
-
+    if (error || !data) return [];
     return data.map(mapRowToBand);
   },
 
@@ -193,11 +157,7 @@ export const metalServerApi = {
       .ilike('genre', `%${genre}%`)
       .limit(20) as { data: BandRow[] | null; error: any };
 
-    if (error || !data) {
-      console.error(`Error fetching bands by genre "${genre}":`, error);
-      return [];
-    }
-
+    if (error || !data) return [];
     return data.map(mapRowToBand);
   },
 
@@ -206,62 +166,54 @@ export const metalServerApi = {
       .from('bands')
       .select('*') as { data: BandRow[] | null; error: any };
 
-    if (error || !data) {
-      console.error('Error fetching all bands:', error);
-      return [];
-    }
-
+    if (error || !data) return [];
     return data.map(mapRowToBand);
   },
 
   // ─────────────────────────────────────────────────────
-  // NAVIGATION PAR PILIERS (Gamification)
+  // 🛡️ CORRECTION MAJEURE : Comptage précis et inclusif
   // ─────────────────────────────────────────────────────
-
   async getGenrePillarsStats(): Promise<GenrePillarStats[]> {
-    // 🛡️ CORRECTION CRITIQUE : Ajout de .range(0, 200000)
-    // Sans cela, PostgREST limite par défaut les résultats (souvent à 1000), faussant totalement le comptage !
-    const { data, error } = await (supabase as any)
-      .from('bands')
-      .select('genre, genre_pillar')
-      .range(0, 200000) as { 
-        data: Array<{ genre: string; genre_pillar: string }> | null; 
-        error: any 
-      };
-
-    if (error || !data) {
-      console.error('Error fetching genre stats:', error);
-      return [];
-    }
-
-    // 🐍 DEBUG : Vérification que nous récupérons bien tous les groupes
-    console.log(`📊 DEBUG: ${data.length} groupes récupérés pour le comptage.`);
-
-    const pillarsMap = new Map<string, Map<string, number>>();
-
-    for (const band of data) {
-      const pillar = band.genre_pillar || 'Heavy Metal';
-      const genre = band.genre || 'Metal';
-
-      if (!pillarsMap.has(pillar)) {
-        pillarsMap.set(pillar, new Map());
-      }
-
-      const subgenres = pillarsMap.get(pillar)!;
-      subgenres.set(genre, (subgenres.get(genre) || 0) + 1);
-    }
-
+    const pillars: GamificationPillar[] = [
+      'Black Metal', 'Death Metal', 'Heavy Metal', 'Thrash Metal',
+      'Power Metal', 'Doom Metal', 'Progressive Metal', 'Folk Metal', 'Metalcore'
+    ];
+    
     const result: GenrePillarStats[] = [];
 
-    for (const [pillar, subgenresMap] of pillarsMap) {
+    for (const pillar of pillars) {
+      // On récupère TOUTES les lignes de ce pilier (range large pour éviter la limite PostgREST)
+      const { data, error } = await (supabase as any)
+        .from('bands')
+        .select('genre, genre_pillar')
+        .eq('genre_pillar', pillar)
+        .range(0, 100000) as { 
+          data: Array<{ genre: string | null; genre_pillar: string | null }> | null; 
+          error: any 
+        };
+
+      if (error || !data) {
+        console.error(`Error fetching stats for ${pillar}:`, error);
+        continue;
+      }
+
+      const subgenresMap = new Map<string, number>();
+      
+      for (const band of data) {
+        // ✅ Inclusif : Si le genre est null/vide, on le compte dans "Non catégorisé"
+        const genre = (band.genre && band.genre.trim() !== '') ? band.genre : 'Non catégorisé';
+        subgenresMap.set(genre, (subgenresMap.get(genre) || 0) + 1);
+      }
+
       const subgenres = Array.from(subgenresMap.entries())
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count);
 
+      // Le total du pilier est la somme exacte de tous ses sous-genres (y compris "Non catégorisé")
       const total = subgenres.reduce((sum, s) => sum + s.count, 0);
 
       result.push({
-        pillar: pillar as GamificationPillar,
+        pillar,
         count: total,
         subgenres,
       });
@@ -270,7 +222,10 @@ export const metalServerApi = {
     return result.sort((a, b) => b.count - a.count);
   },
 
-  async getBandsByPillar(pillar: string, subgenre?: string): Promise<Band[]> {
+  // ─────────────────────────────────────────────────────
+  // 🛡️ CORRECTION MAJEURE : Suppression du plafond de 100
+  // ─────────────────────────────────────────────────────
+  async getBandsByPillar(pillar: string, subgenre?: string, limit: number = 10000): Promise<Band[]> {
     let query = (supabase as any)
       .from('bands')
       .select('*')
@@ -280,7 +235,9 @@ export const metalServerApi = {
       query = query.eq('genre', subgenre);
     }
 
-    query = query.order('listeners', { ascending: false }).limit(100);
+    // ✅ CORRECTION : Augmentation massive de la limite (défaut 10000) 
+    // pour que {bands.length} affiche le VRAI total sur la page [pillar], et non un plafond de 100.
+    query = query.order('listeners', { ascending: false }).limit(limit);
 
     const { data, error } = await query as { 
       data: BandRow[] | null; 
@@ -295,10 +252,6 @@ export const metalServerApi = {
     return data.map(mapRowToBand);
   },
 
-  // ─────────────────────────────────────────────────────
-  // REVIEWS & NOTATIONS
-  // ─────────────────────────────────────────────────────
-
   async getBandReviews(bandId: number): Promise<{
     reviews: Review[];
     averageRating: number;
@@ -308,15 +261,9 @@ export const metalServerApi = {
       .from('reviews')
       .select('*')
       .eq('band_id', bandId)
-      .order('created_at', { ascending: false }) as { 
-        data: Review[] | null; 
-        error: any 
-      };
+      .order('created_at', { ascending: false }) as { data: Review[] | null; error: any };
 
-    if (error) {
-      console.error('Error fetching reviews:', error);
-      return { reviews: [], averageRating: 0, totalReviews: 0 };
-    }
+    if (error) return { reviews: [], averageRating: 0, totalReviews: 0 };
 
     const reviews = data || [];
     const totalReviews = reviews.length;
@@ -339,11 +286,7 @@ export const metalServerApi = {
       .select()
       .single() as { data: Review | null; error: any };
 
-    if (error) {
-      console.error('Error adding review:', error);
-      throw error;
-    }
-
+    if (error) throw error;
     return data!;
   },
 
@@ -354,15 +297,8 @@ export const metalServerApi = {
       .eq('id', reviewId)
       .eq('user_id', userId);
 
-    if (error) {
-      console.error('Error deleting review:', error);
-      throw error;
-    }
+    if (error) throw error;
   },
-
-  // ─────────────────────────────────────────────────────
-  // SYSTÈME DE QUIZ
-  // ─────────────────────────────────────────────────────
 
   async getQuizQuestions(pillar?: string, limit: number = 5): Promise<QuizQuestion[]> {
     let query = (supabase as any)
@@ -370,16 +306,10 @@ export const metalServerApi = {
       .select('*')
       .limit(limit);
 
-    if (pillar) {
-      query = query.eq('pillar_id', pillar);
-    }
+    if (pillar) query = query.eq('pillar_id', pillar);
 
     const { data, error } = await query as { data: QuizQuestion[] | null; error: any };
-
-    if (error || !data) {
-      console.error('Error fetching quiz questions:', error);
-      return [];
-    }
+    if (error || !data) return [];
 
     return data.sort(() => Math.random() - 0.5);
   },
@@ -399,15 +329,8 @@ export const metalServerApi = {
       xp_earned: xpEarned,
     });
 
-    if (error) {
-      console.error('Error submitting quiz attempt:', error);
-      throw error;
-    }
+    if (error) throw error;
   },
-
-  // ─────────────────────────────────────────────────────
-  // REQUÊTES SPÉCIALISÉES
-  // ─────────────────────────────────────────────────────
 
   async getTopBands(limit: number = 50): Promise<Band[]> {
     const { data, error } = await (supabase as any)
@@ -416,11 +339,7 @@ export const metalServerApi = {
       .order('listeners', { ascending: false })
       .limit(limit) as { data: BandRow[] | null; error: any };
 
-    if (error || !data) {
-      console.error('Error fetching top bands:', error);
-      return [];
-    }
-
+    if (error || !data) return [];
     return data.map(mapRowToBand);
   },
 
@@ -432,11 +351,7 @@ export const metalServerApi = {
       .order('listeners', { ascending: false })
       .limit(limit) as { data: BandRow[] | null; error: any };
 
-    if (error || !data) {
-      console.error('Error fetching bands with French bio:', error);
-      return [];
-    }
-
+    if (error || !data) return [];
     return data.map(mapRowToBand);
   },
 
@@ -448,11 +363,7 @@ export const metalServerApi = {
       .order('listeners', { ascending: false })
       .limit(limit) as { data: BandRow[] | null; error: any };
 
-    if (error || !data) {
-      console.error('Error fetching bands with verified country:', error);
-      return [];
-    }
-
+    if (error || !data) return [];
     return data.map(mapRowToBand);
   },
 };
@@ -480,8 +391,6 @@ function mapRowToBand(row: BandRow): Band {
     mbid: row.mbid,
     country_source: (row.country_source || 'unknown') as CountrySource,
     formed_source: (row.formed_source || 'unknown') as FormedSource,
-
-    // 🆕 Nouveaux champs DB
     formed_date: row.formed_date,
     disbanded_date: row.disbanded_date,
     discogs_id: row.discogs_id,
@@ -496,46 +405,27 @@ function mapRowToBand(row: BandRow): Band {
   };
 }
 
-/**
- * ✅ MAPPER ALBUM : aligné sur l'interface Album (title, release_type, year)
- * ⚠️  Attention aux champs optionnels : l'interface Album utilise `?:` (undefined),
- *     pas `| null`. On caste donc en `undefined` pour les champs optionnels.
- */
 function mapRowToAlbum(row: AlbumRow): Album {
   return {
     id: row.id,
     band_id: row.band_id,
-
-    // Champs principaux
     title: row.title || 'Titre inconnu',
     release_type: row.release_type || 'Album',
     year: row.year,
-
-    // Image
     image_url: row.image_url || null,
     image_source: row.image_source as DataSource | string | null,
     mbid: row.mbid,
-
-    // Métadonnées Last.fm
     artist: row.artist,
     playcount: row.playcount,
-    source: row.source as DataSource | string | undefined,  // ✅ Cast vers undefined (champs optionnel)
+    source: row.source as DataSource | string | undefined,
     url: row.url,
     uri: row.uri,
-
-    // Données brutes
     raw_data: row.raw_data as Record<string, unknown> | null,
-
-    // Timestamps
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
 }
 
-/**
- * ✅ MAPPER BANDMEMBER : aligné sur l'interface BandMember
- * (Plus de transformation : les noms DB correspondent directement à l'interface)
- */
 function mapRowToMember(row: BandMemberRow): BandMember {
   return {
     id: row.id,
