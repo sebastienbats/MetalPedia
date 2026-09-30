@@ -219,9 +219,12 @@ export const metalServerApi = {
   // ─────────────────────────────────────────────────────
 
   async getGenrePillarsStats(): Promise<GenrePillarStats[]> {
+    // 🛡️ CORRECTION CRITIQUE : Ajout de .range(0, 200000)
+    // Sans cela, PostgREST limite par défaut les résultats (souvent à 1000), faussant totalement le comptage !
     const { data, error } = await (supabase as any)
       .from('bands')
-      .select('genre, genre_pillar') as { 
+      .select('genre, genre_pillar')
+      .range(0, 200000) as { 
         data: Array<{ genre: string; genre_pillar: string }> | null; 
         error: any 
       };
@@ -230,6 +233,9 @@ export const metalServerApi = {
       console.error('Error fetching genre stats:', error);
       return [];
     }
+
+    // 🐍 DEBUG : Vérification que nous récupérons bien tous les groupes
+    console.log(`📊 DEBUG: ${data.length} groupes récupérés pour le comptage.`);
 
     const pillarsMap = new Map<string, Map<string, number>>();
 
