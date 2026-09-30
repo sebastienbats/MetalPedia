@@ -32,8 +32,14 @@ export default function XPBar() {
           {/* Barre d'XP */}
           <div className="flex-1">
             <div className="flex justify-between text-xs text-gray-400 mb-1">
-              <span>{stats.totalXP.toLocaleString()} XP</span>
-              <span>{progress.nextLevelXP === Infinity ? 'MAX' : `${progress.nextLevelXP.toLocaleString()} XP`}</span>
+              {/* ✅ CORRECTION : Ajout de 'fr-FR' pour éviter le mismatch d'hydratation */}
+              <span>{stats.totalXP.toLocaleString('fr-FR')} XP</span>
+              <span>
+                {progress.nextLevelXP === Infinity 
+                  ? 'MAX' 
+                  : `${progress.nextLevelXP.toLocaleString('fr-FR')} XP`
+                }
+              </span>
             </div>
             <div className="h-3 bg-metal-gray rounded-full overflow-hidden">
               <div
@@ -46,8 +52,6 @@ export default function XPBar() {
               />
             </div>
           </div>
-
-          {/* 🛡️ SUPPRIMÉ : Le bouton profil fait doublon avec l'icône 👤 du Header */}
         </div>
       </div>
     </div>
