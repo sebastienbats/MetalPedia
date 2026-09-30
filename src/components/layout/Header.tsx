@@ -8,6 +8,7 @@ import { useAuth, useSignOut } from '@/api/authApi';
 import SearchBar from '@/components/search/SearchBar';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 import PillarsDropdown from '@/components/layout/PillarsDropdown';
+import Image from 'next/image';
 
 function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -106,9 +107,14 @@ export default function Header() {
             className="shrink-0 flex items-center gap-2 group"
             aria-label="MetalPedia — Accueil"
           >
-            <span className="text-2xl md:text-3xl animate-flame" aria-hidden="true">
-              🔥
-            </span>
+            <Image
+  src="/icons/icon-192.png"
+  alt="MetalPedia Logo"
+  width={192}
+  height={192}
+  priority // ✅ Important : charge l'image en priorité car c'est dans le header (LCP)
+  className="w-8 h-8 sm:w-10 sm:h-10 object-contain drop-shadow-md" 
+/>
             <div className="hidden lg:block leading-tight">
               <h1 className="font-metal text-xl text-metal-rust group-hover:text-metal-fire transition-colors">
                 MetalPedia
