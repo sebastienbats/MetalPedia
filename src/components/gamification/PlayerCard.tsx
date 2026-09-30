@@ -67,11 +67,12 @@ export default function PlayerCard() {
       {/* Progression XP */}
       <div>
         <div className="flex justify-between text-sm mb-2">
-          <span className="text-gray-400">XP Total : {stats.totalXP.toLocaleString()}</span>
+          {/* ✅ CORRECTION : Ajout de 'fr-FR' pour éviter le mismatch d'hydratation */}
+          <span className="text-gray-400">XP Total : {stats.totalXP.toLocaleString('fr-FR')}</span>
           <span className="text-metal-fire font-medium">
             {progress.nextLevelXP === Infinity
               ? 'NIVEAU MAX'
-              : `Prochain niveau : ${progress.nextLevelXP.toLocaleString()} XP`
+              : `Prochain niveau : ${progress.nextLevelXP.toLocaleString('fr-FR')} XP`
             }
           </span>
         </div>
