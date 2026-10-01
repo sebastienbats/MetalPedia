@@ -361,7 +361,7 @@ export default function BandDetailClient({
         >
           {/* Conteneur modale : centrage stable via flexbox */}
           <div 
-            className="relative flex flex-col items-center rounded-xl border-2 overflow-hidden w-full h-full"
+            className="relative flex flex-col items-center rounded-xl border-2 overflow-hidden w-full h-full max-w-[95vw] max-h-[95vh]"
             style={{
               borderColor: pillarMeta.color,
               boxShadow: `0 0 40px 8px ${pillarMeta.color}80, 0 0 80px 16px ${pillarMeta.color}40`,
