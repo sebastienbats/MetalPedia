@@ -111,25 +111,18 @@ export default function BandDetailClient({
   return (
     <div className="w-full px-2 py-6 sm:px-4 sm:py-12 space-y-6 sm:space-y-8 animate-fade-in" suppressHydrationWarning>
       
-      {/* ═══════════════════════════════════════════════════════════
-          HEADER DE PAGE
-      ═══════════════════════════════════════════════════════════ */}
       <header className="text-center mb-4 sm:mb-6">
         <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2">
           Fiche du groupe
         </h1>
       </header>
 
-      {/* ═══════════════════════════════════════════════════════════
-          HEADER DU GROUPE (avec image cliquable)
-      ═══════════════════════════════════════════════════════════ */}
       <div className="metal-card p-3 sm:p-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
           <span className="text-9xl font-black text-white">{band.name.charAt(0)}</span>
         </div>
         
         <div className="relative z-10 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
-          {/* 🖼️ IMAGE DU GROUPE CLIQUABLE */}
           <div 
             className={`w-24 h-24 sm:w-40 sm:h-40 rounded-lg overflow-hidden shrink-0 shadow-2xl border border-metal-gray bg-gradient-to-br from-metal-blood to-metal-rust flex items-center justify-center relative ${
               hasValidBandImage ? 'cursor-pointer hover:scale-105 transition-transform duration-300' : ''
@@ -152,7 +145,6 @@ export default function BandDetailClient({
                   priority={true}
                   onError={handleBandImageError}
                 />
-                {/* Indicateur visuel au survol */}
                 <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors duration-300 z-20 flex items-center justify-center opacity-0 hover:opacity-100">
                   <span className="text-white text-2xl sm:text-3xl">🔍</span>
                 </div>
@@ -160,7 +152,6 @@ export default function BandDetailClient({
             )}
           </div>
 
-          {/* Infos principales */}
           <div className="flex-1 space-y-2 sm:space-y-3 w-full">
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <h2 className="font-metal text-xl sm:text-3xl text-metal-rust break-words">
@@ -206,9 +197,6 @@ export default function BandDetailClient({
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-          ONGLETS DE NAVIGATION
-      ═══════════════════════════════════════════════════════════ */}
       <div className="border-b border-metal-gray">
         <nav className="flex gap-4 sm:gap-6 overflow-x-auto">
           {tabs.map((tab) => (
@@ -227,9 +215,6 @@ export default function BandDetailClient({
         </nav>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-          CONTENU DES ONGLETS
-      ═══════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2 min-h-[300px]" suppressHydrationWarning>
           {activeTab === 'about' && (
@@ -350,7 +335,6 @@ export default function BandDetailClient({
           )}
         </div>
 
-        {/* Colonne latérale */}
         <div className="space-y-4 sm:space-y-6">
           <ConcertsWidget bandId={band.id} bandName={band.name} />
           
@@ -368,7 +352,7 @@ export default function BandDetailClient({
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          MODALE D'IMAGE DU GROUPE (Responsive & Sans Scroll)
+          MODALE D'IMAGE DU GROUPE (Halo sur la bordure)
       ═══════════════════════════════════════════════════════════ */}
       {isImageModalOpen && hasValidBandImage && (
         <div 
@@ -383,22 +367,36 @@ export default function BandDetailClient({
             ✕
           </button>
           
+          {/* Conteneur principal de la modale avec bordure et halo du pilier */}
           <div 
-            className="relative flex flex-col items-center justify-center w-full h-full max-w-[95vw] max-h-[95vh]"
+            className="relative flex flex-col items-center justify-center rounded-xl border-2 overflow-hidden"
+            style={{
+              borderColor: pillarMeta.color,
+              boxShadow: `0 0 40px 8px ${pillarMeta.color}80, 0 0 80px 16px ${pillarMeta.color}40`,
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+            }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Image responsive : s'adapte à l'écran sans scroll */}
-            <Image
-              src={band.image_url!}
-              alt={`Photo de ${band.name}`}
-              width={1200}
-              height={800}
-              className="object-contain w-auto h-auto max-w-full max-h-[80vh] rounded-lg shadow-2xl"
-              priority
-            />
+            {/* Image en GRAND */}
+            <div className="p-3 sm:p-4">
+              <Image
+                src={band.image_url!}
+                alt={`Photo de ${band.name}`}
+                width={1920}
+                height={1080}
+                className="object-contain max-w-[85vw] max-h-[70vh] rounded-lg"
+                priority
+              />
+            </div>
             
             {/* Nom du groupe en bas */}
-            <div className="mt-3 sm:mt-4 bg-black/80 backdrop-blur-sm px-4 py-2 sm:px-6 sm:py-3 rounded-lg border border-metal-gray max-w-full">
+            <div 
+              className="w-full px-4 py-3 sm:px-6 sm:py-4 border-t-2"
+              style={{
+                backgroundColor: `${pillarMeta.color}15`,
+                borderColor: `${pillarMeta.color}60`,
+              }}
+            >
               <p className="text-white font-metal text-base sm:text-xl text-center truncate">{band.name}</p>
             </div>
           </div>
