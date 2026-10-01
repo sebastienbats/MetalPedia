@@ -352,7 +352,7 @@ export default function BandDetailClient({
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          MODALE D'IMAGE DU GROUPE (Halo sur la bordure)
+          MODALE D'IMAGE DU GROUPE (Image grande + Modale ajustée)
       ═══════════════════════════════════════════════════════════ */}
       {isImageModalOpen && hasValidBandImage && (
         <div 
@@ -367,9 +367,9 @@ export default function BandDetailClient({
             ✕
           </button>
           
-          {/* Conteneur principal de la modale avec bordure et halo du pilier */}
+          {/* Conteneur modale : s'ajuste au contenu (w-fit h-fit) */}
           <div 
-            className="relative flex flex-col items-center justify-center rounded-xl border-2 overflow-hidden"
+            className="relative flex flex-col items-center rounded-xl border-2 overflow-hidden w-fit h-fit"
             style={{
               borderColor: pillarMeta.color,
               boxShadow: `0 0 40px 8px ${pillarMeta.color}80, 0 0 80px 16px ${pillarMeta.color}40`,
@@ -377,14 +377,15 @@ export default function BandDetailClient({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Image en GRAND */}
+            {/* Image EN GRAND : dimensions fixes élevées, contraintes par max */}
             <div className="p-3 sm:p-4">
               <Image
                 src={band.image_url!}
                 alt={`Photo de ${band.name}`}
                 width={1920}
                 height={1080}
-                className="object-contain max-w-[85vw] max-h-[70vh] rounded-lg"
+                className="object-contain max-w-[85vw] max-h-[70vh]"
+                style={{ width: '85vw', height: '70vh' }}
                 priority
               />
             </div>
