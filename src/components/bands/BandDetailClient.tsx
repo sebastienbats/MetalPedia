@@ -44,6 +44,7 @@ export default function BandDetailClient({
   const [bandImageError, setBandImageError] = useState(false);
   const [albumImageErrors, setAlbumImageErrors] = useState<Set<number>>(new Set());
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
 
   const pillarMeta = PILLAR_METADATA[band.genre_pillar as GamificationPillar] || PILLAR_METADATA['Heavy Metal'];
 
@@ -244,7 +245,11 @@ export default function BandDetailClient({
                     album.image_url.trim() !== '';
                   
                   return (
-                    <div key={album.id} className="metal-card p-3 sm:p-4 hover:border-metal-fire/50 transition-colors">
+                    <div 
+                      key={album.id} 
+                      className="metal-card p-3 sm:p-4 hover:border-metal-fire/50 transition-colors cursor-pointer"
+                      onClick={() => setSelectedAlbum(album)}
+                    >
                       <div className="flex items-start gap-3">
                         <div 
                           className="w-16 h-16 rounded bg-metal-gray flex items-center justify-center text-2xl shrink-0 overflow-hidden relative"
@@ -400,6 +405,70 @@ export default function BandDetailClient({
               }}
             >
               <p className="text-white font-metal text-base sm:text-xl text-center truncate">{band.name}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════
+          MODALE D'IMAGE D'ALBUM (Même design que la modale du groupe)
+      ═══════════════════════════════════════════════════════════ */}
+      {selectedAlbum && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md !mt-0"
+          onClick={() => setSelectedAlbum(null)}
+        >
+          {/* Conteneur modale : centrage stable via flexbox */}
+          <div 
+            className="relative flex flex-col items-center rounded-xl border-2 overflow-hidden w-fit h-fit"
+            style={{
+              borderColor: pillarMeta.color,
+              boxShadow: `0 0 40px 8px ${pillarMeta.color}80, 0 0 80px 16px ${pillarMeta.color}40`,
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* ✕ BOUTON DE FERMETURE */}
+            <button
+              onClick={() => setSelectedAlbum(null)}
+              className="absolute top-2 right-2 z-30 text-white hover:text-metal-fire transition-colors text-2xl sm:text-3xl bg-black/70 hover:bg-black/90 rounded-full w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center border border-white/20"
+              aria-label="Fermer"
+            >
+              ✕
+            </button>
+            
+            {/* Image EN GRAND */}
+            <div className="p-3 sm:p-4 pt-12 sm:pt-14">
+              <Image
+                src={selectedAlbum.image_url!}
+                alt={`Pochette de ${selectedAlbum.title}`}
+                width={1920}
+                height={1920}
+                className="object-contain max-w-[85vw] max-h-[65vh]"
+                style={{ width: '85vw', height: '65vh' }}
+                priority
+              />
+            </div>
+            
+            {/* Infos de l'album en bas */}
+            <div 
+              className="w-full px-4 py-3 sm:px-6 sm:py-4 border-t-2"
+              style={{
+                backgroundColor: `${pillarMeta.color}15`,
+                borderColor: `${pillarMeta.color}60`,
+              }}
+            >
+              <p className="text-white font-metal text-base sm:text-xl text-center truncate mb-2">{selectedAlbum.title}</p>
+              <div className="flex items-center justify-center gap-3 text-xs sm:text-sm text-gray-300">
+                <span className="px-2 py-1 rounded-full bg-metal-gray/30 border border-metal-gray capitalize">
+                  {selectedAlbum.release_type || 'Album'}
+                </span>
+                {selectedAlbum.year && (
+                  <span className="text-metal-fire font-semibold">
+                    📅 {selectedAlbum.year}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
