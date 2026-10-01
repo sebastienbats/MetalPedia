@@ -352,21 +352,13 @@ export default function BandDetailClient({
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          MODALE D'IMAGE DU GROUPE (Image grande + Modale ajustée)
+          MODALE D'IMAGE DU GROUPE (Bouton fermer dans le coin de la bordure)
       ═══════════════════════════════════════════════════════════ */}
       {isImageModalOpen && hasValidBandImage && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md animate-fade-in"
           onClick={() => setIsImageModalOpen(false)}
         >
-          <button
-            onClick={() => setIsImageModalOpen(false)}
-            className="absolute top-3 right-3 sm:top-4 sm:right-4 text-white hover:text-metal-fire transition-colors text-3xl sm:text-4xl z-10 bg-black/50 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center hover:bg-black/70"
-            aria-label="Fermer"
-          >
-            ✕
-          </button>
-          
           {/* Conteneur modale : s'ajuste au contenu (w-fit h-fit) */}
           <div 
             className="relative flex flex-col items-center rounded-xl border-2 overflow-hidden w-fit h-fit"
@@ -377,15 +369,24 @@ export default function BandDetailClient({
             }}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* ✕ BOUTON DE FERMETURE : ancré dans le coin de la bordure de la modale */}
+            <button
+              onClick={() => setIsImageModalOpen(false)}
+              className="absolute top-2 right-2 z-30 text-white hover:text-metal-fire transition-colors text-2xl sm:text-3xl bg-black/70 hover:bg-black/90 rounded-full w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center border border-white/20"
+              aria-label="Fermer"
+            >
+              ✕
+            </button>
+            
             {/* Image EN GRAND : dimensions fixes élevées, contraintes par max */}
-            <div className="p-3 sm:p-4">
+            <div className="p-3 sm:p-4 pt-12 sm:pt-14">
               <Image
                 src={band.image_url!}
                 alt={`Photo de ${band.name}`}
                 width={1920}
                 height={1080}
-                className="object-contain max-w-[85vw] max-h-[70vh]"
-                style={{ width: '85vw', height: '70vh' }}
+                className="object-contain max-w-[85vw] max-h-[65vh]"
+                style={{ width: '85vw', height: '65vh' }}
                 priority
               />
             </div>
