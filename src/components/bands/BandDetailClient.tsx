@@ -368,35 +368,38 @@ export default function BandDetailClient({
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          MODALE D'IMAGE DU GROUPE
+          MODALE D'IMAGE DU GROUPE (Responsive & Sans Scroll)
       ═══════════════════════════════════════════════════════════ */}
       {isImageModalOpen && hasValidBandImage && (
         <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md animate-fade-in"
           onClick={() => setIsImageModalOpen(false)}
         >
           <button
             onClick={() => setIsImageModalOpen(false)}
-            className="absolute top-4 right-4 text-white hover:text-metal-fire transition-colors text-4xl z-10"
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 text-white hover:text-metal-fire transition-colors text-3xl sm:text-4xl z-10 bg-black/50 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center hover:bg-black/70"
             aria-label="Fermer"
           >
             ✕
           </button>
           
           <div 
-            className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center"
+            className="relative flex flex-col items-center justify-center w-full h-full max-w-[95vw] max-h-[95vh]"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Image responsive : s'adapte à l'écran sans scroll */}
             <Image
               src={band.image_url!}
               alt={`Photo de ${band.name}`}
               width={1200}
               height={800}
-              className="object-contain max-w-full max-h-full rounded-lg shadow-2xl"
+              className="object-contain w-auto h-auto max-w-full max-h-[80vh] rounded-lg shadow-2xl"
               priority
             />
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-metal-gray">
-              <p className="text-white font-metal text-lg sm:text-xl">{band.name}</p>
+            
+            {/* Nom du groupe en bas */}
+            <div className="mt-3 sm:mt-4 bg-black/80 backdrop-blur-sm px-4 py-2 sm:px-6 sm:py-3 rounded-lg border border-metal-gray max-w-full">
+              <p className="text-white font-metal text-base sm:text-xl text-center truncate">{band.name}</p>
             </div>
           </div>
         </div>
