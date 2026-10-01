@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { useGamificationStore } from '@/stores/gamificationStore';
-import { useStatsStore } from '@/stores/statsStore'; // ✅ AJOUT : Import du store de statistiques
+import { useStatsStore } from '@/stores/statsStore';
 import type { BandDetail, Album, BandMember, GamificationPillar } from '@/types/api';
 import { PILLAR_METADATA } from '@/types/api';
 import Loader from '@/components/ui/Loader';
@@ -36,7 +36,6 @@ export default function BandDetailClient({
   albums = [], 
   members = [] 
 }: Props) {
-  // ✅ RÉCUPÉRATION DES DEUX FONCTIONS D'ENREGISTREMENT
   const recordGamificationView = useGamificationStore((state) => state.recordView);
   const recordStatsView = useStatsStore((state) => state.recordView);
   
@@ -44,6 +43,7 @@ export default function BandDetailClient({
   const [isMounted, setIsMounted] = useState(false);
   const [bandImageError, setBandImageError] = useState(false);
   const [albumImageErrors, setAlbumImageErrors] = useState<Set<number>>(new Set());
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const pillarMeta = PILLAR_METADATA[band.genre_pillar as GamificationPillar] || PILLAR_METADATA['Heavy Metal'];
 
@@ -51,10 +51,8 @@ export default function BandDetailClient({
     setIsMounted(true);
   }, []);
 
-  // ✅ ENREGISTREMENT DOUBLE : Gamification (XP/Badges) + Statistiques (Graphiques)
   useEffect(() => {
     if (isMounted && band?.id) {
-      // 1️⃣ Notifie le store de Gamification (nécessite toutes les données pour les bonus de classe)
       recordGamificationView({
         id: band.id,
         name: band.name,
@@ -67,7 +65,6 @@ export default function BandDetailClient({
         biography: band.biography,
       });
 
-      // 2️⃣ Notifie le store de Statistiques (nécessite uniquement l'essentiel pour les graphiques)
       recordStatsView({
         id: band.id,
         name: band.name,
@@ -112,42 +109,58 @@ export default function BandDetailClient({
   }
 
   return (
-    // ✅ Mobile Full-Width : w-full px-2 py-6, desktop : sm:px-4 sm:py-12
     <div className="w-full px-2 py-6 sm:px-4 sm:py-12 space-y-6 sm:space-y-8 animate-fade-in" suppressHydrationWarning>
       
+      {/* ═══════════════════════════════════════════════════════════
+          HEADER DE PAGE
+      ═══════════════════════════════════════════════════════════ */}
       <header className="text-center mb-4 sm:mb-6">
         <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2">
           Fiche du groupe
         </h1>
       </header>
 
+      {/* ═══════════════════════════════════════════════════════════
+          HEADER DU GROUPE (avec image cliquable)
+      ═══════════════════════════════════════════════════════════ */}
       <div className="metal-card p-3 sm:p-4 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
           <span className="text-9xl font-black text-white">{band.name.charAt(0)}</span>
         </div>
         
         <div className="relative z-10 flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
+          {/* 🖼️ IMAGE DU GROUPE CLIQUABLE */}
           <div 
-            className="w-24 h-24 sm:w-40 sm:h-40 rounded-lg overflow-hidden shrink-0 shadow-2xl border border-metal-gray bg-gradient-to-br from-metal-blood to-metal-rust flex items-center justify-center relative"
+            className={`w-24 h-24 sm:w-40 sm:h-40 rounded-lg overflow-hidden shrink-0 shadow-2xl border border-metal-gray bg-gradient-to-br from-metal-blood to-metal-rust flex items-center justify-center relative ${
+              hasValidBandImage ? 'cursor-pointer hover:scale-105 transition-transform duration-300' : ''
+            }`}
             suppressHydrationWarning
+            onClick={hasValidBandImage ? () => setIsImageModalOpen(true) : undefined}
           >
             <span className="absolute inset-0 flex items-center justify-center text-3xl sm:text-5xl font-black text-white drop-shadow-lg z-0">
               {band.name.substring(0, 2).toUpperCase()}
             </span>
             
             {hasValidBandImage && (
-              <Image
-                src={band.image_url!}
-                alt={`Photo de ${band.name}`}
-                fill
-                sizes="(max-width: 768px) 96px, 160px"
-                className="object-cover z-10"
-                priority={true}
-                onError={handleBandImageError}
-              />
+              <>
+                <Image
+                  src={band.image_url!}
+                  alt={`Photo de ${band.name}`}
+                  fill
+                  sizes="(max-width: 768px) 96px, 160px"
+                  className="object-cover z-10"
+                  priority={true}
+                  onError={handleBandImageError}
+                />
+                {/* Indicateur visuel au survol */}
+                <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors duration-300 z-20 flex items-center justify-center opacity-0 hover:opacity-100">
+                  <span className="text-white text-2xl sm:text-3xl">🔍</span>
+                </div>
+              </>
             )}
           </div>
 
+          {/* Infos principales */}
           <div className="flex-1 space-y-2 sm:space-y-3 w-full">
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <h2 className="font-metal text-xl sm:text-3xl text-metal-rust break-words">
@@ -193,6 +206,9 @@ export default function BandDetailClient({
         </div>
       </div>
 
+      {/* ═══════════════════════════════════════════════════════════
+          ONGLETS DE NAVIGATION
+      ═══════════════════════════════════════════════════════════ */}
       <div className="border-b border-metal-gray">
         <nav className="flex gap-4 sm:gap-6 overflow-x-auto">
           {tabs.map((tab) => (
@@ -211,6 +227,9 @@ export default function BandDetailClient({
         </nav>
       </div>
 
+      {/* ═══════════════════════════════════════════════════════════
+          CONTENU DES ONGLETS
+      ═══════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2 min-h-[300px]" suppressHydrationWarning>
           {activeTab === 'about' && (
@@ -331,6 +350,7 @@ export default function BandDetailClient({
           )}
         </div>
 
+        {/* Colonne latérale */}
         <div className="space-y-4 sm:space-y-6">
           <ConcertsWidget bandId={band.id} bandName={band.name} />
           
@@ -346,6 +366,41 @@ export default function BandDetailClient({
           </div>
         </div>
       </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          MODALE D'IMAGE DU GROUPE
+      ═══════════════════════════════════════════════════════════ */}
+      {isImageModalOpen && hasValidBandImage && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in"
+          onClick={() => setIsImageModalOpen(false)}
+        >
+          <button
+            onClick={() => setIsImageModalOpen(false)}
+            className="absolute top-4 right-4 text-white hover:text-metal-fire transition-colors text-4xl z-10"
+            aria-label="Fermer"
+          >
+            ✕
+          </button>
+          
+          <div 
+            className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image
+              src={band.image_url!}
+              alt={`Photo de ${band.name}`}
+              width={1200}
+              height={800}
+              className="object-contain max-w-full max-h-full rounded-lg shadow-2xl"
+              priority
+            />
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-metal-gray">
+              <p className="text-white font-metal text-lg sm:text-xl">{band.name}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
