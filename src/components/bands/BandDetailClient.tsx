@@ -109,7 +109,7 @@ export default function BandDetailClient({
   }
 
   return (
-    <div className="w-full px-2 py-6 sm:px-4 sm:py-12 space-y-6 sm:space-y-8 animate-fade-in" suppressHydrationWarning>
+    <div className="w-full px-2 py-6 sm:px-4 sm:py-12 space-y-6 sm:space-y-8" suppressHydrationWarning>
       
       <header className="text-center mb-4 sm:mb-6">
         <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2">
@@ -218,7 +218,7 @@ export default function BandDetailClient({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2 min-h-[300px]" suppressHydrationWarning>
           {activeTab === 'about' && (
-            <div className="metal-card p-4 sm:p-6 animate-slide-up">
+            <div className="metal-card p-4 sm:p-6">
               <h3 className="font-serif text-lg sm:text-xl mb-3 sm:mb-4 text-metal-rust flex items-center gap-2">
                 📜 Biographie
                 {band.bio_lang && (
@@ -234,7 +234,7 @@ export default function BandDetailClient({
           )}
 
           {activeTab === 'albums' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 animate-slide-up">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {albums.length > 0 ? (
                 albums.map((album) => {
                   const hasAlbumImage = isMounted && 
@@ -285,7 +285,7 @@ export default function BandDetailClient({
           )}
 
           {activeTab === 'members' && (
-            <div className="metal-card p-4 sm:p-6 animate-slide-up">
+            <div className="metal-card p-4 sm:p-6">
               {members.length > 0 ? (
                 <ul className="space-y-2 sm:space-y-3">
                   {members.map((member) => (
@@ -316,13 +316,13 @@ export default function BandDetailClient({
           )}
 
           {activeTab === 'reviews' && (
-            <div className="animate-slide-up">
+            <div>
               <ReviewList bandId={band.id} />
             </div>
           )}
 
           {activeTab === 'similar' && (
-            <div className="animate-slide-up">
+            <div>
               <GraphClient
                 sourceBand={{
                   band_id: band.id,
@@ -352,14 +352,14 @@ export default function BandDetailClient({
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          MODALE D'IMAGE DU GROUPE (Bouton fermer dans le coin de la bordure)
+          MODALE D'IMAGE DU GROUPE (Sans animation, centrage stable)
       ═══════════════════════════════════════════════════════════ */}
       {isImageModalOpen && hasValidBandImage && (
         <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md animate-fade-in"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md"
           onClick={() => setIsImageModalOpen(false)}
         >
-          {/* Conteneur modale : s'ajuste au contenu (w-fit h-fit) */}
+          {/* Conteneur modale : centrage stable via flexbox */}
           <div 
             className="relative flex flex-col items-center rounded-xl border-2 overflow-hidden w-fit h-fit"
             style={{
