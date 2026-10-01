@@ -351,58 +351,59 @@ export default function BandDetailClient({
         </div>
       </div>
 
-{/* ═══════════════════════════════════════════════════════════
-    MODALE D'IMAGE DU GROUPE (Plein écran total, cache le header)
-═══════════════════════════════════════════════════════════ */}
-{isImageModalOpen && hasValidBandImage && (
-  <div 
-    className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md"
-    onClick={() => setIsImageModalOpen(false)}
-  >
-    {/* Conteneur modale : plein écran total, sans marge */}
-    <div 
-      className="relative flex flex-col w-full h-full border-2"
-      style={{
-        borderColor: pillarMeta.color,
-        boxShadow: `inset 0 0 60px 10px ${pillarMeta.color}80, inset 0 0 100px 20px ${pillarMeta.color}40`,
-        backgroundColor: 'rgba(0, 0, 0, 0.98)',
-      }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* ✕ BOUTON DE FERMETURE */}
-      <button
-        onClick={() => setIsImageModalOpen(false)}
-        className="absolute top-4 right-4 z-30 text-white hover:text-metal-fire transition-colors text-3xl sm:text-4xl bg-black/70 hover:bg-black/90 rounded-full w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center border border-white/20"
-        aria-label="Fermer"
-      >
-        ✕
-      </button>
-      
-      {/* Image PLEIN ÉCRAN : remplit tout l'espace disponible */}
-      <div className="flex-1 w-full relative">
-        <Image
-          src={band.image_url!}
-          alt={`Photo de ${band.name}`}
-          fill
-          sizes="100vw"
-          className="object-contain"
-          priority
-        />
-      </div>
-      
-      {/* Nom du groupe en bas */}
-      <div 
-        className="w-full px-4 py-3 sm:px-6 sm:py-4 border-t-2"
-        style={{
-          backgroundColor: `${pillarMeta.color}15`,
-          borderColor: `${pillarMeta.color}60`,
-        }}
-      >
-        <p className="text-white font-metal text-lg sm:text-2xl text-center truncate">{band.name}</p>
-      </div>
-    </div>
-  </div>
-)}
+      {/* ═══════════════════════════════════════════════════════════
+          MODALE D'IMAGE DU GROUPE (Sans animation, centrage stable)
+      ═══════════════════════════════════════════════════════════ */}
+      {isImageModalOpen && hasValidBandImage && (
+        <div 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md"
+          onClick={() => setIsImageModalOpen(false)}
+        >
+          {/* Conteneur modale : centrage stable via flexbox */}
+          <div 
+            className="relative flex flex-col items-center rounded-xl border-2 overflow-hidden w-fit h-fit"
+            style={{
+              borderColor: pillarMeta.color,
+              boxShadow: `0 0 40px 8px ${pillarMeta.color}80, 0 0 80px 16px ${pillarMeta.color}40`,
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* ✕ BOUTON DE FERMETURE : ancré dans le coin de la bordure de la modale */}
+            <button
+              onClick={() => setIsImageModalOpen(false)}
+              className="absolute top-2 right-2 z-30 text-white hover:text-metal-fire transition-colors text-2xl sm:text-3xl bg-black/70 hover:bg-black/90 rounded-full w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center border border-white/20"
+              aria-label="Fermer"
+            >
+              ✕
+            </button>
+            
+            {/* Image EN GRAND : dimensions fixes élevées, contraintes par max */}
+            <div className="p-3 sm:p-4 pt-12 sm:pt-14">
+              <Image
+                src={band.image_url!}
+                alt={`Photo de ${band.name}`}
+                width={1920}
+                height={1080}
+                className="object-contain max-w-[85vw] max-h-[65vh]"
+                style={{ width: '85vw', height: '65vh' }}
+                priority
+              />
+            </div>
+            
+            {/* Nom du groupe en bas */}
+            <div 
+              className="w-full px-4 py-3 sm:px-6 sm:py-4 border-t-2"
+              style={{
+                backgroundColor: `${pillarMeta.color}15`,
+                borderColor: `${pillarMeta.color}60`,
+              }}
+            >
+              <p className="text-white font-metal text-base sm:text-xl text-center truncate">{band.name}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
