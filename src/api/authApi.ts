@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/types/supabase';
+import { useFavoritesStore } from '@/stores/favoritesStore'; // ✅ AJOUT : Pour vider les favoris au logout
 
 // ═══════════════════════════════════════════════════════════
 // AUTHENTICATION HOOKS
@@ -108,6 +109,9 @@ export function useSignOut() {
   return useMutation({
     mutationFn: () => supabase.auth.signOut(),
     onSuccess: () => {
+      // ✅ NOUVEAU : Vider les favoris locaux immédiatement à la déconnexion
+      useFavoritesStore.getState().clearAll();
+      
       qc.invalidateQueries({ queryKey: ['auth-user'] });
       qc.invalidateQueries({ queryKey: ['profile'] });
       qc.clear();
