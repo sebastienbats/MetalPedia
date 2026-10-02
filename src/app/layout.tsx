@@ -180,11 +180,8 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: themeInitializer }}
         />
         
-        {/* 🤖 SCRIPT PUTER.JS : Chargement différé pour éviter les conflits d'hydratation React (#418) */}
-        <Script 
-          src="https://js.puter.com/v2/" 
-          strategy="lazyOnload" 
-        />
+        {/* ❌ SCRIPT PUTER RETIRÉ D'ICI pour éviter les conflits d'hydratation React (#418). 
+            Il est désormais chargé de manière isolée dans AILogoGenerator.tsx */}
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
