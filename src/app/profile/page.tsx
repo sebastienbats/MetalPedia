@@ -6,6 +6,7 @@ import { useAuth } from '@/api/authApi';
 import { useClassStore, useClassMetadata, useClassProgress } from '@/stores/classStore';
 import { useAchievementStore } from '@/stores/achievementStore';
 import { useFragmentStore } from '@/stores/fragmentStore';
+import { useFavoritesCloudSync } from '@/hooks/useFavoritesCloudSync'; // ✅ NOUVEAU IMPORT
 import { getClassTitle } from '@/lib/gamification/classes';
 import ClassSelectionModal from '@/components/gamification/ClassSelectionModal';
 import ClassMilestones from '@/components/gamification/ClassMilestones';
@@ -18,7 +19,7 @@ import TableOfKnowledge from '@/components/timeline/TableOfKnowledge';
 import LoreGrimoire from '@/components/gamification/LoreGrimoire';
 import FloatingRunes from '@/components/ui/FloatingRunes';
 import StatsPanel from '@/components/visual/StatsPanel';
-import AILogoGenerator from '@/components/ai/AILogoGenerator'; // 🆕 IMPORT DU GÉNÉRATEUR
+import AILogoGenerator from '@/components/ai/AILogoGenerator';
 
 function getBonusDescription(type: string, threshold?: number): string {
   const descriptions: Record<string, string> = {
@@ -41,7 +42,7 @@ function ChapterNav() {
     { id: 'incarnation', label: 'Incarnation', icon: '⚔️' },
     { id: 'exploits', label: 'Exploits', icon: '🏆' },
     { id: 'decouvertes', label: 'Découvertes', icon: '📜' },
-    { id: 'forge', label: 'La Forge', icon: '🔥' }, // 🆕 NOUVEAU CHAPITRE
+    { id: 'forge', label: 'La Forge', icon: '🔥' },
   ];
 
   const scrollTo = (id: string) => {
@@ -88,6 +89,9 @@ export default function ProfilePage() {
   const classMeta = useClassMetadata();
   const classProgress = useClassProgress();
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // ✅ C'EST ICI QUE LA MAGIE OPÈRE : On déclenche le chargement cloud des favoris
+  useFavoritesCloudSync();
 
   useEffect(() => {
     const collectedIds = useFragmentStore.getState().collectedIds;
