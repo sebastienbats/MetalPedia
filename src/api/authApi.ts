@@ -179,3 +179,22 @@ export function useSyncGamification() {
     },
   });
 }
+
+// ═══════════════════════════════════════════════════════════
+// AUTHENTICATION UTILITIES (Non-React)
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Fonction utilitaire pour récupérer l'utilisateur actuel de manière asynchrone.
+ * Indispensable pour une utilisation dans les stores Zustand, les Server Actions 
+ * ou les fonctions utilitaires où les hooks React (useAuth) ne sont pas disponibles.
+ */
+export async function getCurrentUser() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user;
+  } catch (error) {
+    console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+    return null;
+  }
+}
