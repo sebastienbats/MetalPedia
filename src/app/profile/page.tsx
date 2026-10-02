@@ -18,6 +18,7 @@ import TableOfKnowledge from '@/components/timeline/TableOfKnowledge';
 import LoreGrimoire from '@/components/gamification/LoreGrimoire';
 import FloatingRunes from '@/components/ui/FloatingRunes';
 import StatsPanel from '@/components/visual/StatsPanel';
+import AILogoGenerator from '@/components/ai/AILogoGenerator'; // 🆕 IMPORT DU GÉNÉRATEUR
 
 function getBonusDescription(type: string, threshold?: number): string {
   const descriptions: Record<string, string> = {
@@ -40,6 +41,7 @@ function ChapterNav() {
     { id: 'incarnation', label: 'Incarnation', icon: '⚔️' },
     { id: 'exploits', label: 'Exploits', icon: '🏆' },
     { id: 'decouvertes', label: 'Découvertes', icon: '📜' },
+    { id: 'forge', label: 'La Forge', icon: '🔥' }, // 🆕 NOUVEAU CHAPITRE
   ];
 
   const scrollTo = (id: string) => {
@@ -244,7 +246,6 @@ export default function ProfilePage() {
                     <div className="flex justify-between text-xs text-gray-400 mb-1">
                       <span className="font-semibold text-gray-300">Niveau {classProgress.currentLevel}</span>
                       <span>
-                        {/* ✅ CORRECTION : Ajout de 'fr-FR' pour éviter le mismatch d'hydratation */}
                         {classProgress.nextLevelXp === Infinity
                           ? 'MAX'
                           : `${classProgress.nextLevelXp.toLocaleString('fr-FR')} XP`}
@@ -326,7 +327,7 @@ export default function ProfilePage() {
         {selectedClass && <ClassMilestones />}
       </section>
 
-      {/* Chapitre III : Exploits (Contient maintenant uniquement Panthéon et Timeline) */}
+      {/* Chapitre III : Exploits */}
       <section id="exploits" aria-labelledby="exploits-title" className="scroll-mt-24 space-y-3 sm:space-y-4">
         <ChapterDivider number="III" title="Tes Exploits" />
         <div className="text-center">
@@ -364,6 +365,25 @@ export default function ProfilePage() {
           <FloatingRunes preset="parchment" />
           <div className="relative z-10">
             <TableOfKnowledge />
+          </div>
+        </div>
+      </section>
+
+      {/* 🆕 Chapitre V : La Forge (Générateur de Logos IA) */}
+      <section id="forge" aria-labelledby="forge-title" className="scroll-mt-24 space-y-3">
+        <ChapterDivider number="V" title="La Forge" />
+        <div className="text-center">
+          <h2 id="forge-title" className="font-metal text-xl sm:text-3xl text-metal-fire mb-2 sm:mb-3">
+            🔥 Forge ton emblème
+          </h2>
+          <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-2 sm:mb-3">
+            Utilise l'IA pour créer le logo officiel de ton groupe de metal idéal
+          </p>
+        </div>
+        <div className="relative p-3 sm:p-5 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
+          <FloatingRunes preset="parchment" />
+          <div className="relative z-10">
+            <AILogoGenerator />
           </div>
         </div>
       </section>
