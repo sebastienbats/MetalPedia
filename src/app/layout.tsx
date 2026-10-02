@@ -179,6 +179,12 @@ export default function RootLayout({
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: themeInitializer }}
         />
+        
+        {/* 🤖 SCRIPT PUTER.JS POUR LA GÉNÉRATION D'IMAGES IA */}
+        <Script 
+          src="https://js.puter.com/v2/" 
+          strategy="beforeInteractive" 
+        />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
