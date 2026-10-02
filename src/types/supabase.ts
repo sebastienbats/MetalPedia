@@ -232,6 +232,34 @@ export type Database = {
           },
         ]
       }
+      // 🆕 NOUVELLE TABLE AJOUTÉE PAR SUPABASE
+      generated_logos: {
+        Row: {
+          band_name: string
+          created_at: string | null
+          genre: string
+          id: string
+          image_url: string
+          user_id: string | null
+        }
+        Insert: {
+          band_name: string
+          created_at?: string | null
+          genre: string
+          id?: string
+          image_url: string
+          user_id?: string | null
+        }
+        Update: {
+          band_name?: string
+          created_at?: string | null
+          genre?: string
+          id?: string
+          image_url?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       members: {
         Row: {
           band_id: number
@@ -756,6 +784,13 @@ export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 export type ReviewUpdate = Database['public']['Tables']['reviews']['Update'];
 export type GamificationProgressUpdate = Database['public']['Tables']['gamification_progress']['Update'];
 export type UserClassUpdate = Database['public']['Tables']['user_classes']['Update'];
+
+// ─────────────────────────────────────────
+// 🆕 AI LOGOS (NOUVEAU)
+// ─────────────────────────────────────────
+export type GeneratedLogo = Database['public']['Tables']['generated_logos']['Row'];
+export type GeneratedLogoInsert = Database['public']['Tables']['generated_logos']['Insert'];
+export type GeneratedLogoUpdate = Database['public']['Tables']['generated_logos']['Update'];
 
 // ─────────────────────────────────────────
 // MÉTIER (GROUPES, ALBUMS, MEMBRES)
