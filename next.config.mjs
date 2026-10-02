@@ -87,18 +87,17 @@ const securityHeaders = [
   { key: 'X-XSS-Protection', value: '1; mode=block' },
 ];
 
-// 🛡️ CSP COMPLET (MIS À JOUR AVEC PUTER.JS)
+// 🛡️ CSP COMPLET ET ULTRA-PERMISSIF POUR PUTER & GOOGLE OAUTH
 const cspDirectives = [
   "default-src 'self'",
-  // ✅ AJOUT : https://js.puter.com et https://*.puter.com
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.com https://*.vercel.app https://js.puter.com https://*.puter.com",
   "style-src 'self' 'unsafe-inline'",
-  // ✅ AJOUT : https://*.puter.com pour les images générées
-  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm-img.freetls.fastly.net https://*.freetls.fastly.net https://*.discogs.com https://*.wikimedia.org https://*.puter.com",
+  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm-img.freetls.fastly.net https://*.freetls.fastly.net https://*.discogs.com https://*.wikimedia.org https://*.puter.com https://*.googleusercontent.com",
   "font-src 'self' data: https://fonts.gstatic.com",
-  // ✅ AJOUT : https://*.puter.com pour les appels API de l'IA
-  "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app https://*.puter.com",
-  "frame-src 'self' https://open.spotify.com https://www.youtube.com https://vercel.com https://*.vercel.app",
+  // ✅ AJOUT CRUCIAL : api.puter.com, auth.puter.com et les domaines Google pour l'OAuth
+  "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app https://api.puter.com https://auth.puter.com https://*.puter.com https://accounts.google.com https://*.google.com https://*.googleusercontent.com",
+  // ✅ AJOUT CRUCIAL : Autoriser les iframes/popups de Google et Puter pour le flux OAuth
+  "frame-src 'self' https://open.spotify.com https://www.youtube.com https://vercel.com https://*.vercel.app https://accounts.google.com https://*.google.com https://puter.com https://*.puter.com",
   "media-src 'self' https://open.spotify.com https://*.scdn.co",
   "worker-src 'self' blob:",
   "manifest-src 'self' https://vercel.com https://*.vercel.app",
