@@ -87,14 +87,17 @@ const securityHeaders = [
   { key: 'X-XSS-Protection', value: '1; mode=block' },
 ];
 
-// 🛡️ CSP COMPLET
+// 🛡️ CSP COMPLET (MIS À JOUR AVEC PUTER.JS)
 const cspDirectives = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.com https://*.vercel.app",
+  // ✅ AJOUT : https://js.puter.com et https://*.puter.com
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.com https://*.vercel.app https://js.puter.com https://*.puter.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm-img.freetls.fastly.net https://*.freetls.fastly.net https://*.discogs.com https://*.wikimedia.org",
+  // ✅ AJOUT : https://*.puter.com pour les images générées
+  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm-img.freetls.fastly.net https://*.freetls.fastly.net https://*.discogs.com https://*.wikimedia.org https://*.puter.com",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app",
+  // ✅ AJOUT : https://*.puter.com pour les appels API de l'IA
+  "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app https://*.puter.com",
   "frame-src 'self' https://open.spotify.com https://www.youtube.com https://vercel.com https://*.vercel.app",
   "media-src 'self' https://open.spotify.com https://*.scdn.co",
   "worker-src 'self' blob:",
@@ -137,6 +140,9 @@ const nextConfig = {
 
       // 🎯 Discogs : wildcard pour couvrir i.discogs.com ET img.discogs.com
       { protocol: 'https', hostname: '*.discogs.com', pathname: '/**' },
+      
+      // ✅ AJOUT : Puter (au cas où l'URL de l'image générée pointerait directement vers leur CDN)
+      { protocol: 'https', hostname: '*.puter.com', pathname: '/**' },
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
