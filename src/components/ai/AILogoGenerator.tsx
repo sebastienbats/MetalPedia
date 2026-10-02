@@ -105,13 +105,22 @@ Style: ${genre}.
 Visual elements: ${PROMPT_STYLES[genre]}. 
 Requirements: Dark background, highly detailed, vector art style, aggressive and epic typography, centered, no extra text or watermarks, pure logo design, symmetrical composition, high contrast.`;
 
-      // Génération via Puter.js
-      const imageBlob = await window.puter.ai.txt2img(prompt);
+      // 1. Génération via Puter.js (Retourne un HTMLImageElement, PAS un Blob)
+      const imageElement = await window.puter.ai.txt2img(prompt);
+      
+      // 2. Récupérer l'URL source de l'image générée (Data URI ou URL temporaire)
+      const generatedImageUrl = imageElement.src;
 
-      const file = new File([imageBlob], `${bandName.trim().toLowerCase().replace(/\s+/g, '-')}-logo.png`, {
-        type: 'image/png',
+      // 3. Fetch de cette URL pour obtenir un vrai Blob
+      const fetchResponse = await fetch(generatedImageUrl);
+      const blob = await fetchResponse.blob();
+
+      // 4. Création du File pour l'upload
+      const file = new File([blob], `${bandName.trim().toLowerCase().replace(/\s+/g, '-')}-logo.png`, {
+        type: blob.type || 'image/png',
       });
 
+      // 5. Upload sécurisé vers ImgBB via notre API Route
       const formData = new FormData();
       formData.append('file', file);
 
@@ -128,6 +137,7 @@ Requirements: Dark background, highly detailed, vector art style, aggressive and
       const uploadData = await uploadResponse.json();
       const finalImageUrl = uploadData.url;
 
+      // 6. Mise à jour de l'état
       setImageUrl(finalImageUrl);
 
       setHistory((prev) => [
