@@ -85,18 +85,19 @@ const securityHeaders = [
   { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
   { key: 'X-XSS-Protection', value: '1; mode=block' },
+  // ✅ AJOUT CRUCIAL : Autoriser la communication avec les popups d'authentification (Google/Puter)
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
 ];
 
-// 🛡️ CSP COMPLET (AVEC WEBSOCKETS PUTER CORRIGÉS)
+// 🛡️ CSP COMPLET (AVEC DATA: ET WEBSOCKETS)
 const cspDirectives = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.com https://*.vercel.app https://js.puter.com https://*.puter.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm-img.freetls.fastly.net https://*.freetls.fastly.net https://*.discogs.com https://*.wikimedia.org https://*.puter.com https://*.googleusercontent.com",
   "font-src 'self' data: https://fonts.gstatic.com",
-  // ✅ AJOUT CRUCIAL : wss://api.puter.com et wss://*.puter.com pour les WebSockets
-  "connect-src 'self' https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app https://api.puter.com https://auth.puter.com https://*.puter.com wss://api.puter.com wss://*.puter.com https://accounts.google.com https://*.google.com https://*.googleusercontent.com",
-  // ✅ AJOUT CRUCIAL : Autoriser les iframes/popups de Google et Puter pour le flux OAuth
+  // ✅ AJOUT CRUCIAL : 'data:' pour permettre le fetch() des images base64 retournées par Puter
+  "connect-src 'self' data: https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app https://api.puter.com https://auth.puter.com https://*.puter.com wss://api.puter.com wss://*.puter.com https://accounts.google.com https://*.google.com https://*.googleusercontent.com",
   "frame-src 'self' https://open.spotify.com https://www.youtube.com https://vercel.com https://*.vercel.app https://accounts.google.com https://*.google.com https://puter.com https://*.puter.com",
   "media-src 'self' https://open.spotify.com https://*.scdn.co",
   "worker-src 'self' blob:",
@@ -117,30 +118,15 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
-      // Metal Archives & metal-api.dev
       { protocol: 'https', hostname: 'www.metal-archives.com', pathname: '/**' },
       { protocol: 'https', hostname: 'cdn.metal-api.dev', pathname: '/**' },
-
-      // Spotify (pochettes audio)
       { protocol: 'https', hostname: 'i.scdn.co', pathname: '/**' },
-
-      // JSDELIVR / Unpkg (assets CDN)
       { protocol: 'https', hostname: 'cdn.jsdelivr.net', pathname: '/**' },
-
-      // Unsplash (images génériques)
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
-
-      // Wikimedia Commons (médias libres - fallback #3 et #4)
       { protocol: 'https', hostname: '*.wikimedia.org', pathname: '/wikipedia/commons/**' },
-
-      // Last.fm via Fastly CDN (source principale des images)
       { protocol: 'https', hostname: 'lastfm-img.freetls.fastly.net', pathname: '/**' },
       { protocol: 'https', hostname: '*.freetls.fastly.net', pathname: '/**' },
-
-      // 🎯 Discogs : wildcard pour couvrir i.discogs.com ET img.discogs.com
       { protocol: 'https', hostname: '*.discogs.com', pathname: '/**' },
-      
-      // ✅ AJOUT : Puter (au cas où l'URL de l'image générée pointerait directement vers leur CDN)
       { protocol: 'https', hostname: '*.puter.com', pathname: '/**' },
     ],
     formats: ['image/avif', 'image/webp'],
@@ -173,7 +159,6 @@ const nextConfig = {
     return [
       { source: '/home', destination: '/', permanent: true },
       { source: '/bands/:id', destination: '/band/:id', permanent: true },
-      // 🎯 CORRECTION FAVICON 404 : Rediriger la requête par défaut du navigateur
       { source: '/favicon.ico', destination: '/icons/favicon-32.png', permanent: true },
     ];
   },
