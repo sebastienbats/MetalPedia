@@ -85,18 +85,19 @@ const securityHeaders = [
   { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
   { key: 'X-XSS-Protection', value: '1; mode=block' },
-  // ✅ AJOUT CRUCIAL : Autoriser la communication avec les popups d'authentification (Google/Puter)
+  // ✅ Autoriser la communication avec les popups d'authentification (Google/Puter)
   { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
 ];
 
-// 🛡️ CSP COMPLET (AVEC DATA: ET WEBSOCKETS)
+// 🛡️ CSP COMPLET (AVEC IMGBB ET WEBSOCKETS AUTORISÉS)
 const cspDirectives = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.com https://*.vercel.app https://js.puter.com https://*.puter.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm-img.freetls.fastly.net https://*.freetls.fastly.net https://*.discogs.com https://*.wikimedia.org https://*.puter.com https://*.googleusercontent.com",
+  // ✅ AJOUT CRUCIAL : https://i.ibb.co et https://*.ibb.co pour afficher les images hébergées sur ImgBB
+  "img-src 'self' data: blob: https://www.metal-archives.com https://cdn.metal-api.dev https://i.scdn.co https://*.scdn.co https://cdn.jsdelivr.net https://unpkg.com https://lastfm-img.freetls.fastly.net https://*.freetls.fastly.net https://*.discogs.com https://*.wikimedia.org https://*.puter.com https://*.googleusercontent.com https://i.ibb.co https://*.ibb.co",
   "font-src 'self' data: https://fonts.gstatic.com",
-  // ✅ AJOUT CRUCIAL : 'data:' pour permettre le fetch() des images base64 retournées par Puter
+  // ✅ 'data:' permet le fetch() des images base64 retournées par Puter
   "connect-src 'self' data: https://www.metal-api.dev https://*.supabase.co wss://*.supabase.co https://api.songkick.com https://cdn.jsdelivr.net https://unpkg.com https://vercel.com https://*.vercel.app https://api.puter.com https://auth.puter.com https://*.puter.com wss://api.puter.com wss://*.puter.com https://accounts.google.com https://*.google.com https://*.googleusercontent.com",
   "frame-src 'self' https://open.spotify.com https://www.youtube.com https://vercel.com https://*.vercel.app https://accounts.google.com https://*.google.com https://puter.com https://*.puter.com",
   "media-src 'self' https://open.spotify.com https://*.scdn.co",
@@ -128,6 +129,9 @@ const nextConfig = {
       { protocol: 'https', hostname: '*.freetls.fastly.net', pathname: '/**' },
       { protocol: 'https', hostname: '*.discogs.com', pathname: '/**' },
       { protocol: 'https', hostname: '*.puter.com', pathname: '/**' },
+      // ✅ AJOUT : ImgBB pour les logos générés
+      { protocol: 'https', hostname: 'i.ibb.co', pathname: '/**' },
+      { protocol: 'https', hostname: '*.ibb.co', pathname: '/**' },
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
