@@ -87,7 +87,12 @@ Style: ${genre}.
 Visual elements: ${PROMPT_STYLES[genre]}. 
 Requirements: Dark background, highly detailed, vector art style, aggressive and epic typography, centered, no extra text or watermarks, pure logo design, symmetrical composition, high contrast.`;
 
-      const imageElement = await (window as any).puter.ai.txt2img(prompt, false);
+      // const imageElement = await (window as any).puter.ai.txt2img(prompt, false); // Qualité Moyenne
+      // Qualité Low, suffisante pour générer les Logos plus rapidement
+      const imageElement = await (window as any).puter.ai.txt2img(prompt, { 
+  quality: "low", // Génération beaucoup plus rapide, parfaite pour des logos graphiques
+  test_mode: false // S'assure que c'est une vraie génération, pas un test
+});
       
       if (!imageElement || !imageElement.src) {
         throw new Error("L'IA n'a pas retourné d'image valide.");
