@@ -5,6 +5,8 @@ import Image from 'next/image';
 import Script from 'next/script';
 import Loader from '@/components/ui/Loader';
 import { PILLAR_METADATA, GAMIFICATION_PILLARS, type GamificationPillar } from '@/types/api';
+import { useAuth } from '@/api/authApi'; // ✅ Import de ton hook d'auth
+import { supabase } from '@/lib/supabase'; // ✅ Import de ton client Supabase (ajuste le chemin si nécessaire)
 
 declare global {
   interface Window {
@@ -25,53 +27,76 @@ const PROMPT_STYLES: Record<GamificationPillar, string> = {
 };
 
 export default function AILogoGenerator() {
+  const { data: user } = useAuth(); // ✅ Récupération de l'utilisateur connecté
+  
   const [bandName, setBandName] = useState('');
   const [genre, setGenre] = useState<GamificationPillar>('Black Metal');
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [history, setHistory] = useState<Array<{ name: string; genre: GamificationPillar; url: string }>>([]);
+  
+  // ✅ L'historique contient maintenant l'ID pour la gestion DB
+  const [history, setHistory] = useState<Array<{ id?: string; name: string; genre: GamificationPillar; url: string }>>([]);
   const [isPuterLoaded, setIsPuterLoaded] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   const pillarMeta = PILLAR_METADATA[genre];
 
+  // ✅ 1. CHARGEMENT DE L'HISTORIQUE DEPUIS SUPABASE
+  useEffect(() => {
+    if (user?.id) {
+      setIsLoadingHistory(true);
+      supabase
+        .from('generated_logos')
+        .select('id, band_name, genre, image_url')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20) // Limite aux 20 derniers pour les perfs
+        .then(({ data, error }) => {
+          if (error) {
+            console.error('Erreur chargement historique:', error);
+          } else if (data) {
+            // Mapping des données Supabase vers le format du composant
+            const formattedHistory = data.map(item => ({
+              id: item.id,
+              name: item.band_name,
+              genre: item.genre as GamificationPillar,
+              url: item.image_url,
+            }));
+            setHistory(formattedHistory);
+          }
+          setIsLoadingHistory(false);
+        });
+    }
+  }, [user?.id]);
+
+  // ✅ 2. VÉRIFICATION DU CHARGEMENT DE PUTER
   useEffect(() => {
     const checkPuter = () => typeof window !== 'undefined' && !!(window as any).puter?.ai;
-
     if (checkPuter()) {
       setIsPuterLoaded(true);
       return;
     }
-
     const interval = setInterval(() => {
       if (checkPuter()) {
         setIsPuterLoaded(true);
         clearInterval(interval);
       }
     }, 500);
-
     const timeout = setTimeout(() => {
       clearInterval(interval);
-      if (!checkPuter()) {
-        console.error('❌ Puter.js non détecté après 15s.');
-        setError("Le script Puter.js est bloqué ou n'a pas pu se charger.");
-      }
+      if (!checkPuter()) setError("Le script Puter.js est bloqué ou n'a pas pu se charger.");
     }, 15000);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
+    return () => { clearInterval(interval); clearTimeout(timeout); };
   }, []);
 
+  // ✅ 3. GÉNÉRATION + UPLOAD + SAUVEGARDE SUPABASE
   const handleGenerate = async (e: FormEvent) => {
     e.preventDefault();
-
     if (!bandName.trim()) {
       setError('Veuillez entrer un nom de groupe');
       return;
     }
-
     if (typeof window === 'undefined' || !(window as any).puter?.ai) {
       setError("Le moteur d'IA n'est pas disponible. Veuillez rafraîchir la page.");
       return;
@@ -87,45 +112,55 @@ Style: ${genre}.
 Visual elements: ${PROMPT_STYLES[genre]}. 
 Requirements: Dark background, highly detailed, vector art style, aggressive and epic typography, centered, no extra text or watermarks, pure logo design, symmetrical composition, high contrast.`;
 
-      // const imageElement = await (window as any).puter.ai.txt2img(prompt, false); // Qualité Moyenne
-      // Qualité Low, suffisante pour générer les Logos plus rapidement
-      const imageElement = await (window as any).puter.ai.txt2img(prompt, { 
-  quality: "low", // Génération beaucoup plus rapide, parfaite pour des logos graphiques
-  test_mode: false // S'assure que c'est une vraie génération, pas un test
-});
-      
-      if (!imageElement || !imageElement.src) {
-        throw new Error("L'IA n'a pas retourné d'image valide.");
-      }
+      const imageElement = await (window as any).puter.ai.txt2img(prompt, { quality: "low", test_mode: false });
+      if (!imageElement || !imageElement.src) throw new Error("L'IA n'a pas retourné d'image valide.");
 
       const fetchResponse = await fetch(imageElement.src);
       if (!fetchResponse.ok) throw new Error("Échec du téléchargement de l'image générée.");
       
       const blob = await fetchResponse.blob();
-      const file = new File([blob], `${bandName.trim().toLowerCase().replace(/\s+/g, '-')}-logo.png`, {
-        type: blob.type || 'image/png',
-      });
+      const file = new File([blob], `${bandName.trim().toLowerCase().replace(/\s+/g, '-')}-logo.png`, { type: blob.type || 'image/png' });
 
       const formData = new FormData();
       formData.append('file', file);
 
-      const uploadResponse = await fetch('/api/imgbb/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
+      const uploadResponse = await fetch('/api/imgbb/upload', { method: 'POST', body: formData });
       if (!uploadResponse.ok) {
         const errData = await uploadResponse.json().catch(() => ({}));
         throw new Error(errData.error || 'Erreur lors de l\'hébergement sur ImgBB');
       }
 
       const uploadData = await uploadResponse.json();
-      setImageUrl(uploadData.url);
-      
-      setHistory((prev) => [
-        { name: bandName.trim(), genre, url: uploadData.url },
-        ...prev.slice(0, 5),
-      ]);
+      const finalImageUrl = uploadData.url;
+      setImageUrl(finalImageUrl);
+
+      // ✅ SAUVEGARDE EN BASE DE DONNÉES (Si l'utilisateur est connecté)
+      if (user?.id) {
+        const { error: dbError } = await supabase.from('generated_logos').insert({
+          user_id: user.id,
+          band_name: bandName.trim(),
+          genre: genre,
+          image_url: finalImageUrl,
+        });
+
+        if (dbError) {
+          console.error('Erreur sauvegarde Supabase:', dbError);
+          // On ne bloque pas l'UX, l'image est affichée même si la DB échoue
+        } else {
+          // Mise à jour optimiste de l'historique local
+          setHistory((prev) => [
+            { name: bandName.trim(), genre, url: finalImageUrl },
+            ...prev.slice(0, 19),
+          ]);
+        }
+      } else {
+        // Fallback local si l'utilisateur n'est pas connecté (comme avant)
+        setHistory((prev) => [
+          { name: bandName.trim(), genre, url: finalImageUrl },
+          ...prev.slice(0, 19),
+        ]);
+      }
+
     } catch (err: any) {
       console.error('Erreur génération:', err);
       setError(err.message || 'Erreur lors de la génération du logo.');
@@ -134,18 +169,11 @@ Requirements: Dark background, highly detailed, vector art style, aggressive and
     }
   };
 
-  // ✅ FONCTION DE TÉLÉCHARGEMENT CORRIGÉE ET ROBUSTE
   const handleDownload = async () => {
     if (!imageUrl) return;
-
     try {
-      // 1. Tentative de téléchargement direct via fetch (avec mode cors explicite)
       const response = await fetch(imageUrl, { mode: 'cors' });
-      
-      if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
-      }
-      
+      if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -155,12 +183,10 @@ Requirements: Dark background, highly detailed, vector art style, aggressive and
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      
     } catch (err) {
-      // 2. Fallback infaillible : si le navigateur bloque le fetch (CORS), on ouvre l'image
-      console.warn('Téléchargement direct bloqué (CORS), utilisation du fallback...');
+      console.warn('Téléchargement direct bloqué (CORS), fallback...');
       window.open(imageUrl, '_blank');
-      alert("Le téléchargement automatique a été temporairement bloqué par la sécurité de votre navigateur. L'image a été ouverte dans un nouvel onglet : faites un **clic droit > Enregistrer l'image sous...**");
+      alert("Le téléchargement automatique a été bloqué par la sécurité du navigateur. L'image a été ouverte dans un nouvel onglet : faites un **clic droit > Enregistrer l'image sous...**");
     }
   };
 
@@ -178,6 +204,7 @@ Requirements: Dark background, highly detailed, vector art style, aggressive and
       />
 
       <div className="max-w-4xl mx-auto space-y-8">
+        {/* Formulaire */}
         <form onSubmit={handleGenerate} className="metal-card p-6 space-y-5">
           <div>
             <label htmlFor="bandName" className="block text-sm font-semibold mb-2">Nom du groupe</label>
@@ -212,16 +239,10 @@ Requirements: Dark background, highly detailed, vector art style, aggressive and
                     }}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-2xl" style={{ filter: `drop-shadow(0 0 4px ${meta.color})` }}>
-                        {meta.icon}
-                      </span>
-                      <span className="font-metal text-sm font-bold" style={{ color: meta.color }}>
-                        {pillarName}
-                      </span>
+                      <span className="text-2xl" style={{ filter: `drop-shadow(0 0 4px ${meta.color})` }}>{meta.icon}</span>
+                      <span className="font-metal text-sm font-bold" style={{ color: meta.color }}>{pillarName}</span>
                     </div>
-                    <div className="text-xs text-gray-400 mt-1 line-clamp-2">
-                      {meta.description}
-                    </div>
+                    <div className="text-xs text-gray-400 mt-1 line-clamp-2">{meta.description}</div>
                   </button>
                 );
               })}
@@ -229,25 +250,16 @@ Requirements: Dark background, highly detailed, vector art style, aggressive and
           </div>
 
           {error && (
-            <div className="p-3 rounded-md bg-red-900/30 border border-red-800 text-red-300 text-sm">
-              ⚠️ {error}
-            </div>
+            <div className="p-3 rounded-md bg-red-900/30 border border-red-800 text-red-300 text-sm">⚠️ {error}</div>
           )}
 
           <button
             type="submit"
             disabled={isGenerating || !bandName.trim() || !isPuterLoaded}
             className="w-full py-3 text-lg font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-white"
-            style={{
-              background: `linear-gradient(135deg, ${pillarMeta.color}, ${pillarMeta.color}cc)`,
-              boxShadow: `0 4px 20px ${pillarMeta.color}40`,
-            }}
+            style={{ background: `linear-gradient(135deg, ${pillarMeta.color}, ${pillarMeta.color}cc)`, boxShadow: `0 4px 20px ${pillarMeta.color}40` }}
           >
-            {!isPuterLoaded 
-              ? '⏳ Chargement du moteur IA...' 
-              : isGenerating 
-                ? '⚡ Forge en cours...' 
-                : '🎨 Générer le logo'}
+            {!isPuterLoaded ? '⏳ Chargement du moteur IA...' : isGenerating ? '⚡ Forge en cours...' : '🎨 Générer le logo'}
           </button>
 
           {!isGenerating && (
@@ -261,64 +273,49 @@ Requirements: Dark background, highly detailed, vector art style, aggressive and
         {isGenerating && (
           <div className="metal-card p-8 text-center">
             <Loader text="L'IA forge votre logo dans les flammes..." variant="inline" />
-            <p className="text-sm text-gray-500 mt-4">
-              Génération et hébergement en cours (cela peut prendre 10-20 secondes).
-            </p>
+            <p className="text-sm text-gray-500 mt-4">Génération et hébergement en cours (cela peut prendre 5-10 secondes).</p>
           </div>
         )}
 
+        {/* Résultat */}
         {imageUrl && !isGenerating && (
           <div className="metal-card overflow-hidden border-2" style={{ borderColor: `${pillarMeta.color}60` }}>
             <div className="relative aspect-square bg-metal-black">
-              <Image
-                src={imageUrl}
-                alt={`Logo de ${bandName}`}
-                fill
-                className="object-contain p-4"
-                unoptimized
-              />
+              <Image src={imageUrl} alt={`Logo de ${bandName}`} fill className="object-contain p-4" unoptimized />
             </div>
             <div className="p-4 flex items-center justify-between flex-wrap gap-4 border-t-2" style={{ borderColor: `${pillarMeta.color}40`, backgroundColor: `${pillarMeta.color}10` }}>
               <div>
-                <div className="font-metal text-lg" style={{ color: pillarMeta.color }}>
-                  {pillarMeta.icon} {bandName}
-                </div>
+                <div className="font-metal text-lg" style={{ color: pillarMeta.color }}>{pillarMeta.icon} {bandName}</div>
                 <div className="text-sm text-gray-400">{genre}</div>
               </div>
               <div className="flex gap-3">
-                <button 
-                  onClick={handleDownload} 
-                  className="px-4 py-2 rounded-lg font-bold text-white transition-all hover:scale-105"
-                  style={{ 
-                    background: `linear-gradient(135deg, ${pillarMeta.color}, ${pillarMeta.color}cc)`,
-                    boxShadow: `0 2px 10px ${pillarMeta.color}40`,
-                  }}
-                >
-                  💾 Télécharger
-                </button>
-                <button
-                  onClick={() => {
-                    setImageUrl(null);
-                    setBandName('');
-                  }}
-                  className="px-4 py-2 rounded-lg font-bold text-white bg-metal-gray/50 border border-metal-gray hover:bg-metal-gray/70 transition-all"
-                >
-                  🔄 Nouveau
-                </button>
+                <button onClick={handleDownload} className="px-4 py-2 rounded-lg font-bold text-white transition-all hover:scale-105" style={{ background: `linear-gradient(135deg, ${pillarMeta.color}, ${pillarMeta.color}cc)`, boxShadow: `0 2px 10px ${pillarMeta.color}40` }}>💾 Télécharger</button>
+                <button onClick={() => { setImageUrl(null); setBandName(''); }} className="px-4 py-2 rounded-lg font-bold text-white bg-metal-gray/50 border border-metal-gray hover:bg-metal-gray/70 transition-all">🔄 Nouveau</button>
               </div>
             </div>
           </div>
         )}
 
+        {/* Historique */}
         {history.length > 0 && (
           <div className="metal-card p-6">
-            <h3 className="font-metal text-lg mb-4 text-metal-fire">📜 Historique des générations</h3>
+            <h3 className="font-metal text-lg mb-4 text-metal-fire flex items-center justify-between">
+              <span>📜 Historique des générations</span>
+              {isLoadingHistory && <span className="text-xs text-gray-400 font-sans animate-pulse">Chargement...</span>}
+            </h3>
+            
+            {!user && (
+              <p className="text-xs text-yellow-500 mb-4 bg-yellow-500/10 p-2 rounded border border-yellow-500/30">
+                💡 Connecte-toi pour sauvegarder définitivement ton historique dans le cloud !
+              </p>
+            )}
+
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {history.map((item, index) => {
                 const itemMeta = PILLAR_METADATA[item.genre];
                 return (
                   <button
-                    key={index}
+                    key={item.id || index}
                     onClick={() => {
                       setImageUrl(item.url);
                       setBandName(item.name);
@@ -336,19 +333,11 @@ Requirements: Dark background, highly detailed, vector art style, aggressive and
                     }}
                   >
                     <div className="relative aspect-square bg-metal-black rounded mb-2 overflow-hidden border" style={{ borderColor: `${itemMeta.color}40` }}>
-                      <Image
-                        src={item.url}
-                        alt={item.name}
-                        fill
-                        className="object-contain p-2"
-                        unoptimized
-                      />
+                      <Image src={item.url} alt={item.name} fill className="object-contain p-2" unoptimized />
                     </div>
                     <div className="flex items-center gap-1 mb-1">
                       <span className="text-lg">{itemMeta.icon}</span>
-                      <div className="text-sm font-bold truncate" style={{ color: itemMeta.color }}>
-                        {item.name}
-                      </div>
+                      <div className="text-sm font-bold truncate" style={{ color: itemMeta.color }}>{item.name}</div>
                     </div>
                     <div className="text-xs text-gray-400">{item.genre}</div>
                   </button>
@@ -361,10 +350,10 @@ Requirements: Dark background, highly detailed, vector art style, aggressive and
         <div className="metal-card p-5">
           <h3 className="font-metal text-lg mb-3 text-metal-fire">ℹ️ À propos</h3>
           <ul className="text-sm text-gray-400 space-y-2">
-            <li>• Les logos sont générés gratuitement par <strong className="text-metal-fire">Puter.js AI</strong>.</li>
+            <li>• Les logos sont générés gratuitement par <strong className="text-metal-fire">Puter.js AI</strong> (qualité optimisée).</li>
             <li>• Les images sont hébergées de manière persistante via <strong className="text-metal-fire">ImgBB</strong>.</li>
             <li>• <strong className="text-metal-fire">9 piliers du metal</strong> disponibles avec des styles uniques.</li>
-            <li>• Astuce : Si le téléchargement est bloqué, l'image s'ouvrira dans un nouvel onglet pour un enregistrement manuel.</li>
+            <li>• {user ? "Ton historique est sauvegardé en toute sécurité dans ton compte." : "Connecte-toi pour sauvegarder ton historique dans le cloud."}</li>
           </ul>
         </div>
       </div>
