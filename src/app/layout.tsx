@@ -180,10 +180,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: themeInitializer }}
         />
         
-        {/* 🤖 SCRIPT PUTER.JS POUR LA GÉNÉRATION D'IMAGES IA */}
+        {/* 🤖 SCRIPT PUTER.JS : Chargement différé pour éviter les conflits d'hydratation React (#418) */}
         <Script 
           src="https://js.puter.com/v2/" 
-          strategy="beforeInteractive" 
+          strategy="lazyOnload" 
         />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
