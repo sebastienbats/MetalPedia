@@ -15,8 +15,6 @@ declare global {
 // ═══════════════════════════════════════════
 // CONFIGURATION DES PROMPTS IA
 // ═══════════════════════════════════════════
-// On garde uniquement les instructions visuelles spécifiques pour l'IA.
-// Les émojis, couleurs et noms officiels viennent de PILLAR_METADATA.
 
 const PROMPT_STYLES: Record<GamificationPillar, string> = {
   'Black Metal': 'Nordic runes, symmetrical, illegible twisted branches, gothic, frost, forest, dark atmospheric',
@@ -45,26 +43,31 @@ export default function AILogoGenerator() {
 
   const pillarMeta = PILLAR_METADATA[genre];
 
-  // ✅ POLLING ROBUSTE : Vérifie que Puter est bien chargé
+  // ✅ POLLING STRICT : Vérifie que puter ET puter.ai sont bien chargés
   useEffect(() => {
-    // Si déjà chargé, on active tout de suite
-    if (typeof window !== 'undefined' && window.puter) {
+    const checkPuter = () => {
+      return typeof window !== 'undefined' && window.puter && window.puter.ai;
+    };
+
+    if (checkPuter()) {
       setIsPuterLoaded(true);
       return;
     }
 
-    // Sinon, on vérifie toutes les 200ms
     const interval = setInterval(() => {
-      if (typeof window !== 'undefined' && window.puter) {
+      if (checkPuter()) {
         setIsPuterLoaded(true);
         clearInterval(interval);
       }
     }, 200);
 
-    // Timeout de sécurité après 10 secondes pour débloquer quoi qu'il arrive
+    // Timeout de 10 secondes : si toujours pas chargé, on affiche une erreur au lieu de forcer
     const timeout = setTimeout(() => {
       clearInterval(interval);
-      if (typeof window !== 'undefined') {
+      if (!checkPuter()) {
+        console.error("Puter.js AI module n'a pas pu être chargé après 10 secondes.");
+        setError("Impossible de charger le moteur d'IA. Veuillez désactiver votre bloqueur de pub ou rafraîchir la page.");
+      } else {
         setIsPuterLoaded(true);
       }
     }, 10000);
@@ -86,8 +89,9 @@ export default function AILogoGenerator() {
       return;
     }
 
-    if (!isPuterLoaded) {
-      setError('Le moteur d\'IA n\'est pas encore chargé. Veuillez patienter...');
+    // ✅ VÉRIFICATION DE SÉCURITÉ AU MOMENT DU CLIC
+    if (typeof window === 'undefined' || !window.puter || !window.puter.ai) {
+      setError("Le moteur d'IA n'est pas disponible. Veuillez rafraîchir la page.");
       return;
     }
 
@@ -96,21 +100,18 @@ export default function AILogoGenerator() {
     setImageUrl(null);
 
     try {
-      // 1. Construction du prompt optimisé
       const prompt = `A professional heavy metal band logo for the band named "${bandName.trim()}". 
 Style: ${genre}. 
 Visual elements: ${PROMPT_STYLES[genre]}. 
 Requirements: Dark background, highly detailed, vector art style, aggressive and epic typography, centered, no extra text or watermarks, pure logo design, symmetrical composition, high contrast.`;
 
-      // 2. Génération via Puter.js (retourne un Blob)
+      // Génération via Puter.js
       const imageBlob = await window.puter.ai.txt2img(prompt);
 
-      // 3. Conversion du Blob en File pour l'upload
       const file = new File([imageBlob], `${bandName.trim().toLowerCase().replace(/\s+/g, '-')}-logo.png`, {
         type: 'image/png',
       });
 
-      // 4. Upload sécurisé vers ImgBB via notre API Route
       const formData = new FormData();
       formData.append('file', file);
 
@@ -127,12 +128,11 @@ Requirements: Dark background, highly detailed, vector art style, aggressive and
       const uploadData = await uploadResponse.json();
       const finalImageUrl = uploadData.url;
 
-      // 5. Mise à jour de l'état
       setImageUrl(finalImageUrl);
 
       setHistory((prev) => [
         { name: bandName.trim(), genre, url: finalImageUrl },
-        ...prev.slice(0, 5), // Garder les 6 derniers
+        ...prev.slice(0, 5),
       ]);
     } catch (err: any) {
       console.error('Erreur génération:', err);
@@ -189,7 +189,6 @@ Requirements: Dark background, highly detailed, vector art style, aggressive and
 
         <div>
           <label className="block text-sm font-semibold mb-2">Pilier du Metal</label>
-          {/* 🛡️ BOUCLE DIRECTE SUR GAMIFICATION_PILLARS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {GAMIFICATION_PILLARS.map((pillarName) => {
               const meta = PILLAR_METADATA[pillarName];
