@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { createStore, set as idbSet, get as idbGet, del as idbDel } from 'idb-keyval';
+import { supabase } from '@/lib/supabase';
+import { getCurrentUser } from '@/api/authApi';
+import { offlineSync } from '@/lib/offline-sync';
 import { TIMELINE_BADGES } from '@/lib/gamification/timeline-badges';
 import { useNotificationStore } from './notificationStore';
 
@@ -17,11 +20,15 @@ interface UnlockedBadge {
 interface AchievementState {
   unlockedBadges: UnlockedBadge[];
   hydrated: boolean;
+  isLoadingCloud: boolean; // ✅ NOUVEAU
 
-  unlockBadge: (id: string) => boolean; // retourne true si nouveau déblocage
+  // Actions
+  loadFromCloud: () => Promise<void>; // ✅ NOUVEAU
+  unlockBadge: (id: string) => Promise<boolean>; // ✅ Rendu async pour la sync
   isUnlocked: (id: string) => boolean;
   getUnlockedAt: (id: string) => number | null;
   checkTimelineAchievements: (collectedIds: number[]) => void;
+  _syncAchievementsToCloud: () => Promise<void>; // ✅ NOUVEAU
   setHydrated: () => void;
   resetAchievements: () => void;
 }
@@ -34,10 +41,84 @@ export const useAchievementStore = create<AchievementState>()(
     (set, get) => ({
       unlockedBadges: [],
       hydrated: false,
+      isLoadingCloud: false,
 
       setHydrated: () => set({ hydrated: true }),
 
-      unlockBadge: (id) => {
+      // ✅ 1. CHARGEMENT DEPUIS LE CLOUD
+      loadFromCloud: async () => {
+        const user = await getCurrentUser();
+        if (!user) {
+          set({ isLoadingCloud: false, hydrated: true });
+          return;
+        }
+
+        set({ isLoadingCloud: true });
+        try {
+          const { data, error } = await supabase
+            .from('user_achievements')
+            .select('badge_id, unlocked_at')
+            .eq('user_id', user.id);
+
+          if (error) throw error;
+
+          if (data) {
+            const cloudBadges: UnlockedBadge[] = data.map((row) => ({
+              id: row.badge_id,
+              unlockedAt: new Date(row.unlocked_at).getTime(),
+            }));
+
+            // Fusion avec l'existant (pour préserver les déblocages hors ligne)
+            set((state) => {
+              const mergedBadges = [...state.unlockedBadges];
+              cloudBadges.forEach((cb) => {
+                if (!mergedBadges.some((b) => b.id === cb.id)) {
+                  mergedBadges.push(cb);
+                }
+              });
+              return { 
+                unlockedBadges: mergedBadges, 
+                isLoadingCloud: false, 
+                hydrated: true 
+              };
+            });
+          } else {
+            set({ isLoadingCloud: false, hydrated: true });
+          }
+        } catch (error) {
+          console.error('Erreur chargement achievements cloud:', error);
+          set({ isLoadingCloud: false, hydrated: true });
+        }
+      },
+
+      // ✅ 2. HELPER DE SYNCHRONISATION
+      _syncAchievementsToCloud: async () => {
+        const user = await getCurrentUser();
+        if (!user) return;
+
+        const currentBadges = get().unlockedBadges;
+        if (offlineSync.isCurrentlyOnline()) {
+          const payload = currentBadges.map((b) => ({
+            user_id: user.id,
+            badge_id: b.id,
+            unlocked_at: new Date(b.unlockedAt).toISOString(),
+          }));
+
+          const { error } = await supabase.from('user_achievements').upsert(payload, {
+            onConflict: 'user_id, badge_id',
+          });
+
+          if (error) console.error('Échec sync achievements:', error);
+        } else {
+          offlineSync.addPendingOperation({
+            type: 'achievements_sync',
+            payload: currentBadges,
+          });
+        }
+      },
+
+      // ✅ 3. ACTION AVEC MISE À JOUR OPTIMISTE + NOTIFICATION
+      unlockBadge: async (id) => {
         const badge = TIMELINE_BADGES.find((b) => b.id === id);
         if (!badge) return false;
 
@@ -46,11 +127,12 @@ export const useAchievementStore = create<AchievementState>()(
 
         const newUnlocked: UnlockedBadge = { id, unlockedAt: Date.now() };
 
+        // A. Mise à jour locale immédiate
         set((state) => ({
           unlockedBadges: [...state.unlockedBadges, newUnlocked],
         }));
 
-        // 🎖️ Notification toast
+        // B. Notification toast (inchangée, c'est parfait)
         useNotificationStore.getState().pushNotification({
           type: 'badge',
           rarity: badge.rarity,
@@ -59,6 +141,9 @@ export const useAchievementStore = create<AchievementState>()(
           description: badge.description,
           duration: 6000,
         });
+
+        // C. Synchronisation en arrière-plan
+        await get()._syncAchievementsToCloud();
 
         return true;
       },
@@ -71,7 +156,8 @@ export const useAchievementStore = create<AchievementState>()(
       },
 
       checkTimelineAchievements: (collectedIds) => {
-        // Itère sur tous les badges et débloque ceux dont la condition est remplie
+        // Cette fonction reste synchrone car elle est appelée en boucle
+        // Elle appellera unlockBadge qui, lui, gérera la sync async en arrière-plan
         for (const badge of TIMELINE_BADGES) {
           if (get().isUnlocked(badge.id)) continue;
           try {
