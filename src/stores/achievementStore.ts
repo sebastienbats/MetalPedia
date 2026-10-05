@@ -65,7 +65,8 @@ export const useAchievementStore = create<AchievementState>()(
           if (data) {
             const cloudBadges: UnlockedBadge[] = data.map((row) => ({
               id: row.badge_id,
-              unlockedAt: new Date(row.unlocked_at).getTime(),
+              // ✅ CORRECTION : Filet de sécurité si unlocked_at est null
+              unlockedAt: row.unlocked_at ? new Date(row.unlocked_at).getTime() : Date.now(),
             }));
 
             // Fusion avec l'existant (pour préserver les déblocages hors ligne)
