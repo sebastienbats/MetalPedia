@@ -72,7 +72,8 @@ export const useStatsStore = create<StatsState>()(
               name: row.band_name,
               genre: row.genre,
               country: row.country,
-              viewedAt: new Date(row.viewed_at).getTime(),
+              // ✅ CORRECTION : Filet de sécurité si viewed_at est null
+              viewedAt: row.viewed_at ? new Date(row.viewed_at).getTime() : Date.now(),
             }));
 
             set((state) => {
