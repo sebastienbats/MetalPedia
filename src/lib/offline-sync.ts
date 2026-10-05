@@ -21,7 +21,11 @@ export type OperationType =
   | 'favorite_remove'
   | 'review_submit'
   | 'profile_update'
-  | 'gamification_sync';
+  | 'gamification_sync'
+  | 'class_sync'             // ✅ NOUVEAU
+  | 'achievements_sync'       // ✅ NOUVEAU (C'est celui qui causait l'erreur)
+  | 'fragments_sync'          // ✅ NOUVEAU
+  | 'view_history_sync';      // ✅ NOUVEAU
 
 export interface PendingOperation {
   id: string;
@@ -237,7 +241,6 @@ class OfflineSyncManager {
     switch (op.type) {
       case 'favorite_add':
         console.log('⭐ Sync favoris (add):', op.payload);
-        // await fetch('/api/favorites', { method: 'POST', body: JSON.stringify(op.payload) })
         break;
 
       case 'favorite_remove':
@@ -254,6 +257,23 @@ class OfflineSyncManager {
 
       case 'gamification_sync':
         console.log('🎮 Sync gamification:', op.payload);
+        break;
+
+      // ✅ NOUVEAUX CAS DE SYNC
+      case 'class_sync':
+        console.log('⚔️ Sync classe:', op.payload);
+        break;
+
+      case 'achievements_sync':
+        console.log('🏆 Sync achievements:', op.payload);
+        break;
+
+      case 'fragments_sync':
+        console.log('📜 Sync fragments:', op.payload);
+        break;
+
+      case 'view_history_sync':
+        console.log('📈 Sync view history:', op.payload);
         break;
 
       default:
