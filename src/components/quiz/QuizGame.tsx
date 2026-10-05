@@ -58,11 +58,12 @@ export default function QuizGame({ pillar, onComplete }: Props) {
 
     if (isCorrect) {
       setCorrectCount((prev) => prev + 1);
-      // Le store calcule l'XP finale avec le bonus de classe et retourne cette valeur
-      earnedXp = recordQuiz(true, baseXp);
+      // ✅ CORRECTION : Ajout de 'await' car recordQuiz est maintenant asynchrone
+      earnedXp = await recordQuiz(true, baseXp);
       setTotalXpEarned((prev) => prev + earnedXp);
     } else {
-      recordQuiz(false, baseXp); // 0 XP, mais on appelle pour la cohérence
+      // ✅ CORRECTION : Ajout de 'await' pour la cohérence
+      await recordQuiz(false, baseXp); 
     }
 
     // Enregistrement en base (seulement si connecté)
