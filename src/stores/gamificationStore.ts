@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { createStore, set as idbSet, get as idbGet, del as idbDel } from 'idb-keyval';
+import { supabase } from '@/lib/supabase';
+import { getCurrentUser } from '@/api/authApi';
+import { offlineSync } from '@/lib/offline-sync';
 import {
   PlayerStats,
   XPEvent,
@@ -54,7 +57,6 @@ function applyClassBonus(
     case 'reviews':
       isEligible = actionType === 'review';
       break;
-    
     case 'vintage':
       if (actionType === 'view' && context?.band && context.band.formed) {
         const formedYear = Number(context.band.formed);
@@ -63,7 +65,6 @@ function applyClassBonus(
         }
       }
       break;
-
     case 'favorites':
       isEligible = actionType === 'favorite';
       break;
@@ -105,17 +106,27 @@ interface GamificationState {
   
   timelineEventsRewarded: number[];
 
+  // ✅ NOUVEAU : États pour la synchronisation cloud
+  isLoadingCloud: boolean;
+  hydrationError: string | null;
+
+  // ✅ NOUVEAU : Actions de synchronisation
+  loadFromCloud: () => Promise<void>;
+  syncToCloud: () => Promise<void>;
+  _syncStatsToCloud: () => Promise<void>;
+
+  // Actions de progression (rendues async pour la sync)
   recordView: (band: { 
     id: number; name: string; genre: string; genre_pillar?: string | null; country: string;
     listeners?: number | null; formed?: number | string | null; status?: string | null; biography?: string | null;
-  }) => void;
-  recordFavorite: (bandId: number, isAdding: boolean) => void;
-  recordReview: () => void;
-  recordGenreDiscovery: (genre: string) => void;
-  claimDailyBonus: () => void;
-  completeQuest: (questId: string) => void;
-  recordQuiz: (isCorrect: boolean, baseXp: number) => number;
-  recordTimelineEvent: (eventId: number, eventType: 'real' | 'echo' | 'revelation', baseXp: number) => void;
+  }) => Promise<void>;
+  recordFavorite: (bandId: number, isAdding: boolean) => Promise<void>;
+  recordReview: () => Promise<void>;
+  recordGenreDiscovery: (genre: string) => Promise<void>;
+  claimDailyBonus: () => Promise<void>;
+  completeQuest: (questId: string) => Promise<void>;
+  recordQuiz: (isCorrect: boolean, baseXp: number) => Promise<number>;
+  recordTimelineEvent: (eventId: number, eventType: 'real' | 'echo' | 'revelation', baseXp: number) => Promise<void>;
 
   completeTrial: (success: boolean) => void;
   dismissTrial: () => void;
@@ -152,15 +163,90 @@ export const useGamificationStore = create<GamificationState>()(
       trialBonusRemaining: 0,
       trialsCompleted: 0,
       timelineEventsRewarded: [],
+      isLoadingCloud: false,
+      hydrationError: null,
 
-      recordView: (band) => {
-        const baseXp = calculateXP('VIEW_BAND');
-        const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'view', { band });
-        const event = createXPEvent('VIEW_BAND', band.name);
-        const gamificationGenre = normalizeGenreForGamification(band.genre, band.genre_pillar);
-        const currentClass = useClassStore.getState().selectedClass;
+      // ✅ 1. CHARGEMENT DEPUIS LE CLOUD
+      loadFromCloud: async () => {
+        const user = await getCurrentUser();
+        if (!user) {
+          set({ isLoadingCloud: false });
+          return;
+        }
 
+        set({ isLoadingCloud: true });
+        try {
+          const { data, error } = await supabase
+            .from('gamification_progress')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+          if (error && error.code !== 'PGRST116') throw error; // PGRST116 = pas de ligne, c'est OK
+
+          if (data) {
+            set((state) => ({
+              stats: {
+                ...state.stats,
+                totalXP: data.total_xp,
+                level: data.level,
+                totalViews: data.total_views,
+                totalFavorites: data.total_favorites,
+                totalReviews: data.total_reviews,
+                genresExplored: data.genres_explored || [],
+                questsCompleted: data.quests_completed || [],
+                badgesUnlocked: data.badges_unlocked || [],
+                lastDailyBonus: data.last_daily_bonus, // ✅ Anti-cheat bonus quotidien
+              },
+            }));
+          }
+        } catch (error) {
+          console.error('Erreur chargement gamification cloud:', error);
+          set({ hydrationError: error instanceof Error ? error.message : String(error) });
+        } finally {
+          set({ isLoadingCloud: false });
+        }
+      },
+
+      // ✅ 2. HELPER POUR SYNC LES STATS (évite la répétition)
+      _syncStatsToCloud: async () => {
+        const user = await getCurrentUser();
+        if (!user) return;
+
+        const currentStats = get().stats;
+        if (offlineSync.isCurrentlyOnline()) {
+          const { error } = await supabase.from('gamification_progress').upsert({
+            user_id: user.id,
+            total_xp: currentStats.totalXP,
+            level: currentStats.level,
+            total_views: currentStats.totalViews,
+            total_favorites: currentStats.totalFavorites,
+            total_reviews: currentStats.totalReviews,
+            genres_explored: currentStats.genresExplored,
+            quests_completed: currentStats.questsCompleted,
+            badges_unlocked: currentStats.badgesUnlocked,
+            last_daily_bonus: currentStats.lastDailyBonus,
+          }, { onConflict: 'user_id' });
+
+          if (error) console.error('Échec sync gamification:', error);
+        } else {
+          offlineSync.addPendingOperation({ type: 'gamification_sync', payload: currentStats });
+        }
+      },
+
+      // ═══════════════════════════════════════════════════════════
+      // ACTIONS DE PROGRESSION (Optimistic UI + Sync)
+      // ═══════════════════════════════════════════════════════════
+
+      recordView: async (band) => {
+        let xpEvent: XPEvent | null = null;
         set((state) => {
+          const baseXp = calculateXP('VIEW_BAND');
+          const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'view', { band });
+          xpEvent = createXPEvent('VIEW_BAND', band.name);
+          const gamificationGenre = normalizeGenreForGamification(band.genre, band.genre_pillar);
+          const currentClass = useClassStore.getState().selectedClass;
+
           const trialMultiplier = state.trialBonusRemaining > 0 ? 2 : 1;
           const finalXPWithTrial = Math.round(finalXp * trialMultiplier);
           const newTrialBonusRemaining = state.trialBonusRemaining > 0 ? state.trialBonusRemaining - 1 : 0;
@@ -216,22 +302,23 @@ export const useGamificationStore = create<GamificationState>()(
 
           return {
             stats: newStats,
-            xpHistory: [event, ...state.xpHistory].slice(0, 100),
+            xpHistory: [xpEvent!, ...state.xpHistory].slice(0, 100),
             showLevelUpModal: newLevel > oldLevel,
             pendingLevelUp: newLevel > oldLevel ? newLevel : null,
             pendingTrial,
             trialBonusRemaining: newTrialBonusRemaining,
           };
         });
+        await get()._syncStatsToCloud();
       },
 
-      recordFavorite: (bandId, isAdding) => {
-        const action = isAdding ? 'ADD_FAVORITE' : 'REMOVE_FAVORITE';
-        const baseXp = calculateXP(action);
-        const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'favorite');
-        const currentClass = useClassStore.getState().selectedClass;
-
+      recordFavorite: async (bandId, isAdding) => {
         set((state) => {
+          const action = isAdding ? 'ADD_FAVORITE' : 'REMOVE_FAVORITE';
+          const baseXp = calculateXP(action);
+          const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'favorite');
+          const currentClass = useClassStore.getState().selectedClass;
+
           const trialMultiplier = state.trialBonusRemaining > 0 ? 2 : 1;
           const finalXPWithTrial = Math.round(finalXp * trialMultiplier);
           const newTrialBonusRemaining = state.trialBonusRemaining > 0 ? state.trialBonusRemaining - 1 : 0;
@@ -277,15 +364,16 @@ export const useGamificationStore = create<GamificationState>()(
             trialBonusRemaining: newTrialBonusRemaining,
           };
         });
+        await get()._syncStatsToCloud();
       },
 
-      recordReview: () => {
-        const baseXp = calculateXP('WRITE_REVIEW');
-        const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'review');
-        const event = createXPEvent('WRITE_REVIEW');
-        const currentClass = useClassStore.getState().selectedClass;
-
+      recordReview: async () => {
         set((state) => {
+          const baseXp = calculateXP('WRITE_REVIEW');
+          const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'review');
+          const event = createXPEvent('WRITE_REVIEW');
+          const currentClass = useClassStore.getState().selectedClass;
+
           const trialMultiplier = state.trialBonusRemaining > 0 ? 2 : 1;
           const finalXPWithTrial = Math.round(finalXp * trialMultiplier);
           const newTrialBonusRemaining = state.trialBonusRemaining > 0 ? state.trialBonusRemaining - 1 : 0;
@@ -332,18 +420,18 @@ export const useGamificationStore = create<GamificationState>()(
             trialBonusRemaining: newTrialBonusRemaining,
           };
         });
+        await get()._syncStatsToCloud();
       },
 
-      recordGenreDiscovery: (genre) => {
-        const gamificationGenre = normalizeGenreForGamification(genre);
-        const currentClass = useClassStore.getState().selectedClass;
-
+      recordGenreDiscovery: async (genre) => {
         set((state) => {
+          const gamificationGenre = normalizeGenreForGamification(genre);
           if (state.stats.genresExplored.includes(gamificationGenre)) return state;
 
           const baseXp = calculateXP('DISCOVER_NEW_GENRE');
           const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'explore');
           const event = createXPEvent('DISCOVER_NEW_GENRE', gamificationGenre);
+          const currentClass = useClassStore.getState().selectedClass;
 
           const trialMultiplier = state.trialBonusRemaining > 0 ? 2 : 1;
           const finalXPWithTrial = Math.round(finalXp * trialMultiplier);
@@ -391,28 +479,32 @@ export const useGamificationStore = create<GamificationState>()(
             trialBonusRemaining: newTrialBonusRemaining,
           };
         });
+        await get()._syncStatsToCloud();
       },
 
-      claimDailyBonus: () => {
+      claimDailyBonus: async () => {
         const today = new Date().toDateString();
         const state = get();
         if (state.stats.lastDailyBonus === today) return;
 
-        const baseXp = calculateXP('DAILY_LOGIN');
-        const { finalXp } = applyClassBonus(baseXp, 'daily');
-        const event = createXPEvent('DAILY_LOGIN');
+        set((state) => {
+          const baseXp = calculateXP('DAILY_LOGIN');
+          const { finalXp } = applyClassBonus(baseXp, 'daily');
+          const event = createXPEvent('DAILY_LOGIN');
 
-        set((state) => ({
-          stats: {
-            ...state.stats,
-            totalXP: state.stats.totalXP + finalXp,
-            lastDailyBonus: today,
-          },
-          xpHistory: [event, ...state.xpHistory].slice(0, 100),
-        }));
+          return {
+            stats: {
+              ...state.stats,
+              totalXP: state.stats.totalXP + finalXp,
+              lastDailyBonus: today,
+            },
+            xpHistory: [event, ...state.xpHistory].slice(0, 100),
+          };
+        });
+        await get()._syncStatsToCloud();
       },
 
-      completeQuest: (questId) => {
+      completeQuest: async (questId) => {
         const quest = QUESTS.find((q) => q.id === questId);
         if (!quest) return;
 
@@ -442,14 +534,18 @@ export const useGamificationStore = create<GamificationState>()(
             pendingTrial,
           };
         });
+        await get()._syncStatsToCloud();
       },
 
-      recordQuiz: (isCorrect: boolean, baseXp: number): number => {
+      recordQuiz: async (isCorrect: boolean, baseXp: number): Promise<number> => {
         if (!isCorrect) return 0;
-        const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'quiz');
-        const event: XPEvent = { action: 'COMPLETE_QUEST', amount: finalXp, timestamp: Date.now(), description: 'Savoir ancestral acquis (Quiz)' };
-
+        
+        let earnedXp = 0;
         set((state) => {
+          const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'quiz');
+          earnedXp = finalXp;
+          const event: XPEvent = { action: 'COMPLETE_QUEST', amount: finalXp, timestamp: Date.now(), description: 'Savoir ancestral acquis (Quiz)' };
+
           const trialMultiplier = state.trialBonusRemaining > 0 ? 2 : 1;
           const finalXPWithTrial = Math.round(finalXp * trialMultiplier);
           const newTrialBonusRemaining = state.trialBonusRemaining > 0 ? state.trialBonusRemaining - 1 : 0;
@@ -482,18 +578,18 @@ export const useGamificationStore = create<GamificationState>()(
             trialBonusRemaining: newTrialBonusRemaining,
           };
         });
-        return finalXp;
+        await get()._syncStatsToCloud();
+        return earnedXp;
       },
 
-      recordTimelineEvent: (eventId, eventType, baseXp) => {
-        const currentClass = useClassStore.getState().selectedClass;
-        
+      recordTimelineEvent: async (eventId, eventType, baseXp) => {
         set((state) => {
           const rewardKey = eventId * 10 + (eventType === 'real' ? 1 : eventType === 'echo' ? 2 : 3);
           if (state.timelineEventsRewarded.includes(rewardKey)) {
             return state;
           }
 
+          const currentClass = useClassStore.getState().selectedClass;
           const { finalXp, bonusApplied } = applyClassBonus(baseXp, 'explore');
           const event = createXPEvent('VIEW_BAND', `Fragment ${eventId} - ${eventType}`);
 
@@ -540,6 +636,7 @@ export const useGamificationStore = create<GamificationState>()(
             timelineEventsRewarded: [...state.timelineEventsRewarded, rewardKey],
           };
         });
+        await get()._syncStatsToCloud();
       },
 
       completeTrial: (success: boolean) => {
@@ -554,6 +651,11 @@ export const useGamificationStore = create<GamificationState>()(
       },
 
       dismissTrial: () => set({ pendingTrial: null }),
+
+      syncToCloud: async () => {
+        console.log('🔄 Synchronisation manuelle de la gamification...');
+        if (offlineSync.processQueue) await offlineSync.processQueue();
+      },
 
       getLevelProgress: () => getLevelProgress(get().stats.totalXP),
       getUnlockedBadges: () => BADGES.filter((b) => get().stats.badgesUnlocked.includes(b.id)),
