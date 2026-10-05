@@ -232,7 +232,6 @@ export type Database = {
           },
         ]
       }
-      // 🆕 NOUVELLE TABLE AJOUTÉE PAR SUPABASE
       generated_logos: {
         Row: {
           band_name: string
@@ -569,6 +568,79 @@ export type Database = {
           },
         ]
       }
+      // 🆕 NOUVELLES TABLES POUR LA SYNCHRONISATION CLOUD
+      user_achievements: {
+        Row: {
+          id: string
+          user_id: string
+          badge_id: string
+          unlocked_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          badge_id: string
+          unlocked_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          badge_id?: string
+          unlocked_at?: string | null
+        }
+        Relationships: []
+      }
+      user_fragments: {
+        Row: {
+          id: string
+          user_id: string
+          fragment_id: number
+          collected_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          fragment_id: number
+          collected_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          fragment_id?: number
+          collected_at?: string | null
+        }
+        Relationships: []
+      }
+      user_view_history: {
+        Row: {
+          id: string
+          user_id: string
+          band_id: number
+          band_name: string
+          genre: string
+          country: string
+          viewed_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          band_id: number
+          band_name: string
+          genre: string
+          country: string
+          viewed_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          band_id?: number
+          band_name?: string
+          genre?: string
+          country?: string
+          viewed_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       leaderboard: {
@@ -786,11 +858,26 @@ export type GamificationProgressUpdate = Database['public']['Tables']['gamificat
 export type UserClassUpdate = Database['public']['Tables']['user_classes']['Update'];
 
 // ─────────────────────────────────────────
-// 🆕 AI LOGOS (NOUVEAU)
+// 🆕 AI LOGOS
 // ─────────────────────────────────────────
 export type GeneratedLogo = Database['public']['Tables']['generated_logos']['Row'];
 export type GeneratedLogoInsert = Database['public']['Tables']['generated_logos']['Insert'];
 export type GeneratedLogoUpdate = Database['public']['Tables']['generated_logos']['Update'];
+
+// ─────────────────────────────────────────
+// 🆕 CLOUD SYNC TABLES (NOUVEAU)
+// ─────────────────────────────────────────
+export type UserAchievement = Database['public']['Tables']['user_achievements']['Row'];
+export type UserAchievementInsert = Database['public']['Tables']['user_achievements']['Insert'];
+export type UserAchievementUpdate = Database['public']['Tables']['user_achievements']['Update'];
+
+export type UserFragment = Database['public']['Tables']['user_fragments']['Row'];
+export type UserFragmentInsert = Database['public']['Tables']['user_fragments']['Insert'];
+export type UserFragmentUpdate = Database['public']['Tables']['user_fragments']['Update'];
+
+export type UserViewHistory = Database['public']['Tables']['user_view_history']['Row'];
+export type UserViewHistoryInsert = Database['public']['Tables']['user_view_history']['Insert'];
+export type UserViewHistoryUpdate = Database['public']['Tables']['user_view_history']['Update'];
 
 // ─────────────────────────────────────────
 // MÉTIER (GROUPES, ALBUMS, MEMBRES)
