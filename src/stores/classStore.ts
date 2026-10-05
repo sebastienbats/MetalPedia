@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { createStore, set as idbSet, get as idbGet, del as idbDel } from 'idb-keyval';
+import { supabase } from '@/lib/supabase';
+import { getCurrentUser } from '@/api/authApi';
+import { offlineSync } from '@/lib/offline-sync';
 import type { CharacterClass } from '@/types/api';
 import { getClassLevelProgress, getClassMetadata, getClassTitle, ALL_CLASSES } from '@/lib/gamification/classes';
 
@@ -29,15 +32,18 @@ interface ClassState {
   selectedClass: CharacterClass | null;
   classXp: number;
   hydrated: boolean;
+  isLoadingCloud: boolean; // ✅ NOUVEAU
   hydrationError: string | null;
 
   // 🏛️ Panthéon des Anciens
   pantheon: Pantheon;
 
   // Actions
-  selectClass: (classId: CharacterClass) => void;
-  addClassXp: (xp: number) => void;
-  resetClass: () => void;
+  loadFromCloud: () => Promise<void>; // ✅ NOUVEAU
+  selectClass: (classId: CharacterClass) => Promise<void>;
+  addClassXp: (xp: number) => Promise<void>;
+  resetClass: () => Promise<void>;
+  _syncClassToCloud: () => Promise<void>; // ✅ NOUVEAU (Helper interne)
   setHydrated: () => void;
   setHydrationError: (error: string | null) => void;
 
@@ -55,46 +61,126 @@ export const useClassStore = create<ClassState>()(
       selectedClass: null,
       classXp: 0,
       hydrated: false,
+      isLoadingCloud: false,
       hydrationError: null,
-      pantheon: createEmptyPantheon(), // 🆕 Initialisation du Panthéon
+      pantheon: createEmptyPantheon(),
 
       setHydrated: () => set({ hydrated: true }),
       setHydrationError: (error) => set({ hydrationError: error }),
 
-      selectClass: (classId) => {
-        // 🛡️ IMPORTANT : On NE réinitialise PAS le panthéon lors du changement de classe.
-        // Seul l'XP de la classe active est réinitialisé.
-        set({ selectedClass: classId, classXp: 0 });
-      },
-
-      addClassXp: (xp) => {
-        const state = get();
-        const newClassXp = state.classXp + xp;
-        const selectedClass = state.selectedClass;
-
-        // 🏛️ Mise à jour du Panthéon si nouveau record de niveau
-        let newPantheon = state.pantheon;
-        if (selectedClass) {
-          const newLevel = getClassLevelProgress(newClassXp).currentLevel;
-          const currentMax = state.pantheon[selectedClass];
-          
-          if (newLevel > currentMax) {
-            newPantheon = {
-              ...state.pantheon,
-              [selectedClass]: newLevel,
-            };
-          }
+      // ✅ 1. CHARGEMENT DEPUIS LE CLOUD
+      loadFromCloud: async () => {
+        const user = await getCurrentUser();
+        if (!user) {
+          set({ isLoadingCloud: false, hydrated: true });
+          return;
         }
 
-        set({
-          classXp: newClassXp,
-          pantheon: newPantheon,
-        });
+        set({ isLoadingCloud: true });
+        try {
+          // On récupère TOUTES les classes de l'utilisateur pour reconstruire le Panthéon
+          const { data, error } = await supabase
+            .from('user_classes')
+            .select('*')
+            .eq('user_id', user.id);
+
+          if (error) throw error;
+
+          if (data && data.length > 0) {
+            const newPantheon = createEmptyPantheon();
+            const currentState = get();
+            let activeClassXp = currentState.classXp;
+
+            // Reconstruction du Panthéon et récupération de l'XP de la classe active
+            data.forEach((row) => {
+              const cId = row.class_id as CharacterClass;
+              newPantheon[cId] = Math.max(newPantheon[cId], row.class_level);
+              
+              // Si cette ligne correspond à la classe actuellement sélectionnée en local, on sync son XP
+              if (currentState.selectedClass && cId === currentState.selectedClass) {
+                activeClassXp = row.class_xp;
+              }
+            });
+
+            set({
+              pantheon: newPantheon,
+              classXp: activeClassXp,
+              isLoadingCloud: false,
+              hydrated: true,
+            });
+          } else {
+            set({ isLoadingCloud: false, hydrated: true });
+          }
+        } catch (error) {
+          console.error('Erreur chargement classe cloud:', error);
+          set({ 
+            hydrationError: error instanceof Error ? error.message : String(error),
+            isLoadingCloud: false,
+            hydrated: true 
+          });
+        }
       },
 
-      resetClass: () => {
-        // 🛡️ resetClass NE touche PAS au panthéon
+      // ✅ 2. HELPER DE SYNCHRONISATION
+      _syncClassToCloud: async () => {
+        const user = await getCurrentUser();
+        const state = get();
+        if (!user || !state.selectedClass) return;
+
+        const currentLevel = getClassLevelProgress(state.classXp).currentLevel;
+
+        if (offlineSync.isCurrentlyOnline()) {
+          const { error } = await supabase.from('user_classes').upsert({
+            user_id: user.id,
+            class_id: state.selectedClass,
+            class_xp: state.classXp,
+            class_level: currentLevel,
+            // Note: chosen_at n'est pas mis à jour ici pour préserver la date de choix initiale 
+          }, { onConflict: 'user_id,class_id' });
+
+          if (error) console.error('Échec sync classe:', error);
+        } else {
+          offlineSync.addPendingOperation({
+            type: 'class_sync',
+            payload: { classId: state.selectedClass, xp: state.classXp, level: currentLevel },
+          });
+        }
+      },
+
+      // ✅ 3. ACTIONS AVEC MISE À JOUR OPTIMISTE
+      selectClass: async (classId) => {
+        // Mise à jour locale immédiate
+        set({ selectedClass: classId, classXp: 0 });
+        // Synchronisation en arrière-plan
+        await get()._syncClassToCloud();
+      },
+
+      addClassXp: async (xp) => {
+        // Mise à jour locale immédiate (avec logique Panthéon)
+        set((state) => {
+          const newClassXp = state.classXp + xp;
+          const selectedClass = state.selectedClass;
+          let newPantheon = state.pantheon;
+
+          if (selectedClass) {
+            const newLevel = getClassLevelProgress(newClassXp).currentLevel;
+            const currentMax = state.pantheon[selectedClass];
+            
+            if (newLevel > currentMax) {
+              newPantheon = { ...state.pantheon, [selectedClass]: newLevel };
+            }
+          }
+
+          return { classXp: newClassXp, pantheon: newPantheon };
+        });
+        
+        // Synchronisation en arrière-plan
+        await get()._syncClassToCloud();
+      },
+
+      resetClass: async () => {
         set({ selectedClass: null, classXp: 0 });
+        // Pas de sync nécessaire ici, car selectedClass est null
       },
 
       hasClass: () => !!get().selectedClass,
@@ -177,14 +263,10 @@ export const useClassStore = create<ClassState>()(
 // HOOKS SÉLECTEURS
 // ═══════════════════════════════════════════════════════════
 
-export const useSelectedClass = () =>
-  useClassStore((s) => s.selectedClass);
-
-export const useClassXp = () =>
-  useClassStore((s) => s.classXp);
-
-export const useClassHydrated = () =>
-  useClassStore((s) => s.hydrated);
+export const useSelectedClass = () => useClassStore((s) => s.selectedClass);
+export const useClassXp = () => useClassStore((s) => s.classXp);
+export const useClassHydrated = () => useClassStore((s) => s.hydrated);
+export const useClassIsLoadingCloud = () => useClassStore((s) => s.isLoadingCloud);
 
 export const useClassProgress = () =>
   useClassStore((s) => {
@@ -198,10 +280,6 @@ export const useClassMetadata = () =>
     return getClassMetadata(s.selectedClass);
   });
 
-// 🏛️ Hook pour accéder au Panthéon complet
-export const usePantheon = () =>
-  useClassStore((s) => s.pantheon);
-
-// 🏛️ Hook pour accéder au niveau max d'une classe spécifique
+export const usePantheon = () => useClassStore((s) => s.pantheon);
 export const usePantheonLevel = (classId: CharacterClass) =>
   useClassStore((s) => s.pantheon[classId] || 0);
