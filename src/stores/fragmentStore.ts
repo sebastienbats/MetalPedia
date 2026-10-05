@@ -1,24 +1,33 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { createStore, set as idbSet, get as idbGet, del as idbDel } from 'idb-keyval';
+import { supabase } from '@/lib/supabase';
+import { getCurrentUser } from '@/api/authApi';
+import { offlineSync } from '@/lib/offline-sync';
 import { useNotificationStore } from './notificationStore';
-import { useAchievementStore } from './achievementStore'; // 🆕 Import pour les succès
-import { TIMELINE_TABLES } from '@/lib/gamification/timeline-badges'; // 🆕 Tables centralisées
+import { useAchievementStore } from './achievementStore';
+import { TIMELINE_TABLES } from '@/lib/gamification/timeline-badges';
+
+const idbStore = createStore('metalpedia', 'fragments');
 
 // ═══════════════════════════════════════════════════════════
 // INTERFACE DU STORE
 // ═══════════════════════════════════════════════════════════
 interface FragmentState {
   collectedIds: number[];
-  collectFragment: (id: number) => boolean; // Retourne true si c'est une nouvelle collecte
+  isLoadingCloud: boolean; // ✅ NOUVEAU
+
+  // Actions
+  loadFromCloud: () => Promise<void>; // ✅ NOUVEAU
+  collectFragment: (id: number) => Promise<boolean>; // ✅ Rendu async
   isCollected: (id: number) => boolean;
-  resetProgress: () => void; // Utile pour tester ou reset le compte
+  _syncFragmentsToCloud: () => Promise<void>; // ✅ NOUVEAU
+  resetProgress: () => Promise<void>; // ✅ Rendu async
 }
 
 // ═══════════════════════════════════════════════════════════
-// HELPER : Détection de Table complète
+// HELPER : Détection de Table complète (Inchangé, c'est parfait !)
 // ═══════════════════════════════════════════════════════════
-// Appelée APRÈS chaque nouvelle collecte pour vérifier
-// si une Table vient d'être complétée.
 function checkTableCompletion(
   collectedIds: number[],
   previousIds: number[],
@@ -27,48 +36,38 @@ function checkTableCompletion(
   for (const [pillar, table] of Object.entries(TIMELINE_TABLES)) {
     const ids = table.ids;
     
-    // Vérifier si ce fragment appartient à cette Table
     if (!ids.includes(newId)) continue;
 
-    // Table était-elle complète AVANT ?
     const wasComplete = ids.every((id) => previousIds.includes(id));
-    // Table est-elle complète MAINTENANT ?
     const isNowComplete = ids.every((id) => collectedIds.includes(id));
 
     if (!wasComplete && isNowComplete) {
-      // 🎉 Table complète ! Déclencher la célébration
-      // avec un délai pour laisser le toast du fragment s'afficher
       setTimeout(() => {
-        // Vérifier si TOUTES les tables sont complètes (Grand Sage)
         const allTablesComplete = Object.values(TIMELINE_TABLES).every((t) =>
           t.ids.every((id) => collectedIds.includes(id))
         );
 
         if (allTablesComplete) {
-          // 🏆 Célébration ultime : toutes les Tables complètes
           useNotificationStore.getState().triggerCelebration({
             type: 'all_tables',
             icon: '👑',
             title: 'Grand Sage du Metalverse',
-            subtitle:
-              'Tu as gravé les 85 fragments. Les Neuf Genres te couronnent. Ta légende est éternelle.',
+            subtitle: 'Tu as gravé les 85 fragments. Les Neuf Genres te couronnent. Ta légende est éternelle.',
             fragmentsCollected: collectedIds.length,
           });
         } else {
-          // 🏆 Célébration de Table
           useNotificationStore.getState().triggerCelebration({
             type: 'table_complete',
             pillar,
             icon: table.icon || '📜',
             title: `Table du ${pillar} Complète !`,
-            subtitle:
-              'Les Anciens gravent ton nom dans la Légende du Metalverse.',
+            subtitle: 'Les Anciens gravent ton nom dans la Légende du Metalverse.',
             fragmentsCollected: ids.length,
           });
         }
       }, 800);
 
-      break; // Une seule Table peut être complétée à la fois
+      break;
     }
   }
 }
@@ -80,36 +79,149 @@ export const useFragmentStore = create<FragmentState>()(
   persist(
     (set, get) => ({
       collectedIds: [],
+      isLoadingCloud: false,
 
-      collectFragment: (id) => {
+      // ✅ 1. CHARGEMENT DEPUIS LE CLOUD
+      loadFromCloud: async () => {
+        const user = await getCurrentUser();
+        if (!user) {
+          set({ isLoadingCloud: false });
+          return;
+        }
+
+        set({ isLoadingCloud: true });
+        try {
+          const { data, error } = await supabase
+            .from('user_fragments')
+            .select('fragment_id')
+            .eq('user_id', user.id);
+
+          if (error) throw error;
+
+          if (data) {
+            const cloudIds = data.map((row) => row.fragment_id);
+            set((state) => {
+              // Fusion avec l'existant (pour préserver les collectes hors ligne)
+              const mergedIds = Array.from(new Set([...state.collectedIds, ...cloudIds]));
+              return { collectedIds: mergedIds, isLoadingCloud: false };
+            });
+
+            // Si on charge des fragments du cloud, on vérifie aussi les succès
+            if (cloudIds.length > 0) {
+              setTimeout(() => {
+                useAchievementStore.getState().checkTimelineAchievements(get().collectedIds);
+              }, 100);
+            }
+          } else {
+            set({ isLoadingCloud: false });
+          }
+        } catch (error) {
+          console.error('Erreur chargement fragments cloud:', error);
+          set({ isLoadingCloud: false });
+        }
+      },
+
+      // ✅ 2. HELPER DE SYNCHRONISATION
+      _syncFragmentsToCloud: async () => {
+        const user = await getCurrentUser();
+        if (!user) return;
+
+        const currentIds = get().collectedIds;
+        if (offlineSync.isCurrentlyOnline()) {
+          const payload = currentIds.map((id) => ({
+            user_id: user.id,
+            fragment_id: id,
+          }));
+
+          const { error } = await supabase.from('user_fragments').upsert(payload, {
+            onConflict: 'user_id, fragment_id',
+          });
+
+          if (error) console.error('Échec sync fragments:', error);
+        } else {
+          offlineSync.addPendingOperation({
+            type: 'fragments_sync',
+            payload: currentIds,
+          });
+        }
+      },
+
+      // ✅ 3. ACTION AVEC MISE À JOUR OPTIMISTE + CÉLÉBRATION
+      collectFragment: async (id) => {
         const previousIds = get().collectedIds;
         const isAlreadyCollected = previousIds.includes(id);
 
         if (!isAlreadyCollected) {
           const newIds = [...previousIds, id];
+          
+          // A. Mise à jour locale immédiate
           set({ collectedIds: newIds });
 
-          // ✅ Vérifier si une Table vient d'être complétée (célébration)
+          // B. Vérifier si une Table vient d'être complétée
           checkTableCompletion(newIds, previousIds, id);
 
-          // 🆕 Vérifier les succès Timeline (badges)
-          // Délai pour laisser la célébration s'afficher en premier
+          // C. Vérifier les succès Timeline (badges)
           setTimeout(() => {
             useAchievementStore.getState().checkTimelineAchievements(newIds);
           }, 100);
 
-          return true; // Nouvelle collecte !
+          // D. Synchronisation en arrière-plan
+          await get()._syncFragmentsToCloud();
+
+          return true;
         }
 
-        return false; // Déjà collecté
+        return false;
       },
 
       isCollected: (id) => get().collectedIds.includes(id),
 
-      resetProgress: () => set({ collectedIds: [] }),
+      resetProgress: async () => {
+        // A. Mise à jour locale immédiate
+        set({ collectedIds: [] });
+        
+        // B. Nettoyer aussi côté cloud si l'utilisateur est connecté
+        const user = await getCurrentUser();
+        if (user) {
+          await supabase.from('user_fragments').delete().eq('user_id', user.id);
+        }
+      },
     }),
     {
-      name: 'metalverse-fragments-storage', // Clé dans le localStorage
+      name: 'metalverse-fragments-storage',
+      storage: createJSONStorage(() => ({
+        getItem: async (name) => {
+          try {
+            const value = await idbGet(name, idbStore);
+            return value ? JSON.parse(value) : null;
+          } catch { return null; }
+        },
+        setItem: async (name, value) => {
+          try { await idbSet(name, JSON.stringify(value), idbStore); }
+          catch (err) { console.error('Failed to persist fragments:', err); }
+        },
+        removeItem: async (name) => {
+          try { await idbDel(name, idbStore); }
+          catch (err) { console.error('Failed to remove fragments:', err); }
+        },
+      })),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // On ne met pas hydrated: true ici car loadFromCloud gérera l'état final
+        }
+      },
     }
   )
 );
+
+// ═══════════════════════════════════════════════════════════
+// HOOKS SÉLECTEURS
+// ═══════════════════════════════════════════════════════════
+export const useCollectedFragments = () =>
+  useFragmentStore((s) => s.collectedIds);
+
+export const useFragmentCount = () =>
+  useFragmentStore((s) => s.collectedIds.length);
+
+export const useFragmentIsLoading = () =>
+  useFragmentStore((s) => s.isLoadingCloud);
