@@ -188,15 +188,16 @@ export const useGamificationStore = create<GamificationState>()(
             set((state) => ({
               stats: {
                 ...state.stats,
-                totalXP: data.total_xp,
-                level: data.level,
-                totalViews: data.total_views,
-                totalFavorites: data.total_favorites,
-                totalReviews: data.total_reviews,
-                genresExplored: data.genres_explored || [],
-                questsCompleted: data.quests_completed || [],
-                badgesUnlocked: data.badges_unlocked || [],
-                lastDailyBonus: data.last_daily_bonus, // ✅ Anti-cheat bonus quotidien
+                // ✅ CORRECTION : Fallbacks pour éviter les types 'number | null'
+                totalXP: data.total_xp ?? 0,
+                level: data.level ?? 1,
+                totalViews: data.total_views ?? 0,
+                totalFavorites: data.total_favorites ?? 0,
+                totalReviews: data.total_reviews ?? 0,
+                genresExplored: data.genres_explored ?? [],
+                questsCompleted: data.quests_completed ?? [],
+                badgesUnlocked: data.badges_unlocked ?? [],
+                lastDailyBonus: data.last_daily_bonus ?? null,
               },
             }));
           }
