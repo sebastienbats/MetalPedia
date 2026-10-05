@@ -108,32 +108,36 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
 
   // ✅ XP GLOBALE + MAÎTRISE + NOTIFICATION : Révélation
   useEffect(() => {
-    if (activeTab === 'class' && hasExclusiveLore && event) {
-      // XP Globale (1.5× l'XP de l'événement)
-      const globalXp = Math.floor(event.xp * 1.5);
-      recordTimelineEvent(event.id, 'revelation', globalXp);
+    const triggerRevelation = async () => {
+      if (activeTab === 'class' && hasExclusiveLore && event) {
+        // XP Globale (1.5× l'XP de l'événement)
+        const globalXp = Math.floor(event.xp * 1.5);
+        recordTimelineEvent(event.id, 'revelation', globalXp);
 
-      // XP de Maîtrise de Classe (XP de base de l'événement)
-      addClassXp(event.xp);
+        // XP de Maîtrise de Classe (XP de base de l'événement)
+        addClassXp(event.xp);
 
-      // Collecte automatique du fragment
-      const isNew = collectFragment(event.id);
-      if (isNew) {
-        // 🆕 Notification toast
-        pushNotification({
-          type: 'fragment',
-          rarity: 'epique',
-          icon: event.icon || '🔮',
-          title: `${event.fragment_title || 'Fragment'} gravé !`,
-          description: `Table ${event.pillar} • ${event.rune || '✦'}`,
-          xpGained: globalXp + event.xp,
-          duration: 5000,
-        });
+        // Collecte automatique du fragment
+        const isNew = await collectFragment(event.id); // ✅ CORRECTION : Ajout de await
+        if (isNew) {
+          // 🆕 Notification toast
+          pushNotification({
+            type: 'fragment',
+            rarity: 'epique',
+            icon: event.icon || '🔮',
+            title: `${event.fragment_title || 'Fragment'} gravé !`,
+            description: `Table ${event.pillar} • ${event.rune || '✦'}`,
+            xpGained: globalXp + event.xp,
+            duration: 5000,
+          });
 
-        setShowCollectAnimation(true);
-        setTimeout(() => setShowCollectAnimation(false), 3500);
+          setShowCollectAnimation(true);
+          setTimeout(() => setShowCollectAnimation(false), 3500);
+        }
       }
-    }
+    };
+
+    triggerRevelation();
   }, [activeTab, hasExclusiveLore, event, recordTimelineEvent, addClassXp, collectFragment, pushNotification]);
 
   // ═══════════════════════════════════════════════════════════
@@ -164,9 +168,10 @@ export default function LoreModal({ event, onClose }: LoreModalProps) {
   // ═══════════════════════════════════════════════════════════
   // GESTIONNAIRE DE COLLECTE MANUELLE (fallback)
   // ═══════════════════════════════════════════════════════════
-  const handleCollectFragment = () => {
+  const handleCollectFragment = async () => { // ✅ CORRECTION : Ajout de async
     if (!event) return;
-    const isNew = collectFragment(event.id);
+    const isNew = await collectFragment(event.id); // ✅ CORRECTION : Ajout de await
+    
     if (isNew) {
       // 🆕 Notification toast aussi pour la collecte manuelle
       const globalXp = Math.floor(event.xp * 1.5);
