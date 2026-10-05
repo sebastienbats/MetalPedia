@@ -653,9 +653,10 @@ export const useGamificationStore = create<GamificationState>()(
 
       dismissTrial: () => set({ pendingTrial: null }),
 
+      // ✅ CORRECTION : Utilisation de la méthode correcte du gestionnaire offlineSync
       syncToCloud: async () => {
         console.log('🔄 Synchronisation manuelle de la gamification...');
-        if (offlineSync.processQueue) await offlineSync.processQueue();
+        await offlineSync.syncPendingOperations();
       },
 
       getLevelProgress: () => getLevelProgress(get().stats.totalXP),
