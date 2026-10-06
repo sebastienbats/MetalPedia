@@ -1,27 +1,26 @@
 'use client';
 
 import { useGamificationStore } from '@/stores/gamificationStore';
-import { useFavoritesCount } from '@/stores/favoritesStore'; // ✅ AJOUT : Source de vérité unique pour les favoris
+import { useFavoritesCount } from '@/stores/favoritesStore';
+import { useTotalViews } from '@/stores/statsStore'; // ✅ AJOUT : Source de vérité unique pour les vues
 import { useAuth } from '@/api/authApi';
 import { RANKS } from '@/lib/gamification/lore';
 
 export default function PlayerCard() {
   const { data: user } = useAuth();
   
-  // ✅ 1. Écouter l'état de chargement global (déclenché par le Header)
   const isLoading = useGamificationStore((s) => s.isLoadingCloud);
   
-  // ✅ 2. Lire le nombre de favoris DIRECTEMENT depuis le store des favoris (comme le Header)
+  // ✅ Sources de vérité uniques (comme le Header)
   const favCount = useFavoritesCount();
+  const totalViews = useTotalViews(); // ✅ Lit directement depuis le statsStore synchronisé
 
-  // ✅ 3. Utiliser des sélecteurs précis pour les autres stats de gamification
   const stats = useGamificationStore((s) => s.stats);
   const progress = useGamificationStore((s) => s.getLevelProgress());
   const unlockedBadges = useGamificationStore((s) => s.getUnlockedBadges());
 
   const nextRank = RANKS.find((r) => r.level > stats.level);
 
-  // ✅ 4. Gérer l'état non connecté
   if (!user) {
     return (
       <div className="metal-card p-6 border-2 border-metal-gray text-center">
@@ -30,7 +29,6 @@ export default function PlayerCard() {
     );
   }
 
-  // ✅ 5. Afficher un état de chargement pendant la synchro cloud
   if (isLoading) {
     return (
       <div className="metal-card p-6 border-2 border-metal-gray animate-pulse">
@@ -52,7 +50,6 @@ export default function PlayerCard() {
     );
   }
 
-  // ✅ 6. Affichage des données réelles
   return (
     <div className="metal-card p-1.5 border-2 border-metal-gray">
       <div className="mb-4 flex items-center gap-2">
@@ -86,30 +83,29 @@ export default function PlayerCard() {
         </div>
       </div>
 
-      {/* Stats rapides */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {/* ✅ CORRECTION : Utilisation de totalViews du statsStore (synchronisé avec Supabase) */}
         <div className="bg-metal-black/50 rounded-lg p-3 text-center border border-metal-gray/30">
-          <div className="text-2xl font-bold text-metal-fire">{stats.totalViews}</div>
+          <div className="text-2xl font-bold text-metal-fire">{totalViews}</div>
           <div className="text-xs text-gray-400">Groupes vus</div>
         </div>
         
-        {/* ✅ CORRECTION : Utilisation de favCount au lieu de stats.totalFavorites */}
         <div className="bg-metal-black/50 rounded-lg p-3 text-center border border-metal-gray/30">
           <div className="text-2xl font-bold text-metal-fire">{favCount}</div>
           <div className="text-xs text-gray-400">Favoris</div>
         </div>
-
+        
         <div className="bg-metal-black/50 rounded-lg p-3 text-center border border-metal-gray/30">
           <div className="text-2xl font-bold text-metal-fire">{stats.totalReviews}</div>
           <div className="text-xs text-gray-400">Reviews</div>
         </div>
+        
         <div className="bg-metal-black/50 rounded-lg p-3 text-center border border-metal-gray/30">
           <div className="text-2xl font-bold text-metal-fire">{unlockedBadges.length}</div>
           <div className="text-xs text-gray-400">Reliques</div>
         </div>
       </div>
 
-      {/* Progression XP */}
       <div>
         <div className="flex justify-between text-sm mb-2">
           <span className="text-gray-400">XP Total : {stats.totalXP.toLocaleString('fr-FR')}</span>
