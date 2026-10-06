@@ -32,18 +32,18 @@ interface ClassState {
   selectedClass: CharacterClass | null;
   classXp: number;
   hydrated: boolean;
-  isLoadingCloud: boolean; // ✅ NOUVEAU
+  isLoadingCloud: boolean;
   hydrationError: string | null;
 
   // 🏛️ Panthéon des Anciens
   pantheon: Pantheon;
 
   // Actions
-  loadFromCloud: () => Promise<void>; // ✅ NOUVEAU
+  loadFromCloud: () => Promise<void>;
   selectClass: (classId: CharacterClass) => Promise<void>;
   addClassXp: (xp: number) => Promise<void>;
   resetClass: () => Promise<void>;
-  _syncClassToCloud: () => Promise<void>; // ✅ NOUVEAU (Helper interne)
+  _syncClassToCloud: () => Promise<void>;
   setHydrated: () => void;
   setHydrationError: (error: string | null) => void;
 
@@ -78,7 +78,6 @@ export const useClassStore = create<ClassState>()(
 
         set({ isLoadingCloud: true });
         try {
-          // On récupère TOUTES les classes de l'utilisateur pour reconstruire le Panthéon
           const { data, error } = await supabase
             .from('user_classes')
             .select('*')
@@ -91,12 +90,10 @@ export const useClassStore = create<ClassState>()(
             const currentState = get();
             let activeClassXp = currentState.classXp;
 
-            // Reconstruction du Panthéon et récupération de l'XP de la classe active
             data.forEach((row) => {
               const cId = row.class_id as CharacterClass;
               newPantheon[cId] = Math.max(newPantheon[cId], row.class_level);
               
-              // Si cette ligne correspond à la classe actuellement sélectionnée en local, on sync son XP
               if (currentState.selectedClass && cId === currentState.selectedClass) {
                 activeClassXp = row.class_xp;
               }
@@ -135,7 +132,6 @@ export const useClassStore = create<ClassState>()(
             class_id: state.selectedClass,
             class_xp: state.classXp,
             class_level: currentLevel,
-            // Note: chosen_at n'est pas mis à jour ici pour préserver la date de choix initiale 
           }, { onConflict: 'user_id,class_id' });
 
           if (error) console.error('Échec sync classe:', error);
@@ -149,14 +145,11 @@ export const useClassStore = create<ClassState>()(
 
       // ✅ 3. ACTIONS AVEC MISE À JOUR OPTIMISTE
       selectClass: async (classId) => {
-        // Mise à jour locale immédiate
         set({ selectedClass: classId, classXp: 0 });
-        // Synchronisation en arrière-plan
         await get()._syncClassToCloud();
       },
 
       addClassXp: async (xp) => {
-        // Mise à jour locale immédiate (avec logique Panthéon)
         set((state) => {
           const newClassXp = state.classXp + xp;
           const selectedClass = state.selectedClass;
@@ -174,13 +167,11 @@ export const useClassStore = create<ClassState>()(
           return { classXp: newClassXp, pantheon: newPantheon };
         });
         
-        // Synchronisation en arrière-plan
         await get()._syncClassToCloud();
       },
 
       resetClass: async () => {
         set({ selectedClass: null, classXp: 0 });
-        // Pas de sync nécessaire ici, car selectedClass est null
       },
 
       hasClass: () => !!get().selectedClass,
@@ -212,7 +203,7 @@ export const useClassStore = create<ClassState>()(
       name: 'metalpedia-user-class',
       storage: createJSONStorage(() => ({
         getItem: async (name) => {
-          // 🛡️ SSR Guard : Si on est sur le serveur, on ne touche pas à IndexedDB
+          // 🛡️ SSR Guard
           if (typeof window === 'undefined') return null;
           try {
             const value = await idbGet(name, idbStore);
@@ -220,15 +211,19 @@ export const useClassStore = create<ClassState>()(
             
             const parsed = JSON.parse(value);
             
-            // 🛡️ Migration : s'assurer que le panthéon existe pour les anciens utilisateurs
-            if (!parsed.state.pantheon) {
-              parsed.state.pantheon = createEmptyPantheon();
+            // 🛡️ VÉRIFICATION ROBUSTE ULTIME : Empêche le crash "Cannot read properties of undefined"
+            if (parsed && parsed.state) {
+              if (!parsed.state.pantheon) {
+                parsed.state.pantheon = createEmptyPantheon();
+              }
+              return parsed;
             }
             
-            return parsed;
+            // Si la structure est corrompue, on retourne null pour forcer une réinitialisation propre
+            return null;
           } catch (error) {
             console.error('Failed to read class from IndexedDB:', error);
-            return null; // ✅ Retourne null au lieu de throw pour éviter le crash SSR
+            return null;
           }
         },
         setItem: async (name, value) => {
@@ -236,8 +231,11 @@ export const useClassStore = create<ClassState>()(
           if (typeof window === 'undefined') return;
           try {
             await idbSet(name, JSON.stringify(value), idbStore);
-          } catch (err) {
-            console.error('Failed to persist class:', err);
+          } catch (err: any) {
+            // Ignore silencieusement les erreurs de structure corrompue (NotFoundError)
+            if (err?.name !== 'NotFoundError') {
+              console.error('Failed to persist class:', err);
+            }
           }
         },
         removeItem: async (name) => {
@@ -245,8 +243,10 @@ export const useClassStore = create<ClassState>()(
           if (typeof window === 'undefined') return;
           try {
             await idbDel(name, idbStore);
-          } catch (err) {
-            console.error('Failed to remove class:', err);
+          } catch (err: any) {
+            if (err?.name !== 'NotFoundError') {
+              console.error('Failed to remove class:', err);
+            }
           }
         },
       })),
