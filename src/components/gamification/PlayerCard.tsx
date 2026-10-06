@@ -2,26 +2,22 @@
 
 import { useGamificationStore } from '@/stores/gamificationStore';
 import { useAuth } from '@/api/authApi';
-import { useGamificationCloudSync } from '@/hooks/useGamificationCloudSync'; // ✅ Assure la synchro
 import { RANKS } from '@/lib/gamification/lore';
 
 export default function PlayerCard() {
   const { data: user } = useAuth();
   
-  // ✅ 1. Déclenche la synchronisation cloud dès que ce composant est monté et que l'utilisateur est connecté
-  useGamificationCloudSync();
-
-  // ✅ 2. Écouter l'état de chargement pour afficher un squelette
+  // ✅ 1. Écouter l'état de chargement global (déclenché par le Header)
   const isLoading = useGamificationStore((s) => s.isLoadingCloud);
   
-  // ✅ 3. Utiliser des sélecteurs précis pour forcer le re-rendu quand les données arrivent du cloud
+  // ✅ 2. Utiliser des sélecteurs précis pour forcer le re-rendu quand les données arrivent
   const stats = useGamificationStore((s) => s.stats);
   const progress = useGamificationStore((s) => s.getLevelProgress());
   const unlockedBadges = useGamificationStore((s) => s.getUnlockedBadges());
 
   const nextRank = RANKS.find((r) => r.level > stats.level);
 
-  // ✅ 4. Gérer l'état non connecté
+  // ✅ 3. Gérer l'état non connecté
   if (!user) {
     return (
       <div className="metal-card p-6 border-2 border-metal-gray text-center">
@@ -30,7 +26,7 @@ export default function PlayerCard() {
     );
   }
 
-  // ✅ 5. Afficher un état de chargement pendant la synchro cloud (évite d'afficher "Niveau 1" par défaut)
+  // ✅ 4. Afficher un état de chargement pendant la synchro cloud (évite d'afficher "Niveau 1" par défaut)
   if (isLoading) {
     return (
       <div className="metal-card p-6 border-2 border-metal-gray animate-pulse">
@@ -52,10 +48,9 @@ export default function PlayerCard() {
     );
   }
 
-  // ✅ 6. Affichage des données réelles (une fois chargées)
+  // ✅ 5. Affichage des données réelles (une fois chargées par le Header)
   return (
     <div className="metal-card p-1.5 border-2 border-metal-gray">
-      {/* 🆕 Badge de distinction */}
       <div className="mb-4 flex items-center gap-2">
         <span className="px-2 py-1 bg-metal-gray/30 text-gray-300 text-[10px] font-bold rounded uppercase tracking-wider border border-metal-gray">
           🌍 Progression Globale
@@ -87,7 +82,6 @@ export default function PlayerCard() {
         </div>
       </div>
 
-      {/* Stats rapides */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div className="bg-metal-black/50 rounded-lg p-3 text-center border border-metal-gray/30">
           <div className="text-2xl font-bold text-metal-fire">{stats.totalViews}</div>
@@ -107,7 +101,6 @@ export default function PlayerCard() {
         </div>
       </div>
 
-      {/* Progression XP */}
       <div>
         <div className="flex justify-between text-sm mb-2">
           <span className="text-gray-400">XP Total : {stats.totalXP.toLocaleString('fr-FR')}</span>
