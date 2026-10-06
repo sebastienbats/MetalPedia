@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/types/supabase';
 import { useFavoritesStore } from '@/stores/favoritesStore'; // ✅ Pour vider les favoris au logout
-import { useGamificationStore } from '@/stores/gamificationStore'; // ✅ NOUVEAU : Pour réinitialiser la gamification au logout
+import { useGamificationStore } from '@/stores/gamificationStore'; // ✅ Pour réinitialiser la gamification au logout
 
 // ═══════════════════════════════════════════════════════════
 // AUTHENTICATION HOOKS
@@ -108,7 +108,9 @@ export function useSignOut() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: () => supabase.auth.signOut(),
+    // ✅ CORRECTION : Ajout de { scope: 'global' } pour révoquer proprement la session
+    // et éviter les erreurs 400 (Bad Request) sur les refresh tokens obsolètes
+    mutationFn: () => supabase.auth.signOut({ scope: 'global' }),
     onSuccess: () => {
       // ✅ NOUVEAU : Réinitialiser les données de gamification à la déconnexion
       // pour éviter d'afficher les stats du précédent utilisateur avant le rechargement
