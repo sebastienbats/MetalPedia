@@ -156,11 +156,10 @@ export const useFavoritesStore = create<FavoritesState>()(
       isFavorite: (id) => !!get().favorites[id],
       clearAll: () => set({ favorites: {} }),
 
-      // ✅ 4. SYNCHRONISATION MANUELLE (Simplifiée pour éviter l'erreur TypeScript)
+      // ✅ 4. SYNCHRONISATION MANUELLE
       syncToCloud: async () => {
         console.log('🔄 Synchronisation des favoris en attente...');
         // La synchronisation est déjà gérée en temps réel dans add/remove.
-        // Si tu implémentes processQueue plus tard dans offline-sync.ts, tu pourras l'appeler ici.
       },
 
       getCount: () => Object.keys(get().favorites).length,
@@ -170,15 +169,19 @@ export const useFavoritesStore = create<FavoritesState>()(
       name: 'metalpedia-favorites',
       storage: createJSONStorage(() => ({
         getItem: async (name) => {
+          // 🛡️ SSR Guard : Si on est sur le serveur, on ne touche pas à IndexedDB
+          if (typeof window === 'undefined') return null;
           try {
             const value = await idbGet(name, idbStore);
             return value ? JSON.parse(value) : null;
           } catch (error) {
             console.error('Failed to read from IndexedDB:', error);
-            throw error;
+            return null; // ✅ Retourne null au lieu de throw pour éviter le crash d'hydratation
           }
         },
         setItem: async (name, value) => {
+          // 🛡️ SSR Guard
+          if (typeof window === 'undefined') return;
           try {
             await idbSet(name, JSON.stringify(value), idbStore);
           } catch (err) {
@@ -186,6 +189,8 @@ export const useFavoritesStore = create<FavoritesState>()(
           }
         },
         removeItem: async (name) => {
+          // 🛡️ SSR Guard
+          if (typeof window === 'undefined') return;
           try {
             await idbDel(name, idbStore);
           } catch (err) {
