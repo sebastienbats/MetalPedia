@@ -7,7 +7,7 @@ import { offlineSync } from '@/lib/offline-sync';
 import type { CharacterClass } from '@/types/api';
 import { getClassLevelProgress, getClassMetadata, getClassTitle, ALL_CLASSES } from '@/lib/gamification/classes';
 
-const idbStore = createStore('metalpedia', 'user-class');
+const idbStore = createStore('metalpedia-user-class', 'keyval');
 
 // ═══════════════════════════════════════════════════════════
 // TYPES & HELPERS
