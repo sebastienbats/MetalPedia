@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useFavoritesCount, useFavoritesHydration } from '@/stores/favoritesStore';
 import { useAuth, useSignOut } from '@/api/authApi';
+import { useGamificationCloudSync } from '@/hooks/useGamificationCloudSync'; // ✅ AJOUT
+import { useClassCloudSync } from '@/hooks/useClassCloudSync'; // ✅ AJOUT (si tu l'as créé)
 import SearchBar from '@/components/search/SearchBar';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 import PillarsDropdown from '@/components/layout/PillarsDropdown';
@@ -97,6 +99,12 @@ function UserMenu() {
 export default function Header() {
   const favCount = useFavoritesCount();
   const { isHydrated } = useFavoritesHydration();
+  const { data: user } = useAuth();
+
+  // ✅ NOUVEAU : Déclenche la synchronisation cloud pour TOUS les stores dès que le Header est monté
+  // Les hooks internes géreront eux-mêmes de ne lancer la requête que si user?.id existe
+  useGamificationCloudSync();
+  useClassCloudSync(); // Assure-toi d'avoir créé ce fichier sur le même modèle que useGamificationCloudSync
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-metal-black/90 border-b border-metal-gray">
@@ -108,13 +116,13 @@ export default function Header() {
             aria-label="MetalPedia — Accueil"
           >
             <Image
-  src="/icons/icon-192.png"
-  alt="MetalPedia Logo"
-  width={192}
-  height={192}
-  priority // ✅ Important : charge l'image en priorité car c'est dans le header (LCP)
-  className="w-8 h-8 sm:w-10 sm:h-10 object-contain drop-shadow-md" 
-/>
+              src="/icons/icon-192.png"
+              alt="MetalPedia Logo"
+              width={192}
+              height={192}
+              priority
+              className="w-8 h-8 sm:w-10 sm:h-10 object-contain drop-shadow-md" 
+            />
             <div className="hidden lg:block leading-tight">
               <h1 className="font-metal text-xl text-metal-rust group-hover:text-metal-fire transition-colors">
                 MetalPedia
@@ -128,8 +136,6 @@ export default function Header() {
           <div className="flex-1 min-w-0">
             <SearchBar />
           </div>
-
-          {/* ✅ RandomBandButton supprimé (maintenant dans SearchBar) */}
 
           <PillarsDropdown />
 
