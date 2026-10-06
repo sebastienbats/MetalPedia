@@ -8,7 +8,7 @@ import { useNotificationStore } from './notificationStore';
 import { useAchievementStore } from './achievementStore';
 import { TIMELINE_TABLES } from '@/lib/gamification/timeline-badges';
 
-const idbStore = createStore('metalpedia', 'fragments');
+const idbStore = createStore('metalpedia-fragments', 'keyval');
 
 // ═══════════════════════════════════════════════════════════
 // INTERFACE DU STORE
