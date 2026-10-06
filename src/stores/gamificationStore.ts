@@ -166,7 +166,7 @@ export const useGamificationStore = create<GamificationState>()(
       isLoadingCloud: false,
       hydrationError: null,
 
-      // ✅ 1. CHARGEMENT DEPUIS LE CLOUD (Version Debug)
+      // ✅ 1. CHARGEMENT DEPUIS LE CLOUD
       loadFromCloud: async () => {
         console.log('🚀 [GAMIFICATION] loadFromCloud déclenché');
         const user = await getCurrentUser();
@@ -690,16 +690,22 @@ export const useGamificationStore = create<GamificationState>()(
       name: 'metalpedia-gamification',
       storage: createJSONStorage(() => ({
         getItem: async (name) => {
+          // 🛡️ SSR Guard : Si on est sur le serveur, on ne touche pas à IndexedDB
+          if (typeof window === 'undefined') return null;
           try {
             const value = await idbGet(name, idbStore);
             return value ? JSON.parse(value) : null;
           } catch { return null; }
         },
         setItem: async (name, value) => {
+          // 🛡️ SSR Guard
+          if (typeof window === 'undefined') return;
           try { await idbSet(name, JSON.stringify(value), idbStore); }
           catch (err) { console.error('Failed to persist gamification:', err); }
         },
         removeItem: async (name) => {
+          // 🛡️ SSR Guard
+          if (typeof window === 'undefined') return;
           try { await idbDel(name, idbStore); }
           catch (err) { console.error('Failed to remove gamification:', err); }
         },
