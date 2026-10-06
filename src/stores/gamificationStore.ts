@@ -166,15 +166,21 @@ export const useGamificationStore = create<GamificationState>()(
       isLoadingCloud: false,
       hydrationError: null,
 
-      // ✅ 1. CHARGEMENT DEPUIS LE CLOUD
+      // ✅ 1. CHARGEMENT DEPUIS LE CLOUD (Version Debug)
       loadFromCloud: async () => {
+        console.log('🚀 [GAMIFICATION] loadFromCloud déclenché');
         const user = await getCurrentUser();
+        console.log('👤 [GAMIFICATION] Utilisateur récupéré par getCurrentUser:', user?.id || 'AUCUN (null)');
+
         if (!user) {
+          console.log('⚠️ [GAMIFICATION] Pas d\'utilisateur détecté, annulation du chargement cloud.');
           set({ isLoadingCloud: false });
           return;
         }
 
+        console.log('📡 [GAMIFICATION] Envoi de la requête Supabase pour user_id:', user.id);
         set({ isLoadingCloud: true });
+
         try {
           const { data, error } = await supabase
             .from('gamification_progress')
@@ -182,13 +188,18 @@ export const useGamificationStore = create<GamificationState>()(
             .eq('user_id', user.id)
             .single();
 
-          if (error && error.code !== 'PGRST116') throw error; // PGRST116 = pas de ligne, c'est OK
+          console.log('📦 [GAMIFICATION] Réponse brute de Supabase:', { data, error });
+
+          if (error && error.code !== 'PGRST116') { // PGRST116 = pas de ligne, ce n'est pas une erreur fatale
+            console.error('❌ [GAMIFICATION] Erreur Supabase détectée:', error);
+            throw error;
+          }
 
           if (data) {
+            console.log('✅ [GAMIFICATION] Données trouvées ! Fusion avec le state local...');
             set((state) => ({
               stats: {
                 ...state.stats,
-                // ✅ CORRECTION : Fallbacks pour éviter les types 'number | null'
                 totalXP: data.total_xp ?? 0,
                 level: data.level ?? 1,
                 totalViews: data.total_views ?? 0,
@@ -200,12 +211,16 @@ export const useGamificationStore = create<GamificationState>()(
                 lastDailyBonus: data.last_daily_bonus ?? null,
               },
             }));
+            console.log('🎉 [GAMIFICATION] State mis à jour avec succès avec les données du cloud !');
+          } else {
+            console.log('ℹ️ [GAMIFICATION] Aucune donnée en base pour cet utilisateur. On garde l\'état local.');
           }
         } catch (error) {
-          console.error('Erreur chargement gamification cloud:', error);
+          console.error('💥 [GAMIFICATION] Erreur fatale lors du chargement cloud:', error);
           set({ hydrationError: error instanceof Error ? error.message : String(error) });
         } finally {
           set({ isLoadingCloud: false });
+          console.log('🏁 [GAMIFICATION] Fin du processus loadFromCloud.');
         }
       },
 
