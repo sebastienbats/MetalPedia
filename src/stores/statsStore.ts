@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { getCurrentUser } from '@/api/authApi';
 import { offlineSync } from '@/lib/offline-sync';
 
-const idbStore = createStore('metalpedia', 'stats');
+const idbStore = createStore('metalpedia-stats', 'keyval');
 
 // ═══════════════════════════════════════════════════════════
 // TYPES
