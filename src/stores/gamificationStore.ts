@@ -22,7 +22,7 @@ import { useClassStore } from './classStore';
 import { getClassMetadata } from '@/lib/gamification/classes';
 import { type GamificationPillar } from '@/types/api';
 
-const idbStore = createStore('metalpedia', 'gamification');
+const idbStore = createStore('metalpedia-gamification', 'keyval');
 
 // ═══════════════════════════════════════════════════════════
 // SYSTÈME DE BONUS DE CLASSE
