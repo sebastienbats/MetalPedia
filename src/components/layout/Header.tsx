@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useFavoritesCount, useFavoritesHydration } from '@/stores/favoritesStore';
 import { useAuth, useSignOut } from '@/api/authApi';
-import { useGamificationCloudSync } from '@/hooks/useGamificationCloudSync'; // ✅ AJOUT
-import { useClassCloudSync } from '@/hooks/useClassCloudSync'; // ✅ AJOUT (si tu l'as créé)
+import { useGamificationCloudSync } from '@/hooks/useGamificationCloudSync';
+import { useClassCloudSync } from '@/hooks/useClassCloudSync';
+import { useStatsCloudSync } from '@/hooks/useStatsCloudSync'; // ✅ AJOUT : Pour synchroniser l'historique des vues
 import SearchBar from '@/components/search/SearchBar';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 import PillarsDropdown from '@/components/layout/PillarsDropdown';
@@ -101,10 +102,11 @@ export default function Header() {
   const { isHydrated } = useFavoritesHydration();
   const { data: user } = useAuth();
 
-  // ✅ NOUVEAU : Déclenche la synchronisation cloud pour TOUS les stores dès que le Header est monté
-  // Les hooks internes géreront eux-mêmes de ne lancer la requête que si user?.id existe
+  // ✅ NOUVEAU : Déclenche la synchronisation cloud pour TOUS les stores dès que le Header est monté.
+  // Les hooks internes géreront eux-mêmes de ne lancer la requête que si user?.id existe.
   useGamificationCloudSync();
-  useClassCloudSync(); // Assure-toi d'avoir créé ce fichier sur le même modèle que useGamificationCloudSync
+  useClassCloudSync();
+  useStatsCloudSync(); // ✅ AJOUT : Synchronise l'historique des vues (user_view_history)
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-metal-black/90 border-b border-metal-gray">
