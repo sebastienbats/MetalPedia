@@ -59,6 +59,8 @@ export default function FloatingRunes({
   boundaryFactor,
 }: FloatingRunesProps) {
   
+  // ✅ 1. TOUS LES HOOKS DOIVENT ÊTRE APPELÉS ICI, AVANT TOUT RETURN
+  
   const finalConfig = useMemo(() => {
     const presetConfig = preset ? RUNE_PRESETS[preset] : undefined;
     return {
@@ -72,24 +74,16 @@ export default function FloatingRunes({
     };
   }, [preset, family, count, maxScale, baseDuration, colorClass, opacityFactor, boundaryFactor]);
 
-  // 🛡️ 1. État pour savoir si on est côté client
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    // 🛡️ 2. On passe à true uniquement après le montage côté client
     setIsMounted(true);
   }, []);
 
-  // 🛡️ 3. Si on n'est pas encore monté, on ne rend RIEN (évite le mismatch d'hydratation)
-  if (!isMounted) {
-    return null;
-  }
-
-  const symbols = SYMBOL_FAMILIES[finalConfig.family];
-  
+  // Initialisation avec des valeurs par défaut pour éviter l'erreur "window is not defined" côté serveur
   const [dimensions, setDimensions] = useState({ 
-    width: window.innerWidth, 
-    height: window.innerHeight 
+    width: 1000, 
+    height: 1000 
   });
 
   useEffect(() => {
@@ -103,6 +97,8 @@ export default function FloatingRunes({
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
+
+  const symbols = SYMBOL_FAMILIES[finalConfig.family];
 
   const particles = useMemo(() => {
     return Array.from({ length: finalConfig.count }).map((_, i) => {
@@ -124,6 +120,12 @@ export default function FloatingRunes({
     });
   }, [finalConfig, dimensions, symbols]);
 
+  // ✅ 2. LE RETURN CONDITIONNEL DOIT ÊTRE APRÈS TOUS LES HOOKS
+  if (!isMounted) {
+    return null;
+  }
+
+  // ✅ 3. LE RENDU NORMAL
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
       {particles.map((p) => (
