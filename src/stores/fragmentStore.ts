@@ -191,16 +191,22 @@ export const useFragmentStore = create<FragmentState>()(
       name: 'metalverse-fragments-storage',
       storage: createJSONStorage(() => ({
         getItem: async (name) => {
+          // 🛡️ SSR Guard : Si on est sur le serveur, on ne touche pas à IndexedDB
+          if (typeof window === 'undefined') return null;
           try {
             const value = await idbGet(name, idbStore);
             return value ? JSON.parse(value) : null;
           } catch { return null; }
         },
         setItem: async (name, value) => {
+          // 🛡️ SSR Guard
+          if (typeof window === 'undefined') return;
           try { await idbSet(name, JSON.stringify(value), idbStore); }
           catch (err) { console.error('Failed to persist fragments:', err); }
         },
         removeItem: async (name) => {
+          // 🛡️ SSR Guard
+          if (typeof window === 'undefined') return;
           try { await idbDel(name, idbStore); }
           catch (err) { console.error('Failed to remove fragments:', err); }
         },
