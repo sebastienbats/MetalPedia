@@ -7,7 +7,7 @@ import { offlineSync } from '@/lib/offline-sync';
 import { TIMELINE_BADGES } from '@/lib/gamification/timeline-badges';
 import { useNotificationStore } from './notificationStore';
 
-const idbStore = createStore('metalpedia', 'achievements');
+const idbStore = createStore('metalpedia-achievements', 'keyval');
 
 // ═══════════════════════════════════════════════════════════
 // TYPES
