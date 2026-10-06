@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import type { Profile } from '@/types/supabase';
-import { useFavoritesStore } from '@/stores/favoritesStore'; // ✅ AJOUT : Pour vider les favoris au logout
+import { useFavoritesStore } from '@/stores/favoritesStore'; // ✅ Pour vider les favoris au logout
+import { useGamificationStore } from '@/stores/gamificationStore'; // ✅ NOUVEAU : Pour réinitialiser la gamification au logout
 
 // ═══════════════════════════════════════════════════════════
 // AUTHENTICATION HOOKS
@@ -109,6 +110,25 @@ export function useSignOut() {
   return useMutation({
     mutationFn: () => supabase.auth.signOut(),
     onSuccess: () => {
+      // ✅ NOUVEAU : Réinitialiser les données de gamification à la déconnexion
+      // pour éviter d'afficher les stats du précédent utilisateur avant le rechargement
+      useGamificationStore.setState({
+        stats: {
+          totalViews: 0, 
+          totalFavorites: 0, 
+          totalReviews: 0,
+          genresExplored: [], 
+          pillarVisits: {}, 
+          questsCompleted: [], 
+          badgesUnlocked: [],
+          totalXP: 0, 
+          level: 1, 
+          lastDailyBonus: null, 
+          trialsCompleted: 0,
+        },
+        xpHistory: [],
+      });
+
       // ✅ NOUVEAU : Vider les favoris locaux immédiatement à la déconnexion
       useFavoritesStore.getState().clearAll();
       
