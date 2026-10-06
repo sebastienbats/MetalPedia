@@ -1,15 +1,58 @@
 'use client';
 
 import { useGamificationStore } from '@/stores/gamificationStore';
+import { useAuth } from '@/api/authApi';
+import { useGamificationCloudSync } from '@/hooks/useGamificationCloudSync'; // ✅ Assure la synchro
 import { RANKS } from '@/lib/gamification/lore';
 
 export default function PlayerCard() {
-  const { stats } = useGamificationStore();
+  const { data: user } = useAuth();
+  
+  // ✅ 1. Déclenche la synchronisation cloud dès que ce composant est monté et que l'utilisateur est connecté
+  useGamificationCloudSync();
+
+  // ✅ 2. Écouter l'état de chargement pour afficher un squelette
+  const isLoading = useGamificationStore((s) => s.isLoadingCloud);
+  
+  // ✅ 3. Utiliser des sélecteurs précis pour forcer le re-rendu quand les données arrivent du cloud
+  const stats = useGamificationStore((s) => s.stats);
   const progress = useGamificationStore((s) => s.getLevelProgress());
   const unlockedBadges = useGamificationStore((s) => s.getUnlockedBadges());
 
   const nextRank = RANKS.find((r) => r.level > stats.level);
 
+  // ✅ 4. Gérer l'état non connecté
+  if (!user) {
+    return (
+      <div className="metal-card p-6 border-2 border-metal-gray text-center">
+        <p className="text-gray-400">Connecte-toi pour voir ta progression et débloquer des reliques.</p>
+      </div>
+    );
+  }
+
+  // ✅ 5. Afficher un état de chargement pendant la synchro cloud (évite d'afficher "Niveau 1" par défaut)
+  if (isLoading) {
+    return (
+      <div className="metal-card p-6 border-2 border-metal-gray animate-pulse">
+        <div className="h-4 bg-metal-gray/50 rounded w-1/3 mb-6"></div>
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-20 h-20 rounded-full bg-metal-gray/50"></div>
+          <div className="flex-1">
+            <div className="h-6 bg-metal-gray/50 rounded w-1/2 mb-2"></div>
+            <div className="h-4 bg-metal-gray/50 rounded w-1/4"></div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-20 bg-metal-gray/50 rounded-lg"></div>
+          ))}
+        </div>
+        <div className="h-4 bg-metal-gray/50 rounded-full w-full"></div>
+      </div>
+    );
+  }
+
+  // ✅ 6. Affichage des données réelles (une fois chargées)
   return (
     <div className="metal-card p-1.5 border-2 border-metal-gray">
       {/* 🆕 Badge de distinction */}
@@ -67,7 +110,6 @@ export default function PlayerCard() {
       {/* Progression XP */}
       <div>
         <div className="flex justify-between text-sm mb-2">
-          {/* ✅ CORRECTION : Ajout de 'fr-FR' pour éviter le mismatch d'hydratation */}
           <span className="text-gray-400">XP Total : {stats.totalXP.toLocaleString('fr-FR')}</span>
           <span className="text-metal-fire font-medium">
             {progress.nextLevelXP === Infinity
