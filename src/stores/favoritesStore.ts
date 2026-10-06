@@ -8,7 +8,7 @@ import { offlineSync } from '@/lib/offline-sync';
 import { useGamificationStore } from './gamificationStore';
 import type { BandSearchResult } from '@/types/api';
 
-const idbStore = createStore('metalpedia', 'favorites');
+const idbStore = createStore('metalpedia-favorites', 'keyval');
 
 interface FavoritesState {
   favorites: Record<number, BandSearchResult>;
