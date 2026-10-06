@@ -212,6 +212,8 @@ export const useClassStore = create<ClassState>()(
       name: 'metalpedia-user-class',
       storage: createJSONStorage(() => ({
         getItem: async (name) => {
+          // 🛡️ SSR Guard : Si on est sur le serveur, on ne touche pas à IndexedDB
+          if (typeof window === 'undefined') return null;
           try {
             const value = await idbGet(name, idbStore);
             if (!value) return null;
@@ -226,10 +228,12 @@ export const useClassStore = create<ClassState>()(
             return parsed;
           } catch (error) {
             console.error('Failed to read class from IndexedDB:', error);
-            throw error;
+            return null; // ✅ Retourne null au lieu de throw pour éviter le crash SSR
           }
         },
         setItem: async (name, value) => {
+          // 🛡️ SSR Guard
+          if (typeof window === 'undefined') return;
           try {
             await idbSet(name, JSON.stringify(value), idbStore);
           } catch (err) {
@@ -237,6 +241,8 @@ export const useClassStore = create<ClassState>()(
           }
         },
         removeItem: async (name) => {
+          // 🛡️ SSR Guard
+          if (typeof window === 'undefined') return;
           try {
             await idbDel(name, idbStore);
           } catch (err) {
