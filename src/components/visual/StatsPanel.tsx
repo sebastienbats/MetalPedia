@@ -77,7 +77,7 @@ export default function StatsPanel() {
     <div className="metal-card p-1.5 space-y-4">
       {/* Header */}
       <div>
-        <h3 className="font-metal text-2xl text-metal-fire mb-2 flex items-center gap-2">
+        <h3 className="font-serif text-xl mb-1">
           <span aria-hidden="true">🧬</span>
           Ton ADN Metal
         </h3>
