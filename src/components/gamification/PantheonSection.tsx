@@ -191,15 +191,15 @@ export default function PantheonSection() {
           style={{ background: 'radial-gradient(circle, #eab308 0%, transparent 70%)' }} 
         />
 
-        <div className="relative z-10">
+        <div className="relative z-10 text-center">
           {/* En-tête du Panthéon */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-3 pb-2 border-b border-yellow-600/20">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-2xl">🏛️</span>
-                <h2 className="font-metal text-xl sm:text-2xl text-yellow-500">
+                <h4 className="font-serif text-xl mb-1">
                   Le Panthéon
-                </h2>
+                </h4>
               </div>
               <p className="text-xs sm:text-sm text-gray-400 italic hidden sm:block">
                 « Les exploits de chaque voie restent gravés dans la pierre. »
