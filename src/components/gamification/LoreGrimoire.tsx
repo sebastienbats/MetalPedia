@@ -173,8 +173,8 @@ export default function LoreGrimoire() {
       {/* ── Bordure intérieure dorée ── */}
       <div className="absolute inset-3 border border-amber-800/20 rounded pointer-events-none" />
 
-      {/* ── Contenu principal (HAUTEUR FIXE pour éviter le layout shift) ── */}
-      <div className="relative z-10 p-6 md:p-8 h-[500px] md:h-[550px] flex flex-col">
+      {/* ── Contenu principal (HAUTEUR FIXE OPTIMISÉE pour contenir le chapitre le plus long) ── */}
+      <div className="relative z-10 p-6 md:p-8 h-[750px] md:h-[800px] flex flex-col">
         
         {/* En-tête du grimoire */}
         <div className="text-center mb-4 shrink-0">
@@ -184,20 +184,15 @@ export default function LoreGrimoire() {
           <div className="w-32 h-px bg-gradient-to-r from-transparent via-amber-700/40 to-transparent mx-auto" />
         </div>
 
-        {/* Zone de narration (animée et scrollable si nécessaire) */}
+        {/* Zone de narration (animée, centrée verticalement) */}
         <div
-          className={`flex-1 flex flex-col items-center justify-center text-center transition-all duration-600 overflow-y-auto pr-1 ${
+          className={`flex-1 flex flex-col items-center justify-center text-center transition-all duration-600 ${
             isFlipping
               ? direction === 'next'
                 ? 'opacity-0 translate-x-8 scale-95'
                 : 'opacity-0 -translate-x-8 scale-95'
               : 'opacity-100 translate-x-0 scale-100'
           }`}
-          style={{
-            // Stylisation native de la scrollbar pour Firefox
-            scrollbarWidth: 'thin',
-            scrollbarColor: 'rgba(180, 83, 9, 0.5) transparent',
-          }}
         >
           {/* Icône du chapitre */}
           <div className="text-5xl md:text-6xl mb-4 drop-shadow-lg animate-pulse-slow">
