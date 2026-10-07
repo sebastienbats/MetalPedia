@@ -70,9 +70,9 @@ export default function ClassMilestones() {
       <div className="relative z-10">
         {/* 📜 EN-TÊTE */}
         <div className="mb-6 pb-4 border-b border-metal-gray/50">
-          <h3 className="font-metal text-2xl text-gray-100 mb-2 flex items-center gap-2 tracking-wide">
+          <h4 className="text-xs font-semibold text-metal-fire uppercase tracking-wide mb-1">
             🎖️ Grades de Maîtrise
-          </h3>
+          </h4>
           <p className="text-sm text-gray-400 leading-relaxed">
             Chaque fois que tu déclenches le <span className="text-metal-fire font-semibold">bonus de ta classe</span>, 
             tu gagnes de l'XP de maîtrise. Gravis les échelons pour débloquer des <strong className="text-gray-200">titres légendaires</strong>.
