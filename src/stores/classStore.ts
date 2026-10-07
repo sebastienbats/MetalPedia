@@ -41,9 +41,9 @@ interface ClassState {
   // Actions
   loadFromCloud: () => Promise<void>;
   selectClass: (classId: CharacterClass) => Promise<void>;
-  addClassXp: (xp: number) => Promise<void>;
+  addClassXp: (xp: number, action?: string) => Promise<void>; // ✅ Ajout du paramètre action
   resetClass: () => Promise<void>;
-  _syncClassToCloud: () => Promise<void>;
+  _syncClassToCloud: (actionType?: string) => Promise<void>; // ✅ Ajout du paramètre actionType
   setHydrated: () => void;
   setHydrationError: (error: string | null) => void;
 
@@ -118,8 +118,8 @@ export const useClassStore = create<ClassState>()(
         }
       },
 
-      // ✅ 2. HELPER DE SYNCHRONISATION
-      _syncClassToCloud: async () => {
+      // ✅ 2. HELPER DE SYNCHRONISATION (Double écriture)
+      _syncClassToCloud: async (actionType = 'xp_gain') => {
         const user = await getCurrentUser();
         const state = get();
         if (!user || !state.selectedClass) return;
@@ -127,18 +127,34 @@ export const useClassStore = create<ClassState>()(
         const currentLevel = getClassLevelProgress(state.classXp).currentLevel;
 
         if (offlineSync.isCurrentlyOnline()) {
-          const { error } = await supabase.from('user_classes').upsert({
+          // A. Mettre à jour la progression globale de la classe (user_classes)
+          const { error: classError } = await supabase.from('user_classes').upsert({
             user_id: user.id,
             class_id: state.selectedClass,
             class_xp: state.classXp,
             class_level: currentLevel,
           }, { onConflict: 'user_id,class_id' });
 
-          if (error) console.error('Échec sync classe:', error);
+          if (classError) console.error('Échec sync user_classes:', classError);
+
+          // B. ✅ NOUVEAU : Insérer un journal dans xp_history avec les BONNES colonnes
+          const { error: historyError } = await supabase.from('xp_history').insert({
+            user_id: user.id,
+            action: actionType,
+            amount: state.classXp, // ✅ 'amount' correspond à ta DB
+            description: `XP gagné pour la classe ${state.selectedClass}`, // ✅ 'description' correspond à ta DB
+          });
+
+          if (historyError) console.error('Échec sync xp_history:', historyError);
         } else {
           offlineSync.addPendingOperation({
             type: 'class_sync',
-            payload: { classId: state.selectedClass, xp: state.classXp, level: currentLevel },
+            payload: { 
+              classId: state.selectedClass, 
+              xp: state.classXp, 
+              level: currentLevel,
+              action: actionType 
+            },
           });
         }
       },
@@ -146,10 +162,11 @@ export const useClassStore = create<ClassState>()(
       // ✅ 3. ACTIONS AVEC MISE À JOUR OPTIMISTE
       selectClass: async (classId) => {
         set({ selectedClass: classId, classXp: 0 });
-        await get()._syncClassToCloud();
+        // ✅ On spécifie que c'est une sélection de classe pour l'historique
+        await get()._syncClassToCloud('class_selected');
       },
 
-      addClassXp: async (xp) => {
+      addClassXp: async (xp, action = 'xp_gain') => {
         set((state) => {
           const newClassXp = state.classXp + xp;
           const selectedClass = state.selectedClass;
@@ -167,7 +184,8 @@ export const useClassStore = create<ClassState>()(
           return { classXp: newClassXp, pantheon: newPantheon };
         });
         
-        await get()._syncClassToCloud();
+        // ✅ On synchronise avec le type d'action (ex: 'view_band', 'review', etc.)
+        await get()._syncClassToCloud(action);
       },
 
       resetClass: async () => {
