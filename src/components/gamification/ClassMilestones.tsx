@@ -67,12 +67,12 @@ export default function ClassMilestones() {
         style={{ background: `radial-gradient(circle, ${classMeta.color} 0%, transparent 70%)` }} 
       />
 
-      <div className="relative z-10">
+      <div className="relative z-10 text-center">
         {/* 📜 EN-TÊTE */}
         <div className="mb-6 pb-4 border-b border-metal-gray/50">
-          <h3 className="font-serif text-xl mb-1">
+          <h4 className="font-serif text-xl mb-1">
             🎖️ Grades de Maîtrise
-          </h3>
+          </h4>
           <p className="text-sm text-gray-400 leading-relaxed">
             Chaque fois que tu déclenches le <span className="text-metal-fire font-semibold">bonus de ta classe</span>, 
             tu gagnes de l'XP de maîtrise. Gravis les échelons pour débloquer des <strong className="text-gray-200">titres légendaires</strong>.
