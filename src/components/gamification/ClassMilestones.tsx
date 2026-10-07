@@ -3,11 +3,57 @@
 import { useClassStore, useClassMetadata, useClassProgress } from '@/stores/classStore';
 
 export default function ClassMilestones() {
-  const { selectedClass } = useClassStore();
+  const { selectedClass, isLoadingCloud } = useClassStore();
   const classMeta = useClassMetadata();
   const classProgress = useClassProgress();
 
-  if (!selectedClass || !classMeta || !classProgress) {
+  // 🛡️ ÉTAT DE CHARGEMENT : Squelette fidèle à la structure finale
+  if (isLoadingCloud) {
+    return (
+      <div className="metal-card p-6 border-2 border-metal-gray relative overflow-hidden animate-pulse">
+        <div className="h-6 bg-metal-gray/40 rounded w-1/3 mb-2" />
+        <div className="h-4 bg-metal-gray/30 rounded w-2/3 mb-6" />
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="flex items-start gap-4 p-4 rounded-lg border border-metal-gray/30 bg-metal-black/20 mb-4">
+            <div className="w-12 h-12 rounded-full bg-metal-gray/40 shrink-0 border-2 border-metal-gray/50" />
+            <div className="flex-1 space-y-3">
+              <div className="h-5 bg-metal-gray/40 rounded w-1/2" />
+              <div className="h-3 bg-metal-gray/30 rounded w-1/4" />
+              <div className="h-2.5 bg-metal-gray/40 rounded-full w-full mt-2" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // 🛡️ ÉTAT VIDE : Thématique et immersif
+  if (!selectedClass) {
+    return (
+      <div className="metal-card p-8 border-2 border-metal-gray/50 relative overflow-hidden text-center">
+        {/* Fond sombre pour l'état vide */}
+        <div className="absolute inset-0 bg-metal-black/60 pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col items-center justify-center py-6">
+          <div className="w-16 h-16 rounded-full bg-metal-gray/10 border-2 border-metal-gray/40 flex items-center justify-center text-3xl mb-4 grayscale opacity-60">
+            🛡️
+          </div>
+          <h3 className="font-metal text-xl text-gray-300 mb-2 tracking-wide">
+            Aucune Classe Sélectionnée
+          </h3>
+          <p className="text-gray-400 max-w-md mb-4 text-sm leading-relaxed">
+            Tu n'as pas encore choisi de voie dans le Metalverse.
+          </p>
+          <p className="text-sm text-metal-fire/80 italic font-serif">
+            "La forge t'attend. Choisis ta destinée pour commencer à forger ta légende."
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback de sécurité
+  if (!classMeta || !classProgress) {
     return null;
   }
 
@@ -15,16 +61,16 @@ export default function ClassMilestones() {
 
   return (
     <div className="metal-card p-6 border-2 border-metal-gray relative overflow-hidden">
-      {/* Lueur d'arrière-plan subtile de la couleur de la classe */}
+      {/* 🌟 Lueur d'arrière-plan subtile de la couleur de la classe */}
       <div 
-        className="absolute -top-10 -right-10 w-40 h-40 opacity-10 pointer-events-none rounded-full blur-2xl"
+        className="absolute -top-10 -right-10 w-40 h-40 opacity-10 pointer-events-none rounded-full blur-2xl transition-colors duration-500"
         style={{ background: `radial-gradient(circle, ${classMeta.color} 0%, transparent 70%)` }} 
       />
 
       <div className="relative z-10">
-        {/* 🆕 EN-TÊTE EXPLICITE */}
+        {/* 📜 EN-TÊTE */}
         <div className="mb-6 pb-4 border-b border-metal-gray/50">
-          <h3 className="font-metal text-2xl text-gray-100 mb-2 flex items-center gap-2">
+          <h3 className="font-metal text-2xl text-gray-100 mb-2 flex items-center gap-2 tracking-wide">
             🎖️ Grades de Maîtrise
           </h3>
           <p className="text-sm text-gray-400 leading-relaxed">
@@ -33,7 +79,7 @@ export default function ClassMilestones() {
           </p>
         </div>
 
-        {/* LISTE DES GRADES */}
+        {/* 📋 LISTE DES GRADES */}
         <div className="space-y-4">
           {classMeta.titles.map((titleObj, index) => {
             const isUnlocked = currentLevel >= titleObj.level;
@@ -87,28 +133,54 @@ interface MilestoneItemProps {
 
 function MilestoneItem({ level, title, color, state, progress }: MilestoneItemProps) {
   
-  // Styles adaptés à l'état du grade (utilisation de styles en ligne pour les couleurs dynamiques)
+  // Styles adaptés à l'état du grade (MetalPedia Design System)
   const styles = {
     unlocked: {
       icon: '🏆',
-      iconStyle: { backgroundColor: `${color}20`, borderColor: color, color: color },
+      iconStyle: { 
+        backgroundColor: `${color}15`, 
+        borderColor: color, 
+        color: color,
+        boxShadow: `0 0 10px ${color}30`
+      },
       titleColor: 'text-gray-100',
       badge: '✅ Obtenu',
-      badgeStyle: { backgroundColor: 'rgba(34, 197, 94, 0.2)', borderColor: 'rgba(34, 197, 94, 0.5)', color: '#4ade80' },
+      badgeStyle: { 
+        backgroundColor: 'rgba(34, 197, 94, 0.1)', 
+        borderColor: 'rgba(34, 197, 94, 0.4)', 
+        color: '#4ade80' 
+      },
     },
     current: {
       icon: '🎯',
-      iconStyle: { backgroundColor: 'rgba(239, 68, 68, 0.2)', borderColor: '#ef4444', color: '#ef4444' },
+      iconStyle: { 
+        backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+        borderColor: '#ef4444', 
+        color: '#ef4444',
+        boxShadow: '0 0 10px rgba(239, 68, 68, 0.2)'
+      },
       titleColor: 'text-gray-100',
       badge: `En cours (${Math.round(progress)}%)`,
-      badgeStyle: { backgroundColor: 'rgba(239, 68, 68, 0.2)', borderColor: 'rgba(239, 68, 68, 0.5)', color: '#ef4444' },
+      badgeStyle: { 
+        backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+        borderColor: 'rgba(239, 68, 68, 0.4)', 
+        color: '#ef4444' 
+      },
     },
     locked: {
       icon: '🔒',
-      iconStyle: { backgroundColor: 'rgba(75, 85, 99, 0.3)', borderColor: 'rgba(75, 85, 99, 1)', color: '#6b7280' },
+      iconStyle: { 
+        backgroundColor: 'rgba(75, 85, 99, 0.2)', 
+        borderColor: 'rgba(75, 85, 99, 0.6)', 
+        color: '#6b7280' 
+      },
       titleColor: 'text-gray-500',
       badge: `Verrouillé (Niv. ${level})`,
-      badgeStyle: { backgroundColor: 'rgba(75, 85, 99, 0.2)', borderColor: 'rgba(75, 85, 99, 0.5)', color: '#6b7280' },
+      badgeStyle: { 
+        backgroundColor: 'rgba(75, 85, 99, 0.1)', 
+        borderColor: 'rgba(75, 85, 99, 0.4)', 
+        color: '#6b7280' 
+      },
     }
   };
 
@@ -118,12 +190,14 @@ function MilestoneItem({ level, title, color, state, progress }: MilestoneItemPr
     <div 
       className={`
         flex items-start gap-4 p-4 rounded-lg border transition-all duration-300
-        ${state === 'current' ? 'bg-metal-fire/5 border-metal-fire/30 shadow-md' : 'bg-metal-black/30 border-metal-gray/50'}
+        ${state === 'current' 
+          ? 'bg-metal-fire/5 border-metal-fire/30 shadow-[0_0_15px_rgba(239,68,68,0.1)]' 
+          : 'bg-metal-black/30 border-metal-gray/40 hover:border-metal-gray/60'}
       `}
     >
       {/* Icône d'état */}
       <div 
-        className="w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0 border-2"
+        className="w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0 border-2 transition-all duration-300"
         style={currentStyle.iconStyle}
       >
         {currentStyle.icon}
@@ -133,17 +207,17 @@ function MilestoneItem({ level, title, color, state, progress }: MilestoneItemPr
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
           <div>
-            <h4 className={`font-bold text-lg transition-colors ${currentStyle.titleColor}`}>
+            <h4 className={`font-bold text-lg transition-colors duration-300 ${currentStyle.titleColor}`}>
               {title}
             </h4>
-            <p className="text-xs text-gray-500 font-mono">
+            <p className="text-xs text-gray-500 font-mono mt-0.5">
               Requis : Niveau de classe {level}
             </p>
           </div>
           
           {/* Badge d'état */}
           <span 
-            className="px-2 py-1 text-[10px] font-bold rounded-full border whitespace-nowrap"
+            className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border whitespace-nowrap transition-all duration-300"
             style={currentStyle.badgeStyle}
           >
             {currentStyle.badge}
@@ -152,20 +226,20 @@ function MilestoneItem({ level, title, color, state, progress }: MilestoneItemPr
 
         {/* Barre de progression (visible uniquement pour le grade en cours) */}
         {state === 'current' && (
-          <div className="mt-2">
-            <div className="w-full h-2.5 bg-metal-gray rounded-full overflow-hidden">
+          <div className="mt-3">
+            <div className="w-full h-2.5 bg-metal-gray/50 rounded-full overflow-hidden border border-metal-gray/30">
               <div 
-                className="h-full rounded-full transition-all duration-1000 relative overflow-hidden"
+                className="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
                 style={{ 
                   width: `${progress}%`, 
-                  background: `linear-gradient(to right, ${color}, ${color}dd)` 
+                  background: `linear-gradient(90deg, ${color}, ${color}cc)` 
                 }}
               >
-                {/* Effet de brillance animé */}
+                {/* Effet de brillance métallique animé */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse" />
               </div>
             </div>
-            <p className="text-[11px] text-gray-400 mt-1 text-right italic">
+            <p className="text-[11px] text-gray-400 mt-1.5 text-right italic font-serif">
               Continue d'explorer les groupes qui correspondent à ta classe !
             </p>
           </div>
