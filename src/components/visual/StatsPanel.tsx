@@ -58,10 +58,10 @@ export default function StatsPanel() {
     return (
       <div className="metal-card p-2 text-center">
         <div className="text-5xl mb-3 animate-bounce-subtle">🧬</div>
-        <h3 className="font-serif text-xl mb-2">Votre ADN Metal</h3>
+        <h4 className="text-xs font-semibold text-metal-fire uppercase tracking-wide mb-1">Ton ADN Metal</h4>
         <p className="text-gray-400 text-sm">
-          Explorez des groupes pour découvrir votre profil metal unique.
-          Chaque consultation nourrit votre légende.
+          Explore des groupes pour découvrir ton profil metal unique.
+          Chaque consultation nourrit ta légende.
         </p>
       </div>
     );
