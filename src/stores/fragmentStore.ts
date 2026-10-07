@@ -10,32 +10,21 @@ import { TIMELINE_TABLES } from '@/lib/gamification/timeline-badges';
 
 const idbStore = createStore('metalpedia-fragments', 'keyval');
 
-// ═══════════════════════════════════════════════════════════
-// INTERFACE DU STORE
-// ═══════════════════════════════════════════════════════════
 interface FragmentState {
   collectedIds: number[];
-  isLoadingCloud: boolean; // ✅ NOUVEAU
+  isLoadingCloud: boolean;
 
-  // Actions
-  loadFromCloud: () => Promise<void>; // ✅ NOUVEAU
-  collectFragment: (id: number) => Promise<boolean>; // ✅ Rendu async
+  loadFromCloud: () => Promise<void>;
+  collectFragment: (id: number) => Promise<boolean>;
   isCollected: (id: number) => boolean;
-  _syncFragmentsToCloud: () => Promise<void>; // ✅ NOUVEAU
-  resetProgress: () => Promise<void>; // ✅ Rendu async
+  clearAll: () => void; // ✅ NOUVEAU : Pour vider le state local à la déconnexion
+  resetProgress: () => Promise<void>;
+  _syncFragmentsToCloud: () => Promise<void>;
 }
 
-// ═══════════════════════════════════════════════════════════
-// HELPER : Détection de Table complète (Inchangé, c'est parfait !)
-// ═══════════════════════════════════════════════════════════
-function checkTableCompletion(
-  collectedIds: number[],
-  previousIds: number[],
-  newId: number
-) {
+function checkTableCompletion(collectedIds: number[], previousIds: number[], newId: number) {
   for (const [pillar, table] of Object.entries(TIMELINE_TABLES)) {
     const ids = table.ids;
-    
     if (!ids.includes(newId)) continue;
 
     const wasComplete = ids.every((id) => previousIds.includes(id));
@@ -66,22 +55,17 @@ function checkTableCompletion(
           });
         }
       }, 800);
-
       break;
     }
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// STORE
-// ═══════════════════════════════════════════════════════════
 export const useFragmentStore = create<FragmentState>()(
   persist(
     (set, get) => ({
       collectedIds: [],
       isLoadingCloud: false,
 
-      // ✅ 1. CHARGEMENT DEPUIS LE CLOUD
       loadFromCloud: async () => {
         const user = await getCurrentUser();
         if (!user) {
@@ -101,12 +85,10 @@ export const useFragmentStore = create<FragmentState>()(
           if (data) {
             const cloudIds = data.map((row) => row.fragment_id);
             set((state) => {
-              // Fusion avec l'existant (pour préserver les collectes hors ligne)
               const mergedIds = Array.from(new Set([...state.collectedIds, ...cloudIds]));
               return { collectedIds: mergedIds, isLoadingCloud: false };
             });
 
-            // Si on charge des fragments du cloud, on vérifie aussi les succès
             if (cloudIds.length > 0) {
               setTimeout(() => {
                 useAchievementStore.getState().checkTimelineAchievements(get().collectedIds);
@@ -121,7 +103,6 @@ export const useFragmentStore = create<FragmentState>()(
         }
       },
 
-      // ✅ 2. HELPER DE SYNCHRONISATION
       _syncFragmentsToCloud: async () => {
         const user = await getCurrentUser();
         if (!user) return;
@@ -146,41 +127,32 @@ export const useFragmentStore = create<FragmentState>()(
         }
       },
 
-      // ✅ 3. ACTION AVEC MISE À JOUR OPTIMISTE + CÉLÉBRATION
       collectFragment: async (id) => {
         const previousIds = get().collectedIds;
         const isAlreadyCollected = previousIds.includes(id);
 
         if (!isAlreadyCollected) {
           const newIds = [...previousIds, id];
-          
-          // A. Mise à jour locale immédiate
           set({ collectedIds: newIds });
-
-          // B. Vérifier si une Table vient d'être complétée
           checkTableCompletion(newIds, previousIds, id);
-
-          // C. Vérifier les succès Timeline (badges)
           setTimeout(() => {
             useAchievementStore.getState().checkTimelineAchievements(newIds);
           }, 100);
-
-          // D. Synchronisation en arrière-plan
           await get()._syncFragmentsToCloud();
-
           return true;
         }
-
         return false;
       },
 
       isCollected: (id) => get().collectedIds.includes(id),
 
-      resetProgress: async () => {
-        // A. Mise à jour locale immédiate
+      // ✅ NOUVEAU : Vide uniquement le state local (pour la déconnexion)
+      clearAll: () => {
         set({ collectedIds: [] });
-        
-        // B. Nettoyer aussi côté cloud si l'utilisateur est connecté
+      },
+
+      resetProgress: async () => {
+        set({ collectedIds: [] });
         const user = await getCurrentUser();
         if (user) {
           await supabase.from('user_fragments').delete().eq('user_id', user.id);
@@ -191,7 +163,6 @@ export const useFragmentStore = create<FragmentState>()(
       name: 'metalverse-fragments-storage',
       storage: createJSONStorage(() => ({
         getItem: async (name) => {
-          // 🛡️ SSR Guard : Si on est sur le serveur, on ne touche pas à IndexedDB
           if (typeof window === 'undefined') return null;
           try {
             const value = await idbGet(name, idbStore);
@@ -199,35 +170,23 @@ export const useFragmentStore = create<FragmentState>()(
           } catch { return null; }
         },
         setItem: async (name, value) => {
-          // 🛡️ SSR Guard
           if (typeof window === 'undefined') return;
           try { await idbSet(name, JSON.stringify(value), idbStore); }
           catch (err) { console.error('Failed to persist fragments:', err); }
         },
         removeItem: async (name) => {
-          // 🛡️ SSR Guard
           if (typeof window === 'undefined') return;
           try { await idbDel(name, idbStore); }
           catch (err) { console.error('Failed to remove fragments:', err); }
         },
       })),
       onRehydrateStorage: () => (state) => {
-        if (state) {
-          // On ne met pas hydrated: true ici car loadFromCloud gérera l'état final
-        }
+        if (state) { /* loadFromCloud gérera l'état final */ }
       },
     }
   )
 );
 
-// ═══════════════════════════════════════════════════════════
-// HOOKS SÉLECTEURS
-// ═══════════════════════════════════════════════════════════
-export const useCollectedFragments = () =>
-  useFragmentStore((s) => s.collectedIds);
-
-export const useFragmentCount = () =>
-  useFragmentStore((s) => s.collectedIds.length);
-
-export const useFragmentIsLoading = () =>
-  useFragmentStore((s) => s.isLoadingCloud);
+export const useCollectedFragments = () => useFragmentStore((s) => s.collectedIds);
+export const useFragmentCount = () => useFragmentStore((s) => s.collectedIds.length);
+export const useFragmentIsLoading = () => useFragmentStore((s) => s.isLoadingCloud);
