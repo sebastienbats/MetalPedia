@@ -41,9 +41,9 @@ interface ClassState {
   // Actions
   loadFromCloud: () => Promise<void>;
   selectClass: (classId: CharacterClass) => Promise<void>;
-  addClassXp: (xp: number, action?: string) => Promise<void>; // ✅ Ajout du paramètre action
+  addClassXp: (xp: number, action?: string) => Promise<void>;
   resetClass: () => Promise<void>;
-  _syncClassToCloud: (actionType?: string) => Promise<void>; // ✅ Ajout du paramètre actionType
+  _syncClassToCloud: (actionType?: string) => Promise<void>;
   setHydrated: () => void;
   setHydrationError: (error: string | null) => void;
 
@@ -68,7 +68,7 @@ export const useClassStore = create<ClassState>()(
       setHydrated: () => set({ hydrated: true }),
       setHydrationError: (error) => set({ hydrationError: error }),
 
-      // ✅ 1. CHARGEMENT DEPUIS LE CLOUD
+      // ✅ 1. CHARGEMENT DEPUIS LE CLOUD (Trié par dernière utilisation)
       loadFromCloud: async () => {
         const user = await getCurrentUser();
         if (!user) {
@@ -78,28 +78,34 @@ export const useClassStore = create<ClassState>()(
 
         set({ isLoadingCloud: true });
         try {
+          // ✅ CORRECTION : On trie par chosen_at décroissant pour avoir la dernière classe utilisée en premier
           const { data, error } = await supabase
             .from('user_classes')
             .select('*')
-            .eq('user_id', user.id);
+            .eq('user_id', user.id)
+            .order('chosen_at', { ascending: false });
 
           if (error) throw error;
 
           if (data && data.length > 0) {
             const newPantheon = createEmptyPantheon();
-            const currentState = get();
-            let activeClassXp = currentState.classXp;
+            let activeClassXp = 0;
+            let activeSelectedClass: CharacterClass | null = null;
 
-            data.forEach((row) => {
+            data.forEach((row, index) => {
               const cId = row.class_id as CharacterClass;
               newPantheon[cId] = Math.max(newPantheon[cId], row.class_level);
               
-              if (currentState.selectedClass && cId === currentState.selectedClass) {
+              // ✅ Comme la liste est triée par date décroissante, l'élément à l'index 0 est le plus récent.
+              // On l'utilise comme classe sélectionnée par défaut au chargement.
+              if (index === 0) {
+                activeSelectedClass = cId;
                 activeClassXp = row.class_xp;
               }
             });
 
             set({
+              selectedClass: activeSelectedClass, // ✅ Restaure la dernière classe utilisée
               pantheon: newPantheon,
               classXp: activeClassXp,
               isLoadingCloud: false,
@@ -118,7 +124,7 @@ export const useClassStore = create<ClassState>()(
         }
       },
 
-      // ✅ 2. HELPER DE SYNCHRONISATION (Double écriture)
+      // ✅ 2. HELPER DE SYNCHRONISATION (Double écriture + mise à jour du timestamp)
       _syncClassToCloud: async (actionType = 'xp_gain') => {
         const user = await getCurrentUser();
         const state = get();
@@ -127,22 +133,23 @@ export const useClassStore = create<ClassState>()(
         const currentLevel = getClassLevelProgress(state.classXp).currentLevel;
 
         if (offlineSync.isCurrentlyOnline()) {
-          // A. Mettre à jour la progression globale de la classe (user_classes)
+          // A. Mettre à jour la progression globale de la classe (et la date de dernier choix)
           const { error: classError } = await supabase.from('user_classes').upsert({
             user_id: user.id,
             class_id: state.selectedClass,
             class_xp: state.classXp,
             class_level: currentLevel,
+            chosen_at: new Date().toISOString(), // ✅ Force la mise à jour du timestamp pour le tri
           }, { onConflict: 'user_id,class_id' });
 
           if (classError) console.error('Échec sync user_classes:', classError);
 
-          // B. ✅ NOUVEAU : Insérer un journal dans xp_history avec les BONNES colonnes
+          // B. Insérer un journal dans xp_history
           const { error: historyError } = await supabase.from('xp_history').insert({
             user_id: user.id,
             action: actionType,
-            amount: state.classXp, // ✅ 'amount' correspond à ta DB
-            description: `XP gagné pour la classe ${state.selectedClass}`, // ✅ 'description' correspond à ta DB
+            amount: state.classXp,
+            description: `XP gagné pour la classe ${state.selectedClass}`,
           });
 
           if (historyError) console.error('Échec sync xp_history:', historyError);
@@ -162,7 +169,6 @@ export const useClassStore = create<ClassState>()(
       // ✅ 3. ACTIONS AVEC MISE À JOUR OPTIMISTE
       selectClass: async (classId) => {
         set({ selectedClass: classId, classXp: 0 });
-        // ✅ On spécifie que c'est une sélection de classe pour l'historique
         await get()._syncClassToCloud('class_selected');
       },
 
@@ -184,7 +190,6 @@ export const useClassStore = create<ClassState>()(
           return { classXp: newClassXp, pantheon: newPantheon };
         });
         
-        // ✅ On synchronise avec le type d'action (ex: 'view_band', 'review', etc.)
         await get()._syncClassToCloud(action);
       },
 
