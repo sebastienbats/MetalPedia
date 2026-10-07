@@ -7,7 +7,9 @@ import { useFavoritesCount, useFavoritesHydration } from '@/stores/favoritesStor
 import { useAuth, useSignOut } from '@/api/authApi';
 import { useGamificationCloudSync } from '@/hooks/useGamificationCloudSync';
 import { useClassCloudSync } from '@/hooks/useClassCloudSync';
-import { useStatsCloudSync } from '@/hooks/useStatsCloudSync'; // ✅ AJOUT : Pour synchroniser l'historique des vues
+import { useStatsCloudSync } from '@/hooks/useStatsCloudSync';
+import { useFragmentCloudSync } from '@/hooks/useFragmentCloudSync'; // ✅ NOUVEAU : Pour synchroniser les fragments
+import { useAchievementCloudSync } from '@/hooks/useAchievementCloudSync'; // ✅ NOUVEAU : Pour synchroniser les achievements
 import SearchBar from '@/components/search/SearchBar';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 import PillarsDropdown from '@/components/layout/PillarsDropdown';
@@ -106,7 +108,9 @@ export default function Header() {
   // Les hooks internes géreront eux-mêmes de ne lancer la requête que si user?.id existe.
   useGamificationCloudSync();
   useClassCloudSync();
-  useStatsCloudSync(); // ✅ AJOUT : Synchronise l'historique des vues (user_view_history)
+  useStatsCloudSync();
+  useFragmentCloudSync();       // ✅ Synchronise les fragments collectés
+  useAchievementCloudSync();   // ✅ Synchronise les badges et achievements
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-metal-black/90 border-b border-metal-gray">
