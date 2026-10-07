@@ -86,7 +86,7 @@ export default function BadgesPanel() {
     <>
       <div className="metal-card p-2 sm:p-3">
         <header className="mb-2">
-          <h3 className="font-serif text-lg sm:text-xl mb-1">🏅 Reliques des Anciens</h3>
+          <h4 className="text-xs font-semibold text-metal-fire uppercase tracking-wide mb-1">🏅 Reliques des Anciens</h4>
           <p className="text-xs text-gray-400">
             {unlockedCount}/{BADGES.length} reliques
           </p>
