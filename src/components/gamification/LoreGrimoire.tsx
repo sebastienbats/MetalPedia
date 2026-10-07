@@ -137,8 +137,8 @@ export default function LoreGrimoire() {
     <div
       className="metal-card border-2 border-amber-900/60 relative overflow-hidden"
       style={{
-  background: 'linear-gradient(135deg, rgba(26, 18, 8, 0.88) 0%, rgba(42, 26, 14, 0.88) 30%, rgba(26, 18, 8, 0.88) 60%, rgba(13, 10, 5, 0.88) 100%)',
-}}
+        background: 'linear-gradient(135deg, rgba(26, 18, 8, 0.88) 0%, rgba(42, 26, 14, 0.88) 30%, rgba(26, 18, 8, 0.88) 60%, rgba(13, 10, 5, 0.88) 100%)',
+      }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -173,26 +173,31 @@ export default function LoreGrimoire() {
       {/* ── Bordure intérieure dorée ── */}
       <div className="absolute inset-3 border border-amber-800/20 rounded pointer-events-none" />
 
-      {/* ── Contenu principal ── */}
-      <div className="relative z-10 p-6 md:p-8 min-h-[320px] md:min-h-[360px] flex flex-col">
+      {/* ── Contenu principal (HAUTEUR FIXE pour éviter le layout shift) ── */}
+      <div className="relative z-10 p-6 md:p-8 h-[500px] md:h-[550px] flex flex-col">
         
         {/* En-tête du grimoire */}
-        <div className="text-center mb-6 shrink-0">
+        <div className="text-center mb-4 shrink-0">
           <p className="text-amber-700/60 text-[10px] uppercase tracking-[0.3em] font-semibold mb-1">
             ✦ Grimoire des Anciens ✦
           </p>
           <div className="w-32 h-px bg-gradient-to-r from-transparent via-amber-700/40 to-transparent mx-auto" />
         </div>
 
-        {/* Zone de narration (animée) */}
+        {/* Zone de narration (animée et scrollable si nécessaire) */}
         <div
-          className={`flex-1 flex flex-col items-center justify-center text-center transition-all duration-600 ${
+          className={`flex-1 flex flex-col items-center justify-center text-center transition-all duration-600 overflow-y-auto pr-1 ${
             isFlipping
               ? direction === 'next'
                 ? 'opacity-0 translate-x-8 scale-95'
                 : 'opacity-0 -translate-x-8 scale-95'
               : 'opacity-100 translate-x-0 scale-100'
           }`}
+          style={{
+            // Stylisation native de la scrollbar pour Firefox
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(180, 83, 9, 0.5) transparent',
+          }}
         >
           {/* Icône du chapitre */}
           <div className="text-5xl md:text-6xl mb-4 drop-shadow-lg animate-pulse-slow">
@@ -223,7 +228,7 @@ export default function LoreGrimoire() {
         </div>
 
         {/* ── Navigation ── */}
-        <div className="shrink-0 mt-6 flex items-center justify-between">
+        <div className="shrink-0 mt-4 flex items-center justify-between">
           
           {/* Bouton précédent */}
           <button
