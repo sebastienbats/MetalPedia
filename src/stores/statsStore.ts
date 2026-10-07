@@ -7,9 +7,6 @@ import { offlineSync } from '@/lib/offline-sync';
 
 const idbStore = createStore('metalpedia-stats', 'keyval');
 
-// ═══════════════════════════════════════════════════════════
-// TYPES
-// ═══════════════════════════════════════════════════════════
 interface ViewedBand {
   id: number;
   name: string;
@@ -20,15 +17,14 @@ interface ViewedBand {
 
 interface StatsState {
   viewedBands: ViewedBand[];
-  isLoadingCloud: boolean; // ✅ NOUVEAU
+  isLoadingCloud: boolean;
 
-  // Actions
-  loadFromCloud: () => Promise<void>; // ✅ NOUVEAU
+  loadFromCloud: () => Promise<void>;
   recordView: (band: Omit<ViewedBand, 'viewedAt'>) => Promise<void>;
   clearHistory: () => Promise<void>;
-  _syncViewHistoryToCloud: () => Promise<void>; // ✅ NOUVEAU
+  clearAll: () => void; // ✅ NOUVEAU : Pour vider le state local à la déconnexion
+  _syncViewHistoryToCloud: () => Promise<void>;
 
-  // Getters
   getTotalViews: () => number;
   getGenreBreakdown: () => { genre: string; count: number; percent: number }[];
   getCountryBreakdown: () => { country: string; count: number; percent: number }[];
@@ -38,16 +34,12 @@ interface StatsState {
 
 const MAX_HISTORY = 500;
 
-// ═══════════════════════════════════════════════════════════
-// STORE
-// ═══════════════════════════════════════════════════════════
 export const useStatsStore = create<StatsState>()(
   persist(
     (set, get) => ({
       viewedBands: [],
       isLoadingCloud: false,
 
-      // ✅ 1. CHARGEMENT DEPUIS LE CLOUD
       loadFromCloud: async () => {
         const user = await getCurrentUser();
         if (!user) {
@@ -72,24 +64,15 @@ export const useStatsStore = create<StatsState>()(
               name: row.band_name,
               genre: row.genre,
               country: row.country,
-              // ✅ CORRECTION : Filet de sécurité si viewed_at est null
               viewedAt: row.viewed_at ? new Date(row.viewed_at).getTime() : Date.now(),
             }));
 
             set((state) => {
-              // Fusion intelligente : garder les plus récents en cas de dépassement
               const merged = [...state.viewedBands];
-              
               cloudHistory.forEach((ch) => {
-                const exists = merged.some(
-                  (m) => m.id === ch.id && m.viewedAt === ch.viewedAt
-                );
-                if (!exists) {
-                  merged.push(ch);
-                }
+                const exists = merged.some((m) => m.id === ch.id && m.viewedAt === ch.viewedAt);
+                if (!exists) merged.push(ch);
               });
-
-              // Trier par viewedAt décroissant et limiter à MAX_HISTORY
               merged.sort((a, b) => b.viewedAt - a.viewedAt);
               
               return {
@@ -106,7 +89,6 @@ export const useStatsStore = create<StatsState>()(
         }
       },
 
-      // ✅ 2. HELPER DE SYNCHRONISATION
       _syncViewHistoryToCloud: async () => {
         const user = await getCurrentUser();
         if (!user) return;
@@ -135,31 +117,28 @@ export const useStatsStore = create<StatsState>()(
         }
       },
 
-      // ✅ 3. ACTION AVEC MISE À JOUR OPTIMISTE
       recordView: async (band) => {
         const newView: ViewedBand = { ...band, viewedAt: Date.now() };
-
-        // A. Mise à jour locale immédiate
         set((state) => ({
           viewedBands: [
             newView,
             ...state.viewedBands.filter((b) => !(b.id === band.id && b.viewedAt === newView.viewedAt)),
           ].slice(0, MAX_HISTORY),
         }));
-
-        // B. Synchronisation en arrière-plan
         await get()._syncViewHistoryToCloud();
       },
 
       clearHistory: async () => {
-        // A. Mise à jour locale immédiate
         set({ viewedBands: [] });
-
-        // B. Nettoyer aussi côté cloud si l'utilisateur est connecté
         const user = await getCurrentUser();
         if (user) {
           await supabase.from('user_view_history').delete().eq('user_id', user.id);
         }
+      },
+
+      // ✅ NOUVEAU : Vide uniquement le state local (pour la déconnexion)
+      clearAll: () => {
+        set({ viewedBands: [] });
       },
 
       getTotalViews: () => get().viewedBands.length,
@@ -167,43 +146,25 @@ export const useStatsStore = create<StatsState>()(
       getGenreBreakdown: () => {
         const bands = get().viewedBands;
         if (bands.length === 0) return [];
-
         const counts: Record<string, number> = {};
-        bands.forEach((b) => {
-          counts[b.genre] = (counts[b.genre] || 0) + 1;
-        });
-
+        bands.forEach((b) => { counts[b.genre] = (counts[b.genre] || 0) + 1; });
         return Object.entries(counts)
-          .map(([genre, count]) => ({
-            genre,
-            count,
-            percent: Math.round((count / bands.length) * 100),
-          }))
+          .map(([genre, count]) => ({ genre, count, percent: Math.round((count / bands.length) * 100) }))
           .sort((a, b) => b.count - a.count);
       },
 
       getCountryBreakdown: () => {
         const bands = get().viewedBands;
         if (bands.length === 0) return [];
-
         const counts: Record<string, number> = {};
-        bands.forEach((b) => {
-          counts[b.country] = (counts[b.country] || 0) + 1;
-        });
-
+        bands.forEach((b) => { counts[b.country] = (counts[b.country] || 0) + 1; });
         return Object.entries(counts)
-          .map(([country, count]) => ({
-            country,
-            count,
-            percent: Math.round((count / bands.length) * 100),
-          }))
+          .map(([country, count]) => ({ country, count, percent: Math.round((count / bands.length) * 100) }))
           .sort((a, b) => b.count - a.count)
           .slice(0, 10);
       },
 
-      getRecentViews: (limit = 10) => {
-        return get().viewedBands.slice(0, limit);
-      },
+      getRecentViews: (limit = 10) => get().viewedBands.slice(0, limit),
 
       getMostViewedGenre: () => {
         const breakdown = get().getGenreBreakdown();
@@ -214,7 +175,6 @@ export const useStatsStore = create<StatsState>()(
       name: 'metalpedia-stats',
       storage: createJSONStorage(() => ({
         getItem: async (name) => {
-          // 🛡️ SSR Guard : Si on est sur le serveur, on ne touche pas à IndexedDB
           if (typeof window === 'undefined') return null;
           try {
             const value = await idbGet(name, idbStore);
@@ -222,13 +182,11 @@ export const useStatsStore = create<StatsState>()(
           } catch { return null; }
         },
         setItem: async (name, value) => {
-          // 🛡️ SSR Guard
           if (typeof window === 'undefined') return;
           try { await idbSet(name, JSON.stringify(value), idbStore); }
           catch (err) { console.error('Failed to persist stats:', err); }
         },
         removeItem: async (name) => {
-          // 🛡️ SSR Guard
           if (typeof window === 'undefined') return;
           try { await idbDel(name, idbStore); }
           catch (err) { console.error('Failed to remove stats:', err); }
@@ -238,9 +196,6 @@ export const useStatsStore = create<StatsState>()(
   )
 );
 
-// ═══════════════════════════════════════════════════════════
-// HOOKS SÉLECTEURS
-// ═══════════════════════════════════════════════════════════
 export const useTotalViews = () => useStatsStore((s) => s.viewedBands.length);
 export const useGenreBreakdown = () => useStatsStore((s) => s.getGenreBreakdown());
 export const useStatsIsLoading = () => useStatsStore((s) => s.isLoadingCloud);
