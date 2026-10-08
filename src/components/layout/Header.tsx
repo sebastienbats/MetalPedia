@@ -8,8 +8,8 @@ import { useAuth, useSignOut } from '@/api/authApi';
 import { useGamificationCloudSync } from '@/hooks/useGamificationCloudSync';
 import { useClassCloudSync } from '@/hooks/useClassCloudSync';
 import { useStatsCloudSync } from '@/hooks/useStatsCloudSync';
-import { useFragmentCloudSync } from '@/hooks/useFragmentCloudSync'; // ✅ NOUVEAU : Pour synchroniser les fragments
-import { useAchievementCloudSync } from '@/hooks/useAchievementCloudSync'; // ✅ NOUVEAU : Pour synchroniser les achievements
+import { useFragmentCloudSync } from '@/hooks/useFragmentCloudSync';
+import { useAchievementCloudSync } from '@/hooks/useAchievementCloudSync';
 import SearchBar from '@/components/search/SearchBar';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 import PillarsDropdown from '@/components/layout/PillarsDropdown';
@@ -102,15 +102,16 @@ function UserMenu() {
 export default function Header() {
   const favCount = useFavoritesCount();
   const { isHydrated } = useFavoritesHydration();
-  const { data: user } = useAuth();
+  
+  // ✅ CORRECTION : Renommage en _user pour satisfaire ESLint (variable non utilisée directement ici)
+  const { data: _user } = useAuth();
 
-  // ✅ NOUVEAU : Déclenche la synchronisation cloud pour TOUS les stores dès que le Header est monté.
-  // Les hooks internes géreront eux-mêmes de ne lancer la requête que si user?.id existe.
+  // ✅ Déclenche la synchronisation cloud pour TOUS les stores dès que le Header est monté.
   useGamificationCloudSync();
   useClassCloudSync();
   useStatsCloudSync();
-  useFragmentCloudSync();       // ✅ Synchronise les fragments collectés
-  useAchievementCloudSync();   // ✅ Synchronise les badges et achievements
+  useFragmentCloudSync();
+  useAchievementCloudSync();
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-md bg-metal-black/90 border-b border-metal-gray">
