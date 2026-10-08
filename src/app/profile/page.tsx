@@ -16,7 +16,7 @@ import BadgesPanel from '@/components/gamification/BadgesPanel';
 import TimelineBadgesPanel from '@/components/gamification/TimelineBadgesPanel';
 import QuestsPanel from '@/components/gamification/QuestsPanel';
 import TableOfKnowledge from '@/components/timeline/TableOfKnowledge';
-import LoreGrimoire from '@/components/gamification/LoreGrimoire'; // ✅ Garde cet import
+import LoreGrimoire from '@/components/gamification/LoreGrimoire';
 import FloatingRunes from '@/components/ui/FloatingRunes';
 import StatsPanel from '@/components/visual/StatsPanel';
 import AILogoGenerator from '@/components/ai/AILogoGenerator';
@@ -90,7 +90,7 @@ export default function ProfilePage() {
   const classProgress = useClassProgress();
   
   const [isClassModalOpen, setIsClassModalOpen] = useState(false);
-  const [isGrimoireOpen, setIsGrimoireOpen] = useState(false); // ✅ NOUVEAU : État pour la modale du grimoire
+  const [isGrimoireOpen, setIsGrimoireOpen] = useState(false);
 
   // ✅ Déclenche le chargement cloud des favoris
   useFavoritesCloudSync();
@@ -178,21 +178,23 @@ export default function ProfilePage() {
           </p>
         </div>
         
-        {/* ✅ CORRECTION : Remplacement du LoreGrimoire direct par un bouton d'invitation immersif */}
+        {/* ✅ CORRECTION : Centrage horizontal parfait du bouton et de l'invitation */}
         <div className="relative p-6 sm:p-10 overflow-hidden rounded-xl bg-metal-black/40 border border-amber-900/40 flex flex-col items-center justify-center min-h-[300px]">
           <FloatingRunes preset="parchment" />
-          <div className="relative z-10 text-center">
-            <p className="text-amber-200/60 font-serif text-sm sm:text-base mb-6 italic max-w-md mx-auto">
+          
+          <div className="relative z-10 flex flex-col items-center w-full">
+            <p className="text-amber-200/60 font-serif text-sm sm:text-base mb-6 italic max-w-md text-center px-4">
               "Les secrets du Metalverse t'attendent dans les pages anciennes..."
             </p>
+            
             <button
               onClick={() => setIsGrimoireOpen(true)}
-              className="group flex flex-col items-center gap-4 px-10 py-8 bg-metal-black/60 border-2 border-amber-700/50 rounded-xl hover:border-amber-500 hover:bg-amber-900/20 transition-all duration-300 shadow-[0_0_15px_rgba(180,83,9,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]"
+              className="group flex flex-col items-center gap-4 px-10 py-8 bg-metal-black/60 border-2 border-amber-700/50 rounded-xl hover:border-amber-500 hover:bg-amber-900/20 transition-all duration-300 shadow-[0_0_15px_rgba(180,83,9,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] mx-auto"
             >
               <span className="text-6xl filter drop-shadow-md group-hover:drop-shadow-[0_0_12px_rgba(245,158,11,0.8)] transition-all animate-pulse-slow">
                 📜
               </span>
-              <span className="font-metal text-xl sm:text-2xl text-amber-200 group-hover:text-amber-100 tracking-widest uppercase">
+              <span className="font-metal text-xl sm:text-2xl text-amber-200 group-hover:text-amber-100 tracking-widest uppercase text-center">
                 Ouvrir le Grimoire
               </span>
             </button>
@@ -410,8 +412,6 @@ export default function ProfilePage() {
           MODALES
       ═══════════════════════════════════════════════════════════ */}
       <ClassSelectionModal isOpen={isClassModalOpen} onClose={() => setIsClassModalOpen(false)} />
-      
-      {/* ✅ NOUVEAU : Rendu de la modale du Grimoire */}
       <LoreGrimoire isOpen={isGrimoireOpen} onClose={() => setIsGrimoireOpen(false)} />
     </div>
   );
