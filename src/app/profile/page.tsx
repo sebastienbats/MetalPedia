@@ -6,7 +6,7 @@ import { useAuth } from '@/api/authApi';
 import { useClassStore, useClassMetadata, useClassProgress } from '@/stores/classStore';
 import { useAchievementStore } from '@/stores/achievementStore';
 import { useFragmentStore } from '@/stores/fragmentStore';
-import { useFavoritesCloudSync } from '@/hooks/useFavoritesCloudSync'; // ✅ NOUVEAU IMPORT
+import { useFavoritesCloudSync } from '@/hooks/useFavoritesCloudSync';
 import { getClassTitle } from '@/lib/gamification/classes';
 import ClassSelectionModal from '@/components/gamification/ClassSelectionModal';
 import ClassMilestones from '@/components/gamification/ClassMilestones';
@@ -16,7 +16,7 @@ import BadgesPanel from '@/components/gamification/BadgesPanel';
 import TimelineBadgesPanel from '@/components/gamification/TimelineBadgesPanel';
 import QuestsPanel from '@/components/gamification/QuestsPanel';
 import TableOfKnowledge from '@/components/timeline/TableOfKnowledge';
-import LoreGrimoire from '@/components/gamification/LoreGrimoire';
+import LoreGrimoire from '@/components/gamification/LoreGrimoire'; // ✅ Garde cet import
 import FloatingRunes from '@/components/ui/FloatingRunes';
 import StatsPanel from '@/components/visual/StatsPanel';
 import AILogoGenerator from '@/components/ai/AILogoGenerator';
@@ -88,9 +88,11 @@ export default function ProfilePage() {
   const { selectedClass } = useClassStore();
   const classMeta = useClassMetadata();
   const classProgress = useClassProgress();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const [isClassModalOpen, setIsClassModalOpen] = useState(false);
+  const [isGrimoireOpen, setIsGrimoireOpen] = useState(false); // ✅ NOUVEAU : État pour la modale du grimoire
 
-  // ✅ C'EST ICI QUE LA MAGIE OPÈRE : On déclenche le chargement cloud des favoris
+  // ✅ Déclenche le chargement cloud des favoris
   useFavoritesCloudSync();
 
   useEffect(() => {
@@ -121,19 +123,16 @@ export default function ProfilePage() {
           2. TABLEAU DE BORD PRINCIPAL (Hors chapitres)
       ═══════════════════════════════════════════════════════════ */}
       <div className="space-y-4 sm:space-y-6">
-        {/* Ligne 1 : Player Card & Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <PlayerCard />
           <StatsPanel />
         </div>
 
-        {/* Ligne 2 : Quêtes & Badges */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <QuestsPanel />
           <BadgesPanel />
         </div>
 
-        {/* Ligne 3 : Invitation Cloud (si non connecté) */}
         {!user && (
           <section
             aria-label="Invitation à créer un compte"
@@ -178,10 +177,25 @@ export default function ProfilePage() {
             Les récits fondateurs du monde que tu explores — à lire avant de choisir ta voie
           </p>
         </div>
-        <div className="relative p-3 sm:p-5 overflow-hidden rounded-xl bg-metal-black/20 border border-metal-gray/30">
+        
+        {/* ✅ CORRECTION : Remplacement du LoreGrimoire direct par un bouton d'invitation immersif */}
+        <div className="relative p-6 sm:p-10 overflow-hidden rounded-xl bg-metal-black/40 border border-amber-900/40 flex flex-col items-center justify-center min-h-[300px]">
           <FloatingRunes preset="parchment" />
-          <div className="relative z-10">
-            <LoreGrimoire />
+          <div className="relative z-10 text-center">
+            <p className="text-amber-200/60 font-serif text-sm sm:text-base mb-6 italic max-w-md mx-auto">
+              "Les secrets du Metalverse t'attendent dans les pages anciennes..."
+            </p>
+            <button
+              onClick={() => setIsGrimoireOpen(true)}
+              className="group flex flex-col items-center gap-4 px-10 py-8 bg-metal-black/60 border-2 border-amber-700/50 rounded-xl hover:border-amber-500 hover:bg-amber-900/20 transition-all duration-300 shadow-[0_0_15px_rgba(180,83,9,0.2)] hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]"
+            >
+              <span className="text-6xl filter drop-shadow-md group-hover:drop-shadow-[0_0_12px_rgba(245,158,11,0.8)] transition-all animate-pulse-slow">
+                📜
+              </span>
+              <span className="font-metal text-xl sm:text-2xl text-amber-200 group-hover:text-amber-100 tracking-widest uppercase">
+                Ouvrir le Grimoire
+              </span>
+            </button>
           </div>
         </div>
       </section>
@@ -284,7 +298,7 @@ export default function ProfilePage() {
                 </div>
 
                 <button
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={() => setIsClassModalOpen(true)}
                   className="shrink-0 px-4 py-2 text-sm text-gray-400 hover:text-metal-fire border border-metal-gray hover:border-metal-fire rounded-lg transition-all bg-metal-black/30 focus:outline-none focus:ring-2 focus:ring-metal-fire/50 w-full md:w-auto"
                   aria-label="Changer de classe de personnage"
                 >
@@ -300,7 +314,7 @@ export default function ProfilePage() {
                     Le Conseil des Neuf Genres t'attend. Choisis ta destinée pour débloquer des bonus d'XP uniques et des quêtes spéciales.
                   </p>
                   <button
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={() => setIsClassModalOpen(true)}
                     className="px-6 py-2 bg-metal-fire text-white font-bold rounded-lg hover:bg-metal-fire/80 transition-all shadow-lg shadow-metal-fire/20 focus:outline-none focus:ring-2 focus:ring-metal-fire/50"
                   >
                     Choisir ma classe
@@ -373,7 +387,7 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      {/* 🆕 Chapitre V : La Forge (Générateur de Logos IA) */}
+      {/* Chapitre V : La Forge */}
       <section id="forge" aria-labelledby="forge-title" className="scroll-mt-24 space-y-3">
         <ChapterDivider number="V" title="La Forge" />
         <div className="text-center">
@@ -392,7 +406,13 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      <ClassSelectionModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      {/* ═══════════════════════════════════════════════════════════
+          MODALES
+      ═══════════════════════════════════════════════════════════ */}
+      <ClassSelectionModal isOpen={isClassModalOpen} onClose={() => setIsClassModalOpen(false)} />
+      
+      {/* ✅ NOUVEAU : Rendu de la modale du Grimoire */}
+      <LoreGrimoire isOpen={isGrimoireOpen} onClose={() => setIsGrimoireOpen(false)} />
     </div>
   );
 }
