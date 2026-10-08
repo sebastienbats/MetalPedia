@@ -106,7 +106,7 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
 
     if (isPaused) return;
 
-    // Pause initiale augmentée à 2s pour s'adapter au rythme lent
+    // Pause initiale de 2s pour s'adapter au rythme lent
     const startScrollTimeout = setTimeout(() => {
       if (isPaused) return;
 
@@ -118,12 +118,12 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
 
         if (isAtBottom) {
           clearScroll();
-          // Pause de fin augmentée à 3s pour bien laisser lire la dernière phrase
+          // Pause de fin de 3s pour bien laisser lire la dernière phrase
           setTimeout(() => {
             nextPage();
           }, 3000);
         } else {
-          // VITESSE 4x PLUS LENTE : 1 pixel toutes les 100ms (au lieu de 25ms)
+          // VITESSE 4x PLUS LENTE : 1 pixel toutes les 100ms
           el.scrollTop += 1;
         }
       }, 100);
@@ -132,7 +132,7 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
     return () => {
       clearTimeout(startScrollTimeout);
       clearScroll();
-    }; // ✅ CORRECTION : Le point parasite a été supprimé ici
+    };
   }, [currentPage, isOpen, isPaused, clearScroll, nextPage]);
 
   // Navigation clavier
@@ -157,7 +157,8 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md p-0 md:p-6"
+          // ✅ CORRECTION : Ajout de !mt-0 comme demandé
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md p-0 md:p-6 !mt-0"
           onClick={onClose}
         >
           <motion.div
@@ -212,11 +213,11 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
 
               <div className="relative z-10 flex flex-col h-full p-3 md:p-8">
                 
-                <div className="text-center mb-1 md:mb-3 shrink-0">
-                  <p className="text-amber-700/60 text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-semibold">
+                <div className="text-center mb-2 md:mb-4 shrink-0">
+                  <p className="text-amber-700/60 text-xs md:text-sm uppercase tracking-[0.3em] font-semibold">
                     ✦ Grimoire des Anciens ✦
                   </p>
-                  <div className="w-32 md:w-48 h-px bg-gradient-to-r from-transparent via-amber-700/40 to-transparent mx-auto mt-1" />
+                  <div className="w-48 md:w-64 h-px bg-gradient-to-r from-transparent via-amber-700/40 to-transparent mx-auto mt-2" />
                 </div>
 
                 {/* ✅ CONTENEUR DE TEXTE AVEC AUTO-SCROLL (Scrollbar masquée) */}
@@ -230,47 +231,52 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                       : 'opacity-100 translate-x-0 scale-100'
                   }`}
                 >
-                  <div className="text-3xl md:text-5xl mb-1 md:mb-2 drop-shadow-lg animate-pulse-slow mt-2">
+                  {/* ✅ TAILLE ICÔNE AUGMENTÉE */}
+                  <div className="text-4xl md:text-6xl mb-2 md:mb-4 drop-shadow-lg animate-pulse-slow mt-2">
                     {page.icon}
                   </div>
 
-                  <p className="text-amber-600/70 text-[9px] md:text-[10px] uppercase tracking-[0.25em] font-semibold mb-1">
+                  {/* ✅ TAILLE CHAPITRE AUGMENTÉE */}
+                  <p className="text-amber-600/70 text-xs md:text-sm uppercase tracking-[0.25em] font-semibold mb-2">
                     {page.chapter}
                   </p>
 
-                  <h3 className="font-metal text-lg md:text-2xl text-amber-200/90 mb-1 md:mb-3 drop-shadow-md">
+                  {/* ✅ TAILLE TITRE AUGMENTÉE */}
+                  <h3 className="font-metal text-xl md:text-3xl text-amber-200/90 mb-2 md:mb-4 drop-shadow-md">
                     {page.title}
                   </h3>
 
-                  <div className="text-amber-700/30 text-xl md:text-2xl mb-1 md:mb-3 select-none">
+                  {/* ✅ TAILLE RUNE AUGMENTÉE */}
+                  <div className="text-amber-700/30 text-2xl md:text-3xl mb-2 md:mb-4 select-none">
                     {page.rune}
                   </div>
 
-                  <div className="max-w-xl mx-auto w-full px-2 pb-20">
-                    <p className="text-amber-100/80 text-[11px] md:text-xs leading-snug md:leading-normal font-serif italic whitespace-pre-line">
+                  {/* ✅ TAILLE TEXTE AUGMENTÉE POUR UNE MEILLEURE LISIBILITÉ */}
+                  <div className="max-w-2xl mx-auto w-full px-4 pb-24">
+                    <p className="text-amber-100/80 text-sm md:text-base leading-relaxed md:leading-loose font-serif italic whitespace-pre-line">
                       {page.text}
                     </p>
                   </div>
                 </div>
 
-                <div className="shrink-0 mt-1 md:mt-4 flex items-center justify-between">
+                <div className="shrink-0 mt-2 md:mt-6 flex items-center justify-between">
                   <button
                     onClick={prevPage}
                     disabled={isFlipping}
-                    className="w-8 h-8 md:w-10 md:h-10 rounded-full border border-amber-800/40 bg-amber-900/20 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/40 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-sm md:text-lg"
+                    className="w-9 h-9 md:w-11 md:h-11 rounded-full border border-amber-800/40 bg-amber-900/20 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/40 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-base md:text-xl"
                   >
                     ←
                   </button>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 md:gap-3">
                     {GRIMOIRE_PAGES.map((_, idx) => (
                       <button
                         key={idx}
                         onClick={() => goToPage(idx, idx > currentPage ? 'next' : 'prev')}
                         className={`transition-all duration-300 rounded-full ${
                           idx === currentPage
-                            ? 'w-5 md:w-6 h-1.5 bg-amber-500/80 shadow-[0_0_8px_rgba(245,158,11,0.5)]'
-                            : 'w-1.5 h-1.5 bg-amber-800/40 hover:bg-amber-600/60'
+                            ? 'w-6 md:w-8 h-1.5 md:h-2 bg-amber-500/80 shadow-[0_0_8px_rgba(245,158,11,0.5)]'
+                            : 'w-1.5 md:w-2 h-1.5 md:h-2 bg-amber-800/40 hover:bg-amber-600/60'
                         }`}
                       />
                     ))}
@@ -279,14 +285,14 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                   <button
                     onClick={nextPage}
                     disabled={isFlipping}
-                    className="w-8 h-8 md:w-10 md:h-10 rounded-full border border-amber-800/40 bg-amber-900/20 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/40 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-sm md:text-lg"
+                    className="w-9 h-9 md:w-11 md:h-11 rounded-full border border-amber-800/40 bg-amber-900/20 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/40 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-base md:text-xl"
                   >
                     →
                   </button>
                 </div>
 
-                <div className="text-center mt-1 md:mt-2 shrink-0">
-                  <p className="text-amber-800/50 text-[9px] md:text-[10px] tracking-widest uppercase">
+                <div className="text-center mt-2 md:mt-3 shrink-0">
+                  <p className="text-amber-800/50 text-[10px] md:text-xs tracking-widest uppercase">
                     {isPaused ? '⏸ Lecture en pause' : '▶ Défilement automatique'}
                   </p>
                 </div>
