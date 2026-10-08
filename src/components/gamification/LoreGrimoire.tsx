@@ -46,7 +46,8 @@ const GRIMOIRE_PAGES = [
 
 const AUTO_PLAY_INTERVAL = 8000;
 
-interface LoreGrimoireProps {
+// ✅ INTERFACE EXPORTÉE EXPLICITEMENT
+export interface LoreGrimoireProps {
   isOpen: boolean;
   onClose: () => void;
 }
@@ -85,14 +86,12 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
     goToPage(prev, 'prev');
   }, [currentPage, totalPages, goToPage]);
 
-  // Auto-play
   useEffect(() => {
     if (isPaused || !isOpen) return;
     const timer = setInterval(nextPage, AUTO_PLAY_INTERVAL);
     return () => clearInterval(timer);
   }, [nextPage, isPaused, isOpen]);
 
-  // Keyboard navigation & Escape to close
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -109,23 +108,21 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        // 🌌 BACKDROP PLEIN ÉCRAN
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
-          onClick={onClose} // Ferme en cliquant en dehors
+          onClick={onClose}
         >
-          {/* 📖 CONTENEUR DU GRIMOIRE (Animation d'entrée) */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 30 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 30 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-3xl" // Largeur max pour la lisibilité
-            onClick={(e) => e.stopPropagation()} // Empêche la fermeture au clic intérieur
+            className="relative w-full max-w-3xl"
+            onClick={(e) => e.stopPropagation()}
           >
             <div
               className="metal-card border-2 border-amber-900/60 relative overflow-hidden"
@@ -135,7 +132,6 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
-              {/* Bouton de fermeture */}
               <button
                 onClick={onClose}
                 className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full border border-amber-800/40 bg-amber-900/20 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/40 transition-all flex items-center justify-center"
@@ -144,7 +140,6 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                 ✕
               </button>
 
-              {/* Texture parchemin */}
               <div
                 className="absolute inset-0 opacity-[0.04] pointer-events-none"
                 style={{
@@ -152,7 +147,6 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                 }}
               />
 
-              {/* Lueur ambiante dynamique */}
               <div
                 className="absolute -top-20 -left-20 w-60 h-60 opacity-15 pointer-events-none rounded-full blur-3xl transition-colors duration-1000"
                 style={{
@@ -166,16 +160,13 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                 }}
               />
 
-              {/* Coins décoratifs */}
               <div className="absolute top-3 left-3 text-amber-800/40 text-2xl pointer-events-none select-none">❧</div>
               <div className="absolute top-3 right-3 text-amber-800/40 text-2xl pointer-events-none select-none rotate-90">❧</div>
               <div className="absolute bottom-3 left-3 text-amber-800/40 text-2xl pointer-events-none select-none -rotate-90">❧</div>
               <div className="absolute bottom-3 right-3 text-amber-800/40 text-2xl pointer-events-none select-none rotate-180">❧</div>
               <div className="absolute inset-3 border border-amber-800/20 rounded pointer-events-none" />
 
-              {/* Contenu principal (Hauteur fixe optimisée pour modale) */}
               <div className="relative z-10 p-8 md:p-12 h-[700px] md:h-[750px] flex flex-col">
-                
                 <div className="text-center mb-6 shrink-0">
                   <p className="text-amber-700/60 text-[10px] uppercase tracking-[0.3em] font-semibold mb-2">
                     ✦ Grimoire des Anciens ✦
@@ -183,7 +174,6 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                   <div className="w-48 h-px bg-gradient-to-r from-transparent via-amber-700/40 to-transparent mx-auto" />
                 </div>
 
-                {/* Zone de narration */}
                 <div
                   className={`flex-1 flex flex-col items-center justify-center text-center transition-all duration-600 ${
                     isFlipping
@@ -216,7 +206,6 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                   </div>
                 </div>
 
-                {/* Navigation */}
                 <div className="shrink-0 mt-8 flex items-center justify-between">
                   <button
                     onClick={prevPage}
