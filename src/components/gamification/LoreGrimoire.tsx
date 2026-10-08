@@ -73,7 +73,7 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
       if (isFlipping || targetPage === currentPage) return;
       if (targetPage < 0 || targetPage >= totalPages) return;
 
-      clearScroll(); // Arrêter le scroll de la page actuelle
+      clearScroll();
       setDirection(dir);
       setIsFlipping(true);
 
@@ -95,20 +95,18 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
     goToPage(prev, 'prev');
   }, [currentPage, totalPages, goToPage]);
 
-  // ✅ LOGIQUE D'AUTO-SCROLL
+  // ✅ LOGIQUE D'AUTO-SCROLL (4x PLUS LENTE)
   useEffect(() => {
     clearScroll();
     if (!isOpen) return;
     
-    // Réinitialiser le scroll en haut de la page à chaque changement
     if (textContainerRef.current) {
       textContainerRef.current.scrollTop = 0;
     }
 
-    // Si en pause, on ne lance pas le scroll
     if (isPaused) return;
 
-    // Délai initial pour laisser le temps de lire le titre et l'icône (1.5 seconde)
+    // ✅ Pause initiale augmentée à 2s pour s'adapter au rythme lent
     const startScrollTimeout = setTimeout(() => {
       if (isPaused) return;
 
@@ -116,26 +114,26 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
         if (isPaused || !textContainerRef.current) return;
 
         const el = textContainerRef.current;
-        // Vérifier si on est arrivé en bas (avec une tolérance de 2px)
         const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= 2;
 
         if (isAtBottom) {
           clearScroll();
-          // Pause de 2.5 secondes en bas de page avant de passer à la suite
+          // ✅ Pause de fin augmentée à 3s pour bien laisser lire la dernière phrase
           setTimeout(() => {
             nextPage();
-          }, 2500);
+          }, 3000);
         } else {
-          // Vitesse de défilement : 1px toutes les 25ms (soit 40px/seconde, très lisible)
+          // ✅ VITESSE 4x PLUS LENTE : 1 pixel toutes les 100ms (au lieu de 25ms)
+          // Soit 10 pixels par seconde (très doux et lisible)
           el.scrollTop += 1;
         }
-      }, 25);
-    }, 1500);
+      }, 100); // <-- C'est ici que la magie opère (100ms au lieu de 25ms)
+    }, 2000);
 
     return () => {
       clearTimeout(startScrollTimeout);
       clearScroll();
-    };
+.    };
   }, [currentPage, isOpen, isPaused, clearScroll, nextPage]);
 
   // Navigation clavier
@@ -249,7 +247,6 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                     {page.rune}
                   </div>
 
-                  {/* Padding bottom généreux pour que la dernière ligne remonte bien au centre avant la fin */}
                   <div className="max-w-xl mx-auto w-full px-2 pb-20">
                     <p className="text-amber-100/80 text-[11px] md:text-xs leading-snug md:leading-normal font-serif italic whitespace-pre-line">
                       {page.text}
