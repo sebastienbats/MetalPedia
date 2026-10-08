@@ -106,7 +106,7 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
 
     if (isPaused) return;
 
-    // ✅ Pause initiale augmentée à 2s pour s'adapter au rythme lent
+    // Pause initiale augmentée à 2s pour s'adapter au rythme lent
     const startScrollTimeout = setTimeout(() => {
       if (isPaused) return;
 
@@ -118,22 +118,21 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
 
         if (isAtBottom) {
           clearScroll();
-          // ✅ Pause de fin augmentée à 3s pour bien laisser lire la dernière phrase
+          // Pause de fin augmentée à 3s pour bien laisser lire la dernière phrase
           setTimeout(() => {
             nextPage();
           }, 3000);
         } else {
-          // ✅ VITESSE 4x PLUS LENTE : 1 pixel toutes les 100ms (au lieu de 25ms)
-          // Soit 10 pixels par seconde (très doux et lisible)
+          // VITESSE 4x PLUS LENTE : 1 pixel toutes les 100ms (au lieu de 25ms)
           el.scrollTop += 1;
         }
-      }, 100); // <-- C'est ici que la magie opère (100ms au lieu de 25ms)
+      }, 100);
     }, 2000);
 
     return () => {
       clearTimeout(startScrollTimeout);
       clearScroll();
-.    };
+    }; // ✅ CORRECTION : Le point parasite a été supprimé ici
   }, [currentPage, isOpen, isPaused, clearScroll, nextPage]);
 
   // Navigation clavier
