@@ -106,7 +106,6 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
 
     if (isPaused) return;
 
-    // Pause initiale de 2s pour s'adapter au rythme lent
     const startScrollTimeout = setTimeout(() => {
       if (isPaused) return;
 
@@ -118,12 +117,10 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
 
         if (isAtBottom) {
           clearScroll();
-          // Pause de fin de 3s pour bien laisser lire la dernière phrase
           setTimeout(() => {
             nextPage();
           }, 3000);
         } else {
-          // VITESSE 4x PLUS LENTE : 1 pixel toutes les 100ms
           el.scrollTop += 1;
         }
       }, 100);
@@ -157,7 +154,7 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          // ✅ CORRECTION : Ajout de !mt-0 comme demandé
+          // ✅ !mt-0 conservé comme demandé
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md p-0 md:p-6 !mt-0"
           onClick={onClose}
         >
@@ -166,20 +163,22 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full h-full md:max-w-4xl md:h-[85vh] overflow-hidden flex flex-col shadow-2xl shadow-black"
+            className="relative w-full h-full md:max-w-4xl md:h-[85vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* ✨ HALO MAGIQUE : Ombre multi-couches (externe + interne) + bordure plus lumineuse */}
             <div
-              className="flex flex-col h-full w-full border-2 md:border-4 border-amber-900/60 relative"
+              className="flex flex-col h-full w-full border-2 md:border-[3px] border-amber-500/40 relative"
               style={{
                 background: 'linear-gradient(135deg, rgba(26, 18, 8, 0.98) 0%, rgba(42, 26, 14, 0.98) 30%, rgba(26, 18, 8, 0.98) 60%, rgba(13, 10, 5, 0.98) 100%)',
+                boxShadow: '0 0 25px rgba(245, 158, 11, 0.4), 0 0 50px rgba(245, 158, 11, 0.2), 0 0 75px rgba(245, 158, 11, 0.1), inset 0 0 20px rgba(245, 158, 11, 0.3)'
               }}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
               <button
                 onClick={onClose}
-                className="absolute top-3 right-3 md:top-4 md:right-4 z-30 w-9 h-9 md:w-11 md:h-11 rounded-full border border-amber-800/40 bg-amber-900/30 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/50 transition-all flex items-center justify-center text-lg md:text-xl"
+                className="absolute top-3 right-3 md:top-4 md:right-4 z-30 w-9 h-9 md:w-11 md:h-11 rounded-full border border-amber-500/40 bg-amber-900/40 text-amber-300 hover:text-amber-100 hover:border-amber-400 hover:bg-amber-800/60 transition-all flex items-center justify-center text-lg md:text-xl shadow-[0_0_10px_rgba(245,158,11,0.5)]"
                 aria-label="Fermer le grimoire"
               >
                 ✕
@@ -193,7 +192,7 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
               />
 
               <div
-                className="absolute -top-20 -left-20 w-40 h-40 md:w-80 md:h-80 opacity-15 pointer-events-none rounded-full blur-3xl transition-colors duration-1000"
+                className="absolute -top-20 -left-20 w-40 h-40 md:w-80 md:h-80 opacity-20 pointer-events-none rounded-full blur-3xl transition-colors duration-1000"
                 style={{
                   background: `radial-gradient(circle, ${
                     currentPage === 0 ? '#6b7280' :
@@ -205,22 +204,23 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                 }}
               />
 
-              <div className="absolute top-2 left-2 md:top-3 md:left-3 text-amber-800/40 text-xl md:text-3xl pointer-events-none select-none">❧</div>
-              <div className="absolute top-2 right-2 md:top-3 md:right-3 text-amber-800/40 text-xl md:text-3xl pointer-events-none select-none rotate-90">❧</div>
-              <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 text-amber-800/40 text-xl md:text-3xl pointer-events-none select-none -rotate-90">❧</div>
-              <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 text-amber-800/40 text-xl md:text-3xl pointer-events-none select-none rotate-180">❧</div>
-              <div className="absolute inset-2 md:inset-4 border border-amber-800/20 rounded pointer-events-none" />
+              <div className="absolute top-2 left-2 md:top-3 md:left-3 text-amber-500/50 text-xl md:text-3xl pointer-events-none select-none drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]">❧</div>
+              <div className="absolute top-2 right-2 md:top-3 md:right-3 text-amber-500/50 text-xl md:text-3xl pointer-events-none select-none rotate-90 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]">❧</div>
+              <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 text-amber-500/50 text-xl md:text-3xl pointer-events-none select-none -rotate-90 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]">❧</div>
+              <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 text-amber-500/50 text-xl md:text-3xl pointer-events-none select-none rotate-180 drop-shadow-[0_0_5px_rgba(245,158,11,0.5)]">❧</div>
+              
+              {/* Bordure intérieure subtile pour renforcer l'effet de profondeur */}
+              <div className="absolute inset-1.5 md:inset-2.5 border border-amber-500/20 rounded pointer-events-none shadow-[inset_0_0_10px_rgba(245,158,11,0.1)]" />
 
               <div className="relative z-10 flex flex-col h-full p-3 md:p-8">
                 
                 <div className="text-center mb-2 md:mb-4 shrink-0">
-                  <p className="text-amber-700/60 text-xs md:text-sm uppercase tracking-[0.3em] font-semibold">
+                  <p className="text-amber-400/80 text-xs md:text-sm uppercase tracking-[0.3em] font-semibold drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]">
                     ✦ Grimoire des Anciens ✦
                   </p>
-                  <div className="w-48 md:w-64 h-px bg-gradient-to-r from-transparent via-amber-700/40 to-transparent mx-auto mt-2" />
+                  <div className="w-48 md:w-64 h-px bg-gradient-to-r from-transparent via-amber-500/50 to-transparent mx-auto mt-2 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
                 </div>
 
-                {/* ✅ CONTENEUR DE TEXTE AVEC AUTO-SCROLL (Scrollbar masquée) */}
                 <div
                   ref={textContainerRef}
                   className={`flex-1 flex flex-col items-center text-center transition-all duration-600 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
@@ -231,29 +231,24 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                       : 'opacity-100 translate-x-0 scale-100'
                   }`}
                 >
-                  {/* ✅ TAILLE ICÔNE AUGMENTÉE */}
-                  <div className="text-4xl md:text-6xl mb-2 md:mb-4 drop-shadow-lg animate-pulse-slow mt-2">
+                  <div className="text-4xl md:text-6xl mb-2 md:mb-4 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)] animate-pulse-slow mt-2">
                     {page.icon}
                   </div>
 
-                  {/* ✅ TAILLE CHAPITRE AUGMENTÉE */}
-                  <p className="text-amber-600/70 text-xs md:text-sm uppercase tracking-[0.25em] font-semibold mb-2">
+                  <p className="text-amber-400/80 text-xs md:text-sm uppercase tracking-[0.25em] font-semibold mb-2">
                     {page.chapter}
                   </p>
 
-                  {/* ✅ TAILLE TITRE AUGMENTÉE */}
-                  <h3 className="font-metal text-xl md:text-3xl text-amber-200/90 mb-2 md:mb-4 drop-shadow-md">
+                  <h3 className="font-metal text-xl md:text-3xl text-amber-100 mb-2 md:mb-4 drop-shadow-[0_0_10px_rgba(245,158,11,0.3)]">
                     {page.title}
                   </h3>
 
-                  {/* ✅ TAILLE RUNE AUGMENTÉE */}
-                  <div className="text-amber-700/30 text-2xl md:text-3xl mb-2 md:mb-4 select-none">
+                  <div className="text-amber-500/60 text-2xl md:text-3xl mb-2 md:mb-4 select-none drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]">
                     {page.rune}
                   </div>
 
-                  {/* ✅ TAILLE TEXTE AUGMENTÉE POUR UNE MEILLEURE LISIBILITÉ */}
                   <div className="max-w-2xl mx-auto w-full px-4 pb-24">
-                    <p className="text-amber-100/80 text-sm md:text-base leading-relaxed md:leading-loose font-serif italic whitespace-pre-line">
+                    <p className="text-amber-100/90 text-sm md:text-base leading-relaxed md:leading-loose font-serif italic whitespace-pre-line drop-shadow-sm">
                       {page.text}
                     </p>
                   </div>
@@ -263,7 +258,7 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                   <button
                     onClick={prevPage}
                     disabled={isFlipping}
-                    className="w-9 h-9 md:w-11 md:h-11 rounded-full border border-amber-800/40 bg-amber-900/20 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/40 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-base md:text-xl"
+                    className="w-9 h-9 md:w-11 md:h-11 rounded-full border border-amber-500/40 bg-amber-900/30 text-amber-300 hover:text-amber-100 hover:border-amber-400 hover:bg-amber-800/50 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-base md:text-xl shadow-[0_0_10px_rgba(245,158,11,0.3)]"
                   >
                     ←
                   </button>
@@ -273,10 +268,10 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                       <button
                         key={idx}
                         onClick={() => goToPage(idx, idx > currentPage ? 'next' : 'prev')}
-                        className={`transition-all duration-300 rounded-full ${
+                        className={`transition-all duration-300 rounded-full shadow-[0_0_5px_rgba(245,158,11,0.3)] ${
                           idx === currentPage
-                            ? 'w-6 md:w-8 h-1.5 md:h-2 bg-amber-500/80 shadow-[0_0_8px_rgba(245,158,11,0.5)]'
-                            : 'w-1.5 md:w-2 h-1.5 md:h-2 bg-amber-800/40 hover:bg-amber-600/60'
+                            ? 'w-6 md:w-8 h-1.5 md:h-2 bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.8)]'
+                            : 'w-1.5 md:w-2 h-1.5 md:h-2 bg-amber-700/50 hover:bg-amber-500/80'
                         }`}
                       />
                     ))}
@@ -285,14 +280,14 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                   <button
                     onClick={nextPage}
                     disabled={isFlipping}
-                    className="w-9 h-9 md:w-11 md:h-11 rounded-full border border-amber-800/40 bg-amber-900/20 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/40 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-base md:text-xl"
+                    className="w-9 h-9 md:w-11 md:h-11 rounded-full border border-amber-500/40 bg-amber-900/30 text-amber-300 hover:text-amber-100 hover:border-amber-400 hover:bg-amber-800/50 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-base md:text-xl shadow-[0_0_10px_rgba(245,158,11,0.3)]"
                   >
                     →
                   </button>
                 </div>
 
                 <div className="text-center mt-2 md:mt-3 shrink-0">
-                  <p className="text-amber-800/50 text-[10px] md:text-xs tracking-widest uppercase">
+                  <p className="text-amber-500/60 text-[10px] md:text-xs tracking-widest uppercase">
                     {isPaused ? '⏸ Lecture en pause' : '▶ Défilement automatique'}
                   </p>
                 </div>
