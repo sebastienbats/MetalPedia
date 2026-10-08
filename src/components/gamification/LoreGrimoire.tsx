@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ═══════════════════════════════════════════════════════════
@@ -44,8 +44,6 @@ const GRIMOIRE_PAGES = [
   },
 ];
 
-const AUTO_PLAY_INTERVAL = 8000;
-
 export interface LoreGrimoireProps {
   isOpen: boolean;
   onClose: () => void;
@@ -57,13 +55,25 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
   const [direction, setDirection] = useState<'next' | 'prev'>('next');
   const [isPaused, setIsPaused] = useState(false);
 
+  // ✅ RÉFÉRENCES POUR L'AUTO-SCROLL
+  const textContainerRef = useRef<HTMLDivElement>(null);
+  const scrollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   const totalPages = GRIMOIRE_PAGES.length;
+
+  const clearScroll = useCallback(() => {
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
+  }, []);
 
   const goToPage = useCallback(
     (targetPage: number, dir: 'next' | 'prev') => {
       if (isFlipping || targetPage === currentPage) return;
       if (targetPage < 0 || targetPage >= totalPages) return;
 
+      clearScroll(); // Arrêter le scroll de la page actuelle
       setDirection(dir);
       setIsFlipping(true);
 
@@ -72,7 +82,7 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
         setIsFlipping(false);
       }, 600);
     },
-    [isFlipping, currentPage, totalPages]
+    [isFlipping, currentPage, totalPages, clearScroll]
   );
 
   const nextPage = useCallback(() => {
@@ -85,12 +95,50 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
     goToPage(prev, 'prev');
   }, [currentPage, totalPages, goToPage]);
 
+  // ✅ LOGIQUE D'AUTO-SCROLL
   useEffect(() => {
-    if (isPaused || !isOpen) return;
-    const timer = setInterval(nextPage, AUTO_PLAY_INTERVAL);
-    return () => clearInterval(timer);
-  }, [nextPage, isPaused, isOpen]);
+    clearScroll();
+    if (!isOpen) return;
+    
+    // Réinitialiser le scroll en haut de la page à chaque changement
+    if (textContainerRef.current) {
+      textContainerRef.current.scrollTop = 0;
+    }
 
+    // Si en pause, on ne lance pas le scroll
+    if (isPaused) return;
+
+    // Délai initial pour laisser le temps de lire le titre et l'icône (1.5 seconde)
+    const startScrollTimeout = setTimeout(() => {
+      if (isPaused) return;
+
+      scrollIntervalRef.current = setInterval(() => {
+        if (isPaused || !textContainerRef.current) return;
+
+        const el = textContainerRef.current;
+        // Vérifier si on est arrivé en bas (avec une tolérance de 2px)
+        const isAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight <= 2;
+
+        if (isAtBottom) {
+          clearScroll();
+          // Pause de 2.5 secondes en bas de page avant de passer à la suite
+          setTimeout(() => {
+            nextPage();
+          }, 2500);
+        } else {
+          // Vitesse de défilement : 1px toutes les 25ms (soit 40px/seconde, très lisible)
+          el.scrollTop += 1;
+        }
+      }, 25);
+    }, 1500);
+
+    return () => {
+      clearTimeout(startScrollTimeout);
+      clearScroll();
+    };
+  }, [currentPage, isOpen, isPaused, clearScroll, nextPage]);
+
+  // Navigation clavier
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
@@ -112,7 +160,7 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md p-0 md:p-6 !mt-0"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md p-0 md:p-6"
           onClick={onClose}
         >
           <motion.div
@@ -165,7 +213,7 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
               <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 text-amber-800/40 text-xl md:text-3xl pointer-events-none select-none rotate-180">❧</div>
               <div className="absolute inset-2 md:inset-4 border border-amber-800/20 rounded pointer-events-none" />
 
-              <div className="relative z-10 flex flex-col h-full p-3 md:p-8 overflow-hidden">
+              <div className="relative z-10 flex flex-col h-full p-3 md:p-8">
                 
                 <div className="text-center mb-1 md:mb-3 shrink-0">
                   <p className="text-amber-700/60 text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-semibold">
@@ -174,8 +222,10 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                   <div className="w-32 md:w-48 h-px bg-gradient-to-r from-transparent via-amber-700/40 to-transparent mx-auto mt-1" />
                 </div>
 
+                {/* ✅ CONTENEUR DE TEXTE AVEC AUTO-SCROLL (Scrollbar masquée) */}
                 <div
-                  className={`flex-1 flex flex-col items-center justify-center text-center transition-all duration-600 overflow-hidden ${
+                  ref={textContainerRef}
+                  className={`flex-1 flex flex-col items-center text-center transition-all duration-600 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
                     isFlipping
                       ? direction === 'next'
                         ? 'opacity-0 translate-x-8 scale-95'
@@ -183,7 +233,7 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                       : 'opacity-100 translate-x-0 scale-100'
                   }`}
                 >
-                  <div className="text-3xl md:text-5xl mb-1 md:mb-2 drop-shadow-lg animate-pulse-slow">
+                  <div className="text-3xl md:text-5xl mb-1 md:mb-2 drop-shadow-lg animate-pulse-slow mt-2">
                     {page.icon}
                   </div>
 
@@ -199,7 +249,8 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                     {page.rune}
                   </div>
 
-                  <div className="max-w-xl mx-auto w-full px-2">
+                  {/* Padding bottom généreux pour que la dernière ligne remonte bien au centre avant la fin */}
+                  <div className="max-w-xl mx-auto w-full px-2 pb-20">
                     <p className="text-amber-100/80 text-[11px] md:text-xs leading-snug md:leading-normal font-serif italic whitespace-pre-line">
                       {page.text}
                     </p>
