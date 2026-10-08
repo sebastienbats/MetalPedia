@@ -3,9 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// ═══════════════════════════════════════════════════════════
-// DONNÉES NARRATIVES : LES 5 CHAPITRES DU METALVERSE
-// ═══════════════════════════════════════════════════════════
 const GRIMOIRE_PAGES = [
   {
     chapter: 'Prologue',
@@ -107,22 +104,22 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        // 🌌 BACKDROP PLEIN ÉCRAN (z-[9999] pour être au-dessus de TOUT)
+        // ✅ ZÉRO DÉCALAGE : p-0 partout, items-start pour coller en haut
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md p-0 md:p-6"
+          className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/95 backdrop-blur-md p-0"
           onClick={onClose}
         >
-          {/* 📖 CONTENEUR DU GRIMOIRE (Plein écran mobile, large fenêtre PC) */}
+          {/* ✅ CONTENEUR : h-full pour occuper 100% de la hauteur */}
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full h-full md:max-w-5xl md:h-[90vh] md:rounded-2xl overflow-hidden flex flex-col shadow-2xl shadow-black"
+            className="relative w-full h-full md:max-w-4xl overflow-hidden flex flex-col shadow-2xl shadow-black"
             onClick={(e) => e.stopPropagation()}
           >
             <div
@@ -133,16 +130,14 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
-              {/* Bouton de fermeture */}
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full border border-amber-800/40 bg-amber-900/30 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/50 transition-all flex items-center justify-center text-xl"
+                className="absolute top-3 right-3 md:top-4 md:right-4 z-30 w-9 h-9 md:w-11 md:h-11 rounded-full border border-amber-800/40 bg-amber-900/30 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/50 transition-all flex items-center justify-center text-lg md:text-xl"
                 aria-label="Fermer le grimoire"
               >
                 ✕
               </button>
 
-              {/* Texture parchemin */}
               <div
                 className="absolute inset-0 opacity-[0.04] pointer-events-none"
                 style={{
@@ -150,9 +145,8 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                 }}
               />
 
-              {/* Lueur ambiante dynamique */}
               <div
-                className="absolute -top-20 -left-20 w-60 h-60 md:w-96 md:h-96 opacity-15 pointer-events-none rounded-full blur-3xl transition-colors duration-1000"
+                className="absolute -top-20 -left-20 w-40 h-40 md:w-80 md:h-80 opacity-15 pointer-events-none rounded-full blur-3xl transition-colors duration-1000"
                 style={{
                   background: `radial-gradient(circle, ${
                     currentPage === 0 ? '#6b7280' :
@@ -164,82 +158,71 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                 }}
               />
 
-              {/* Coins décoratifs */}
-              <div className="absolute top-3 left-3 text-amber-800/40 text-2xl md:text-3xl pointer-events-none select-none">❧</div>
-              <div className="absolute top-3 right-3 text-amber-800/40 text-2xl md:text-3xl pointer-events-none select-none rotate-90">❧</div>
-              <div className="absolute bottom-3 left-3 text-amber-800/40 text-2xl md:text-3xl pointer-events-none select-none -rotate-90">❧</div>
-              <div className="absolute bottom-3 right-3 text-amber-800/40 text-2xl md:text-3xl pointer-events-none select-none rotate-180">❧</div>
-              <div className="absolute inset-3 md:inset-4 border border-amber-800/20 rounded pointer-events-none" />
+              <div className="absolute top-2 left-2 md:top-3 md:left-3 text-amber-800/40 text-xl md:text-3xl pointer-events-none select-none">❧</div>
+              <div className="absolute top-2 right-2 md:top-3 md:right-3 text-amber-800/40 text-xl md:text-3xl pointer-events-none select-none rotate-90">❧</div>
+              <div className="absolute bottom-2 left-2 md:bottom-3 md:left-3 text-amber-800/40 text-xl md:text-3xl pointer-events-none select-none -rotate-90">❧</div>
+              <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 text-amber-800/40 text-xl md:text-3xl pointer-events-none select-none rotate-180">❧</div>
+              <div className="absolute inset-2 md:inset-4 border border-amber-800/20 rounded pointer-events-none" />
 
-              {/* ═══════════════════════════════════════════════
-                  CONTENU PRINCIPAL (Flex column pour gérer le scroll)
-                  ═══════════════════════════════════════════════ */}
-              <div className="relative z-10 flex flex-col h-full p-6 md:p-12">
+              <div className="relative z-10 flex flex-col h-full p-3 md:p-8 overflow-hidden">
                 
-                {/* En-tête (ne scroll pas) */}
-                <div className="text-center mb-4 md:mb-6 shrink-0">
-                  <p className="text-amber-700/60 text-[10px] md:text-xs uppercase tracking-[0.3em] font-semibold mb-2">
+                <div className="text-center mb-1 md:mb-3 shrink-0">
+                  <p className="text-amber-700/60 text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-semibold">
                     ✦ Grimoire des Anciens ✦
                   </p>
-                  <div className="w-48 h-px bg-gradient-to-r from-transparent via-amber-700/40 to-transparent mx-auto" />
+                  <div className="w-32 md:w-48 h-px bg-gradient-to-r from-transparent via-amber-700/40 to-transparent mx-auto mt-1" />
                 </div>
 
-                {/* Zone de narration (SCROLLABLE pour garantir l'affichage intégral) */}
                 <div
-                  className={`flex-1 flex flex-col items-center justify-center text-center transition-all duration-600 overflow-y-auto px-2 md:px-8 ${
+                  className={`flex-1 flex flex-col items-center justify-center text-center transition-all duration-600 overflow-hidden ${
                     isFlipping
                       ? direction === 'next'
                         ? 'opacity-0 translate-x-8 scale-95'
                         : 'opacity-0 -translate-x-8 scale-95'
                       : 'opacity-100 translate-x-0 scale-100'
                   }`}
-                  style={{
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: 'rgba(180, 83, 9, 0.5) transparent',
-                  }}
                 >
-                  <div className="text-5xl md:text-7xl mb-4 md:mb-6 drop-shadow-lg animate-pulse-slow">
+                  <div className="text-3xl md:text-5xl mb-1 md:mb-2 drop-shadow-lg animate-pulse-slow">
                     {page.icon}
                   </div>
 
-                  <p className="text-amber-600/70 text-xs md:text-sm uppercase tracking-[0.25em] font-semibold mb-2 md:mb-3">
+                  <p className="text-amber-600/70 text-[9px] md:text-[10px] uppercase tracking-[0.25em] font-semibold mb-1">
                     {page.chapter}
                   </p>
 
-                  <h3 className="font-metal text-2xl md:text-4xl text-amber-200/90 mb-4 md:mb-6 drop-shadow-md">
+                  <h3 className="font-metal text-lg md:text-2xl text-amber-200/90 mb-1 md:mb-3 drop-shadow-md">
                     {page.title}
                   </h3>
 
-                  <div className="text-amber-700/30 text-3xl md:text-4xl mb-4 md:mb-6 select-none">
+                  <div className="text-amber-700/30 text-xl md:text-2xl mb-1 md:mb-3 select-none">
                     {page.rune}
                   </div>
 
-                  <div className="max-w-2xl mx-auto w-full">
-                    <p className="text-amber-100/80 text-sm md:text-lg leading-relaxed md:leading-loose font-serif italic whitespace-pre-line">
+                  <div className="max-w-xl mx-auto w-full px-2">
+                    <p className="text-amber-100/80 text-[11px] md:text-xs leading-snug md:leading-normal font-serif italic whitespace-pre-line">
                       {page.text}
                     </p>
                   </div>
                 </div>
 
-                {/* Navigation (ne scroll pas, reste en bas) */}
-                <div className="shrink-0 mt-4 md:mt-8 flex items-center justify-between">
+                <div className="shrink-0 mt-1 md:mt-4 flex items-center justify-between">
                   <button
                     onClick={prevPage}
                     disabled={isFlipping}
-                    className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-amber-800/40 bg-amber-900/20 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/40 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-lg md:text-xl"
+                    className="w-8 h-8 md:w-10 md:h-10 rounded-full border border-amber-800/40 bg-amber-900/20 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/40 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-sm md:text-lg"
                   >
                     ←
                   </button>
 
-                  <div className="flex items-center gap-2 md:gap-3">
+                  <div className="flex items-center gap-2">
                     {GRIMOIRE_PAGES.map((_, idx) => (
                       <button
                         key={idx}
                         onClick={() => goToPage(idx, idx > currentPage ? 'next' : 'prev')}
                         className={`transition-all duration-300 rounded-full ${
                           idx === currentPage
-                            ? 'w-6 md:w-8 h-2 md:h-2.5 bg-amber-500/80 shadow-[0_0_10px_rgba(245,158,11,0.5)]'
-                            : 'w-2 md:w-2.5 h-2 md:h-2.5 bg-amber-800/40 hover:bg-amber-600/60'
+                            ? 'w-5 md:w-6 h-1.5 bg-amber-500/80 shadow-[0_0_8px_rgba(245,158,11,0.5)]'
+                            : 'w-1.5 h-1.5 bg-amber-800/40 hover:bg-amber-600/60'
                         }`}
                       />
                     ))}
@@ -248,14 +231,14 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
                   <button
                     onClick={nextPage}
                     disabled={isFlipping}
-                    className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-amber-800/40 bg-amber-900/20 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/40 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-lg md:text-xl"
+                    className="w-8 h-8 md:w-10 md:h-10 rounded-full border border-amber-800/40 bg-amber-900/20 text-amber-400/70 hover:text-amber-200 hover:border-amber-500/60 hover:bg-amber-800/40 transition-all flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed text-sm md:text-lg"
                   >
                     →
                   </button>
                 </div>
 
-                <div className="text-center mt-3 md:mt-4 shrink-0">
-                  <p className="text-amber-800/50 text-[10px] md:text-xs tracking-widest uppercase">
+                <div className="text-center mt-1 md:mt-2 shrink-0">
+                  <p className="text-amber-800/50 text-[9px] md:text-[10px] tracking-widest uppercase">
                     {isPaused ? '⏸ Lecture en pause' : '▶ Défilement automatique'}
                   </p>
                 </div>
