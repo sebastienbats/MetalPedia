@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// ═══════════════════════════════════════════════════════════
+// DONNÉES NARRATIVES : LES 5 CHAPITRES DU METALVERSE
+// ═══════════════════════════════════════════════════════════
 const GRIMOIRE_PAGES = [
   {
     chapter: 'Prologue',
@@ -104,22 +107,20 @@ export default function LoreGrimoire({ isOpen, onClose }: LoreGrimoireProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        // ✅ ZÉRO DÉCALAGE : p-0 partout, items-start pour coller en haut
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[9999] flex items-start justify-center bg-black/95 backdrop-blur-md p-0"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md p-0 md:p-6 !mt-0"
           onClick={onClose}
         >
-          {/* ✅ CONTENEUR : h-full pour occuper 100% de la hauteur */}
           <motion.div
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full h-full md:max-w-4xl overflow-hidden flex flex-col shadow-2xl shadow-black"
+            className="relative w-full h-full md:max-w-4xl md:h-[85vh] overflow-hidden flex flex-col shadow-2xl shadow-black"
             onClick={(e) => e.stopPropagation()}
           >
             <div
