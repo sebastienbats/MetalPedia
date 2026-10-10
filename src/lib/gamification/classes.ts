@@ -6,12 +6,12 @@ import type { CharacterClass, ClassMetadata, GamificationPillar } from '@/types/
 
 export const CHARACTER_CLASSES: Record<CharacterClass, ClassMetadata> = {
   // ─────────────────────────────────────────────────────
-  // 🖤 BLACK METAL - Nécromancien des Ombres
+  // 💀 BLACK METAL - Nécromancien des Ombres
   // ─────────────────────────────────────────────────────
   necromancer: {
     id: 'necromancer',
     name: 'Nécromancien des Ombres',
-    icon: '🧟',
+    icon: '💀',
     pillar: 'Black Metal' as GamificationPillar,
     description: 'Expert des groupes obscurs et underground. Tu trouves la beauté là où d\'autres ne voient que les ténèbres.',
     lore: 'Né dans les cryptes oubliées du Metalverse, le Nécromancien parcourt les recoins les plus sombres de l\'encyclopédie. Là où les autres hésitent, lui avance, guidé par l\'appel des groupes dont le nom n\'est murmuré que dans les catacombes.',
@@ -31,12 +31,12 @@ export const CHARACTER_CLASSES: Record<CharacterClass, ClassMetadata> = {
   },
 
   // ─────────────────────────────────────────────────────
-  // 💀 DEATH METAL - Bourreau Sonore
+  // 🩸 DEATH METAL - Bourreau Sonore
   // ─────────────────────────────────────────────────────
   executioner: {
     id: 'executioner',
     name: 'Bourreau Sonore',
-    icon: '☠️',
+    icon: '🩸',
     pillar: 'Death Metal' as GamificationPillar,
     description: 'Chasseur impitoyable de brutalité. Ta plume est aussi tranchante que les riffs que tu découvres.',
     lore: 'Le Bourreau Sonore arpente les champs de bataille du Death Metal, laissant derrière lui une traînée de reviews cinglantes. Chaque avis qu\'il rédige est un coup de hache qui tranche dans le vif, séparant les vrais guerriers des imposteurs.',
@@ -60,7 +60,7 @@ export const CHARACTER_CLASSES: Record<CharacterClass, ClassMetadata> = {
   paladin: {
     id: 'paladin',
     name: 'Paladin du Riff',
-    icon: '⚔️',
+    icon: '🎸',
     pillar: 'Heavy Metal' as GamificationPillar,
     description: 'Gardien des traditions et champion de l\'équilibre. Ta force réside dans la constance.',
     lore: 'Le Paladin du Riff est le chevalier errant du Metalverse, portant haut l\'étendard du Heavy Metal classique. Là où il passe, les mélodies s\'élèvent et les riffs résonnent. Sa quête : préserver la pureté du Metal originel.',
@@ -84,7 +84,7 @@ export const CHARACTER_CLASSES: Record<CharacterClass, ClassMetadata> = {
   berserker: {
     id: 'berserker',
     name: 'Berserker de la Vitesse',
-    icon: '🤘',
+    icon: '⚡',
     pillar: 'Thrash Metal' as GamificationPillar,
     description: 'Speed demon intrépide. Tu fonces tête baissée vers les classiques de l\'âge d\'or.',
     lore: 'Le Berserker de la Vitesse ne connaît qu\'une loi : la vitesse. Les doigts sur le manche, il fonce à travers les décennies, ne s\'arrêtant que devant les monuments du Thrash des années 80. Chaque riff rapide est un cri de guerre.',
@@ -104,12 +104,12 @@ export const CHARACTER_CLASSES: Record<CharacterClass, ClassMetadata> = {
   },
 
   // ─────────────────────────────────────────────────────
-  // ✨ POWER METAL - Barde Épique
+  // 🔥 POWER METAL - Barde Épique
   // ─────────────────────────────────────────────────────
   bard: {
     id: 'bard',
     name: 'Barde Épique',
-    icon: '🎼',
+    icon: '🔥',
     pillar: 'Power Metal' as GamificationPillar,
     description: 'Conteur de légendes et collectionneur de mélodies. Chaque album est un chapitre de ton épopée.',
     lore: 'Le Barde Épique parcourt le Metalverse un luth à la main, chantant les hauts faits des groupes légendaires. Chaque album qu\'il ajoute à sa collection est une strophe de plus dans la grande saga du Power Metal.',
@@ -128,12 +128,12 @@ export const CHARACTER_CLASSES: Record<CharacterClass, ClassMetadata> = {
   },
 
   // ─────────────────────────────────────────────────────
-  // 🕯️ DOOM METAL - Gardien du Vide
+  // 🌑 DOOM METAL - Gardien du Vide
   // ─────────────────────────────────────────────────────
   void_guardian: {
     id: 'void_guardian',
     name: 'Gardien du Vide',
-    icon: '🕳️',
+    icon: '🌑',
     pillar: 'Doom Metal' as GamificationPillar,
     description: 'Ermite patient et contemplatif. Tu plonges dans les profondeurs des biographies les plus denses.',
     lore: 'Le Gardien du Vide médite dans les temples oubliés du Doom, là où le temps s\'étire à l\'infini. Il lit chaque biographie comme un parchemin sacré, cherchant la vérité dans les mots les plus denses et les plus lourds de sens.',
@@ -158,7 +158,7 @@ export const CHARACTER_CLASSES: Record<CharacterClass, ClassMetadata> = {
   chaos_architect: {
     id: 'chaos_architect',
     name: 'Architecte du Chaos',
-    icon: '🧩',
+    icon: '🌀',
     pillar: 'Progressive Metal' as GamificationPillar,
     description: 'Analyste technique et maître des quiz complexes. Tu décortiques chaque structure musicale.',
     lore: 'L\'Architecte du Chaos est un esprit brillant qui déconstruit le Metal pour mieux le comprendre. Chaque signature rythmique impaire, chaque modulation complexe est un puzzle qu\'il résout avec une précision mathématique.',
@@ -182,7 +182,7 @@ export const CHARACTER_CLASSES: Record<CharacterClass, ClassMetadata> = {
   shaman: {
     id: 'shaman',
     name: 'Chaman des Racines',
-    icon: '🌿',
+    icon: '🍀',
     pillar: 'Folk Metal' as GamificationPillar,
     description: 'Ethnographe musical et explorateur de contrées rares. Tu voyages à travers les cultures du Metal.',
     lore: 'Le Chaman des Racines parcourt le monde, collectant les mélodies ancestrales de chaque contrée. Là où les autres voient des pays exotiques, lui voit des terres promises où le Folk Metal puise sa force dans les traditions millénaires.',
@@ -202,12 +202,12 @@ export const CHARACTER_CLASSES: Record<CharacterClass, ClassMetadata> = {
   },
 
   // ─────────────────────────────────────────────────────
-  // 🔗 METALCORE - Briseur de Chaînes
+  // 💥 METALCORE - Briseur de Chaînes
   // ─────────────────────────────────────────────────────
   chain_breaker: {
     id: 'chain_breaker',
     name: 'Briseur de Chaînes',
-    icon: '⛓️',
+    icon: '💥',
     pillar: 'Metalcore' as GamificationPillar,
     description: 'Rebelle moderne et défenseur des groupes actifs. Tu soutiens la scène vivante.',
     lore: 'Le Briseur de Chaînes est un rebelle qui refuse de laisser le Metal devenir une relique du passé. Il sillonne la scène actuelle, supportant les groupes actifs qui repoussent les limites du genre et forgeant l\'avenir du Metalcore.',
