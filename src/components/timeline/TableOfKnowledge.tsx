@@ -34,7 +34,7 @@ const PILLARS: Pillar[] = [
     { id: 6, rune: 'ᛏ', title: "L'Uniforme du Visible" },
     { id: 7, rune: 'ᛒ', title: 'La Cité des Bannières Oubliées' },
   ]},
-  { id: 'Thrash Metal', icon: '⚡', color: '#d63031', fragments: [
+  { id: 'Thrash Metal', icon: '⚡', color: '#ff6f00', fragments: [
     { id: 8, rune: 'ᚠ', title: "L'Étincelle de la Baie" },
     { id: 9, rune: 'ᚢ', title: 'Le Premier Coup de Tonnerre' },
     { id: 10, rune: 'ᚲ', title: 'Les 29 Minutes du Chaos' },
