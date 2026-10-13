@@ -17,8 +17,8 @@ export const BADGES: Badge[] = [
   { id: 'genre_explorer', name: 'Explorateur des Royaumes', icon: '🗺️', description: 'Explorer 5 genres', rarity: 'rare', xpBonus: 75, condition: { type: 'genres', threshold: 5 }, lore: 'Tu as franchi les frontières.' },
   { id: 'knowledge_keeper', name: 'Gardien du Savoir', icon: '📜', description: 'Consulter 200 groupes', rarity: 'epic', xpBonus: 250, condition: { type: 'views', threshold: 200 }, lore: 'Les Tables brillent à nouveau.' },
   { id: 'horde_leader', name: 'Chef de Horde', icon: '🐺', description: 'Avoir 50 favoris', rarity: 'epic', xpBonus: 250, condition: { type: 'favorites', threshold: 500 }, lore: 'Une armée marche sous ta bannière.' },
-  { id: 'lich_lord', name: 'Seigneur Liche', icon: '☠️', description: 'Avoir 250 favoris de Black Metal', rarity: 'epic', xpBonus: 250, condition: { type: 'favorites', threshold: 250, genre: 'Black Metal' }, lore: 'Un nouveau Seigneur Liche se relève, la Crypte dU Metalverse se réveille' },
-  { id: 'blood_lord', name: 'Seigneur du Sang', icon: '🩸', description: 'Avoir 250 favoris de Black Metal', rarity: 'epic', xpBonus: 250, condition: { type: 'favorites', threshold: 250, genre: 'Death Metal' }, lore: 'Un nouveau Seigneur du Sang, le Charnier dU Metalverse déverse une coulée de Sang' },
+  { id: 'lich_lord', name: 'Seigneur Liche', icon: '☠️', description: 'Avoir 250 favoris de Black Metal', rarity: 'epic', xpBonus: 250, condition: { type: 'favorites', threshold: 250, genre: 'Black Metal' }, lore: 'Un nouveau Seigneur Liche se relève, la Crypte du Metalverse se réveille' },
+  { id: 'blood_lord', name: 'Seigneur du Sang', icon: '🩸', description: 'Avoir 250 favoris de Death Metal', rarity: 'epic', xpBonus: 250, condition: { type: 'favorites', threshold: 250, genre: 'Death Metal' }, lore: 'Un nouveau Seigneur du Sang, le Charnier du Metalverse déverse une coulée de Sang' },
   { id: 'metal_god', name: 'Élu des Anciens', icon: '👑', description: 'Atteindre le niveau 50', rarity: 'legendary', xpBonus: 1000, condition: { type: 'special', threshold: 50 }, lore: 'Le Conseil s\'incline devant toi.' },
 ];
 
