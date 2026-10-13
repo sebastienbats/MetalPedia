@@ -16,7 +16,7 @@ export const BADGES: Badge[] = [
   { id: 'true_necro', name: 'True Necro', icon: '💀', description: 'Consulter 50 groupes de Black Metal', rarity: 'rare', xpBonus: 100, condition: { type: 'views', threshold: 50, genre: 'Black Metal' }, lore: 'Les forêts murmurent ton nom.' },
   { id: 'genre_explorer', name: 'Explorateur des Royaumes', icon: '🗺️', description: 'Explorer 5 genres', rarity: 'rare', xpBonus: 75, condition: { type: 'genres', threshold: 5 }, lore: 'Tu as franchi les frontières.' },
   { id: 'knowledge_keeper', name: 'Gardien du Savoir', icon: '📜', description: 'Consulter 200 groupes', rarity: 'epic', xpBonus: 250, condition: { type: 'views', threshold: 200 }, lore: 'Les Tables brillent à nouveau.' },
-  { id: 'horde_leader', name: 'Chef de Horde', icon: '🐺', description: 'Avoir 50 favoris', rarity: 'epic', xpBonus: 250, condition: { type: 'favorites', threshold: 50 }, lore: 'Une armée marche sous ta bannière.' },
+  { id: 'horde_leader', name: 'Chef de Horde', icon: '🐺', description: 'Avoir 50 favoris', rarity: 'epic', xpBonus: 250, condition: { type: 'favorites', threshold: 500 }, lore: 'Une armée marche sous ta bannière.' },
   { id: 'metal_god', name: 'Élu des Anciens', icon: '👑', description: 'Atteindre le niveau 50', rarity: 'legendary', xpBonus: 1000, condition: { type: 'special', threshold: 50 }, lore: 'Le Conseil s\'incline devant toi.' },
 ];
 
