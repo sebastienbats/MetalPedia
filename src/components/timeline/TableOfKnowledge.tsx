@@ -47,7 +47,7 @@ const PILLARS: Pillar[] = [
     { id: 70, rune: 'ᛝ', title: 'La Résistance Moderne' },
     { id: 71, rune: 'ᛞ', title: 'Le Chant des Vaincus qui se Relèvent' },
   ]},
-  { id: 'Death Metal', icon: '🩸', color: '#2d3436', fragments: [
+  { id: 'Death Metal', icon: '🩸', color: '#8b0000', fragments: [
     { id: 13, rune: 'ᚾ', title: 'Le Voile Déchiré' },
     { id: 14, rune: 'ᛇ', title: 'La Voix des Morts' },
     { id: 15, rune: 'ᛡ', title: 'Les Grimoires Interdits' },
