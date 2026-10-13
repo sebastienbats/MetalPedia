@@ -224,6 +224,32 @@ module.exports = {
           master: '#a855f7',
           legendary: '#f59e0b',
         },
+
+        // 🎸 9 CLASSES DU METALVERSE (Couleurs dynamiques)
+        class: {
+          necromancer: '#6b21a8',   // Black Metal
+          executioner: '#991b1b',   // Death Metal
+          paladin: '#ca8a04',       // Heavy Metal
+          berserker: '#ea580c',     // Thrash Metal
+          bard: '#0891b2',          // Power Metal
+          void: '#475569',          // Doom Metal
+          architect: '#7c3aed',     // Progressive Metal
+          shaman: '#16a34a',        // Folk Metal
+          breaker: '#dc2626',       // Metalcore
+        },
+
+        // 🏛️ 9 PILIERS DU METALVERSE (Couleurs thématiques)
+        pillar: {
+          black: '#4c1d95',         // Pourpre des Cryptes
+          death: '#7f1d1d',         // Rouge Sang Séché
+          heavy: '#a16207',         // Or Antique
+          thrash: '#c2410c',        // Orange Brasier
+          power: '#0e7490',         // Cyan Profond
+          doom: '#334155',          // Gris Ardoise du Vide
+          progressive: '#6d28d9',   // Améthyste du Chaos
+          folk: '#15803d',          // Vert Forêt Ancestrale
+          metalcore: '#b91c1c',     // Rouge Rébellion
+        },
       },
 
       // ═══════════════════════════════════════
@@ -419,10 +445,10 @@ module.exports = {
     // Raretés des badges (gamification)
     'rarity-common', 'rarity-rare', 'rarity-epic', 'rarity-legendary',
     'glow-rarity',
-    // Couleurs dynamiques des rangs
-    { pattern: /^text-(gray|red|blue|purple|amber|white)/ },
-    { pattern: /^bg-(gray|red|blue|purple|amber|white)-\d+/ },
-    { pattern: /^border-(gray|red|blue|purple|amber|white)-\d+/ },
+    // Couleurs dynamiques des rangs, classes et piliers
+    { pattern: /^text-(gray|red|blue|purple|amber|white|class|pillar)-/ },
+    { pattern: /^bg-(gray|red|blue|purple|amber|white|class|pillar)-/ },
+    { pattern: /^border-(gray|red|blue|purple|amber|white|class|pillar)-/ },
     // Animations
     'animate-flame', 'animate-pulse-slow', 'animate-glow',
     'animate-shake', 'animate-slide-up', 'animate-slide-down',
@@ -451,7 +477,6 @@ module.exports = {
   // CORE PLUGINS (optimisations)
   // ─────────────────────────────────────────
   corePlugins: {
-    // Désactiver si non utilisé (performance)
     preflight: true,
   },
 
