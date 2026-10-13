@@ -13,7 +13,7 @@ const PILLAR_METADATA: Record<string, { icon: string; color: string }> = {
   'Death Metal':        { icon: '🩸', color: '#8b0000' },
   'Black Metal':        { icon: '💀', color: '#4a148c' },
   'Power Metal':        { icon: '🔥', color: '#d63031' },
-  'Doom Metal':         { icon: '🧟', color: '#2d3436' },
+  'Doom Metal':         { icon: '🌑', color: '#2d3436' },
   'Progressive Metal':  { icon: '🌀', color: '#0277bd' },
   'Folk Metal':         { icon: '🍀', color: '#2e7d32' },
   'Metalcore':          { icon: '💥', color: '#6a1b9a' },
