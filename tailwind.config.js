@@ -253,13 +253,23 @@ module.exports = {
       },
 
       // ═══════════════════════════════════════
-      // POLICES (via next/font)
+      // POLICES (Synchronisé avec src/app/layout.tsx)
       // ═══════════════════════════════════════
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        serif: ['var(--font-cinzel)', 'Georgia', 'serif'],
-        metal: ['var(--font-metal-mania)', 'cursive'],
-        mono: ['var(--font-jetbrains)', 'monospace'],
+        // 1. Inter (Corps de texte)
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        
+        // 2. Cinzel (Sous-titres, textes élégants)
+        serif: ['var(--font-cinzel)', 'Cinzel', 'Georgia', 'serif'],
+        
+        // 3. Metal Mania (Titres principaux, Logo, Gros textes Metal)
+        metal: ['var(--font-metal-mania)', 'Metal Mania', 'cursive'],
+        
+        // 4. Medieval Sharp (Lore, Grimoire, textes anciens)
+        medieval: ['var(--font-medieval)', 'Medieval Sharp', 'cursive'],
+        
+        // 5. JetBrains Mono (Code, données techniques)
+        mono: ['var(--font-jetbrains)', 'JetBrains Mono', 'monospace'],
       },
 
       // ═══════════════════════════════════════
