@@ -60,7 +60,7 @@ const PILLARS: Pillar[] = [
     { id: 72, rune: 'ᚣ', title: "L'Atlas de la Fin" },
     { id: 73, rune: 'ᛁ', title: 'Le Désert qui Attend' },
   ]},
-  { id: 'Black Metal', icon: '💀', color: '#000000', fragments: [
+  { id: 'Black Metal', icon: '💀', color: '#4a148c', fragments: [
     { id: 17, rune: 'ᛉ', title: 'Les Premiers Hérétiques' },
     { id: 18, rune: 'ᛊ', title: "L'Hiver Norvégien" },
     { id: 19, rune: 'ᛏ', title: 'Le Ciel du Nord en Flammes' },
@@ -83,7 +83,7 @@ const PILLARS: Pillar[] = [
     { id: 76, rune: 'ᛏ', title: 'Le Retour des Années 80' },
     { id: 77, rune: 'ᛞ', title: "L'Étoile Dragon" },
   ]},
-  { id: 'Doom Metal', icon: '🧟', color: '#636e72', fragments: [
+  { id: 'Doom Metal', icon: '🌑', color: '#2d3436', fragments: [
     { id: 36, rune: 'ᚨ', title: 'Le Premier Souffle du Vide' },
     { id: 60, rune: 'ᛋ', title: 'Le Soleil Noir' },
     { id: 37, rune: 'ᛒ', title: "L'Arbre qui Pousse dans le Vide" },
