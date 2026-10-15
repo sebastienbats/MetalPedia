@@ -23,7 +23,7 @@ const COUNTRY_TO_ISO: Record<string, string> = {
   'hungary': 'HU', 'czech republic': 'CZ', 'czechia': 'CZ', 'slovakia': 'SK', 'ireland': 'IE',
   'scotland': 'SCT', 'wales': 'WLS', 'england': 'ENG',
   'unknown': 'UN', 'various': 'UN', 'worldwide': 'UN',
-  'cyprus': 'CY', 'estonia': 'EE', 'faroe island': 'FO', 'guadeloupe': 'GP', 'india': 'IN', 'iraq': 'IQ', 'philippines': 'PH', 'portugal': 'PT',
+  'cyprus': 'CY', 'estonia': 'EE', 'faroe islands': 'FO', 'guadeloupe': 'GP', 'india': 'IN', 'iraq': 'IQ', 'philippines': 'PH', 'portugal': 'PT',
   'slovenia': 'SI', 'turkey': 'TR',
 };
 
