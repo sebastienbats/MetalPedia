@@ -7,10 +7,9 @@ import Link from 'next/link';
 import { GAMIFICATION_PILLARS, PILLAR_METADATA, type GamificationPillar } from '@/types/api';
 
 // ═══════════════════════════════════════════════════════════
-// GÉNÉRATEUR INFAILLIBLE DE DRAPEAUX (Basé sur les codes ISO)
+// GÉNÉRATEUR DE DRAPEAUX + CODE ISO (Pour compatibilité Windows/Mac)
 // ═══════════════════════════════════════════════════════════
 
-// Mapping normalisé (minuscules) des noms de pays vers leurs codes ISO 3166-1 alpha-2
 const COUNTRY_TO_ISO: Record<string, string> = {
   'norway': 'NO', 'sweden': 'SE', 'finland': 'FI', 'denmark': 'DK', 'iceland': 'IS',
   'germany': 'DE', 'united kingdom': 'GB', 'uk': 'GB', 'great britain': 'GB',
@@ -25,10 +24,8 @@ const COUNTRY_TO_ISO: Record<string, string> = {
   'unknown': 'UN', 'various': 'UN', 'worldwide': 'UN'
 };
 
-// Fonction pour convertir un code ISO 2 lettres en émoji drapeau officiel Unicode
 const getFlagEmojiFromIso = (countryCode: string) => {
   if (countryCode.length !== 2) {
-    // Gestion des drapeaux régionaux spécifiques (séquences de tags Unicode)
     if (countryCode === 'SCT') return '🏴󠁧󠁢󠁳󠁣󠁴󠁿';
     if (countryCode === 'WLS') return '🏴󠁧󠁢󠁷󠁬󠁳󠁿';
     if (countryCode === 'ENG') return '🏴󠁧󠁢󠁥󠁮󠁧󠁿';
@@ -41,22 +38,24 @@ const getFlagEmojiFromIso = (countryCode: string) => {
   return String.fromCodePoint(...codePoints);
 };
 
-const getFlagEmoji = (countryName: string) => {
-  if (!countryName) return '🌍';
+// ✅ Fonction qui retourne l'émoji + le code ISO entre crochets pour une compatibilité totale
+const getCountryDisplay = (countryName: string) => {
+  if (!countryName) return '🌍 [??] Unknown';
   
-  // Normalisation robuste : minuscules, suppression des espaces multiples et des caractères invisibles
   const normalized = countryName.trim().toLowerCase().replace(/\s+/g, ' ');
-  
   const isoCode = COUNTRY_TO_ISO[normalized];
+  
   if (isoCode) {
-    return getFlagEmojiFromIso(isoCode);
+    const flag = getFlagEmojiFromIso(isoCode);
+    const codeDisplay = isoCode.length === 2 ? `[${isoCode}]` : '';
+    return `${flag} ${codeDisplay} ${countryName}`.trim();
   }
   
-  return '🌍'; // Fallback universel si le pays n'est pas reconnu
+  return `🌍 [??] ${countryName}`;
 };
 
 // ═══════════════════════════════════════════════════════════
-// RESTE DU COMPOSANT (inchangé)
+// COMPOSANT PRINCIPAL
 // ═══════════════════════════════════════════════════════════
 
 type SortOption = 'name-asc' | 'name-desc' | 'listeners-asc' | 'listeners-desc';
@@ -146,7 +145,7 @@ export default function FavoritesPage() {
               <option value="all">🌍 Tous les Pays</option>
               {uniqueCountries.map((country) => (
                 <option key={country} value={country}>
-                  {getFlagEmoji(country)} {country}
+                  {getCountryDisplay(country)}
                 </option>
               ))}
             </select>
