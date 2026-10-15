@@ -4,21 +4,25 @@ import { useState, useMemo } from 'react';
 import { useFavoriteBands, useFavoritesCount } from '@/stores/favoritesStore';
 import BandCard from '@/components/bands/BandCard';
 import Link from 'next/link';
+// ✅ Import direct depuis la source de vérité
+import { GAMIFICATION_PILLARS, PILLAR_METADATA, type GamificationPillar } from '@/types/api';
 
-// ═══════════════════════════════════════════════════════════
-// LISTE DES 9 PILIERS (Pour le filtre)
-// ═══════════════════════════════════════════════════════════
-const PILLARS = [
-  'Black Metal',
-  'Death Metal',
-  'Heavy Metal',
-  'Thrash Metal',
-  'Power Metal',
-  'Doom Metal',
-  'Progressive Metal',
-  'Folk Metal',
-  'Metalcore',
-] as const;
+// Dictionnaire des drapeaux pour les pays du metal (extensible)
+const COUNTRY_FLAGS: Record<string, string> = {
+  'Norway': '🇳🇴', 'Sweden': '🇸🇪', 'Finland': '🇫🇮', 'Denmark': '🇩🇰', 'Iceland': '🇮🇸',
+  'Germany': '🇩🇪', 'United Kingdom': '🇬🇧', 'United States': '🇺🇸', 'Canada': '🇨🇦',
+  'France': '🇫🇷', 'Italy': '🇮🇹', 'Spain': '🇪🇸', 'Netherlands': '🇳🇱', 'Belgium': '🇧🇪',
+  'Poland': '🇵🇱', 'Russia': '🇷🇺', 'Ukraine': '🇺🇦', 'Greece': '🇬🇷', 'Romania': '🇷🇴',
+  'Brazil': '🇧🇷', 'Argentina': '🇦🇷', 'Chile': '🇨🇱', 'Mexico': '🇲🇽', 'Colombia': '🇨🇴',
+  'Japan': '🇯🇵', 'South Korea': '🇰🇷', 'China': '🇨🇳', 'Australia': '🇦🇺', 'New Zealand': '🇳🇿',
+  'Switzerland': '🇨🇭', 'Austria': '🇦🇹', 'Hungary': '🇭🇺', 'Czech Republic': '🇨🇿', 'Slovakia': '🇸🇰',
+  'Ireland': '🇮🇪', 'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿', 'Wales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿', 'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+  'Unknown': '🌍', 'Various': '🌍', 'Worldwide': '🌍'
+};
+
+const getFlagEmoji = (countryName: string) => {
+  return COUNTRY_FLAGS[countryName] || '🌍'; // Fallback sur le globe si le pays n'est pas dans la liste
+};
 
 type SortOption = 'name-asc' | 'name-desc' | 'listeners-asc' | 'listeners-desc';
 
@@ -32,7 +36,7 @@ export default function FavoritesPage() {
   const [filterCountry, setFilterCountry] = useState<string>('all');
 
   // ═══════════════════════════════════════════════════════════
-  // EXTRACTION DYNAMIQUE DES PAYS (uniquement ceux dans les favoris)
+  // EXTRACTION DYNAMIQUE DES PAYS (triés alphabétiquement)
   // ═══════════════════════════════════════════════════════════
   const uniqueCountries = useMemo(() => {
     const countries = new Set(
@@ -92,7 +96,7 @@ export default function FavoritesPage() {
       {favorites.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
           
-          {/* 1. Filtre par Pilier */}
+          {/* 1. Filtre par Pilier (Depuis src/types/api.ts) */}
           <div className="flex-1">
             <label htmlFor="filter-pillar" className="sr-only">
               Filtrer par pilier
@@ -104,15 +108,15 @@ export default function FavoritesPage() {
               className="w-full bg-metal-black border border-metal-gray rounded-lg px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-metal-fire focus:ring-1 focus:ring-metal-fire/50 transition-all cursor-pointer"
             >
               <option value="all">🏛️ Tous les Piliers</option>
-              {PILLARS.map((pillar) => (
+              {GAMIFICATION_PILLARS.map((pillar) => (
                 <option key={pillar} value={pillar}>
-                  {pillar}
+                  {PILLAR_METADATA[pillar as GamificationPillar].icon} {pillar}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* 2. Filtre par Pays (Dynamique) */}
+          {/* 2. Filtre par Pays (Dynamique avec drapeaux) */}
           <div className="flex-1">
             <label htmlFor="filter-country" className="sr-only">
               Filtrer par pays
@@ -126,7 +130,7 @@ export default function FavoritesPage() {
               <option value="all">🌍 Tous les Pays</option>
               {uniqueCountries.map((country) => (
                 <option key={country} value={country}>
-                  {country}
+                  {getFlagEmoji(country)} {country}
                 </option>
               ))}
             </select>
