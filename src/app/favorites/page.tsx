@@ -4,25 +4,60 @@ import { useState, useMemo } from 'react';
 import { useFavoriteBands, useFavoritesCount } from '@/stores/favoritesStore';
 import BandCard from '@/components/bands/BandCard';
 import Link from 'next/link';
-// ✅ Import direct depuis la source de vérité
 import { GAMIFICATION_PILLARS, PILLAR_METADATA, type GamificationPillar } from '@/types/api';
 
-// Dictionnaire des drapeaux pour les pays du metal (extensible)
-const COUNTRY_FLAGS: Record<string, string> = {
-  'Norway': '🇳🇴', 'Sweden': '🇸🇪', 'Finland': '🇫🇮', 'Denmark': '🇩🇰', 'Iceland': '🇮🇸',
-  'Germany': '🇩🇪', 'United Kingdom': '🇬🇧', 'United States': '🇺🇸', 'Canada': '🇨🇦',
-  'France': '🇫🇷', 'Italy': '🇮🇹', 'Spain': '🇪🇸', 'Netherlands': '🇳🇱', 'Belgium': '🇧🇪',
-  'Poland': '🇵🇱', 'Russia': '🇷🇺', 'Ukraine': '🇺🇦', 'Greece': '🇬🇷', 'Romania': '🇷🇴',
-  'Brazil': '🇧🇷', 'Argentina': '🇦🇷', 'Chile': '🇨🇱', 'Mexico': '🇲🇽', 'Colombia': '🇨🇴',
-  'Japan': '🇯🇵', 'South Korea': '🇰🇷', 'China': '🇨🇳', 'Australia': '🇦🇺', 'New Zealand': '🇳🇿',
-  'Switzerland': '🇨🇭', 'Austria': '🇦🇹', 'Hungary': '🇭🇺', 'Czech Republic': '🇨🇿', 'Slovakia': '🇸🇰',
-  'Ireland': '🇮🇪', 'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿', 'Wales': '🏴󠁧󠁢󠁷󠁬󠁳󠁿', 'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
-  'Unknown': '🌍', 'Various': '🌍', 'Worldwide': '🌍'
+// ═══════════════════════════════════════════════════════════
+// GÉNÉRATEUR INFAILLIBLE DE DRAPEAUX (Basé sur les codes ISO)
+// ═══════════════════════════════════════════════════════════
+
+// Mapping normalisé (minuscules) des noms de pays vers leurs codes ISO 3166-1 alpha-2
+const COUNTRY_TO_ISO: Record<string, string> = {
+  'norway': 'NO', 'sweden': 'SE', 'finland': 'FI', 'denmark': 'DK', 'iceland': 'IS',
+  'germany': 'DE', 'united kingdom': 'GB', 'uk': 'GB', 'great britain': 'GB',
+  'united states': 'US', 'usa': 'US', 'us': 'US', 'united states of america': 'US', 'america': 'US',
+  'canada': 'CA', 'france': 'FR', 'italy': 'IT', 'spain': 'ES', 'netherlands': 'NL', 'the netherlands': 'NL',
+  'belgium': 'BE', 'poland': 'PL', 'russia': 'RU', 'russian federation': 'RU', 'ukraine': 'UA',
+  'greece': 'GR', 'romania': 'RO', 'brazil': 'BR', 'argentina': 'AR', 'chile': 'CL',
+  'mexico': 'MX', 'colombia': 'CO', 'japan': 'JP', 'south korea': 'KR', 'korea, republic of': 'KR',
+  'china': 'CN', 'australia': 'AU', 'new zealand': 'NZ', 'switzerland': 'CH', 'austria': 'AT',
+  'hungary': 'HU', 'czech republic': 'CZ', 'czechia': 'CZ', 'slovakia': 'SK', 'ireland': 'IE',
+  'scotland': 'SCT', 'wales': 'WLS', 'england': 'ENG',
+  'unknown': 'UN', 'various': 'UN', 'worldwide': 'UN'
+};
+
+// Fonction pour convertir un code ISO 2 lettres en émoji drapeau officiel Unicode
+const getFlagEmojiFromIso = (countryCode: string) => {
+  if (countryCode.length !== 2) {
+    // Gestion des drapeaux régionaux spécifiques (séquences de tags Unicode)
+    if (countryCode === 'SCT') return '🏴󠁧󠁢󠁳󠁣󠁴󠁿';
+    if (countryCode === 'WLS') return '🏴󠁧󠁢󠁷󠁬󠁳󠁿';
+    if (countryCode === 'ENG') return '🏴󠁧󠁢󠁥󠁮󠁧󠁿';
+    return '🌍';
+  }
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
 };
 
 const getFlagEmoji = (countryName: string) => {
-  return COUNTRY_FLAGS[countryName] || '🌍'; // Fallback sur le globe si le pays n'est pas dans la liste
+  if (!countryName) return '🌍';
+  
+  // Normalisation robuste : minuscules, suppression des espaces multiples et des caractères invisibles
+  const normalized = countryName.trim().toLowerCase().replace(/\s+/g, ' ');
+  
+  const isoCode = COUNTRY_TO_ISO[normalized];
+  if (isoCode) {
+    return getFlagEmojiFromIso(isoCode);
+  }
+  
+  return '🌍'; // Fallback universel si le pays n'est pas reconnu
 };
+
+// ═══════════════════════════════════════════════════════════
+// RESTE DU COMPOSANT (inchangé)
+// ═══════════════════════════════════════════════════════════
 
 type SortOption = 'name-asc' | 'name-desc' | 'listeners-asc' | 'listeners-desc';
 
@@ -30,14 +65,10 @@ export default function FavoritesPage() {
   const favorites = useFavoriteBands();
   const count = useFavoritesCount();
 
-  // États pour le tri et les filtres
   const [sortBy, setSortBy] = useState<SortOption>('name-asc');
   const [filterPillar, setFilterPillar] = useState<string>('all');
   const [filterCountry, setFilterCountry] = useState<string>('all');
 
-  // ═══════════════════════════════════════════════════════════
-  // EXTRACTION DYNAMIQUE DES PAYS (triés alphabétiquement)
-  // ═══════════════════════════════════════════════════════════
   const uniqueCountries = useMemo(() => {
     const countries = new Set(
       favorites.map((band) => band.country).filter((c): c is string => Boolean(c))
@@ -45,23 +76,17 @@ export default function FavoritesPage() {
     return Array.from(countries).sort((a, b) => a.localeCompare(b));
   }, [favorites]);
 
-  // ═══════════════════════════════════════════════════════════
-  // LOGIQUE DE FILTRAGE ET DE TRI (Optimisée avec useMemo)
-  // ═══════════════════════════════════════════════════════════
   const processedFavorites = useMemo(() => {
     let result = [...favorites];
 
-    // 1. Filtrer par pilier
     if (filterPillar !== 'all') {
       result = result.filter((band) => band.genre_pillar === filterPillar);
     }
 
-    // 2. Filtrer par pays
     if (filterCountry !== 'all') {
       result = result.filter((band) => band.country === filterCountry);
     }
 
-    // 3. Trier le résultat
     result.sort((a, b) => {
       switch (sortBy) {
         case 'name-asc':
@@ -82,7 +107,6 @@ export default function FavoritesPage() {
 
   return (
     <div className="w-full px-2 py-6 sm:px-4 sm:py-12">
-      {/* ── EN-TÊTE ── */}
       <div className="mb-6 sm:mb-8 text-center">
         <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2 sm:mb-4">
           ❤️ Mes Favoris
@@ -92,15 +116,10 @@ export default function FavoritesPage() {
         </p>
       </div>
 
-      {/* ── BARRE DE CONTRÔLES (Filtres & Tri) ── */}
       {favorites.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
-          
-          {/* 1. Filtre par Pilier (Depuis src/types/api.ts) */}
           <div className="flex-1">
-            <label htmlFor="filter-pillar" className="sr-only">
-              Filtrer par pilier
-            </label>
+            <label htmlFor="filter-pillar" className="sr-only">Filtrer par pilier</label>
             <select
               id="filter-pillar"
               value={filterPillar}
@@ -116,11 +135,8 @@ export default function FavoritesPage() {
             </select>
           </div>
 
-          {/* 2. Filtre par Pays (Dynamique avec drapeaux) */}
           <div className="flex-1">
-            <label htmlFor="filter-country" className="sr-only">
-              Filtrer par pays
-            </label>
+            <label htmlFor="filter-country" className="sr-only">Filtrer par pays</label>
             <select
               id="filter-country"
               value={filterCountry}
@@ -136,11 +152,8 @@ export default function FavoritesPage() {
             </select>
           </div>
 
-          {/* 3. Tri */}
           <div className="flex-1">
-            <label htmlFor="sort-by" className="sr-only">
-              Trier par
-            </label>
+            <label htmlFor="sort-by" className="sr-only">Trier par</label>
             <select
               id="sort-by"
               value={sortBy}
@@ -156,7 +169,6 @@ export default function FavoritesPage() {
         </div>
       )}
 
-      {/* ── GRILLE DES FAVORIS OU ÉTAT VIDE ── */}
       {processedFavorites.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           {processedFavorites.map((band) => (
