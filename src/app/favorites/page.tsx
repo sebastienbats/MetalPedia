@@ -1,17 +1,69 @@
 'use client';
 
+import { useState, useMemo } from 'react';
 import { useFavoriteBands, useFavoritesCount } from '@/stores/favoritesStore';
 import BandCard from '@/components/bands/BandCard';
 import Link from 'next/link';
+
+// ═══════════════════════════════════════════════════════════
+// LISTE DES 9 PILIERS (Pour le filtre)
+// ═══════════════════════════════════════════════════════════
+const PILLARS = [
+  'Black Metal',
+  'Death Metal',
+  'Heavy Metal',
+  'Thrash Metal',
+  'Power Metal',
+  'Doom Metal',
+  'Progressive Metal',
+  'Folk Metal',
+  'Metalcore',
+] as const;
+
+type SortOption = 'name-asc' | 'name-desc' | 'listeners-asc' | 'listeners-desc';
 
 export default function FavoritesPage() {
   const favorites = useFavoriteBands();
   const count = useFavoritesCount();
 
+  // États pour le tri et le filtre
+  const [sortBy, setSortBy] = useState<SortOption>('name-asc');
+  const [filterPillar, setFilterPillar] = useState<string>('all');
+
+  // ═══════════════════════════════════════════════════════════
+  // LOGIQUE DE FILTRAGE ET DE TRI (Optimisée avec useMemo)
+  // ═══════════════════════════════════════════════════════════
+  const processedFavorites = useMemo(() => {
+    let result = [...favorites];
+
+    // 1. Filtrer par pilier
+    if (filterPillar !== 'all') {
+      result = result.filter((band) => band.genre_pillar === filterPillar);
+    }
+
+    // 2. Trier le résultat
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case 'name-asc':
+          return a.name.localeCompare(b.name);
+        case 'name-desc':
+          return b.name.localeCompare(a.name);
+        case 'listeners-asc':
+          return (a.listeners || 0) - (b.listeners || 0);
+        case 'listeners-desc':
+          return (b.listeners || 0) - (a.listeners || 0);
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [favorites, sortBy, filterPillar]);
+
   return (
-    // ✅ FIX : w-full px-2 au lieu de container mx-auto px-4 (supprime le double padding)
     <div className="w-full px-2 py-6 sm:px-4 sm:py-12">
-      <div className="mb-4 sm:mb-8 text-center">
+      {/* ── EN-TÊTE ── */}
+      <div className="mb-6 sm:mb-8 text-center">
         <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2 sm:mb-4">
           ❤️ Mes Favoris
         </h1>
@@ -20,27 +72,79 @@ export default function FavoritesPage() {
         </p>
       </div>
 
-      {favorites.length > 0 ? (
+      {/* ── BARRE DE CONTRÔLES (Filtre & Tri) ── */}
+      {favorites.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
+          {/* Filtre par Pilier */}
+          <div className="flex-1">
+            <label htmlFor="filter-pillar" className="sr-only">
+              Filtrer par pilier
+            </label>
+            <select
+              id="filter-pillar"
+              value={filterPillar}
+              onChange={(e) => setFilterPillar(e.target.value)}
+              className="w-full bg-metal-black border border-metal-gray rounded-lg px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-metal-fire focus:ring-1 focus:ring-metal-fire/50 transition-all cursor-pointer"
+            >
+              <option value="all">🏛️ Tous les Piliers</option>
+              {PILLARS.map((pillar) => (
+                <option key={pillar} value={pillar}>
+                  {pillar}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Tri */}
+          <div className="flex-1">
+            <label htmlFor="sort-by" className="sr-only">
+              Trier par
+            </label>
+            <select
+              id="sort-by"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="w-full bg-metal-black border border-metal-gray rounded-lg px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-metal-fire focus:ring-1 focus:ring-metal-fire/50 transition-all cursor-pointer"
+            >
+              <option value="name-asc">🔤 Nom (A → Z)</option>
+              <option value="name-desc">🔤 Nom (Z → A)</option>
+              <option value="listeners-desc">👥 Auditeurs (Plus → Moins)</option>
+              <option value="listeners-asc">👥 Auditeurs (Moins → Plus)</option>
+            </select>
+          </div>
+        </div>
+      )}
+
+      {/* ── GRILLE DES FAVORIS OU ÉTAT VIDE ── */}
+      {processedFavorites.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-          {favorites.map((band) => (
+          {processedFavorites.map((band) => (
             <BandCard key={band.id} band={band} />
           ))}
         </div>
       ) : (
         <div className="metal-card p-6 sm:p-8 text-center border border-metal-gray">
-          <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">🎸</div>
+          <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">
+            {favorites.length === 0 ? '🎸' : '🔍'}
+          </div>
           <h2 className="font-metal text-xl sm:text-3xl text-metal-fire mb-3 sm:mb-4">
-            Aucun favori pour le moment
+            {favorites.length === 0
+              ? 'Aucun favori pour le moment'
+              : 'Aucun groupe trouvé pour ce pilier'}
           </h2>
           <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-4 sm:mb-6">
-            Explore l'encyclopédie et ajoute des groupes à ta collection personnelle.
+            {favorites.length === 0
+              ? "Explore l'encyclopédie et ajoute des groupes à ta collection personnelle."
+              : "Essaie de sélectionner un autre pilier ou réinitialise les filtres."}
           </p>
-          <Link 
-            href="/genres" 
-            className="inline-block px-6 py-3 bg-metal-fire text-white rounded-lg font-semibold hover:bg-metal-fire/80 transition-colors text-sm sm:text-base"
-          >
-            Explorer les 9 Piliers du Metal
-          </Link>
+          {favorites.length === 0 && (
+            <Link
+              href="/genres"
+              className="inline-block px-6 py-3 bg-metal-fire text-white rounded-lg font-semibold hover:bg-metal-fire/80 transition-colors text-sm sm:text-base"
+            >
+              Explorer les 9 Piliers du Metal
+            </Link>
+          )}
         </div>
       )}
     </div>
