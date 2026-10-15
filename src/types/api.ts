@@ -98,6 +98,7 @@ export interface BandSearchResult {
   name: string;
   genre: Genre;
   genre_pillar?: GamificationPillar | string | null;
+  listeners?: number; // ✅ AJOUT : Pour permettre le tri par auditeurs
   country: string;
   formed?: number | null;
   status?: BandStatus | string;
