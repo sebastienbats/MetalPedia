@@ -26,9 +26,20 @@ export default function FavoritesPage() {
   const favorites = useFavoriteBands();
   const count = useFavoritesCount();
 
-  // États pour le tri et le filtre
+  // États pour le tri et les filtres
   const [sortBy, setSortBy] = useState<SortOption>('name-asc');
   const [filterPillar, setFilterPillar] = useState<string>('all');
+  const [filterCountry, setFilterCountry] = useState<string>('all');
+
+  // ═══════════════════════════════════════════════════════════
+  // EXTRACTION DYNAMIQUE DES PAYS (uniquement ceux dans les favoris)
+  // ═══════════════════════════════════════════════════════════
+  const uniqueCountries = useMemo(() => {
+    const countries = new Set(
+      favorites.map((band) => band.country).filter((c): c is string => Boolean(c))
+    );
+    return Array.from(countries).sort((a, b) => a.localeCompare(b));
+  }, [favorites]);
 
   // ═══════════════════════════════════════════════════════════
   // LOGIQUE DE FILTRAGE ET DE TRI (Optimisée avec useMemo)
@@ -41,7 +52,12 @@ export default function FavoritesPage() {
       result = result.filter((band) => band.genre_pillar === filterPillar);
     }
 
-    // 2. Trier le résultat
+    // 2. Filtrer par pays
+    if (filterCountry !== 'all') {
+      result = result.filter((band) => band.country === filterCountry);
+    }
+
+    // 3. Trier le résultat
     result.sort((a, b) => {
       switch (sortBy) {
         case 'name-asc':
@@ -58,7 +74,7 @@ export default function FavoritesPage() {
     });
 
     return result;
-  }, [favorites, sortBy, filterPillar]);
+  }, [favorites, sortBy, filterPillar, filterCountry]);
 
   return (
     <div className="w-full px-2 py-6 sm:px-4 sm:py-12">
@@ -72,10 +88,11 @@ export default function FavoritesPage() {
         </p>
       </div>
 
-      {/* ── BARRE DE CONTRÔLES (Filtre & Tri) ── */}
+      {/* ── BARRE DE CONTRÔLES (Filtres & Tri) ── */}
       {favorites.length > 0 && (
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
-          {/* Filtre par Pilier */}
+          
+          {/* 1. Filtre par Pilier */}
           <div className="flex-1">
             <label htmlFor="filter-pillar" className="sr-only">
               Filtrer par pilier
@@ -95,7 +112,27 @@ export default function FavoritesPage() {
             </select>
           </div>
 
-          {/* Tri */}
+          {/* 2. Filtre par Pays (Dynamique) */}
+          <div className="flex-1">
+            <label htmlFor="filter-country" className="sr-only">
+              Filtrer par pays
+            </label>
+            <select
+              id="filter-country"
+              value={filterCountry}
+              onChange={(e) => setFilterCountry(e.target.value)}
+              className="w-full bg-metal-black border border-metal-gray rounded-lg px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-metal-fire focus:ring-1 focus:ring-metal-fire/50 transition-all cursor-pointer"
+            >
+              <option value="all">🌍 Tous les Pays</option>
+              {uniqueCountries.map((country) => (
+                <option key={country} value={country}>
+                  {country}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 3. Tri */}
           <div className="flex-1">
             <label htmlFor="sort-by" className="sr-only">
               Trier par
@@ -130,12 +167,12 @@ export default function FavoritesPage() {
           <h2 className="font-metal text-xl sm:text-3xl text-metal-fire mb-3 sm:mb-4">
             {favorites.length === 0
               ? 'Aucun favori pour le moment'
-              : 'Aucun groupe trouvé pour ce pilier'}
+              : 'Aucun groupe trouvé pour ces critères'}
           </h2>
           <p className="text-metal-bone font-serif text-sm sm:text-base lg:text-lg mb-4 sm:mb-6">
             {favorites.length === 0
               ? "Explore l'encyclopédie et ajoute des groupes à ta collection personnelle."
-              : "Essaie de sélectionner un autre pilier ou réinitialise les filtres."}
+              : "Essaie de modifier tes filtres ou réinitialise-les pour tout voir."}
           </p>
           {favorites.length === 0 && (
             <Link
