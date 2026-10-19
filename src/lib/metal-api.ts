@@ -223,21 +223,22 @@ export const metalServerApi = {
   },
 
   // ─────────────────────────────────────────────────────
-  // 🛡️ CORRECTION MAJEURE : Suppression du plafond de 100
+  // 🛡️ CORRECTION DÉFINITIVE : Utilisation de .range() au lieu de .limit()
   // ─────────────────────────────────────────────────────
-  async getBandsByPillar(pillar: string, subgenre?: string, limit: number = 10000): Promise<Band[]> {
+  async getBandsByPillar(pillar: string, subgenre?: string): Promise<Band[]> {
     let query = (supabase as any)
       .from('bands')
       .select('*')
       .eq('genre_pillar', pillar);
 
     if (subgenre) {
-      query = query.eq('genre', subgenre);
+      // Si on filtre par sous-genre, une limite de 1000 est largement suffisante
+      query = query.eq('genre', subgenre).order('listeners', { ascending: false }).limit(1000);
+    } else {
+      // ✅ CORRECTION : .range() est la méthode fiable pour bypasser la limite de 1000 de PostgREST
+      // On récupère jusqu'à 5000 groupes, ce qui couvre largement tes 1326 groupes Heavy Metal
+      query = query.order('listeners', { ascending: false }).range(0, 5000);
     }
-
-    // ✅ CORRECTION : Augmentation massive de la limite (défaut 10000) 
-    // pour que {bands.length} affiche le VRAI total sur la page [pillar], et non un plafond de 100.
-    query = query.order('listeners', { ascending: false }).limit(limit);
 
     const { data, error } = await query as { 
       data: BandRow[] | null; 
