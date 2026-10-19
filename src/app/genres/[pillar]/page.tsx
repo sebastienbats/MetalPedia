@@ -8,6 +8,10 @@ import Loader from '@/components/ui/Loader';
 import FloatingRunes, { type SymbolFamily } from '@/components/ui/FloatingRunes';
 import { PILLAR_METADATA, type GamificationPillar } from '@/types/api';
 
+// ✅ CORRECTION CRITIQUE : Forcer le rendu dynamique et désactiver le cache ISR
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface Props {
   params: Promise<{ pillar: string }>;
   searchParams: Promise<{ subgenre?: string }>;
