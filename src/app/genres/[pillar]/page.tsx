@@ -8,9 +8,9 @@ import Loader from '@/components/ui/Loader';
 import FloatingRunes, { type SymbolFamily } from '@/components/ui/FloatingRunes';
 import { PILLAR_METADATA, type GamificationPillar } from '@/types/api';
 
-// ✅ CORRECTION CRITIQUE : Forcer le rendu dynamique et désactiver le cache ISR
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// ✅ OPTIMISATION : Réactivation du cache ISR (régénération toutes les heures)
+// pour des performances optimales maintenant que la limite Supabase est corrigée.
+export const revalidate = 3600;
 
 interface Props {
   params: Promise<{ pillar: string }>;
