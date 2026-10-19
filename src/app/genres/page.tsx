@@ -9,15 +9,12 @@ export const metadata = {
   description: 'Explorez les 9 grands piliers du metal et découvrez des milliers de groupes classés par sous-genre.',
 };
 
-// ✅ CORRECTION CRITIQUE : Forcer le rendu dynamique et désactiver le cache
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// ✅ OPTIMISATION : Réactivation du cache ISR (régénération toutes les heures)
+// pour des performances optimales maintenant que la limite Supabase est corrigée.
+export const revalidate = 3600;
 
 export default async function GenresPage() {
   const pillarsStats = await metalServerApi.getGenrePillarsStats();
-
-  // ✅ LOG DE DEBUG : Vérifier que l'API renvoie bien toutes les données
-  console.log('🔍 [GenresPage] Statistiques des piliers:', pillarsStats.map(p => `${p.pillar}: ${p.count}`));
 
   return (
     <>
