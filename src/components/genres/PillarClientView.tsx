@@ -25,7 +25,8 @@ const COUNTRY_TO_ISO: Record<string, string> = {
   'faroe islands': 'FO', 'guadeloupe': 'GP', 'india': 'IN', 'iraq': 'IQ', 'philippines': 'PH', 
   'portugal': 'PT', 'slovenia': 'SI', 'turkey': 'TR',
   'bangladesh': 'BD', 'belize': 'BZ', 'bosnia and herzegovina': 'BA', 'croatia': 'HR', 'cuba': 'CU', 'honduras': 'HN', 'hong kong': 'HK', 'indonesia': 'ID',
-  'israel': 'IL', 'jamaica': 'JM', 'latvia': 'LV', 'malaysia': 'MY', 'montserrat': 'MS', 'peru': 'PE', 'serbia': 'RS', 'south africa': 'ZA', 'URSS': 'SU', 'taiwan': "TW",
+  'israel': 'IL', 'jamaica': 'JM', 'latvia': 'LV', 'malaysia': 'MY', 'montserrat': 'MS', 'peru': 'PE', 'serbia': 'RS', 'south africa': 'ZA',
+  'taiwan (province of china)': "TW", 'united arab emirates': 'AE', 'venezuela (bolivarian republic of)': 'VE', 'zimbabwe': 'ZW',
 };
 
 const getFlagEmojiFromIso = (countryCode: string) => {
