@@ -979,7 +979,7 @@
   color: color-mix(in srgb, var(--fire-color), white 0%);
   
   text-shadow:
-    0 0 0.08em color-mix(in srgb, var(--fire-color), white 60%),
+    0 0 0.08em color-mix(in srgb, var(--fire-color), white 0%),
     0 -0.08em 0.15em color-mix(in srgb, var(--fire-color), transparent 30%);
 
   /* ✅ TRANSITION CINÉMATIQUE : 1.2s avec easing naturel */
