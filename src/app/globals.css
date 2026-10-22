@@ -963,11 +963,11 @@
   }
 }
 /* ═══════════════════════════════════════════════════════════
-   EFFET DE FLAMME DYNAMIQUE (Transition Cinématique)
+   EFFET DE FLAMME DYNAMIQUE (État de base plat → Ignition)
    ═══════════════════════════════════════════════════════════ */
 
 .fire-text {
-  --fire-color: #e8a84c;
+  --fire-color: #e8a84c; /* Fallback: couleur braise par défaut */
   
   display: inline-block;
   font-family: var(--font-metal-mania), cursive;
@@ -975,41 +975,20 @@
   letter-spacing: 0.02em;
   line-height: 1.1;
   
-  /* État de base : braise incandescente */
-  color: color-mix(in srgb, var(--fire-color), white 0%);
+  /* ✅ ÉTAT DE BASE : Couleur plate du pilier, AUCUN effet, AUCUNE animation */
+  color: var(--fire-color);
+  text-shadow: none;
   
-  /* text-shadow:
-    0 0 0.08em color-mix(in srgb, var(--fire-color), white 0%),
-    0 -0.08em 0.15em color-mix(in srgb, var(--fire-color), transparent 30%); */
-   
-  /* ✅ TRANSITION CINÉMATIQUE : 1.2s avec easing naturel */
-  transition: 
-    color 1.2s cubic-bezier(0.4, 0, 0.2, 1),
-    text-shadow 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  animation: ember 2.8s ease-in-out infinite;
+  /* ✅ Transition douce pour l'apparition progressive de la lueur à l'ignition */
+  transition: color 0.6s ease, text-shadow 0.6s ease;
 }
 
-@keyframes ember {
-  0%, 100% {
-    text-shadow:
-      0 0 0.08em color-mix(in srgb, var(--fire-color), white 60%),
-      0 -0.08em 0.15em color-mix(in srgb, var(--fire-color), transparent 30%),
-      0 -0.15em 0.20em color-mix(in srgb, var(--fire-color), black 10%);
-  }
-  50% {
-    text-shadow:
-      0 0 0.10em color-mix(in srgb, var(--fire-color), white 75%),
-      0 -0.10em 0.18em color-mix(in srgb, var(--fire-color), transparent 20%),
-      0 -0.18em 0.25em color-mix(in srgb, var(--fire-color), black 15%);
-  }
-}
-
-/* ✅ ÉTAT IGNITION : Transition fluide vers les flammes vives */
+/* ✅ ÉTAT IGNITION : Déclenchement des effets de feu */
 .fire-text.ignited {
-  color: color-mix(in srgb, var(--fire-color), white 0%);
+  /* Cœur lumineux teinté de la couleur du pilier pour l'harmonie chromatique */
+  color: color-mix(in srgb, var(--fire-color), white 85%);
   
-  /* ✅ L'animation démarre immédiatement mais la couleur transitionne doucement */
+  /* Les animations ne se lancent qu'ici */
   animation:
     flick 0.55s steps(3, jump-none) infinite,
     haze 0.18s ease-in-out infinite alternate;
@@ -1047,15 +1026,14 @@
   to   { transform: skewX(0.4deg); }
 }
 
+/* Accessibilité : désactiver les animations si demandé */
 @media (prefers-reduced-motion: reduce) {
   .fire-text,
   .fire-text.ignited {
     animation: none !important;
     transform: none !important;
+    /* On garde une version légèrement éclaircie pour la lisibilité, mais sans clignotement */
     color: color-mix(in srgb, var(--fire-color), white 80%);
-    text-shadow:
-      0 -0.06em 0.10em color-mix(in srgb, var(--fire-color), white 60%),
-      0 -0.16em 0.22em color-mix(in srgb, var(--fire-color), transparent 20%),
-      0 -0.28em 0.30em color-mix(in srgb, var(--fire-color), black 30%);
+    text-shadow: 0 0 0.1em color-mix(in srgb, var(--fire-color), white 50%);
   }
 }
