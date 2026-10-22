@@ -963,7 +963,152 @@
   }
 }
 /* ═══════════════════════════════════════════════════════════
-   EFFET DE FLAMME DYNAMIQUE (État de base plat → Ignition)
+   BIBLIOTHÈQUE D'EFFETS DE TITRES (MetalPedia UI)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────────────────
+   1. EFFET HALO LUMINEUX (Power Metal, Heavy Metal)
+   Pulsation douce et rayonnante, comme une aura sacrée.
+   ────────────────────────────────────────────────────────── */
+.halo-text {
+  --theme-color: #e8a84c;
+  display: inline-block;
+  font-family: var(--font-metal-mania), cursive;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  color: color-mix(in srgb, var(--theme-color), white 90%);
+  
+  text-shadow:
+    0 0 10px color-mix(in srgb, var(--theme-color), transparent 0%),
+    0 0 20px color-mix(in srgb, var(--theme-color), transparent 20%),
+    0 0 40px color-mix(in srgb, var(--theme-color), transparent 40%);
+    
+  animation: halo-pulse 3s ease-in-out infinite;
+}
+
+@keyframes halo-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 10px color-mix(in srgb, var(--theme-color), transparent 0%),
+      0 0 20px color-mix(in srgb, var(--theme-color), transparent 20%),
+      0 0 40px color-mix(in srgb, var(--theme-color), transparent 40%);
+  }
+  50% {
+    text-shadow:
+      0 0 15px color-mix(in srgb, var(--theme-color), transparent 0%),
+      0 0 30px color-mix(in srgb, var(--theme-color), transparent 10%),
+      0 0 60px color-mix(in srgb, var(--theme-color), transparent 30%),
+      0 0 100px color-mix(in srgb, var(--theme-color), transparent 50%);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   2. EFFET BRUME / MYSTIQUE (Black Metal, Doom Metal)
+   Dégradé fluide qui traverse le texte comme un brouillard glacial.
+   ────────────────────────────────────────────────────────── */
+.mist-text {
+  --theme-color: #4a148c;
+  display: inline-block;
+  font-family: var(--font-metal-mania), cursive;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  
+  /* Le texte est transparent, on voit le dégradé animé à travers */
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--theme-color), white 10%) 0%,
+    color-mix(in srgb, var(--theme-color), white 80%) 50%,
+    color-mix(in srgb, var(--theme-color), white 10%) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  
+  animation: mist-flow 5s linear infinite;
+}
+
+@keyframes mist-flow {
+  0% { background-position: 0% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ──────────────────────────────────────────────────────────
+   3. EFFET GLITCH / DISTORSION (Thrash Metal, Metalcore)
+   Décalage chromatique subtil et saccadé, énergie brute.
+   ────────────────────────────────────────────────────────── */
+.glitch-text {
+  --theme-color: #ff6f00;
+  display: inline-block;
+  font-family: var(--font-metal-mania), cursive;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  color: color-mix(in srgb, var(--theme-color), white 90%);
+  position: relative;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit; /* Hérite du fond si besoin */
+}
+
+.glitch-text::before {
+  color: color-mix(in srgb, var(--theme-color), cyan 50%);
+  animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+  transform: translate(-2px, -1px);
+  opacity: 0.8;
+}
+
+.glitch-text::after {
+  color: color-mix(in srgb, var(--theme-color), magenta 50%);
+  animation: glitch-anim-2 3s infinite linear alternate-reverse;
+  clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+  transform: translate(2px, 1px);
+  opacity: 0.8;
+}
+
+@keyframes glitch-anim-1 {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes glitch-anim-2 {
+  0% { transform: translate(0); }
+  20% { transform: translate(2px, -2px); }
+  40% { transform: translate(2px, 2px); }
+  60% { transform: translate(-2px, -2px); }
+  80% { transform: translate(-2px, 2px); }
+  100% { transform: translate(0); }
+}
+
+/* Accessibilité globale pour tous les effets */
+@media (prefers-reduced-motion: reduce) {
+  .halo-text, .mist-text, .glitch-text, .glitch-text::before, .glitch-text::after {
+    animation: none !important;
+    transform: none !important;
+  }
+  .mist-text {
+    background: var(--theme-color);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
+/* ═══════════════════════════════════════════════════════════
+   4. EFFET DE FLAMME DYNAMIQUE (État de base plat → Ignition)
    ═══════════════════════════════════════════════════════════ */
 
 .fire-text {
