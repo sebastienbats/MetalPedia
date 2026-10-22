@@ -5,7 +5,13 @@ import Link from 'next/link';
 import BandCard from '@/components/bands/BandCard';
 import SubgenreFilter from '@/components/genres/SubgenreFilter';
 import FloatingRunes, { type SymbolFamily } from '@/components/ui/FloatingRunes';
-import FireTitle from '@/components/ui/FireTitle'; // ✅ NOUVEAU : Composant de titre enflammé
+
+// ✅ NOUVEAUX IMPORTS : Composants de titres dynamiques
+import FireTitle from '@/components/ui/FireTitle';
+import HaloTitle from '@/components/ui/HaloTitle';
+import MistTitle from '@/components/ui/MistTitle';
+import GlitchTitle from '@/components/ui/GlitchTitle';
+
 import { type Band, type GenrePillarStats } from '@/types/api';
 
 // ═══════════════════════════════════════════════════════════
@@ -54,11 +60,13 @@ const getFlagEmoji = (countryName: string) => {
 // COMPOSANT CLIENT
 // ═══════════════════════════════════════════════════════════
 type SortOption = 'name-asc' | 'name-desc' | 'listeners-asc' | 'listeners-desc';
+type TitleEffect = 'fire' | 'halo' | 'mist' | 'glitch'; // ✅ NOUVEAU TYPE
 
 interface PillarClientViewProps {
   bands: Band[];
   validPillar: string;
-  pillarColor: string; // ✅ NOUVEAU : Reçoit la couleur du pilier pour le feu
+  pillarColor: string;
+  titleEffect: TitleEffect; // ✅ NOUVEAU : Reçoit le type d'effet depuis le serveur
   pillarMetadata: { icon: string; color: string; description: string };
   runesConfig: { family: SymbolFamily; colorClass: string; opacityFactor: number; baseDuration: number; count: number };
   currentPillarStats: GenrePillarStats | undefined;
@@ -68,7 +76,8 @@ interface PillarClientViewProps {
 export default function PillarClientView({
   bands,
   validPillar,
-  pillarColor, // ✅ NOUVEAU
+  pillarColor,
+  titleEffect, // ✅ NOUVEAU
   pillarMetadata,
   runesConfig,
   currentPillarStats,
@@ -77,7 +86,6 @@ export default function PillarClientView({
   const [sortBy, setSortBy] = useState<SortOption>('listeners-desc');
   const [filterCountry, setFilterCountry] = useState<string>('all');
 
-  // Extraction dynamique des pays (comme dans favorites)
   const uniqueCountries = useMemo(() => {
     const countries = new Set(
       bands.map((band) => band.country).filter((c): c is string => Boolean(c))
@@ -85,7 +93,6 @@ export default function PillarClientView({
     return Array.from(countries).sort((a, b) => a.localeCompare(b));
   }, [bands]);
 
-  // Filtrage et tri côté client (ultra-rapide pour ~1300 éléments)
   const processedBands = useMemo(() => {
     let result = [...bands];
 
@@ -106,6 +113,14 @@ export default function PillarClientView({
     return result;
   }, [bands, filterCountry, sortBy]);
 
+  // 🎯 Sélection dynamique du composant de titre en fonction de la prop
+  const TitleComponent = {
+    fire: FireTitle,
+    halo: HaloTitle,
+    mist: MistTitle,
+    glitch: GlitchTitle,
+  }[titleEffect] || FireTitle;
+
   return (
     <>
       <div className="fixed inset-0 z-10 pointer-events-none overflow-hidden">
@@ -120,7 +135,6 @@ export default function PillarClientView({
       </div>
 
       <div className="relative z-20 w-full px-2 py-6 sm:px-4 sm:py-12">
-        {/* En-tête */}
         <div className="mb-4 sm:mb-8">
           <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
             <Link href="/genres" className="hover:text-metal-fire transition-colors">Piliers</Link>
@@ -147,11 +161,10 @@ export default function PillarClientView({
             </div>
             
             <div className="text-center">
-              {/* ✅ REMPLACEMENT DU H1 PAR FIRETITLE AVEC LA COULEUR DU PILIER */}
-              <FireTitle 
+              {/* ✅ RENDU DYNAMIQUE DU TITRE AVEC L'EFFET CHOISI */}
+              <TitleComponent 
                 text={validPillar} 
                 color={pillarColor} 
-                autoIgnite={true}
                 className="text-3xl sm:text-5xl md:text-6xl drop-shadow-lg"
               />
               
@@ -179,12 +192,10 @@ export default function PillarClientView({
           </div>
         </div>
 
-        {/* Filtre de sous-genre (Server-side via URL) */}
         {currentPillarStats && currentPillarStats.subgenres.length > 1 && (
           <SubgenreFilter pillar={validPillar} subgenres={currentPillarStats.subgenres} />
         )}
 
-        {/* Barre de contrôles (Client-side : Pays + Tri) */}
         {bands.length > 0 && (
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
             <div className="flex-1">
@@ -221,7 +232,6 @@ export default function PillarClientView({
           </div>
         )}
 
-        {/* Grille des groupes */}
         {processedBands.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {processedBands.map((band) => (
