@@ -963,11 +963,11 @@
   }
 }
 /* ═══════════════════════════════════════════════════════════
-   EFFET DE FLAMME DYNAMIQUE (Harmonie Chromatique Optimisée)
+   EFFET DE FLAMME DYNAMIQUE (Transition Cinématique)
    ═══════════════════════════════════════════════════════════ */
 
 .fire-text {
-  --fire-color: #e8a84c; /* Fallback: couleur braise par défaut */
+  --fire-color: #e8a84c;
   
   display: inline-block;
   font-family: var(--font-metal-mania), cursive;
@@ -975,18 +975,19 @@
   letter-spacing: 0.02em;
   line-height: 1.1;
   
-  /* ✅ ÉTAT DE BASE (Avant ignition) : 
-     Le texte prend la couleur du pilier, mais légèrement blanchie (15%) 
-     pour ressembler immédiatement à une braise chaude, pas à une couleur plate. */
+  /* État de base : braise incandescente */
   color: color-mix(in srgb, var(--fire-color), white 15%);
   
-  /* ✅ Lueur de braise IMMÉDIATE (dès le chargement, avant l'animation) */
   text-shadow:
     0 0 0.08em color-mix(in srgb, var(--fire-color), white 60%),
     0 -0.08em 0.15em color-mix(in srgb, var(--fire-color), transparent 30%);
 
+  /* ✅ TRANSITION CINÉMATIQUE : 1.2s avec easing naturel */
+  transition: 
+    color 1.2s cubic-bezier(0.4, 0, 0.2, 1),
+    text-shadow 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  
   animation: ember 2.8s ease-in-out infinite;
-  transition: color 0.6s ease, text-shadow 0.6s ease;
 }
 
 @keyframes ember {
@@ -1004,9 +1005,11 @@
   }
 }
 
+/* ✅ ÉTAT IGNITION : Transition fluide vers les flammes vives */
 .fire-text.ignited {
-  /* ✅ ÉTAT IGNITION : Le cœur devient une version hyper-lumineuse de la couleur du pilier */
-  color: color-mix(in srgb, var(--fire-color), white 15%);
+  color: color-mix(in srgb, var(--fire-color), white 85%);
+  
+  /* ✅ L'animation démarre immédiatement mais la couleur transitionne doucement */
   animation:
     flick 0.55s steps(3, jump-none) infinite,
     haze 0.18s ease-in-out infinite alternate;
@@ -1044,7 +1047,6 @@
   to   { transform: skewX(0.4deg); }
 }
 
-/* Accessibilité : désactiver les animations si demandé */
 @media (prefers-reduced-motion: reduce) {
   .fire-text,
   .fire-text.ignited {
