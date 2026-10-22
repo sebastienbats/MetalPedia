@@ -5,6 +5,7 @@ import Link from 'next/link';
 import BandCard from '@/components/bands/BandCard';
 import SubgenreFilter from '@/components/genres/SubgenreFilter';
 import FloatingRunes, { type SymbolFamily } from '@/components/ui/FloatingRunes';
+import FireTitle from '@/components/ui/FireTitle'; // ✅ NOUVEAU : Composant de titre enflammé
 import { type Band, type GenrePillarStats } from '@/types/api';
 
 // ═══════════════════════════════════════════════════════════
@@ -23,10 +24,12 @@ const COUNTRY_TO_ISO: Record<string, string> = {
   'scotland': 'SCT', 'wales': 'WLS', 'england': 'ENG',
   'unknown': 'UN', 'various': 'UN', 'worldwide': 'UN', 'cyprus': 'CY', 'estonia': 'EE', 
   'faroe islands': 'FO', 'guadeloupe': 'GP', 'india': 'IN', 'iraq': 'IQ', 'philippines': 'PH', 
-  'portugal': 'PT', 'slovenia': 'SI', 'turkey': 'TR',
-  'bangladesh': 'BD', 'belize': 'BZ', 'bosnia and herzegovina': 'BA', 'croatia': 'HR', 'cuba': 'CU', 'honduras': 'HN', 'hong kong': 'HK', 'indonesia': 'ID',
-  'israel': 'IL', 'jamaica': 'JM', 'latvia': 'LV', 'malaysia': 'MY', 'montserrat': 'MS', 'peru': 'PE', 'serbia': 'RS', 'south africa': 'ZA',
-  'taiwan (province of china)': "TW", 'united arab emirates': 'AE', 'venezuela (bolivarian republic of)': 'VE', 'zimbabwe': 'ZW',
+  'portugal': 'PT', 'slovenia': 'SI', 'turkey': 'TR', 'bangladesh': 'BD', 'belize': 'BZ', 
+  'bosnia and herzegovina': 'BA', 'croatia': 'HR', 'cuba': 'CU', 'honduras': 'HN', 'hong kong': 'HK', 
+  'indonesia': 'ID', 'israel': 'IL', 'jamaica': 'JM', 'latvia': 'LV', 'malaysia': 'MY', 
+  'montserrat': 'MS', 'peru': 'PE', 'serbia': 'RS', 'south africa': 'ZA',
+  'taiwan (province of china)': 'TW', 'united arab emirates': 'AE', 
+  'venezuela (bolivarian republic of)': 'VE', 'zimbabwe': 'ZW',
 };
 
 const getFlagEmojiFromIso = (countryCode: string) => {
@@ -55,6 +58,7 @@ type SortOption = 'name-asc' | 'name-desc' | 'listeners-asc' | 'listeners-desc';
 interface PillarClientViewProps {
   bands: Band[];
   validPillar: string;
+  pillarColor: string; // ✅ NOUVEAU : Reçoit la couleur du pilier pour le feu
   pillarMetadata: { icon: string; color: string; description: string };
   runesConfig: { family: SymbolFamily; colorClass: string; opacityFactor: number; baseDuration: number; count: number };
   currentPillarStats: GenrePillarStats | undefined;
@@ -64,6 +68,7 @@ interface PillarClientViewProps {
 export default function PillarClientView({
   bands,
   validPillar,
+  pillarColor, // ✅ NOUVEAU
   pillarMetadata,
   runesConfig,
   currentPillarStats,
@@ -140,11 +145,17 @@ export default function PillarClientView({
             >
               {pillarMetadata.icon}
             </div>
+            
             <div className="text-center">
-              <h1 className="font-metal text-2xl sm:text-4xl drop-shadow-lg" style={{ color: pillarMetadata.color }}>
-                {validPillar}
-              </h1>
-              <p className="text-metal-bone font-serif text-sm sm:text-base mt-1 drop-shadow-md">
+              {/* ✅ REMPLACEMENT DU H1 PAR FIRETITLE AVEC LA COULEUR DU PILIER */}
+              <FireTitle 
+                text={validPillar} 
+                color={pillarColor} 
+                autoIgnite={true}
+                className="text-3xl sm:text-5xl md:text-6xl drop-shadow-lg"
+              />
+              
+              <p className="text-metal-bone font-serif text-sm sm:text-base mt-2 drop-shadow-md">
                 {pillarMetadata.description}
               </p>
             </div>
