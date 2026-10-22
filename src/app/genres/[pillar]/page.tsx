@@ -51,6 +51,28 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
+// 🎯 Mapping des effets visuels selon l'ambiance du pilier
+type TitleEffect = 'fire' | 'halo' | 'mist' | 'glitch';
+
+function getTitleEffectForPillar(pillar: GamificationPillar): TitleEffect {
+  switch (pillar) {
+    case 'Thrash Metal':
+    case 'Metalcore':
+      return 'glitch'; // Énergie brute, distorsion
+    case 'Black Metal':
+    case 'Doom Metal':
+    case 'Progressive Metal':
+      return 'mist'; // Mystère, froideur, atmosphère
+    case 'Power Metal':
+    case 'Heavy Metal':
+    case 'Folk Metal':
+      return 'halo'; // Épique, légendaire, sacré
+    case 'Death Metal':
+    default:
+      return 'fire'; // Brutalité, intensité (et fallback)
+  }
+}
+
 export default async function PillarPage({ params, searchParams }: Props) {
   const { pillar } = await params;
   const { subgenre } = await searchParams;
@@ -66,12 +88,16 @@ export default async function PillarPage({ params, searchParams }: Props) {
   const pillarsStats = await metalServerApi.getGenrePillarsStats();
   const currentPillar = pillarsStats.find(p => p.pillar === validPillar);
 
-  // Rendu délégué au composant client, en lui passant la couleur sécurisée du pilier
+  // Détermination de l'effet visuel
+  const titleEffect = getTitleEffectForPillar(validPillar);
+
+  // Rendu délégué au composant client
   return (
     <PillarClientView
       bands={bands}
       validPillar={validPillar}
-      pillarColor={getPillarColor(validPillar)} // ✅ Couleur dynamique injectée ici
+      pillarColor={getPillarColor(validPillar)}
+      titleEffect={titleEffect} // ✅ NOUVEAU : On passe le type d'effet à utiliser
       pillarMetadata={PILLAR_METADATA[validPillar]}
       runesConfig={PILLAR_RUNES_CONFIG[validPillar]}
       currentPillarStats={currentPillar}
