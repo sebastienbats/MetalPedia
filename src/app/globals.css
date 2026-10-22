@@ -963,51 +963,50 @@
   }
 }
 /* ═══════════════════════════════════════════════════════════
-   EFFET DE FLAMME DYNAMIQUE (Adapté aux couleurs des Piliers)
+   EFFET DE FLAMME DYNAMIQUE (Harmonie Chromatique Optimisée)
    ═══════════════════════════════════════════════════════════ */
 
 .fire-text {
-  --fire-color: #e8a84c; /* Couleur par défaut (braise) */
+  --fire-color: #e8a84c; /* Fallback: couleur braise par défaut */
   
   display: inline-block;
   font-family: var(--font-metal-mania), cursive;
   font-weight: 400;
   letter-spacing: 0.02em;
   line-height: 1.1;
-  color: var(--fire-color);
-
+  
+  /* ✅ ÉTAT DE BASE (Avant ignition) : 
+     Le texte prend la couleur du pilier, mais légèrement blanchie (15%) 
+     pour ressembler immédiatement à une braise chaude, pas à une couleur plate. */
+  color: color-mix(in srgb, var(--fire-color), white 15%);
+  
+  /* ✅ Lueur de braise IMMÉDIATE (dès le chargement, avant l'animation) */
   text-shadow:
-    0 -0.04em 0.06em color-mix(in srgb, var(--fire-color), white 40%),
-    0 -0.12em 0.16em color-mix(in srgb, var(--fire-color), transparent 30%),
-    0 -0.20em 0.25em color-mix(in srgb, var(--fire-color), black 20%),
-    0 -0.30em 0.30em transparent,
-    0 -0.40em 0.35em transparent;
+    0 0 0.08em color-mix(in srgb, var(--fire-color), white 60%),
+    0 -0.08em 0.15em color-mix(in srgb, var(--fire-color), transparent 30%);
 
   animation: ember 2.8s ease-in-out infinite;
-  transition: color 0.3s ease;
+  transition: color 0.6s ease, text-shadow 0.6s ease;
 }
 
 @keyframes ember {
   0%, 100% {
     text-shadow:
-      0 -0.04em 0.06em color-mix(in srgb, var(--fire-color), white 40%),
-      0 -0.12em 0.16em color-mix(in srgb, var(--fire-color), transparent 30%),
-      0 -0.20em 0.25em color-mix(in srgb, var(--fire-color), black 20%),
-      0 -0.30em 0.30em transparent,
-      0 -0.40em 0.35em transparent;
+      0 0 0.08em color-mix(in srgb, var(--fire-color), white 60%),
+      0 -0.08em 0.15em color-mix(in srgb, var(--fire-color), transparent 30%),
+      0 -0.15em 0.20em color-mix(in srgb, var(--fire-color), black 10%);
   }
   50% {
     text-shadow:
-      0 -0.05em 0.07em color-mix(in srgb, var(--fire-color), white 60%),
-      0 -0.14em 0.18em color-mix(in srgb, var(--fire-color), transparent 20%),
-      0 -0.22em 0.27em color-mix(in srgb, var(--fire-color), black 30%),
-      0 -0.32em 0.32em transparent,
-      0 -0.42em 0.37em transparent;
+      0 0 0.10em color-mix(in srgb, var(--fire-color), white 75%),
+      0 -0.10em 0.18em color-mix(in srgb, var(--fire-color), transparent 20%),
+      0 -0.18em 0.25em color-mix(in srgb, var(--fire-color), black 15%);
   }
 }
 
 .fire-text.ignited {
-  color: #fff5e6; /* Cœur de flamme blanc-chaud pour le réalisme */
+  /* ✅ ÉTAT IGNITION : Le cœur devient une version hyper-lumineuse de la couleur du pilier */
+  color: color-mix(in srgb, var(--fire-color), white 85%);
   animation:
     flick 0.55s steps(3, jump-none) infinite,
     haze 0.18s ease-in-out infinite alternate;
@@ -1016,24 +1015,24 @@
 @keyframes flick {
   0%, 100% {
     text-shadow:
-      0 -0.04em 0.02em #fff8f0,
-      0 -0.13em 0.06em color-mix(in srgb, var(--fire-color), white 20%),
+      0 -0.04em 0.02em color-mix(in srgb, var(--fire-color), white 90%),
+      0 -0.13em 0.06em color-mix(in srgb, var(--fire-color), white 40%),
       0 -0.26em 0.12em var(--fire-color),
       0 -0.42em 0.20em color-mix(in srgb, var(--fire-color), black 40%),
       0.02em -0.60em 0.30em color-mix(in srgb, var(--fire-color), black 80%);
   }
   38% {
     text-shadow:
-      0 -0.05em 0.02em #fff8f0,
-      0.01em -0.16em 0.07em color-mix(in srgb, var(--fire-color), white 20%),
+      0 -0.05em 0.02em color-mix(in srgb, var(--fire-color), white 90%),
+      0.01em -0.16em 0.07em color-mix(in srgb, var(--fire-color), white 40%),
       -0.02em -0.30em 0.13em var(--fire-color),
       0.02em -0.48em 0.22em color-mix(in srgb, var(--fire-color), black 40%),
       -0.03em -0.66em 0.32em color-mix(in srgb, var(--fire-color), black 80%);
   }
   72% {
     text-shadow:
-      0 -0.035em 0.02em #fff8f0,
-      -0.015em -0.11em 0.05em color-mix(in srgb, var(--fire-color), white 20%),
+      0 -0.035em 0.02em color-mix(in srgb, var(--fire-color), white 90%),
+      -0.015em -0.11em 0.05em color-mix(in srgb, var(--fire-color), white 40%),
       0.02em -0.22em 0.11em var(--fire-color),
       -0.02em -0.38em 0.19em color-mix(in srgb, var(--fire-color), black 40%),
       0.03em -0.55em 0.28em color-mix(in srgb, var(--fire-color), black 80%);
@@ -1045,12 +1044,15 @@
   to   { transform: skewX(0.4deg); }
 }
 
+/* Accessibilité : désactiver les animations si demandé */
 @media (prefers-reduced-motion: reduce) {
-  .fire-text, .fire-text.ignited {
+  .fire-text,
+  .fire-text.ignited {
     animation: none !important;
     transform: none !important;
+    color: color-mix(in srgb, var(--fire-color), white 80%);
     text-shadow:
-      0 -0.06em 0.10em color-mix(in srgb, var(--fire-color), white 50%),
+      0 -0.06em 0.10em color-mix(in srgb, var(--fire-color), white 60%),
       0 -0.16em 0.22em color-mix(in srgb, var(--fire-color), transparent 20%),
       0 -0.28em 0.30em color-mix(in srgb, var(--fire-color), black 30%);
   }
