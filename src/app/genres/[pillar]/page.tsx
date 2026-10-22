@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { metalServerApi } from '@/lib/metal-api';
 import PillarClientView from '@/components/genres/PillarClientView';
-import { PILLAR_METADATA, type GamificationPillar } from '@/types/api';
+import { PILLAR_METADATA, getPillarColor, type GamificationPillar } from '@/types/api';
 
 export const revalidate = 3600;
 
@@ -66,11 +66,12 @@ export default async function PillarPage({ params, searchParams }: Props) {
   const pillarsStats = await metalServerApi.getGenrePillarsStats();
   const currentPillar = pillarsStats.find(p => p.pillar === validPillar);
 
-  // Rendu délégué au composant client pour l'interactivité (tri/filtre)
+  // Rendu délégué au composant client, en lui passant la couleur sécurisée du pilier
   return (
     <PillarClientView
       bands={bands}
       validPillar={validPillar}
+      pillarColor={getPillarColor(validPillar)} // ✅ Couleur dynamique injectée ici
       pillarMetadata={PILLAR_METADATA[validPillar]}
       runesConfig={PILLAR_RUNES_CONFIG[validPillar]}
       currentPillarStats={currentPillar}
