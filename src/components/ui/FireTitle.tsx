@@ -22,9 +22,11 @@ export default function FireTitle({
 
   useEffect(() => {
     if (autoIgnite && titleRef.current) {
+      // ✅ Délai optimisé à 400ms pour un équilibre parfait entre effet dramatique et réactivité
       const timer = setTimeout(() => {
         setIsIgnited(true);
-      }, 800); // Délai dramatique de 800ms
+      }, 400);
+      
       return () => clearTimeout(timer);
     }
   }, [autoIgnite]);
@@ -33,7 +35,7 @@ export default function FireTitle({
     <h1
       ref={titleRef}
       className={`fire-text ${isIgnited ? 'ignited' : ''} ${className}`}
-      // Injection de la variable CSS dynamique
+      // Injection de la variable CSS dynamique pour l'harmonie chromatique
       style={{ '--fire-color': color } as React.CSSProperties}
       onMouseEnter={() => igniteOnHover && setIsIgnited(true)}
       onMouseLeave={() => igniteOnHover && !autoIgnite && setIsIgnited(false)}
