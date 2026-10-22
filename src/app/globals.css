@@ -1006,7 +1006,7 @@
 
 .fire-text.ignited {
   /* ✅ ÉTAT IGNITION : Le cœur devient une version hyper-lumineuse de la couleur du pilier */
-  color: color-mix(in srgb, var(--fire-color), white 85%);
+  color: color-mix(in srgb, var(--fire-color), white 15%);
   animation:
     flick 0.55s steps(3, jump-none) infinite,
     haze 0.18s ease-in-out infinite alternate;
