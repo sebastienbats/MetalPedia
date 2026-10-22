@@ -986,7 +986,7 @@
 /* ✅ ÉTAT IGNITION : Déclenchement des effets de feu */
 .fire-text.ignited {
   /* Cœur lumineux teinté de la couleur du pilier pour l'harmonie chromatique */
-  color: color-mix(in srgb, var(--fire-color), white 50%);
+  color: color-mix(in srgb, var(--fire-color), white 0%);
   
   /* Les animations ne se lancent qu'ici */
   animation:
