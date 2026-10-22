@@ -978,10 +978,10 @@
   /* État de base : braise incandescente */
   color: color-mix(in srgb, var(--fire-color), white 0%);
   
-  text-shadow:
+  /* text-shadow:
     0 0 0.08em color-mix(in srgb, var(--fire-color), white 0%),
-    0 -0.08em 0.15em color-mix(in srgb, var(--fire-color), transparent 30%);
-
+    0 -0.08em 0.15em color-mix(in srgb, var(--fire-color), transparent 30%); */
+   
   /* ✅ TRANSITION CINÉMATIQUE : 1.2s avec easing naturel */
   transition: 
     color 1.2s cubic-bezier(0.4, 0, 0.2, 1),
