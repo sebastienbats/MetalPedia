@@ -976,7 +976,7 @@
   line-height: 1.1;
   
   /* État de base : braise incandescente */
-  color: color-mix(in srgb, var(--fire-color), white 15%);
+  color: color-mix(in srgb, var(--fire-color), white 5%);
   
   text-shadow:
     0 0 0.08em color-mix(in srgb, var(--fire-color), white 60%),
@@ -1007,7 +1007,7 @@
 
 /* ✅ ÉTAT IGNITION : Transition fluide vers les flammes vives */
 .fire-text.ignited {
-  color: color-mix(in srgb, var(--fire-color), white 25%);
+  color: color-mix(in srgb, var(--fire-color), white 15%);
   
   /* ✅ L'animation démarre immédiatement mais la couleur transitionne doucement */
   animation:
