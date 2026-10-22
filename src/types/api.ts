@@ -74,6 +74,29 @@ export const PILLAR_METADATA: Record<GamificationPillar, {
 };
 
 // ═══════════════════════════════════════════════════════════
+// HELPERS D'ACCÈS SÉCURISÉ AUX MÉTADONNÉES DES PILIERS
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Helper pour récupérer la couleur d'un pilier de manière sécurisée.
+ * Utile pour les cas où le type GamificationPillar n'est pas garanti (ex: données API brutes).
+ */
+export function getPillarColor(pillar: string | null | undefined): string {
+  if (!pillar) return '#e8a84c'; // Fallback: couleur braise par défaut
+  const meta = PILLAR_METADATA[pillar as GamificationPillar];
+  return meta?.color || '#e8a84c';
+}
+
+/**
+ * Helper pour récupérer l'icône d'un pilier de manière sécurisée.
+ */
+export function getPillarIcon(pillar: string | null | undefined): string {
+  if (!pillar) return '🎸'; // Fallback: guitare par défaut
+  const meta = PILLAR_METADATA[pillar as GamificationPillar];
+  return meta?.icon || '🎸';
+}
+
+// ═══════════════════════════════════════════════════════════
 // 2. TYPES UTILITAIRES & ÉNUMÉRATIONS
 // ═══════════════════════════════════════════════════════════
 
