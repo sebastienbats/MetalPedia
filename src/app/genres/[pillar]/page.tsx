@@ -7,7 +7,7 @@ export const revalidate = 3600;
 
 interface Props {
   params: Promise<{ pillar: string }>;
-  // ✅ searchParams retiré car le sous-genre est désormais géré entièrement côté client
+  searchParams: Promise<{ subgenre?: string }>; // ✅ Gardé pour la compatibilité Next.js routing
 }
 
 const SLUG_TO_PILLAR: Record<string, GamificationPillar> = {
@@ -51,6 +51,7 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
+// 🎯 Mapping des effets visuels selon l'ambiance du pilier
 type TitleEffect = 'fire' | 'halo' | 'mist' | 'glitch';
 
 function getTitleEffectForPillar(pillar: GamificationPillar): TitleEffect {
@@ -72,8 +73,9 @@ function getTitleEffectForPillar(pillar: GamificationPillar): TitleEffect {
   }
 }
 
-export default async function PillarPage({ params }: Props) {
+export default async function PillarPage({ params, searchParams }: Props) {
   const { pillar } = await params;
+  await searchParams; // ✅ On await pour éviter les warnings Next.js, même si on ne l'utilise plus
   const decodedPillar = decodeURIComponent(pillar);
   const validPillar = SLUG_TO_PILLAR[decodedPillar];
 
@@ -81,13 +83,15 @@ export default async function PillarPage({ params }: Props) {
     notFound();
   }
 
-  // ✅ Fetch de TOUS les groupes du pilier (jusqu'à 5000) pour permettre le filtrage client-side instantané
+  // ✅ Fetch de TOUS les groupes du pilier (filtrage instantané côté client)
   const bands = await metalServerApi.getBandsByPillar(validPillar);
   const pillarsStats = await metalServerApi.getGenrePillarsStats();
   const currentPillar = pillarsStats.find(p => p.pillar === validPillar);
 
+  // Détermination de l'effet visuel
   const titleEffect = getTitleEffectForPillar(validPillar);
 
+  // Rendu délégué au composant client
   return (
     <PillarClientView
       bands={bands}
@@ -97,7 +101,6 @@ export default async function PillarPage({ params }: Props) {
       pillarMetadata={PILLAR_METADATA[validPillar]}
       runesConfig={PILLAR_RUNES_CONFIG[validPillar]}
       currentPillarStats={currentPillar}
-      // ✅ currentSubgenre retiré car géré en interne par PillarClientView
     />
   );
 }
