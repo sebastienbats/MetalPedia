@@ -7,7 +7,7 @@ export const revalidate = 3600;
 
 interface Props {
   params: Promise<{ pillar: string }>;
-  searchParams: Promise<{ subgenre?: string }>;
+  // ✅ searchParams retiré car le sous-genre est désormais géré entièrement côté client
 }
 
 const SLUG_TO_PILLAR: Record<string, GamificationPillar> = {
@@ -51,7 +51,6 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-// 🎯 Mapping des effets visuels selon l'ambiance du pilier
 type TitleEffect = 'fire' | 'halo' | 'mist' | 'glitch';
 
 function getTitleEffectForPillar(pillar: GamificationPillar): TitleEffect {
@@ -73,9 +72,8 @@ function getTitleEffectForPillar(pillar: GamificationPillar): TitleEffect {
   }
 }
 
-export default async function PillarPage({ params, searchParams }: Props) {
+export default async function PillarPage({ params }: Props) {
   const { pillar } = await params;
-  const { subgenre } = await searchParams;
   const decodedPillar = decodeURIComponent(pillar);
   const validPillar = SLUG_TO_PILLAR[decodedPillar];
 
@@ -83,25 +81,23 @@ export default async function PillarPage({ params, searchParams }: Props) {
     notFound();
   }
 
-  // Fetch côté serveur (rapide et optimisé pour le SEO)
-  const bands = await metalServerApi.getBandsByPillar(validPillar, subgenre);
+  // ✅ Fetch de TOUS les groupes du pilier (jusqu'à 5000) pour permettre le filtrage client-side instantané
+  const bands = await metalServerApi.getBandsByPillar(validPillar);
   const pillarsStats = await metalServerApi.getGenrePillarsStats();
   const currentPillar = pillarsStats.find(p => p.pillar === validPillar);
 
-  // Détermination de l'effet visuel
   const titleEffect = getTitleEffectForPillar(validPillar);
 
-  // Rendu délégué au composant client
   return (
     <PillarClientView
       bands={bands}
       validPillar={validPillar}
       pillarColor={getPillarColor(validPillar)}
-      titleEffect={titleEffect} // ✅ NOUVEAU : On passe le type d'effet à utiliser
+      titleEffect={titleEffect}
       pillarMetadata={PILLAR_METADATA[validPillar]}
       runesConfig={PILLAR_RUNES_CONFIG[validPillar]}
       currentPillarStats={currentPillar}
-      currentSubgenre={subgenre}
+      // ✅ currentSubgenre retiré car géré en interne par PillarClientView
     />
   );
 }
