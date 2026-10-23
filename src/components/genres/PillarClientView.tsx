@@ -3,7 +3,6 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import BandCard from '@/components/bands/BandCard';
-import SubgenreFilter from '@/components/genres/SubgenreFilter';
 import FloatingRunes, { type SymbolFamily } from '@/components/ui/FloatingRunes';
 
 // ✅ NOUVEAUX IMPORTS : Composants de titres dynamiques
@@ -15,7 +14,7 @@ import GlitchTitle from '@/components/ui/GlitchTitle';
 import { type Band, type GenrePillarStats } from '@/types/api';
 
 // ═══════════════════════════════════════════════════════════
-// GÉNÉRATEUR DE DRAPEAUX (Identique à favorites/page.tsx)
+// GÉNÉRATEUR DE DRAPEAUX
 // ═══════════════════════════════════════════════════════════
 const COUNTRY_TO_ISO: Record<string, string> = {
   'norway': 'NO', 'sweden': 'SE', 'finland': 'FI', 'denmark': 'DK', 'iceland': 'IS',
@@ -28,13 +27,13 @@ const COUNTRY_TO_ISO: Record<string, string> = {
   'china': 'CN', 'australia': 'AU', 'new zealand': 'NZ', 'switzerland': 'CH', 'austria': 'AT',
   'hungary': 'HU', 'czech republic': 'CZ', 'czechia': 'CZ', 'slovakia': 'SK', 'ireland': 'IE',
   'scotland': 'SCT', 'wales': 'WLS', 'england': 'ENG',
-  'unknown': 'UN', 'various': 'UN', 'worldwide': 'UN', 'cyprus': 'CY', 'estonia': 'EE', 
-  'faroe islands': 'FO', 'guadeloupe': 'GP', 'india': 'IN', 'iraq': 'IQ', 'philippines': 'PH', 
-  'portugal': 'PT', 'slovenia': 'SI', 'turkey': 'TR', 'bangladesh': 'BD', 'belize': 'BZ', 
-  'bosnia and herzegovina': 'BA', 'croatia': 'HR', 'cuba': 'CU', 'honduras': 'HN', 'hong kong': 'HK', 
-  'indonesia': 'ID', 'israel': 'IL', 'jamaica': 'JM', 'latvia': 'LV', 'malaysia': 'MY', 
+  'unknown': 'UN', 'various': 'UN', 'worldwide': 'UN', 'cyprus': 'CY', 'estonia': 'EE',
+  'faroe islands': 'FO', 'guadeloupe': 'GP', 'india': 'IN', 'iraq': 'IQ', 'philippines': 'PH',
+  'portugal': 'PT', 'slovenia': 'SI', 'turkey': 'TR', 'bangladesh': 'BD', 'belize': 'BZ',
+  'bosnia and herzegovina': 'BA', 'croatia': 'HR', 'cuba': 'CU', 'honduras': 'HN', 'hong kong': 'HK',
+  'indonesia': 'ID', 'israel': 'IL', 'jamaica': 'JM', 'latvia': 'LV', 'malaysia': 'MY',
   'montserrat': 'MS', 'peru': 'PE', 'serbia': 'RS', 'south africa': 'ZA',
-  'taiwan (province of china)': 'TW', 'united arab emirates': 'AE', 
+  'taiwan (province of china)': 'TW', 'united arab emirates': 'AE',
   'venezuela (bolivarian republic of)': 'VE', 'zimbabwe': 'ZW',
 };
 
@@ -60,13 +59,13 @@ const getFlagEmoji = (countryName: string) => {
 // COMPOSANT CLIENT
 // ═══════════════════════════════════════════════════════════
 type SortOption = 'name-asc' | 'name-desc' | 'listeners-asc' | 'listeners-desc';
-type TitleEffect = 'fire' | 'halo' | 'mist' | 'glitch'; // ✅ NOUVEAU TYPE
+type TitleEffect = 'fire' | 'halo' | 'mist' | 'glitch';
 
 interface PillarClientViewProps {
   bands: Band[];
   validPillar: string;
   pillarColor: string;
-  titleEffect: TitleEffect; // ✅ NOUVEAU : Reçoit le type d'effet depuis le serveur
+  titleEffect: TitleEffect;
   pillarMetadata: { icon: string; color: string; description: string };
   runesConfig: { family: SymbolFamily; colorClass: string; opacityFactor: number; baseDuration: number; count: number };
   currentPillarStats: GenrePillarStats | undefined;
@@ -77,7 +76,7 @@ export default function PillarClientView({
   bands,
   validPillar,
   pillarColor,
-  titleEffect, // ✅ NOUVEAU
+  titleEffect,
   pillarMetadata,
   runesConfig,
   currentPillarStats,
@@ -85,6 +84,16 @@ export default function PillarClientView({
 }: PillarClientViewProps) {
   const [sortBy, setSortBy] = useState<SortOption>('listeners-desc');
   const [filterCountry, setFilterCountry] = useState<string>('all');
+  // ✅ NOUVEAU : État pour le filtre de sous-genre
+  const [filterSubgenre, setFilterSubgenre] = useState<string>(currentSubgenre || 'all');
+
+  // ✅ NOUVEAU : Extraction dynamique des sous-genres présents dans ce pilier
+  const uniqueSubgenres = useMemo(() => {
+    const subgenres = new Set(
+      bands.map((band) => band.genre).filter((g): g is string => Boolean(g) && g.trim() !== '')
+    );
+    return Array.from(subgenres).sort((a, b) => a.localeCompare(b));
+  }, [bands]);
 
   const uniqueCountries = useMemo(() => {
     const countries = new Set(
@@ -93,8 +102,13 @@ export default function PillarClientView({
     return Array.from(countries).sort((a, b) => a.localeCompare(b));
   }, [bands]);
 
+  // ✅ MIS À JOUR : Filtrage combiné (Sous-genre + Pays + Tri)
   const processedBands = useMemo(() => {
     let result = [...bands];
+
+    if (filterSubgenre !== 'all') {
+      result = result.filter((band) => band.genre === filterSubgenre);
+    }
 
     if (filterCountry !== 'all') {
       result = result.filter((band) => band.country === filterCountry);
@@ -111,9 +125,9 @@ export default function PillarClientView({
     });
 
     return result;
-  }, [bands, filterCountry, sortBy]);
+  }, [bands, filterSubgenre, filterCountry, sortBy]);
 
-  // 🎯 Sélection dynamique du composant de titre en fonction de la prop
+  // 🎯 Sélection dynamique du composant de titre
   const TitleComponent = {
     fire: FireTitle,
     halo: HaloTitle,
@@ -140,10 +154,10 @@ export default function PillarClientView({
             <Link href="/genres" className="hover:text-metal-fire transition-colors">Piliers</Link>
             <span>→</span>
             <span className="text-gray-300">{validPillar}</span>
-            {currentSubgenre && (
+            {filterSubgenre !== 'all' && (
               <>
                 <span>→</span>
-                <span className="text-metal-fire">{currentSubgenre}</span>
+                <span className="text-metal-fire">{filterSubgenre}</span>
               </>
             )}
           </div>
@@ -161,13 +175,11 @@ export default function PillarClientView({
             </div>
             
             <div className="text-center">
-              {/* ✅ RENDU DYNAMIQUE DU TITRE AVEC L'EFFET CHOISI */}
               <TitleComponent 
                 text={validPillar} 
                 color={pillarColor} 
                 className="text-3xl sm:text-5xl md:text-6xl drop-shadow-lg"
               />
-              
               <p className="text-metal-bone font-serif text-sm sm:text-base mt-2 drop-shadow-md">
                 {pillarMetadata.description}
               </p>
@@ -177,10 +189,10 @@ export default function PillarClientView({
           <div className="text-metal-bone font-serif text-sm sm:text-base text-center">
             <span className="text-metal-fire font-bold text-xl sm:text-2xl">{processedBands.length}</span>
             {' '}groupe{processedBands.length > 1 ? 's' : ''}
-            {currentSubgenre && (
+            {filterSubgenre !== 'all' && (
               <>
                 {' '}dans{' '}
-                <span className="text-metal-fire font-semibold">{currentSubgenre}</span>
+                <span className="text-metal-fire font-semibold">{filterSubgenre}</span>
               </>
             )}
             {filterCountry !== 'all' && (
@@ -192,13 +204,30 @@ export default function PillarClientView({
           </div>
         </div>
 
-        {currentPillarStats && currentPillarStats.subgenres.length > 1 && (
-          <SubgenreFilter pillar={validPillar} subgenres={currentPillarStats.subgenres} />
-        )}
-
+        {/* ✅ NOUVEAU : Barre de contrôles unifiée (3 dropdowns en grille responsive) */}
         {bands.length > 0 && (
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
-            <div className="flex-1">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            
+            {/* 1. Filtre par Sous-genre */}
+            <div>
+              <label htmlFor="filter-subgenre" className="sr-only">Filtrer par sous-genre</label>
+              <select
+                id="filter-subgenre"
+                value={filterSubgenre}
+                onChange={(e) => setFilterSubgenre(e.target.value)}
+                className="w-full bg-metal-black border border-metal-gray rounded-lg px-4 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-metal-fire focus:ring-1 focus:ring-metal-fire/50 transition-all cursor-pointer"
+              >
+                <option value="all">🎸 Tous les sous-genres</option>
+                {uniqueSubgenres.map((subgenre) => (
+                  <option key={subgenre} value={subgenre}>
+                    {subgenre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 2. Filtre par Pays */}
+            <div>
               <label htmlFor="filter-country" className="sr-only">Filtrer par pays</label>
               <select
                 id="filter-country"
@@ -215,7 +244,8 @@ export default function PillarClientView({
               </select>
             </div>
 
-            <div className="flex-1">
+            {/* 3. Tri */}
+            <div>
               <label htmlFor="sort-by" className="sr-only">Trier par</label>
               <select
                 id="sort-by"
@@ -232,6 +262,7 @@ export default function PillarClientView({
           </div>
         )}
 
+        {/* Grille des groupes */}
         {processedBands.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {processedBands.map((band) => (
@@ -242,13 +273,17 @@ export default function PillarClientView({
           <div className="metal-card p-6 sm:p-12 text-center border border-metal-gray/50 bg-metal-black/50 backdrop-blur-sm">
             <div className="text-5xl sm:text-6xl mb-3 sm:mb-4">🔍</div>
             <p className="text-metal-bone font-serif text-sm sm:text-lg">
-              Aucun groupe trouvé pour ces critères.
+              Aucun groupe trouvé pour cette combinaison de filtres.
             </p>
             <button
-              onClick={() => { setFilterCountry('all'); setSortBy('listeners-desc'); }}
+              onClick={() => { 
+                setFilterSubgenre('all'); 
+                setFilterCountry('all'); 
+                setSortBy('listeners-desc'); 
+              }}
               className="mt-3 sm:mt-4 inline-block text-metal-fire hover:underline text-sm sm:text-base cursor-pointer"
             >
-              Réinitialiser les filtres →
+              Réinitialiser tous les filtres →
             </button>
           </div>
         )}
