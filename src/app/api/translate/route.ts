@@ -2,13 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Vérification stricte du Content-Type
     const contentType = req.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
       return NextResponse.json({ error: 'Le corps de la requête doit être du JSON' }, { status: 400 });
     }
 
-    // 2. Parsing sécurisé du JSON
     let body;
     try {
       body = await req.json();
@@ -47,35 +45,30 @@ export async function POST(req: NextRequest) {
       console.error('❌ MyMemory : Crash de la requête', myMemoryError.message);
     }
 
-    // 🥊 TENTATIVE 2 : LibreTranslate (Fallback)
+    // 🥊 TENTATIVE 2 : Google Translate (Endpoint non-officiel mais très fiable pour les petits textes)
     try {
-      console.log('🥊 Tentative 2: LibreTranslate API...');
-      const libreUrl = 'https://libretranslate.de/translate';
-      const libreRes = await fetch(libreUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          q: safeText,
-          source: source,
-          target: target,
-          format: 'text'
-        })
-      });
-
-      if (libreRes.ok) {
-        const libreData = await libreRes.json();
-        if (libreData.translatedText) {
-          console.log('✅ LibreTranslate : Succès !');
-          return NextResponse.json({ translatedText: libreData.translatedText });
+      console.log('🥊 Tentative 2: Google Translate (Fallback)...');
+      const googleUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${source}&tl=${target}&dt=t&q=${encodeURIComponent(safeText)}`;
+      const googleRes = await fetch(googleUrl, { next: { revalidate: 60 } });
+      
+      if (googleRes.ok) {
+        const googleData = await googleRes.json();
+        // Google Translate renvoie un tableau de tableaux. Le texte traduit est dans data[0][0][0]
+        if (googleData && googleData[0] && googleData[0][0] && googleData[0][0][0]) {
+          // On joint les chunks au cas où le texte est long
+          const translatedText = googleData[0].map((chunk: any) => chunk[0]).join('');
+          console.log('✅ Google Translate : Succès !');
+          return NextResponse.json({ translatedText });
         }
+        console.warn('⚠️ Google Translate : Structure de réponse inattendue', googleData);
+      } else {
+        console.warn(`⚠️ Google Translate : Erreur HTTP ${googleRes.status}`);
       }
-      const libreErrorText = await libreRes.text();
-      console.warn(`⚠️ LibreTranslate : Erreur HTTP ${libreRes.status} - ${libreErrorText}`);
-    } catch (libreError: any) {
-      console.error('❌ LibreTranslate : Crash de la requête', libreError.message);
+    } catch (googleError: any) {
+      console.error('❌ Google Translate : Crash de la requête', googleError.message);
     }
 
-    console.error('💥 ÉCHEC TOTAL : Les deux services de traduction ont échoué.');
+    console.error('💥 ÉCHEC TOTAL : Tous les services de traduction ont échoué.');
     return NextResponse.json({ 
       error: 'Les services de traduction sont temporairement indisponibles. Veuillez réessayer dans quelques minutes.' 
     }, { status: 503 });
