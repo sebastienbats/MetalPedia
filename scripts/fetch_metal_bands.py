@@ -6,7 +6,10 @@ Fonctionnalités :
 - ✨ FILTRAGE PAR PILIER : --pillar "Folk Metal" pour cibler un pilier spécifique
 - Biographies multi-langues (FR → EN fallback)
 - Albums via Last.fm artist.getTopAlbums
-- ✨ Recherche Discogs ciblée par artiste (via 'q')
+- ✨ FILTRAGE MBID STRICT : Seuls les albums avec un MBID valide (36 chars) sont conservés
+- ✨ OPTIMISATION RAPIDE : Limite albums bruts traités + suppression fallback album.getInfo
+- ✨ Enrichissement Discogs priorisé par MBID (via MusicBrainz url-rels)
+- ✨ Recherche Discogs ciblée par artiste (fallback via 'q')
 - ✨ Filtrage côté client pour ne garder que les masters de l'artiste
 - ✨ Extraction du titre d'album depuis le format "Artist - Album"
 - ✨ Recherche MusicBrainz ciblée par type (release-group type:album)
@@ -27,26 +30,29 @@ Fonctionnalités :
 - ✨ Champ uri rempli automatiquement (Last.fm URL ou Discogs URI)
 - ✨ Membres via MusicBrainz (priorité) + Discogs (complément)
 - ✨ Images artistes via chaîne de résolution (Last.fm → Discogs → MB/Wikimedia)
+- ✨ BARRE DE PROGRESSION GLOBALE basée sur le nombre de groupes cibles
+- ✨ LOGS DÉTAILLÉS toutes les 50 bands avec ETA et stats albums
+- ✨ RAPPORT FINAL consolidé (durée, taux MBID, rejets)
+- ✨ GESTION CTRL+C propre avec message de reprise
+- ✨ OPTION --max-albums : Limite strictement le nombre d'albums récupérés par artiste
 - Covers albums via Last.fm / Discogs → Cover Art Archive (fallback)
 - ✨ Résolution du pays via hiérarchie des zones MusicBrainz (ville → pays)
 - ✨ Support de --min-listeners dans toutes les configurations
 - ✨ Cache agressif : sauvegarde automatique toutes les 10 entrées
 - Format de sortie : {"bands": [...]}
-
 Usage:
-  python fetch_metal_bands.py --limit 500 --with-discogs --min-listeners 5000
-  python fetch_metal_bands.py --pillar "Folk Metal" --limit 100 --with-discogs
-  python fetch_metal_bands.py --pillar "Thrash Metal" --limit 200 --with-discogs --min-listeners 10000
-  python fetch_metal_bands.py --update-from ../data/metal_bands_latest.json --pillar "Folk Metal" --update-fields members
-  python fetch_metal_bands.py --focus-albums --include-tracks --limit 100 --with-discogs
-  python fetch_metal_bands.py --update-from ../data/metal_bands_latest.json --update-fields albums
-  python fetch_metal_bands.py --update-from ../data/metal_bands_latest.json --update-fields members --with-discogs
-  python fetch_metal_bands.py --update-from ../data/metal_bands_latest.json --update-fields image_url --with-discogs --force
-  python fetch_metal_bands.py --enrich-years --update-from ../data/metal_bands_updated_latest.json --with-discogs
-  python fetch_metal_bands.py --test
-  python fetch_metal_bands.py --clear-tracklist-cache
+python fetch_metal_bands.py --limit 500 --with-discogs --min-listeners 5000 --max-albums 50
+python fetch_metal_bands.py --pillar "Folk Metal" --limit 100 --with-discogs --max-albums 30
+python fetch_metal_bands.py --pillar "Thrash Metal" --limit 200 --with-discogs --min-listeners 10000 --max-albums 25
+python fetch_metal_bands.py --update-from ../data/metal_bands_latest.json --pillar "Folk Metal" --update-fields members
+python fetch_metal_bands.py --focus-albums --include-tracks --limit 100 --with-discogs --max-albums 30
+python fetch_metal_bands.py --update-from ../data/metal_bands_latest.json --update-fields albums
+python fetch_metal_bands.py --update-from ../data/metal_bands_latest.json --update-fields members --with-discogs
+python fetch_metal_bands.py --update-from ../data/metal_bands_latest.json --update-fields image_url --with-discogs --force
+python fetch_metal_bands.py --enrich-years --update-from ../data/metal_bands_updated_latest.json --with-discogs
+python fetch_metal_bands.py --test
+python fetch_metal_bands.py --clear-tracklist-cache
 """
-
 import os
 import sys
 import json
@@ -69,36 +75,30 @@ load_dotenv(Path(__file__).parent.parent / '.env')
 # ═══════════════════════════════════════════════════════════
 # CONFIGURATION
 # ═══════════════════════════════════════════════════════════
-
 LASTFM_API_KEY = os.getenv('LASTFM_API_KEY')
 DISCOGS_TOKEN = os.getenv('DISCOGS_TOKEN')
-
 LASTFM_API_URL_HTTP = 'http://ws.audioscrobbler.com/2.0/'
 LASTFM_API_URL_HTTPS = 'https://ws.audioscrobbler.com/2.0/'
-
 MUSICBRAINZ_API_URL = 'https://musicbrainz.org/ws/2/'
 DISCOGS_API_URL = 'https://api.discogs.com/'
 COVERART_ARCHIVE_URL = 'https://coverartarchive.org'
-
 CAA_THUMB_SIZE = '500'
 CAA_DELAY = 0.3
-
 DEFAULT_OUTPUT = '../data/metal_bands.json'
 DEFAULT_LIMIT = 10000
 DEFAULT_LANG = 'fr'
+DEFAULT_MAX_ALBUMS = 100  # ✨ Limite par défaut d'albums par artiste
+RAW_ALBUMS_MULTIPLIER = 2  # ✨ Solution A : on traite max_albums * 2 albums bruts max
 MIN_BIO_LENGTH = 100
 MAX_BIO_LENGTH = None
-
 LASTFM_DELAY = 0.25
 DEFAULT_MB_DELAY = 1.2
 DISCOGS_DELAY = 1.1
-
 CACHE_SAVE_INTERVAL = 10
-
+PROGRESS_LOG_INTERVAL = 50  # ✨ Log détaillé toutes les N bands
 PLACEHOLDER_HASHES = ('2a96cbd8b46e442fc41c2b86b821562f', 'c6f59c1e5e7240a4c0d427abd71f3dbb')
 LASTFM_SIZE_ORDER = ('mega', 'extralarge', 'large', 'medium', 'small')
 MB_MIN_SCORE = 50
-
 MB_CACHE_FILE = '../data/mbid_cache.json'
 DISCOGS_CACHE_FILE = '../data/discogs_cache.json'
 LASTFM_CACHE_FILE = '../data/lastfm_cache.json'
@@ -110,7 +110,6 @@ LOG_FILE = '../logs/metal_fetcher.log'
 # ═══════════════════════════════════════════════════════════
 # ✨ LISTE BLANCHE DES GENRES METAL (MUSICBRAINZ)
 # ═══════════════════════════════════════════════════════════
-
 ALLOWED_METAL_GENRES = {
     "melodic black metal", "melodic death metal", "melodic metalcore",
     "medieval metal", "mathcore", "alternative metal", "avant-garde metal",
@@ -125,59 +124,38 @@ ALLOWED_METAL_GENRES = {
 # ═══════════════════════════════════════════════════════════
 # ✨ 9 PILIERS PRINCIPAUX DU METAL
 # ═══════════════════════════════════════════════════════════
-
 METAL_PILLARS = {
-    'Black Metal',
-    'Death Metal',
-    'Heavy Metal',
-    'Thrash Metal',
-    'Power Metal',
-    'Doom Metal',
-    'Progressive Metal',
-    'Folk Metal',
-    'Metalcore',
+    'Black Metal', 'Death Metal', 'Heavy Metal', 'Thrash Metal',
+    'Power Metal', 'Doom Metal', 'Progressive Metal', 'Folk Metal', 'Metalcore',
 }
 
 # ═══════════════════════════════════════════════════════════
-# ✨ MAPPING GENRE → PILIER (doit rester identique à import_to_supabase.py)
+# ✨ MAPPING GENRE → PILIER
 # ═══════════════════════════════════════════════════════════
-
 GENRE_TO_PILLAR = {
-    # Folk Metal
-    'folk metal': 'Folk Metal', 'viking metal': 'Folk Metal',
-    'pagan metal': 'Folk Metal',
-    # Black Metal
+    'folk metal': 'Folk Metal', 'viking metal': 'Folk Metal', 'pagan metal': 'Folk Metal',
     'black metal': 'Black Metal', 'norwegian black metal': 'Black Metal',
     'symphonic black metal': 'Black Metal', 'melodic black metal': 'Black Metal',
     'folk black metal': 'Black Metal', 'viking black metal': 'Black Metal',
-    # Death Metal
     'death metal': 'Death Metal', 'melodic death metal': 'Death Metal',
     'brutal death metal': 'Death Metal', 'technical death metal': 'Death Metal',
     'swedish death metal': 'Death Metal', 'finnish death metal': 'Death Metal',
-    # Thrash Metal
+    'grindcore': 'Death Metal', 'goregrind': 'Death Metal',        # ✨ NOUVEAU
+    'pornogrind': 'Death Metal', 'noisecore': 'Death Metal',       # ✨ NOUVEAU
     'thrash metal': 'Thrash Metal', 'thrash': 'Thrash Metal',
     'speed metal': 'Thrash Metal', 'crossover thrash': 'Thrash Metal',
     'teutonic thrash': 'Thrash Metal', 'groove metal': 'Thrash Metal',
-    # Power Metal
-    'power metal': 'Power Metal', 'epic metal': 'Power Metal',
-    'symphonic metal': 'Power Metal',
-    # Doom Metal
+    'power metal': 'Power Metal', 'epic metal': 'Power Metal', 'symphonic metal': 'Power Metal',
     'doom metal': 'Doom Metal', 'sludge metal': 'Doom Metal',
     'stoner metal': 'Doom Metal', 'gothic metal': 'Doom Metal',
-    # Progressive Metal
     'progressive metal': 'Progressive Metal', 'post-metal': 'Progressive Metal',
     'djent': 'Progressive Metal', 'mathcore': 'Progressive Metal',
-    # Metalcore
     'metalcore': 'Metalcore', 'melodic metalcore': 'Metalcore',
-    'metallic hardcore': 'Metalcore', 'deathcore': 'Metalcore',
-    'nu metal': 'Metalcore',
-    # Heavy Metal (défaut)
-    'heavy metal': 'Heavy Metal', 'true metal': 'Heavy Metal',
-    'metal': 'Heavy Metal',
+    'metallic hardcore': 'Metalcore', 'deathcore': 'Metalcore', 'nu metal': 'Metalcore',
+    'heavy metal': 'Heavy Metal', 'true metal': 'Heavy Metal', 'metal': 'Heavy Metal',
 }
 
 def resolve_pillar(genre: Optional[str]) -> str:
-    """Résout un genre (ou un pilier déjà normalisé) vers l'un des 9 piliers."""
     if not genre:
         return 'Heavy Metal'
     return GENRE_TO_PILLAR.get(genre.strip().lower(), 'Heavy Metal')
@@ -185,7 +163,6 @@ def resolve_pillar(genre: Optional[str]) -> str:
 # ═══════════════════════════════════════════════════════════
 # LOGGING SETUP
 # ═══════════════════════════════════════════════════════════
-
 def setup_logging(log_level: str = 'INFO', log_file: Optional[str] = LOG_FILE):
     numeric_level = getattr(logging, log_level.upper(), logging.INFO)
     handlers = [logging.StreamHandler(sys.stdout)]
@@ -203,12 +180,11 @@ def setup_logging(log_level: str = 'INFO', log_file: Optional[str] = LOG_FILE):
     logging.getLogger('requests').setLevel(logging.WARNING)
     return logging.getLogger(__name__)
 
-logger = logging.getLogger(__name__)
+logger = setup_logging()
 
 # ═══════════════════════════════════════════════════════════
 # FONCTIONS UTILITAIRES
 # ═══════════════════════════════════════════════════════════
-
 def _safe_int(value, default: Optional[int] = None) -> Optional[int]:
     if value is None:
         return default
@@ -242,26 +218,16 @@ def generate_output_filename(base_name: str = 'metal_bands', output_dir: str = '
     return filepath
 
 def is_placeholder(url: Optional[str]) -> bool:
-    """Détecte les images placeholder (à rejeter)."""
     if not url:
         return True
     lowered = url.lower()
-    placeholder_signatures = [
-        "2a96cbd8b46e442fc41c2b86b821562f",
-        "c6f59c1e5e7240a4c0d427abd71f3dbb",
-        "noimage",
-        "placeholder",
-    ]
+    placeholder_signatures = ["2a96cbd8b46e442fc41c2b86b821562f", "c6f59c1e5e7240a4c0d427abd71f3dbb", "noimage", "placeholder"]
     return any(sig in lowered for sig in placeholder_signatures)
 
 def pick_best_lastfm_image(images: List[Dict]) -> Optional[str]:
     if isinstance(images, dict):
         images = [images]
-    by_size = {
-        img.get('size'): (img.get('#text') or '')
-        for img in images
-        if isinstance(img, dict)
-    }
+    by_size = {img.get('size'): (img.get('#text') or '') for img in images if isinstance(img, dict)}
     for size in LASTFM_SIZE_ORDER:
         url = by_size.get(size)
         if not is_placeholder(url):
@@ -283,7 +249,6 @@ def get_discogs_style_from_genre(genre: str) -> str:
     if not genre:
         return 'Heavy Metal'
     genre_lower = genre.lower()
-    
     if 'black metal' in genre_lower: return 'Black Metal'
     if 'death metal' in genre_lower or 'grindcore' in genre_lower: return 'Death Metal'
     if 'thrash metal' in genre_lower or 'industrial metal' in genre_lower: return 'Thrash Metal'
@@ -293,11 +258,9 @@ def get_discogs_style_from_genre(genre: str) -> str:
     if 'folk metal' in genre_lower or 'pagan metal' in genre_lower or 'viking metal' in genre_lower: return 'Folk Metal'
     if 'metalcore' in genre_lower or 'core' in genre_lower: return 'Metalcore'
     if 'heavy metal' in genre_lower or 'metal' in genre_lower: return 'Heavy Metal'
-    
     return 'Heavy Metal'
 
 def sanitize_mb_query(text: str) -> str:
-    """Échappe les caractères spéciaux pour les requêtes Lucene de MusicBrainz."""
     if not text:
         return ""
     special_chars = r'[\+\-\!\(\)\{\}\[\]\^\"\'\~\*\?\:\\\/]'
@@ -307,8 +270,7 @@ def clean_biography(bio_content: str) -> str:
     if not bio_content:
         return ''
     clean = re.sub(r'<[^>]+>', '', bio_content)
-    clean = re.sub(r'\s*(?:Read more|Lire la suite|Mehr lesen|Más información|Leggi tutto).*$', '',
-                   clean, flags=re.IGNORECASE | re.DOTALL)
+    clean = re.sub(r'\s*(?:Read more|Lire la suite|Mehr lesen|Más información|Leggi tutto).*$', '', clean, flags=re.IGNORECASE | re.DOTALL)
     clean = re.sub(r'https?://www\.last\.fm[^\s]*', '', clean)
     clean = re.sub(r'\s+', ' ', clean).strip()
     if MAX_BIO_LENGTH is not None:
@@ -338,27 +300,22 @@ def extract_genre_from_tags(tags: List[Dict]) -> str:
 # ═══════════════════════════════════════════════════════════
 # DICTIONNAIRES DES CODES D'ERREUR
 # ═══════════════════════════════════════════════════════════
-
 LASTFM_ERROR_CODES = {
     2: "Invalid method", 4: "Authentication failed", 5: "Invalid API key",
-    6: "Invalid session key", 8: "Operation failed",
-    10: "❌ INVALID API KEY", 11: "Service offline",
-    16: "Service temporarily unavailable", 26: "❌ API KEY SUSPENDED",
-    27: "❌ API KEY EXPIRED", 29: "⚠️ RATE LIMIT EXCEEDED",
+    6: "Invalid session key", 8: "Operation failed", 10: "❌ INVALID API KEY",
+    11: "Service offline", 16: "Service temporarily unavailable",
+    26: "❌ API KEY SUSPENDED", 27: "❌ API KEY EXPIRED", 29: "⚠️ RATE LIMIT EXCEEDED",
 }
 LASTFM_PERMANENT_ERRORS = {5, 10, 26, 27}
 LASTFM_TEMPORARY_ERRORS = {8, 11, 16, 28, 29, 30}
-
 MUSICBRAINZ_PERMANENT_ERRORS = {400, 401, 403, 404, 405, 406}
 MUSICBRAINZ_TEMPORARY_ERRORS = {408, 413, 429, 500, 502, 503, 504}
-
 DISCOGS_PERMANENT_ERRORS = {400, 401, 403, 404, 405, 406, 415, 422}
 DISCOGS_TEMPORARY_ERRORS = {408, 413, 429, 500, 502, 503, 504}
 
 # ═══════════════════════════════════════════════════════════
 # MODE TEST
 # ═══════════════════════════════════════════════════════════
-
 def test_services(insecure: bool = False, proxy: Optional[str] = None) -> bool:
     logger.info("🔍 TEST DE CONNEXION AUX SERVICES API")
     logger.info("=" * 80)
@@ -367,7 +324,7 @@ def test_services(insecure: bool = False, proxy: Optional[str] = None) -> bool:
     session = requests.Session()
     if proxy:
         session.proxies = {'http': proxy, 'https': proxy}
-
+    
     logger.info(f"\n🌐 Last.fm ({protocol}):")
     try:
         socket.gethostbyname('ws.audioscrobbler.com')
@@ -375,16 +332,11 @@ def test_services(insecure: bool = False, proxy: Optional[str] = None) -> bool:
     except Exception as e:
         logger.error(f"   ❌ DNS échoué: {e}")
         all_ok = False
-
+        
     if LASTFM_API_KEY:
         try:
             base_url = LASTFM_API_URL_HTTP if insecure else LASTFM_API_URL_HTTPS
-            response = session.get(
-                base_url,
-                params={'method': 'artist.getinfo', 'artist': 'Metallica',
-                        'api_key': LASTFM_API_KEY, 'format': 'json'},
-                timeout=15
-            )
+            response = session.get(base_url, params={'method': 'artist.getinfo', 'artist': 'Metallica', 'api_key': LASTFM_API_KEY, 'format': 'json'}, timeout=15)
             if response.status_code == 200:
                 data = response.json()
                 if data.get('artist'):
@@ -404,10 +356,7 @@ def test_services(insecure: bool = False, proxy: Optional[str] = None) -> bool:
 
     logger.info("\n🎵 MusicBrainz:")
     try:
-        response = session.get(
-            'https://musicbrainz.org/ws/2/artist/65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab?fmt=json',
-            headers={'User-Agent': 'MetalPedia/1.0.0 (test)'}, timeout=15
-        )
+        response = session.get('https://musicbrainz.org/ws/2/artist/65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab?fmt=json', headers={'User-Agent': 'MetalPedia/1.0.0 (test)'}, timeout=15)
         if response.status_code == 200:
             logger.info("   ✅ Service disponible")
         else:
@@ -420,13 +369,7 @@ def test_services(insecure: bool = False, proxy: Optional[str] = None) -> bool:
     logger.info("\n💿 Discogs:")
     if DISCOGS_TOKEN:
         try:
-            response = session.get(
-                'https://api.discogs.com/database/search',
-                params={'q': 'Metallica', 'type': 'artist', 'per_page': 1},
-                headers={'User-Agent': 'MetalPedia/1.0.0 (test)',
-                         'Authorization': f'Discogs token={DISCOGS_TOKEN}'},
-                timeout=15
-            )
+            response = session.get('https://api.discogs.com/database/search', params={'q': 'Metallica', 'type': 'artist', 'per_page': 1}, headers={'User-Agent': 'MetalPedia/1.0.0 (test)', 'Authorization': f'Discogs token={DISCOGS_TOKEN}'}, timeout=15)
             if response.status_code == 200:
                 logger.info("   ✅ Token valide")
             else:
@@ -437,7 +380,7 @@ def test_services(insecure: bool = False, proxy: Optional[str] = None) -> bool:
             all_ok = False
     else:
         logger.info("   ℹ️  Token optionnel non fourni")
-
+        
     logger.info("\n" + "=" * 80)
     if all_ok:
         logger.info(f"✅ Tous les services sont accessibles ! ({protocol})")
@@ -448,124 +391,88 @@ def test_services(insecure: bool = False, proxy: Optional[str] = None) -> bool:
 # ═══════════════════════════════════════════════════════════
 # ✨ SOUS-GENRES METAL ÉTENDUS
 # ═══════════════════════════════════════════════════════════
-
 METAL_TAGS = [
-    'heavy metal', 'thrash metal', 'death metal', 'black metal',
-    'power metal', 'doom metal', 'progressive metal', 'folk metal',
-    'metalcore', 'symphonic metal', 'gothic metal', 'nu metal',
-    'groove metal', 'industrial metal', 'speed metal',
-    'melodic death metal', 'brutal death metal', 'technical death metal',
-    'viking metal', 'pagan metal', 'sludge metal', 'stoner metal',
-    'post-metal', 'djent', 'grindcore', 'deathcore',
-    'swedish death metal', 'finnish death metal', 'norwegian black metal',
-    'symphonic black metal', 'epic metal', 'true metal',
-    'avant-garde metal', 'experimental metal',
-    'industrial', 'cyber metal', 'neue deutsche härte',
-    'folk black metal', 'viking black metal',
-    'goregrind', 'pornogrind', 'noisecore',
+    'heavy metal', 'thrash metal', 'death metal', 'black metal', 'power metal', 'doom metal',
+    'progressive metal', 'folk metal', 'metalcore', 'symphonic metal', 'gothic metal', 'nu metal',
+    'groove metal', 'industrial metal', 'speed metal', 'melodic death metal', 'brutal death metal',
+    'technical death metal', 'viking metal', 'pagan metal', 'sludge metal', 'stoner metal',
+    'post-metal', 'djent', 'grindcore', 'deathcore', 'swedish death metal', 'finnish death metal',
+    'norwegian black metal', 'symphonic black metal', 'epic metal', 'true metal',
+    'avant-garde metal', 'experimental metal', 'industrial', 'cyber metal', 'neue deutsche härte',
+    'folk black metal', 'viking black metal', 'goregrind', 'pornogrind', 'noisecore',
 ]
-
 METAL_GENRES = {
-    'black metal', 'death metal', 'thrash metal', 'heavy metal',
-    'power metal', 'doom metal', 'progressive metal', 'folk metal',
-    'symphonic metal', 'gothic metal', 'nu metal', 'metalcore',
-    'groove metal', 'industrial metal', 'speed metal', 'grindcore',
-    'deathcore', 'sludge metal', 'stoner metal', 'viking metal',
-    'pagan metal', 'post-metal', 'djent', 'melodic death metal',
-    'brutal death metal', 'technical death metal', 'epic metal',
-    'true metal', 'swedish death metal', 'finnish death metal',
-    'norwegian black metal', 'symphonic black metal',
-    'avant-garde metal', 'experimental metal', 'industrial metal',
+    'black metal', 'death metal', 'thrash metal', 'heavy metal', 'power metal', 'doom metal',
+    'progressive metal', 'folk metal', 'symphonic metal', 'gothic metal', 'nu metal', 'metalcore',
+    'groove metal', 'industrial metal', 'speed metal', 'grindcore', 'deathcore', 'sludge metal',
+    'stoner metal', 'viking metal', 'pagan metal', 'post-metal', 'djent', 'melodic death metal',
+    'brutal death metal', 'technical death metal', 'epic metal', 'true metal', 'swedish death metal',
+    'finnish death metal', 'norwegian black metal', 'symphonic black metal', 'avant-garde metal',
+    'experimental metal', 'industrial metal',
 }
-
 TAG_TO_COUNTRY = {
-    'swedish': 'Sweden', 'norwegian': 'Norway', 'finnish': 'Finland',
-    'danish': 'Denmark', 'icelandic': 'Iceland', 'german': 'Germany',
-    'french': 'France', 'british': 'United Kingdom', 'english': 'United Kingdom',
-    'american': 'United States', 'canadian': 'Canada', 'australian': 'Australia',
-    'brazilian': 'Brazil', 'japanese': 'Japan', 'polish': 'Poland',
-    'russian': 'Russia', 'greek': 'Greece', 'italian': 'Italy',
-    'spanish': 'Spain', 'portuguese': 'Portugal', 'dutch': 'Netherlands',
-    'belgian': 'Belgium', 'swiss': 'Switzerland', 'austrian': 'Austria',
-    'hungarian': 'Hungary', 'czech': 'Czechia', 'romanian': 'Romania',
-    'ukrainian': 'Ukraine', 'israeli': 'Israel', 'turkish': 'Turkey',
-    'mexican': 'Mexico', 'argentine': 'Argentina', 'chilean': 'Chile',
-    'colombian': 'Colombia', 'chinese': 'China', 'korean': 'South Korea',
-    'indian': 'India', 'south african': 'South Africa',
-    'scandinavian': 'Sweden', 'baltic': 'Latvia',
+    'swedish': 'Sweden', 'norwegian': 'Norway', 'finnish': 'Finland', 'danish': 'Denmark',
+    'icelandic': 'Iceland', 'german': 'Germany', 'french': 'France', 'british': 'United Kingdom',
+    'english': 'United Kingdom', 'american': 'United States', 'canadian': 'Canada',
+    'australian': 'Australia', 'brazilian': 'Brazil', 'japanese': 'Japan', 'polish': 'Poland',
+    'russian': 'Russia', 'greek': 'Greece', 'italian': 'Italy', 'spanish': 'Spain',
+    'portuguese': 'Portugal', 'dutch': 'Netherlands', 'belgian': 'Belgium', 'swiss': 'Switzerland',
+    'austrian': 'Austria', 'hungarian': 'Hungary', 'czech': 'Czechia', 'romanian': 'Romania',
+    'ukrainian': 'Ukraine', 'israeli': 'Israel', 'turkish': 'Turkey', 'mexican': 'Mexico',
+    'argentine': 'Argentina', 'chilean': 'Chile', 'colombian': 'Colombia', 'chinese': 'China',
+    'korean': 'South Korea', 'indian': 'India', 'south african': 'South Africa', 'scandinavian': 'Sweden', 'baltic': 'Latvia',
 }
-
 ISO_TO_COUNTRY = {
-    'AD': 'Andorra', 'AE': 'United Arab Emirates', 'AF': 'Afghanistan',
-    'AL': 'Albania', 'AM': 'Armenia', 'AO': 'Angola', 'AR': 'Argentina',
-    'AT': 'Austria', 'AU': 'Australia', 'AZ': 'Azerbaijan',
-    'BA': 'Bosnia and Herzegovina', 'BD': 'Bangladesh', 'BE': 'Belgium',
-    'BG': 'Bulgaria', 'BH': 'Bahrain', 'BI': 'Burundi', 'BJ': 'Benin',
-    'BN': 'Brunei Darussalam', 'BO': 'Bolivia', 'BR': 'Brazil',
-    'BS': 'Bahamas', 'BT': 'Bhutan', 'BW': 'Botswana', 'BY': 'Belarus',
-    'BZ': 'Belize', 'CA': 'Canada', 'CD': 'Congo (Democratic Republic)',
-    'CF': 'Central African Republic', 'CG': 'Congo', 'CH': 'Switzerland',
-    'CI': 'Côte d\'Ivoire', 'CL': 'Chile', 'CM': 'Cameroon', 'CN': 'China',
-    'CO': 'Colombia', 'CR': 'Costa Rica', 'CU': 'Cuba', 'CV': 'Cabo Verde',
-    'CY': 'Cyprus', 'CZ': 'Czechia', 'DE': 'Germany', 'DJ': 'Djibouti',
-    'DK': 'Denmark', 'DO': 'Dominican Republic', 'DZ': 'Algeria',
-    'EC': 'Ecuador', 'EE': 'Estonia', 'EG': 'Egypt', 'ER': 'Eritrea',
-    'ES': 'Spain', 'ET': 'Ethiopia', 'FI': 'Finland', 'FJ': 'Fiji',
-    'FM': 'Micronesia', 'FO': 'Faroe Islands', 'FR': 'France', 'GA': 'Gabon',
-    'GB': 'United Kingdom', 'GD': 'Grenada', 'GE': 'Georgia', 'GF': 'French Guiana',
-    'GH': 'Ghana', 'GI': 'Gibraltar', 'GL': 'Greenland', 'GM': 'Gambia',
-    'GN': 'Guinea', 'GP': 'Guadeloupe', 'GQ': 'Equatorial Guinea', 'GR': 'Greece',
-    'GT': 'Guatemala', 'GU': 'Guam', 'GW': 'Guinea-Bissau', 'GY': 'Guyana',
-    'HK': 'Hong Kong', 'HN': 'Honduras', 'HR': 'Croatia', 'HT': 'Haiti',
-    'HU': 'Hungary', 'ID': 'Indonesia', 'IE': 'Ireland', 'IL': 'Israel',
-    'IM': 'Isle of Man', 'IN': 'India', 'IQ': 'Iraq',
-    'IR': 'Iran (Islamic Republic of)', 'IS': 'Iceland', 'IT': 'Italy',
-    'JE': 'Jersey', 'JM': 'Jamaica', 'JO': 'Jordan', 'JP': 'Japan',
-    'KE': 'Kenya', 'KG': 'Kyrgyzstan', 'KH': 'Cambodia', 'KI': 'Kiribati',
-    'KM': 'Comoros', 'KN': 'Saint Kitts and Nevis', 'KP': 'North Korea',
-    'KR': 'South Korea', 'KW': 'Kuwait', 'KY': 'Cayman Islands',
-    'KZ': 'Kazakhstan', 'LA': 'Lao People\'s Democratic Republic',
-    'LB': 'Lebanon', 'LC': 'Saint Lucia', 'LI': 'Liechtenstein',
-    'LK': 'Sri Lanka', 'LR': 'Liberia', 'LS': 'Lesotho', 'LT': 'Lithuania',
-    'LU': 'Luxembourg', 'LV': 'Latvia', 'LY': 'Libya', 'MA': 'Morocco',
-    'MC': 'Monaco', 'MD': 'Moldova (Republic of)', 'ME': 'Montenegro',
-    'MG': 'Madagascar', 'MH': 'Marshall Islands', 'MK': 'North Macedonia',
-    'ML': 'Mali', 'MM': 'Myanmar', 'MN': 'Mongolia', 'MO': 'Macao',
-    'MP': 'Northern Mariana Islands', 'MQ': 'Martinique', 'MR': 'Mauritania',
-    'MS': 'Montserrat', 'MT': 'Malta', 'MU': 'Mauritius', 'MV': 'Maldives',
-    'MW': 'Malawi', 'MX': 'Mexico', 'MY': 'Malaysia', 'MZ': 'Mozambique',
-    'NA': 'Namibia', 'NC': 'New Caledonia', 'NE': 'Niger', 'NF': 'Norfolk Island',
-    'NG': 'Nigeria', 'NI': 'Nicaragua', 'NL': 'Netherlands', 'NO': 'Norway',
-    'NP': 'Nepal', 'NR': 'Nauru', 'NU': 'Niue', 'NZ': 'New Zealand',
-    'OM': 'Oman', 'PA': 'Panama', 'PE': 'Peru', 'PF': 'French Polynesia',
-    'PG': 'Papua New Guinea', 'PH': 'Philippines', 'PK': 'Pakistan',
-    'PL': 'Poland', 'PM': 'Saint Pierre and Miquelon', 'PN': 'Pitcairn',
-    'PR': 'Puerto Rico', 'PS': 'Palestine, State of', 'PT': 'Portugal',
-    'PW': 'Palau', 'PY': 'Paraguay', 'QA': 'Qatar', 'RE': 'Réunion',
-    'RO': 'Romania', 'RS': 'Serbia', 'RU': 'Russia', 'RW': 'Rwanda',
-    'SA': 'Saudi Arabia', 'SB': 'Solomon Islands', 'SC': 'Seychelles',
-    'SD': 'Sudan', 'SE': 'Sweden', 'SG': 'Singapore', 'SI': 'Slovenia',
-    'SK': 'Slovakia', 'SL': 'Sierra Leone', 'SM': 'San Marino',
-    'SN': 'Senegal', 'SO': 'Somalia', 'SR': 'Suriname', 'SS': 'South Sudan',
-    'ST': 'Sao Tome and Principe', 'SV': 'El Salvador', 'SY': 'Syrian Arab Republic',
-    'SZ': 'Eswatini', 'TC': 'Turks and Caicos Islands', 'TD': 'Chad',
-    'TG': 'Togo', 'TH': 'Thailand', 'TJ': 'Tajikistan', 'TK': 'Tokelau',
-    'TL': 'Timor-Leste', 'TM': 'Turkmenistan', 'TN': 'Tunisia', 'TO': 'Tonga',
-    'TR': 'Turkey', 'TT': 'Trinidad and Tobago', 'TV': 'Tuvalu',
-    'TW': 'Taiwan (Province of China)', 'TZ': 'Tanzania, United Republic of',
-    'UA': 'Ukraine', 'UG': 'Uganda', 'UM': 'United States Minor Outlying Islands',
-    'US': 'United States', 'UY': 'Uruguay', 'UZ': 'Uzbekistan',
-    'VA': 'Vatican City State', 'VC': 'Saint Vincent and the Grenadines',
-    'VE': 'Venezuela (Bolivarian Republic of)', 'VG': 'Virgin Islands (British)',
-    'VI': 'Virgin Islands (U.S.)', 'VN': 'Vietnam', 'VU': 'Vanuatu',
-    'WF': 'Wallis and Futuna', 'WS': 'Samoa', 'YE': 'Yemen', 'YT': 'Mayotte',
-    'ZA': 'South Africa', 'ZM': 'Zambia', 'ZW': 'Zimbabwe',
+    'AD': 'Andorra', 'AE': 'United Arab Emirates', 'AF': 'Afghanistan', 'AL': 'Albania', 'AM': 'Armenia',
+    'AO': 'Angola', 'AR': 'Argentina', 'AT': 'Austria', 'AU': 'Australia', 'AZ': 'Azerbaijan',
+    'BA': 'Bosnia and Herzegovina', 'BD': 'Bangladesh', 'BE': 'Belgium', 'BG': 'Bulgaria', 'BH': 'Bahrain',
+    'BI': 'Burundi', 'BJ': 'Benin', 'BN': 'Brunei Darussalam', 'BO': 'Bolivia', 'BR': 'Brazil',
+    'BS': 'Bahamas', 'BT': 'Bhutan', 'BW': 'Botswana', 'BY': 'Belarus', 'BZ': 'Belize', 'CA': 'Canada',
+    'CD': 'Congo (Democratic Republic)', 'CF': 'Central African Republic', 'CG': 'Congo', 'CH': 'Switzerland',
+    'CI': 'Côte d\'Ivoire', 'CL': 'Chile', 'CM': 'Cameroon', 'CN': 'China', 'CO': 'Colombia',
+    'CR': 'Costa Rica', 'CU': 'Cuba', 'CV': 'Cabo Verde', 'CY': 'Cyprus', 'CZ': 'Czechia', 'DE': 'Germany',
+    'DJ': 'Djibouti', 'DK': 'Denmark', 'DO': 'Dominican Republic', 'DZ': 'Algeria', 'EC': 'Ecuador',
+    'EE': 'Estonia', 'EG': 'Egypt', 'ER': 'Eritrea', 'ES': 'Spain', 'ET': 'Ethiopia', 'FI': 'Finland',
+    'FJ': 'Fiji', 'FM': 'Micronesia', 'FO': 'Faroe Islands', 'FR': 'France', 'GA': 'Gabon', 'GB': 'United Kingdom',
+    'GD': 'Grenada', 'GE': 'Georgia', 'GF': 'French Guiana', 'GH': 'Ghana', 'GI': 'Gibraltar',
+    'GL': 'Greenland', 'GM': 'Gambia', 'GN': 'Guinea', 'GP': 'Guadeloupe', 'GQ': 'Equatorial Guinea',
+    'GR': 'Greece', 'GT': 'Guatemala', 'GU': 'Guam', 'GW': 'Guinea-Bissau', 'GY': 'Guyana', 'HK': 'Hong Kong',
+    'HN': 'Honduras', 'HR': 'Croatia', 'HT': 'Haiti', 'HU': 'Hungary', 'ID': 'Indonesia', 'IE': 'Ireland',
+    'IL': 'Israel', 'IM': 'Isle of Man', 'IN': 'India', 'IQ': 'Iraq', 'IR': 'Iran (Islamic Republic of)',
+    'IS': 'Iceland', 'IT': 'Italy', 'JE': 'Jersey', 'JM': 'Jamaica', 'JO': 'Jordan', 'JP': 'Japan',
+    'KE': 'Kenya', 'KG': 'Kyrgyzstan', 'KH': 'Cambodia', 'KI': 'Kiribati', 'KM': 'Comoros',
+    'KN': 'Saint Kitts and Nevis', 'KP': 'North Korea', 'KR': 'South Korea', 'KW': 'Kuwait',
+    'KY': 'Cayman Islands', 'KZ': 'Kazakhstan', 'LA': 'Lao People\'s Democratic Republic', 'LB': 'Lebanon',
+    'LC': 'Saint Lucia', 'LI': 'Liechtenstein', 'LK': 'Sri Lanka', 'LR': 'Liberia', 'LS': 'Lesotho',
+    'LT': 'Lithuania', 'LU': 'Luxembourg', 'LV': 'Latvia', 'LY': 'Libya', 'MA': 'Morocco', 'MC': 'Monaco',
+    'MD': 'Moldova (Republic of)', 'ME': 'Montenegro', 'MG': 'Madagascar', 'MH': 'Marshall Islands',
+    'MK': 'North Macedonia', 'ML': 'Mali', 'MM': 'Myanmar', 'MN': 'Mongolia', 'MO': 'Macao',
+    'MP': 'Northern Mariana Islands', 'MQ': 'Martinique', 'MR': 'Mauritania', 'MS': 'Montserrat',
+    'MT': 'Malta', 'MU': 'Mauritius', 'MV': 'Maldives', 'MW': 'Malawi', 'MX': 'Mexico', 'MY': 'Malaysia',
+    'MZ': 'Mozambique', 'NA': 'Namibia', 'NC': 'New Caledonia', 'NE': 'Niger', 'NF': 'Norfolk Island',
+    'NG': 'Nigeria', 'NI': 'Nicaragua', 'NL': 'Netherlands', 'NO': 'Norway', 'NP': 'Nepal', 'NR': 'Nauru',
+    'NU': 'Niue', 'NZ': 'New Zealand', 'OM': 'Oman', 'PA': 'Panama', 'PE': 'Peru', 'PF': 'French Polynesia',
+    'PG': 'Papua New Guinea', 'PH': 'Philippines', 'PK': 'Pakistan', 'PL': 'Poland', 'PM': 'Saint Pierre and Miquelon',
+    'PN': 'Pitcairn', 'PR': 'Puerto Rico', 'PS': 'Palestine, State of', 'PT': 'Portugal', 'PW': 'Palau',
+    'PY': 'Paraguay', 'QA': 'Qatar', 'RE': 'Réunion', 'RO': 'Romania', 'RS': 'Serbia', 'RU': 'Russia',
+    'RW': 'Rwanda', 'SA': 'Saudi Arabia', 'SB': 'Solomon Islands', 'SC': 'Seychelles', 'SD': 'Sudan',
+    'SE': 'Sweden', 'SG': 'Singapore', 'SI': 'Slovenia', 'SK': 'Slovakia', 'SL': 'Sierra Leone',
+    'SM': 'San Marino', 'SN': 'Senegal', 'SO': 'Somalia', 'SR': 'Suriname', 'SS': 'South Sudan',
+    'ST': 'Sao Tome and Principe', 'SV': 'El Salvador', 'SY': 'Syrian Arab Republic', 'SZ': 'Eswatini',
+    'TC': 'Turks and Caicos Islands', 'TD': 'Chad', 'TG': 'Togo', 'TH': 'Thailand', 'TJ': 'Tajikistan',
+    'TK': 'Tokelau', 'TL': 'Timor-Leste', 'TM': 'Turkmenistan', 'TN': 'Tunisia', 'TO': 'Tonga',
+    'TR': 'Turkey', 'TT': 'Trinidad and Tobago', 'TV': 'Tuvalu', 'TW': 'Taiwan (Province of China)',
+    'TZ': 'Tanzania, United Republic of', 'UA': 'Ukraine', 'UG': 'Uganda', 'UM': 'United States Minor Outlying Islands',
+    'US': 'United States', 'UY': 'Uruguay', 'UZ': 'Uzbekistan', 'VA': 'Vatican City State',
+    'VC': 'Saint Vincent and the Grenadines', 'VE': 'Venezuela (Bolivarian Republic of)',
+    'VG': 'Virgin Islands (British)', 'VI': 'Virgin Islands (U.S.)', 'VN': 'Vietnam', 'VU': 'Vanuatu',
+    'WF': 'Wallis and Futuna', 'WS': 'Samoa', 'YE': 'Yemen', 'YT': 'Mayotte', 'ZA': 'South Africa',
+    'ZM': 'Zambia', 'ZW': 'Zimbabwe',
 }
 
 # ═══════════════════════════════════════════════════════════
 # ✨ CACHE LOCAL AVEC SAUVEGARDE AUTOMATIQUE
 # ═══════════════════════════════════════════════════════════
-
 class JSONCache:
     def __init__(self, cache_path: str, name: str = "cache", save_interval: int = CACHE_SAVE_INTERVAL):
         self.cache_path = Path(cache_path)
@@ -603,18 +510,17 @@ class JSONCache:
     def set(self, key: str, data: Dict):
         if key not in self.cache:
             self._new_entries += 1
-        self.cache[key] = data
-        if self._new_entries >= self.save_interval:
-            self.save()
-            logger.debug(f"💾 Cache {self.name} sauvegardé automatiquement ({len(self.cache)} entrées)")
+            self.cache[key] = data
+            if self._new_entries >= self.save_interval:
+                self.save()
+                logger.debug(f"💾 Cache {self.name} sauvegardé automatiquement ({len(self.cache)} entrées)")
 
     def stats(self) -> Dict[str, int]:
         return {'hits': self.hits, 'misses': self.misses, 'size': len(self.cache)}
 
 # ═══════════════════════════════════════════════════════════
-# CLIENT LAST.FM
+# CLIENT LAST.FM (AVEC OPTIMISATION RAPIDE SOLUTION A)
 # ═══════════════════════════════════════════════════════════
-
 class LastFmClient:
     def __init__(self, api_key: str, default_lang: str = 'fr', insecure: bool = False, proxy: Optional[str] = None):
         self.api_key = api_key
@@ -630,10 +536,15 @@ class LastFmClient:
         self.rate_limited_count = 0
         self.bio_stats = {'bio_fr': 0, 'bio_en': 0, 'bio_none': 0}
         self.image_stats = {'lastfm_info': 0, 'placeholder_filtered': 0, 'no_image': 0}
-        self.album_stats = {'total_albums': 0, 'artists_with_albums': 0}
+        self.album_stats = {
+            'total_albums_fetched': 0,
+            'albums_with_valid_mbid': 0,
+            'albums_rejected_no_mbid': 0,
+            'artists_with_albums': 0
+        }
         self.base_url = LASTFM_API_URL_HTTP if insecure else LASTFM_API_URL_HTTPS
         self.cache = JSONCache(LASTFM_CACHE_FILE, "Last.fm", save_interval=CACHE_SAVE_INTERVAL)
-        logger.info(f"🎵 Client Last.fm initialisé ({'HTTP' if insecure else 'HTTPS'})")
+        logger.info(f"🎵 Client Last.fm initialisé ({'HTTP' if insecure else 'HTTPS'}) - Filtrage MBID strict + optimisation rapide")
 
     def _request(self, params: Dict) -> Optional[Dict]:
         params['api_key'] = self.api_key
@@ -676,8 +587,8 @@ class LastFmClient:
                 logger.error(f"❌ Last.fm {endpoint} - Exception réseau: {e}")
                 if attempt < max_attempts - 1:
                     time.sleep(5 * (attempt + 1))
-                continue
-        return None
+                    continue
+                return None
 
     def get_top_artists_by_tag(self, tag: str, limit: int = 100, page: int = 1) -> List[Dict]:
         data = self._request({'method': 'tag.gettopartists', 'tag': tag, 'limit': limit, 'page': page})
@@ -699,7 +610,7 @@ class LastFmClient:
             artist_data = data.get('artist')
             if artist_data:
                 self.cache.set(cache_key, artist_data)
-            return artist_data
+                return artist_data
         return None
 
     def get_artist_info_with_fallback(self, artist_name: str, preferred_lang: str = 'fr', fallback_lang: str = 'en') -> Tuple[Optional[Dict], str]:
@@ -716,15 +627,30 @@ class LastFmClient:
                     return artist_data_fallback, fallback_lang
         return artist_data, 'none'
 
-    def get_artist_albums(self, artist_name: str, limit: int = 100, max_pages: Optional[int] = None) -> List[Dict]:
-        cache_key = f"albums:{artist_name.lower().strip()}"
+    def get_artist_albums(self, artist_name: str, limit: int = 100, max_pages: Optional[int] = None, max_albums: int = DEFAULT_MAX_ALBUMS) -> List[Dict]:
+        """✨ SOLUTION A : Récupération optimisée des albums.
+        
+        Optimisations appliquées :
+        1. Limite le nombre d'albums BRUTS traités à max_albums * RAW_ALBUMS_MULTIPLIER
+        2. Supprime le fallback lent album.getInfo (trop de requêtes API)
+        3. Arrêt immédiat dès que max_albums valides sont trouvés
+        4. Clé de cache dynamique incluant max_albums
+        """
+        if max_albums <= 0:
+            return []
+        
+        # ✨ Clé de cache dynamique incluant max_albums
+        cache_key = f"albums:{artist_name.lower().strip()}:{max_albums}"
         cached = self.cache.get(cache_key)
         if cached is not None:
             return cached.get('albums', [])
         
         albums = []
         page = 1
-        while True:
+        raw_albums_processed = 0  # ✨ SOLUTION A : Compteur d'albums bruts traités
+        max_raw_albums = max_albums * RAW_ALBUMS_MULTIPLIER  # ✨ SOLUTION A : Limite d'albums bruts
+        
+        while len(albums) < max_albums:
             data = self._request({
                 'method': 'artist.getTopAlbums',
                 'artist': artist_name,
@@ -740,14 +666,40 @@ class LastFmClient:
                 page_albums = [page_albums]
             if not page_albums:
                 break
+            
             for album in page_albums:
-                album_artist = album.get('artist', {})
+                # ✨ SOLUTION A : Arrêt immédiat si on a atteint le max d'albums valides
+                if len(albums) >= max_albums:
+                    break
+                
+                # ✨ SOLUTION A : Arrêt immédiat si on a traité trop d'albums bruts
+                if raw_albums_processed >= max_raw_albums:
+                    break
+                
+                raw_albums_processed += 1
+                self.album_stats['total_albums_fetched'] += 1
+                album_name = album.get('name')
+                artist_data = album.get('artist', {})
+                album_artist_name = artist_data.get('name') if isinstance(artist_data, dict) else artist_data
+                
+                # 1. Récupérer le MBID initial (parfois présent dans getTopAlbums)
+                mbid = album.get('mbid')
+                
+                # ✨ SOLUTION A : Suppression du fallback album.getInfo (trop lent)
+                # On ne garde que les MBID natifs fournis par getTopAlbums
+                # Validation stricte : MBID doit faire exactement 36 caractères
+                if not mbid or len(str(mbid).strip()) != 36:
+                    self.album_stats['albums_rejected_no_mbid'] += 1
+                    continue
+                
+                self.album_stats['albums_with_valid_mbid'] += 1
                 album_image = pick_best_lastfm_image(album.get('image', []))
                 album_url = album.get('url')
+                
                 albums.append({
-                    'name': album.get('name'),
-                    'artist': album_artist.get('name') if isinstance(album_artist, dict) else album_artist,
-                    'mbid': album.get('mbid') or None,
+                    'name': album_name,
+                    'artist': album_artist_name,
+                    'mbid': mbid.strip(),
                     'url': album_url,
                     'uri': album_url,
                     'playcount': album.get('playcount'),
@@ -755,11 +707,19 @@ class LastFmClient:
                     'year': None,
                     'type': 'album',
                 })
+            
+            # ✨ SOLUTION A : Arrêt de la pagination si on a atteint les limites
+            if len(albums) >= max_albums:
+                break
+            if raw_albums_processed >= max_raw_albums:
+                break
+            
             attr = top_albums.get('@attr', {})
             try:
                 total_pages = int(attr.get('totalPages', 1))
             except (TypeError, ValueError):
                 total_pages = 1
+            
             if page >= total_pages:
                 break
             if max_pages is not None and page >= max_pages:
@@ -772,10 +732,8 @@ class LastFmClient:
                 'fetched_at': datetime.now(timezone.utc).isoformat(),
                 'count': len(albums)
             })
-        
-        self.album_stats['total_albums'] += len(albums)
-        if albums:
             self.album_stats['artists_with_albums'] += 1
+            
         return albums
 
     def save_cache(self):
@@ -792,13 +750,15 @@ class LastFmClient:
             'bio_fr': self.bio_stats.get('bio_fr', 0),
             'bio_en': self.bio_stats.get('bio_en', 0),
             'bio_none': self.bio_stats.get('bio_none', 0),
-            'total_albums': self.album_stats.get('total_albums', 0),
+            'total_albums_fetched': self.album_stats.get('total_albums_fetched', 0),
+            'albums_with_valid_mbid': self.album_stats.get('albums_with_valid_mbid', 0),
+            'albums_rejected_no_mbid': self.album_stats.get('albums_rejected_no_mbid', 0),
+            'artists_with_albums': self.album_stats.get('artists_with_albums', 0),
         }
 
 # ═══════════════════════════════════════════════════════════
 # CLIENT MUSICBRAINZ (avec optimisations anti-backoff)
 # ═══════════════════════════════════════════════════════════
-
 class MusicBrainzClient:
     def __init__(self, mb_delay: float = DEFAULT_MB_DELAY, use_cache: bool = True, proxy: Optional[str] = None):
         self.mb_delay = mb_delay
@@ -876,7 +836,7 @@ class MusicBrainzClient:
             except requests.RequestException as e:
                 logger.error(f"❌ MusicBrainz - Exception réseau: {e}")
                 time.sleep(2)
-        return None
+                return None
 
     def search_artist_mbid(self, artist_name: str) -> Optional[str]:
         if not artist_name:
@@ -934,7 +894,7 @@ class MusicBrainzClient:
             except requests.RequestException as e:
                 logger.error(f"❌ MusicBrainz artist search - Exception: {e}")
                 time.sleep(2)
-        return None
+                return None
 
     def search_release_group_mbid(self, album_title: str, artist_name: str) -> Optional[str]:
         if not album_title or not artist_name:
@@ -993,6 +953,54 @@ class MusicBrainzClient:
             except requests.RequestException as e:
                 logger.error(f"❌ MusicBrainz release-group search - Exception: {e}")
                 time.sleep(2)
+                return None
+
+    def get_release_group_discogs_uri(self, mbid: str) -> Optional[str]:
+        """✨ Récupère l'URI Discogs officielle d'un Release Group via son MBID (inc=url-rels)."""
+        if not mbid:
+            return None
+        cache_key = f"rg_discogs_uri:{mbid}"
+        if self.cache:
+            cached = self.cache.get(cache_key)
+            if cached is not None:
+                return cached.get('uri')
+        max_attempts = 3
+        for attempt in range(max_attempts):
+            try:
+                base_delay = min(self.current_backoff, self.max_backoff)
+                jitter = base_delay * 0.2 * (random.random() * 2 - 1)
+                delay = max(0.5, base_delay + jitter)
+                time.sleep(delay)
+                url = f"{MUSICBRAINZ_API_URL}release-group/{mbid}?inc=url-rels&fmt=json"
+                response = self.session.get(url, timeout=30)
+                self.request_count += 1
+                if response.status_code == 200:
+                    self.current_backoff = self.mb_delay
+                    data = response.json()
+                    relations = data.get('relations', [])
+                    for rel in relations:
+                        if rel.get('type') == 'discogs' and 'resource' in rel.get('url', {}):
+                            uri = rel['url']['resource']
+                            if self.cache:
+                                self.cache.set(cache_key, {'uri': uri})
+                            return uri
+                    # Negative caching : pas de lien Discogs trouvé
+                    if self.cache:
+                        self.cache.set(cache_key, {'uri': None})
+                    return None
+                elif response.status_code in MUSICBRAINZ_TEMPORARY_ERRORS:
+                    self.rate_limited_count += 1
+                    self.current_backoff = min(self.current_backoff * 2, self.max_backoff)
+                    if attempt == max_attempts - 1:
+                        return None
+                    time.sleep(int(self.current_backoff))
+                    continue
+                else:
+                    return None
+            except requests.RequestException as e:
+                logger.debug(f"⚠️ MusicBrainz RG Discogs URI - Exception: {e}")
+                time.sleep(2)
+                return None
         return None
 
     def extract_members(self, mbid: str) -> List[Dict]:
@@ -1217,7 +1225,6 @@ class MusicBrainzClient:
 # ═══════════════════════════════════════════════════════════
 # CLIENT COVER ART ARCHIVE
 # ═══════════════════════════════════════════════════════════
-
 class CoverArtArchiveClient:
     def __init__(self, use_cache: bool = True, proxy: Optional[str] = None):
         self.session = requests.Session()
@@ -1263,8 +1270,8 @@ class CoverArtArchiveClient:
                 front = next((img for img in images if img.get('front')), images[0])
                 thumbnails = front.get('thumbnails', {}) or {}
                 url = thumbnails.get(CAA_THUMB_SIZE) or thumbnails.get('500') or thumbnails.get('1200') or thumbnails.get('250') or front.get('image')
-        if self.cache:
-            self.cache.set(cache_key, {'url': url})
+                if self.cache:
+                    self.cache.set(cache_key, {'url': url})
         if url:
             self.covers_found += 1
         else:
@@ -1291,7 +1298,6 @@ class CoverArtArchiveClient:
 # ═══════════════════════════════════════════════════════════
 # CLIENT DISCOGS
 # ═══════════════════════════════════════════════════════════
-
 class DiscogsClient:
     def __init__(self, token: Optional[str] = None, use_cache: bool = True, proxy: Optional[str] = None):
         self.token = token
@@ -1309,7 +1315,7 @@ class DiscogsClient:
         self.cache = JSONCache(DISCOGS_CACHE_FILE, "Discogs", save_interval=CACHE_SAVE_INTERVAL) if use_cache else None
         self.tracklist_cache = JSONCache(TRACKLIST_CACHE_FILE, "Tracklist", save_interval=CACHE_SAVE_INTERVAL) if use_cache else None
         self.last_request_time = 0
-        self.album_enrichment_stats = {'enriched': 0, 'not_found': 0}
+        self.album_enrichment_stats = {'enriched': 0, 'not_found': 0, 'total': 0}
 
     def _request(self, endpoint: str, params: Optional[Dict] = None):
         now = time.time()
@@ -1338,7 +1344,7 @@ class DiscogsClient:
             except requests.RequestException as e:
                 logger.error(f"❌ Discogs - Exception réseau: {e}")
                 time.sleep(2 * (attempt + 1))
-        return None
+                return None
 
     def search_releases_by_style(self, artist_name: str, style: str, limit: int = 100) -> List[Dict]:
         releases = []
@@ -1350,54 +1356,89 @@ class DiscogsClient:
             artist_name_lower = artist_name.lower()
             for item in result['results']:
                 if artist_name_lower in item.get('title', '').lower():
-                    releases.append({'title': item.get('title'), 'year': item.get('year'), 'type': item.get('type'), 'uri': f"https://www.discogs.com/{item.get('type')}/{item.get('id')}", 'thumb': item.get('thumb'), 'id': item.get('id')})
+                    releases.append({
+                        'title': item.get('title'),
+                        'year': item.get('year'),
+                        'type': item.get('type'),
+                        'uri': f"https://www.discogs.com/{item.get('type')}/{item.get('id')}",
+                        'thumb': item.get('thumb'),
+                        'id': item.get('id')
+                    })
             pagination = result.get('pagination', {})
             if page >= pagination.get('pages', 1) or page > 5:
                 break
             page += 1
         return releases[:limit]
 
-    def enrich_albums_with_discogs(self, artist_name: str, genre: str, lastfm_albums: List[Dict], include_tracks: bool = False) -> List[Dict]:
+    def enrich_albums_with_discogs(self, artist_name: str, genre: str, lastfm_albums: List[Dict], musicbrainz_client=None, include_tracks: bool = False) -> List[Dict]:
+        """✨ Enrichissement Discogs avec priorité MBID → URI existant → recherche textuelle."""
         if not lastfm_albums:
             return lastfm_albums
-        discogs_releases = self.search_releases_by_style(artist_name, get_discogs_style_from_genre(genre), limit=100)
-        if not discogs_releases:
-            return lastfm_albums
-        discogs_titles = {normalize_album_title(r['title'].split(' - ', 1)[1] if ' - ' in r['title'] else r['title']): r for r in discogs_releases}
+        self.album_enrichment_stats['total'] += len(lastfm_albums)
         enriched_count = 0
         for album in lastfm_albums:
             lastfm_title = album.get('name', '')
             if not lastfm_title:
                 continue
-            discogs_release = discogs_titles.get(normalize_album_title(lastfm_title))
-            if discogs_release:
-                album['year'] = discogs_release.get('year')
-                album['type'] = discogs_release.get('type', 'album')
-                album['uri'] = discogs_release.get('uri')
-                if include_tracks and discogs_release.get('id'):
-                    cache_key = f"tracklist:{discogs_release['id']}"
-                    cached = self.tracklist_cache.get(cache_key) if self.tracklist_cache else None
-                    if cached:
-                        album['tracks'] = cached
-                    else:
+            discogs_uri = None
+            # ✨ PRIORITÉ 1 : Utiliser le MBID garanti pour obtenir l'URI Discogs via MusicBrainz
+            mbid = album.get('mbid')
+            if mbid and musicbrainz_client:
+                discogs_uri = musicbrainz_client.get_release_group_discogs_uri(mbid)
+            # ✨ PRIORITÉ 2 : Fallback sur l'URI déjà présent dans l'album
+            if not discogs_uri:
+                uri = album.get('uri', '')
+                if uri and 'discogs.com/master/' in uri:
+                    discogs_uri = uri
+            # ✨ PRIORITÉ 3 : Fallback sur la recherche textuelle (uniquement si MBID échoue)
+            if not discogs_uri:
+                discogs_releases = self.search_releases_by_style(artist_name, get_discogs_style_from_genre(genre), limit=50)
+                discogs_titles = {normalize_album_title(r['title'].split(' - ', 1)[1] if ' - ' in r['title'] else r['title']): r for r in discogs_releases}
+                matched_release = discogs_titles.get(normalize_album_title(lastfm_title))
+                if matched_release:
+                    discogs_uri = matched_release.get('uri')
+            # ✨ ENRICHISSEMENT DIRECT via l'URI Discogs trouvé
+            if discogs_uri:
+                match = re.search(r'/master/(\d+)', discogs_uri)
+                if match:
+                    master_id = match.group(1)
+                    cache_key = f"master:{master_id}"
+                    master_data = None
+                    if self.tracklist_cache:
+                        cached = self.tracklist_cache.get(cache_key)
+                        if cached:
+                            master_data = cached
+                    if not master_data:
                         time.sleep(DISCOGS_DELAY)
-                        master_data = self._request(f'masters/{discogs_release["id"]}')
-                        if master_data and 'tracklist' in master_data:
-                            album['tracks'] = [{"position": str(t.get("position", "")), "title": t.get("title", ""), "duration": t.get("duration", "")} for t in master_data['tracklist'] if t.get("title")]
-                            if self.tracklist_cache:
-                                self.tracklist_cache.set(cache_key, album['tracks'])
-                discogs_thumb = discogs_release.get('thumb')
-                if discogs_thumb and (not album.get('image') or is_placeholder(album.get('image'))):
-                    album['image'] = discogs_thumb
-                    album['image_source'] = 'discogs'
-                enriched_count += 1
-        logger.info(f"💿 Discogs: {enriched_count}/{len(lastfm_albums)} albums enrichis pour '{artist_name}'")
+                        master_data = self._request(f'masters/{master_id}')
+                    if self.tracklist_cache and master_data:
+                        self.tracklist_cache.set(cache_key, master_data)
+                    if master_data:
+                        if not album.get('year') and master_data.get('year'):
+                            album['year'] = master_data['year']
+                        formats = master_data.get('main_release', {}).get('formats', [{}])
+                        album['type'] = formats[0].get('name', 'album').lower() if formats else 'album'
+                        album['uri'] = f"https://www.discogs.com/master/{master_id}"
+                        if include_tracks and 'tracklist' in master_data:
+                            album['tracks'] = [
+                                {"position": str(t.get("position", "")), "title": t.get("title", ""), "duration": t.get("duration", "")}
+                                for t in master_data['tracklist'] if t.get("title")
+                            ]
+                        discogs_thumb = master_data.get('thumb') or (master_data.get('images', [{}])[0].get('uri') if master_data.get('images') else None)
+                        if discogs_thumb and (not album.get('image') or is_placeholder(album.get('image'))):
+                            album['image'] = discogs_thumb
+                            album['image_source'] = 'discogs'
+                        enriched_count += 1
+        # Déduplication robuste basée sur l'URI Discogs
         unique_albums, seen = [], set()
         for album in lastfm_albums:
             identifier = album.get('uri') or f"local:{normalize_album_title(album.get('name', ''))}"
             if identifier not in seen:
                 seen.add(identifier)
                 unique_albums.append(album)
+        if enriched_count > 0:
+            self.album_enrichment_stats['enriched'] += enriched_count
+            logger.info(f"💿 Discogs: {enriched_count}/{len(lastfm_albums)} albums enrichis (via MBID prioritaire) pour '{artist_name}'")
         return unique_albums
 
     def enrich_artist(self, artist_name: str):
@@ -1433,13 +1474,20 @@ class DiscogsClient:
         return result
 
     def enrich_album_year(self, album: Dict, artist_name: str, musicbrainz_client=None) -> Optional[int]:
+        """✨ Enrichissement année avec priorité MBID → URI Discogs."""
         if album.get('year'):
             return album['year']
         mbid = album.get('mbid')
+        # ✨ PRIORITÉ 1 : MBID via MusicBrainz (le plus fiable)
         if mbid and musicbrainz_client:
             year = musicbrainz_client.get_release_group_year(mbid)
             if year:
                 return year
+            # Si MusicBrainz n'a pas l'année, on tente de récupérer l'URI Discogs via MBID
+            discogs_uri = musicbrainz_client.get_release_group_discogs_uri(mbid)
+            if discogs_uri:
+                album['uri'] = discogs_uri
+        # ✨ PRIORITÉ 2 : Fallback sur l'URI Discogs
         uri = album.get('uri', '')
         if uri and 'discogs.com/master/' in uri:
             try:
@@ -1457,7 +1505,7 @@ class DiscogsClient:
                             self.tracklist_cache.set(cache_key, {'year': year})
                         return year
             except Exception as e:
-                logger.debug(f"⚠️  Erreur récupération année via URI Discogs: {e}")
+                logger.debug(f"⚠️ Erreur récupération année via URI Discogs: {e}")
         return None
 
     def save_cache(self):
@@ -1468,7 +1516,13 @@ class DiscogsClient:
 
     @property
     def stats(self):
-        stats = {'api_requests': self.request_count, 'rate_limited': self.rate_limited_count, 'albums_enriched': self.album_enrichment_stats.get('enriched', 0), 'albums_not_found': self.album_enrichment_stats.get('not_found', 0)}
+        stats = {
+            'api_requests': self.request_count,
+            'rate_limited': self.rate_limited_count,
+            'albums_enriched': self.album_enrichment_stats.get('enriched', 0),
+            'albums_not_found': self.album_enrichment_stats.get('not_found', 0),
+            'albums_total': self.album_enrichment_stats.get('total', 0)
+        }
         if self.cache:
             stats['cache_size'] = self.cache.stats()['size']
         if self.tracklist_cache:
@@ -1478,7 +1532,6 @@ class DiscogsClient:
 # ═══════════════════════════════════════════════════════════
 # FILTRAGE ET STATISTIQUES
 # ═══════════════════════════════════════════════════════════
-
 def filter_bands_by_listeners(bands: List[Dict], min_listeners: int) -> Tuple[List[Dict], Dict]:
     if min_listeners <= 0:
         return bands, {'total_before': len(bands), 'total_after': len(bands), 'removed': 0, 'min_listeners': min_listeners}
@@ -1486,7 +1539,6 @@ def filter_bands_by_listeners(bands: List[Dict], min_listeners: int) -> Tuple[Li
     return filtered, {'total_before': len(bands), 'total_after': len(filtered), 'removed': len(bands) - len(filtered), 'min_listeners': min_listeners}
 
 def filter_bands_by_pillar(bands: List[Dict], pillar: str) -> Tuple[List[Dict], Dict]:
-    """Filtre les groupes par pilier (ex: 'Folk Metal')."""
     filtered = [b for b in bands if resolve_pillar(b.get('genre_pillar') or b.get('genre')) == pillar]
     return filtered, {'total_before': len(bands), 'total_after': len(filtered), 'removed': len(bands) - len(filtered), 'pillar': pillar}
 
@@ -1516,15 +1568,26 @@ def print_artist_statistics(bands: List[Dict]):
         return
     total = len(bands)
     print("\n" + "=" * 80 + f"\n📊 STATISTIQUES DÉTAILLÉES DES ARTISTES RÉCUPÉRÉS ({total:,} artistes)\n" + "=" * 80)
-    fields_to_check = [('name', lambda b: bool(b.get('name'))), ('genre', lambda b: bool(b.get('genre'))), ('country', lambda b: bool(b.get('country')) and b.get('country') != 'Unknown'), ('formed', lambda b: b.get('formed') is not None), ('formed_date', lambda b: bool(b.get('formed_date'))), ('disbanded_date', lambda b: bool(b.get('disbanded_date'))), ('status', lambda b: bool(b.get('status'))), ('biography', lambda b: bool(b.get('biography'))), ('bio_lang', lambda b: bool(b.get('bio_lang')) and b.get('bio_lang') != 'none'), ('image_url', lambda b: bool(b.get('image_url'))), ('listeners', lambda b: b.get('listeners') is not None and b.get('listeners') > 0), ('mbid', lambda b: bool(b.get('mbid'))), ('original_name', lambda b: bool(b.get('original_name'))), ('rating', lambda b: b.get('rating') is not None), ('rating_votes', lambda b: b.get('rating_votes') is not None and b.get('rating_votes') > 0), ('discogs_id', lambda b: b.get('discogs_id') is not None), ('discogs_uri', lambda b: bool(b.get('discogs_uri'))), ('albums', lambda b: bool(b.get('albums'))), ('members', lambda b: bool(b.get('members')))]
-    print(f"\n   {'Champ':<20} {'Remplis':<12} {'Taux':<10} {'Barre'}\n   " + "─" * 70)
+    fields_to_check = [
+        ('name', lambda b: bool(b.get('name'))), ('genre', lambda b: bool(b.get('genre'))),
+        ('country', lambda b: bool(b.get('country')) and b.get('country') != 'Unknown'),
+        ('formed', lambda b: b.get('formed') is not None), ('formed_date', lambda b: bool(b.get('formed_date'))),
+        ('disbanded_date', lambda b: bool(b.get('disbanded_date'))), ('status', lambda b: bool(b.get('status'))),
+        ('biography', lambda b: bool(b.get('biography'))), ('bio_lang', lambda b: bool(b.get('bio_lang')) and b.get('bio_lang') != 'none'),
+        ('image_url', lambda b: bool(b.get('image_url'))), ('listeners', lambda b: b.get('listeners') is not None and b.get('listeners') > 0),
+        ('mbid', lambda b: bool(b.get('mbid'))), ('original_name', lambda b: bool(b.get('original_name'))),
+        ('rating', lambda b: b.get('rating') is not None), ('rating_votes', lambda b: b.get('rating_votes') is not None and b.get('rating_votes') > 0),
+        ('discogs_id', lambda b: b.get('discogs_id') is not None), ('discogs_uri', lambda b: bool(b.get('discogs_uri'))),
+        ('albums', lambda b: bool(b.get('albums'))), ('members', lambda b: bool(b.get('members')))
+    ]
+    print(f"\n{'Champ':<20} {'Remplis':<12} {'Taux':<10} {'Barre'}\n" + "─" * 70)
     for field_name, check_func in fields_to_check:
         count = sum(1 for b in bands if check_func(b))
         pct = (count / total * 100) if total > 0 else 0
         print(f"   {field_name:<20} {count:>8,}     {pct:>6.1f}%   {'█' * int(pct / 5)}{'░' * (20 - int(pct / 5))}")
     listeners_list = [b.get('listeners', 0) or 0 for b in bands if b.get('listeners')]
     if listeners_list:
-        print(f"\n   👂 Listeners :\n      Min      : {min(listeners_list):>12,}\n      Max      : {max(listeners_list):>12,}\n      Moyenne  : {sum(listeners_list) // len(listeners_list):>12,}")
+        print(f"\n👂 Listeners :\n   Min      : {min(listeners_list):>12,}\n   Max      : {max(listeners_list):>12,}\n   Moyenne  : {sum(listeners_list) // len(listeners_list):>12,}")
     print("\n" + "=" * 80)
 
 def print_album_statistics(bands: List[Dict]):
@@ -1533,8 +1596,15 @@ def print_album_statistics(bands: List[Dict]):
         return
     total = len(all_albums)
     print("\n" + "=" * 80 + f"\n💿 STATISTIQUES DÉTAILLÉES DES ALBUMS RÉCUPÉRÉS ({total:,} albums)\n" + "=" * 80)
-    fields_to_check = [('title', lambda a: bool(a.get('name') or a.get('title'))), ('artist', lambda a: bool(a.get('artist'))), ('year', lambda a: a.get('year') is not None), ('image_url', lambda a: bool(a.get('image') or a.get('cover_image'))), ('mbid', lambda a: bool(a.get('mbid'))), ('url', lambda a: bool(a.get('url'))), ('playcount', lambda a: a.get('playcount') is not None and _safe_int(a.get('playcount'), 0) > 0), ('release_type', lambda a: bool(a.get('type') or a.get('release_type'))), ('uri', lambda a: bool(a.get('uri'))), ('tracks', lambda a: bool(a.get('tracks')))]
-    print(f"\n   {'Champ':<20} {'Remplis':<12} {'Taux':<10} {'Barre'}\n   " + "─" * 70)
+    fields_to_check = [
+        ('title', lambda a: bool(a.get('name') or a.get('title'))), ('artist', lambda a: bool(a.get('artist'))),
+        ('year', lambda a: a.get('year') is not None), ('image_url', lambda a: bool(a.get('image') or a.get('cover_image'))),
+        ('mbid', lambda a: bool(a.get('mbid'))), ('url', lambda a: bool(a.get('url'))),
+        ('playcount', lambda a: a.get('playcount') is not None and _safe_int(a.get('playcount'), 0) > 0),
+        ('release_type', lambda a: bool(a.get('type') or a.get('release_type'))), ('uri', lambda a: bool(a.get('uri'))),
+        ('tracks', lambda a: bool(a.get('tracks')))
+    ]
+    print(f"\n{'Champ':<20} {'Remplis':<12} {'Taux':<10} {'Barre'}\n" + "─" * 70)
     for field_name, check_func in fields_to_check:
         count = sum(1 for a in all_albums if check_func(a))
         pct = (count / total * 100) if total > 0 else 0
@@ -1544,7 +1614,6 @@ def print_album_statistics(bands: List[Dict]):
 # ═══════════════════════════════════════════════════════════
 # GESTION DE LA PROGRESSION ET MISE À JOUR
 # ═══════════════════════════════════════════════════════════
-
 def load_progress(path: str) -> Dict:
     if not Path(path).exists():
         return {'seen_names': [], 'bands': [], 'last_tag_index': 0, 'last_page': 1}
@@ -1571,8 +1640,7 @@ def reset_progress(path: str):
 # ═══════════════════════════════════════════════════════════
 # MISE À JOUR DES DONNÉES EXISTANTES
 # ═══════════════════════════════════════════════════════════
-
-def update_bands_from_file(file_path: str, fields: Optional[List[str]] = None, insecure: bool = False, proxy: Optional[str] = None, use_musicbrainz: bool = True, use_discogs: bool = True, max_albums_per_band: int = 5, preloaded_bands: Optional[List[Dict]] = None, include_tracks: bool = False, filter_album_type: Optional[List[str]] = None, force: bool = False) -> Tuple[List[Dict], Dict]:
+def update_bands_from_file(file_path: str, fields: Optional[List[str]] = None, insecure: bool = False, proxy: Optional[str] = None, use_musicbrainz: bool = True, use_discogs: bool = True, max_albums_per_band: int = 5, preloaded_bands: Optional[List[Dict]] = None, include_tracks: bool = False, filter_album_type: Optional[List[str]] = None, force: bool = False, max_albums: int = DEFAULT_MAX_ALBUMS) -> Tuple[List[Dict], Dict]:
     bands = preloaded_bands if preloaded_bands is not None else (json.load(open(file_path, 'r', encoding='utf-8')) if isinstance(json.load(open(file_path, 'r', encoding='utf-8')), list) else json.load(open(file_path, 'r', encoding='utf-8')).get('bands', []))
     update_fields = set(field.strip() for field in fields) if fields else {'country', 'formed', 'formed_date', 'status', 'disbanded_date', 'rating', 'rating_votes', 'albums', 'members', 'mbid', 'album_mbid', 'image_url', 'original_name', 'biography', 'bio_lang', 'discogs_id', 'discogs_uri'}
     musicbrainz_fields = {'country', 'formed', 'formed_date', 'status', 'disbanded_date', 'rating', 'rating_votes'}
@@ -1580,14 +1648,12 @@ def update_bands_from_file(file_path: str, fields: Optional[List[str]] = None, i
         update_fields = update_fields - musicbrainz_fields - {'mbid', 'album_mbid', 'image_url'}
     if not update_fields:
         return bands, {'total_groups': len(bands), 'groups_updated': 0, 'fields': {}, 'total_albums_added': 0, 'total_members_added': 0, 'total_albums_mbid_added': 0}
-
     lastfm_client = LastFmClient(LASTFM_API_KEY, insecure=insecure, proxy=proxy)
     musicbrainz_client = MusicBrainzClient(mb_delay=DEFAULT_MB_DELAY, use_cache=True, proxy=proxy) if use_musicbrainz else None
     discogs_client = DiscogsClient(token=DISCOGS_TOKEN, use_cache=True, proxy=proxy) if use_discogs else None
     coverart_client = CoverArtArchiveClient(use_cache=True, proxy=proxy)
     stats = {'total_groups': len(bands), 'groups_updated': 0, 'fields': {field: 0 for field in update_fields}, 'total_albums_added': 0, 'total_members_added': 0, 'total_albums_mbid_added': 0}
     updated_bands = []
-
     for band in tqdm(bands, desc="Mise à jour"):
         name, mbid, changed = band.get('name'), band.get('mbid'), False
         missing = []
@@ -1608,17 +1674,14 @@ def update_bands_from_file(file_path: str, fields: Optional[List[str]] = None, i
         if 'rating_votes' in update_fields and band.get('rating_votes') is None: missing.append('rating_votes')
         if 'albums' in update_fields and (not band.get('albums') or len(band.get('albums', [])) == 0): missing.append('albums')
         if 'members' in update_fields and (not band.get('members') or len(band.get('members', [])) == 0): missing.append('members')
-
         if not missing:
             updated_bands.append(band)
             continue
-
         if 'mbid' in missing and name and musicbrainz_client:
             found = musicbrainz_client.search_artist_mbid(name)
             if found:
                 band['mbid'], mbid, changed = found, found, True
                 stats['fields']['mbid'] += 1
-
         if ('image_url' in missing or 'biography' in missing or 'bio_lang' in missing) and name:
             artist_info = lastfm_client.get_artist_info(name)
             if ('biography' in missing or 'bio_lang' in missing) and artist_info:
@@ -1647,7 +1710,6 @@ def update_bands_from_file(file_path: str, fields: Optional[List[str]] = None, i
                     stats['fields']['image_url'] += 1
                     changed = True
                     logger.info(f"🖼️  Image trouvée pour '{name}' (Source: {img_src})")
-
         if ('discogs_id' in missing or 'discogs_uri' in missing) and use_discogs and discogs_client and name:
             d_data = discogs_client.enrich_artist(name)
             if d_data:
@@ -1659,7 +1721,6 @@ def update_bands_from_file(file_path: str, fields: Optional[List[str]] = None, i
                     band['discogs_uri'] = d_data['discogs_uri']
                     stats['fields']['discogs_uri'] += 1
                     changed = True
-
         if 'original_name' in missing and name:
             match = re.match(r'^(.+?)\s*\(([^)]+)\)\s*$', name)
             if match:
@@ -1668,7 +1729,6 @@ def update_bands_from_file(file_path: str, fields: Optional[List[str]] = None, i
                     band['original_name'] = pot_name
                     stats['fields']['original_name'] += 1
                     changed = True
-
         if 'album_mbid' in missing and musicbrainz_client:
             albums_to_process = [a for a in band.get('albums', []) if not a.get('mbid') and (a.get('name') or a.get('title'))]
             if filter_album_type:
@@ -1685,7 +1745,6 @@ def update_bands_from_file(file_path: str, fields: Optional[List[str]] = None, i
                 stats['total_albums_mbid_added'] += enriched
                 changed = True
                 logger.info(f"🎵 {enriched}/{len(albums_to_process)} albums enrichis avec MBID pour '{name}'")
-
         if musicbrainz_client and any(f in missing for f in musicbrainz_fields) and mbid:
             mb_country, mb_formed, mb_ended, mb_end_date, mb_formed_date, mb_genres, mb_rating, mb_rating_votes = musicbrainz_client.extract_country_formed_genres_ratings(mbid)
             for field, val, src in [('country', mb_country, 'musicbrainz'), ('formed', mb_formed, 'musicbrainz'), ('formed_date', mb_formed_date, 'musicbrainz'), ('status', 'Split up' if mb_ended else 'Active', None), ('disbanded_date', mb_end_date, None), ('rating', mb_rating, None), ('rating_votes', mb_rating_votes, None)]:
@@ -1694,7 +1753,6 @@ def update_bands_from_file(file_path: str, fields: Optional[List[str]] = None, i
                     if src: band[f'{field}_source'] = src
                     stats['fields'][field] += 1
                     changed = True
-
         if 'members' in missing and musicbrainz_client and mbid:
             mb_members = musicbrainz_client.extract_members(mbid)
             if mb_members:
@@ -1711,33 +1769,24 @@ def update_bands_from_file(file_path: str, fields: Optional[List[str]] = None, i
                 stats['total_members_added'] += len(d_data['members'])
                 changed = True
                 logger.info(f"👥 {len(d_data['members'])} membres trouvés via Discogs pour '{name}'")
-
         if 'albums' in missing and name:
-            lastfm_albums = lastfm_client.get_artist_albums(name, limit=100)
+            lastfm_albums = lastfm_client.get_artist_albums(name, limit=100, max_albums=max_albums)
             if lastfm_albums and (not band.get('albums') or len(band.get('albums', [])) == 0):
+                if discogs_client:
+                    lastfm_albums = discogs_client.enrich_albums_with_discogs(name, band.get('genre', 'Heavy Metal'), lastfm_albums, musicbrainz_client=musicbrainz_client, include_tracks=include_tracks)
                 band['albums'], band['albums_source'] = lastfm_albums, 'lastfm'
                 stats['fields']['albums'] += 1
                 stats['total_albums_added'] += len(lastfm_albums)
                 changed = True
-        elif discogs_client and 'albums' in missing and name:
-            d_data = discogs_client.enrich_artist(name)
-            if d_data and d_data.get('albums') and (not band.get('albums') or len(band.get('albums', [])) == 0):
-                band['albums'], band['albums_source'] = d_data['albums'], 'discogs'
-                stats['fields']['albums'] += 1
-                stats['total_albums_added'] += len(d_data['albums'])
-                changed = True
-
         if band.get('albums') and coverart_client:
             for album in band['albums'][:max_albums_per_band]:
                 if not album.get('image') and not album.get('cover_image') and album.get('mbid'):
                     cover_url = coverart_client.get_cover_for_album(album['mbid'])
                     if cover_url:
                         album['image'], album['image_source'] = cover_url, 'coverartarchive'
-
         if changed:
             stats['groups_updated'] += 1
-        updated_bands.append(band)
-
+            updated_bands.append(band)
     lastfm_client.save_cache()
     if musicbrainz_client: musicbrainz_client.save_cache()
     if discogs_client: discogs_client.save_cache()
@@ -1747,21 +1796,24 @@ def update_bands_from_file(file_path: str, fields: Optional[List[str]] = None, i
 # ═══════════════════════════════════════════════════════════
 # TRAITEMENT ET RÉCUPÉRATION PRINCIPALE
 # ═══════════════════════════════════════════════════════════
-
-def process_artist(artist_data: Dict, source_tag: str, bio_lang: str, lastfm_client: Optional[LastFmClient] = None, musicbrainz_client: Optional[MusicBrainzClient] = None, discogs_client: Optional[DiscogsClient] = None, coverart_client: Optional[CoverArtArchiveClient] = None, focus_albums: bool = False, include_tracks: bool = False) -> Optional[Dict]:
+def process_artist(artist_data: Dict, source_tag: str, bio_lang: str, lastfm_client: Optional[LastFmClient] = None, musicbrainz_client: Optional[MusicBrainzClient] = None, discogs_client: Optional[DiscogsClient] = None, coverart_client: Optional[CoverArtArchiveClient] = None, focus_albums: bool = False, include_tracks: bool = False, max_albums: int = DEFAULT_MAX_ALBUMS) -> Optional[Dict]:
     name = artist_data.get('name', '').strip()
     if not name: return None
     genre, genre_source = extract_genre_from_tags(artist_data.get('tags', {}).get('tag', [])) or 'Metal', 'lastfm_tags'
-    
     if focus_albums:
         albums, albums_source = [], None
         if lastfm_client:
-            albums = lastfm_client.get_artist_albums(name, limit=100, max_pages=2)
+            albums = lastfm_client.get_artist_albums(name, limit=100, max_pages=2, max_albums=max_albums)
             if albums: albums_source = 'lastfm'
         if discogs_client and albums and albums_source == 'lastfm':
-            albums = discogs_client.enrich_albums_with_discogs(name, genre, albums, include_tracks)
-        return {'name': name, 'genre': genre, 'genre_source': genre_source, 'country': 'Unknown', 'country_source': 'unknown', 'formed': None, 'formed_date': None, 'formed_source': 'unknown', 'status': 'Unknown', 'disbanded_date': None, 'rating': None, 'rating_votes': None, 'mbid': artist_data.get('mbid', '').strip() or None, 'biography': None, 'bio_lang': 'none', 'image_url': None, 'image_source': None, 'listeners': int(artist_data.get('stats', {}).get('listeners', 0) or 0), 'albums': albums, 'albums_source': albums_source, 'members': [], 'source_tag': source_tag, 'fetched_at': datetime.now(timezone.utc).isoformat()}
-
+            albums = discogs_client.enrich_albums_with_discogs(name, genre, albums, musicbrainz_client=musicbrainz_client, include_tracks=include_tracks)
+        return {
+            'name': name, 'genre': genre, 'genre_source': genre_source, 'country': 'Unknown', 'country_source': 'unknown',
+            'formed': None, 'formed_date': None, 'formed_source': 'unknown', 'status': 'Unknown', 'disbanded_date': None,
+            'rating': None, 'rating_votes': None, 'mbid': artist_data.get('mbid', '').strip() or None, 'biography': None,
+            'bio_lang': 'none', 'image_url': None, 'image_source': None, 'listeners': int(artist_data.get('stats', {}).get('listeners', 0) or 0),
+            'albums': albums, 'albums_source': albums_source, 'members': [], 'source_tag': source_tag, 'fetched_at': datetime.now(timezone.utc).isoformat()
+        }
     biography = clean_biography(artist_data.get('bio', {}).get('content', ''))
     images = artist_data.get('image', [])
     image_url = pick_best_lastfm_image(images)
@@ -1770,7 +1822,7 @@ def process_artist(artist_data: Dict, source_tag: str, bio_lang: str, lastfm_cli
     listeners = int(artist_data.get('stats', {}).get('listeners', 0) or 0)
     country, country_source, formed, formed_source, formed_date, status, disbanded_date, rating, rating_votes, mbid, albums, albums_source = None, None, None, None, None, 'Active', None, None, None, artist_data.get('mbid', '').strip(), [], None
     if lastfm_client and name:
-        albums = lastfm_client.get_artist_albums(name, limit=100, max_pages=3)
+        albums = lastfm_client.get_artist_albums(name, limit=100, max_pages=3, max_albums=max_albums)
         if albums: albums_source = 'lastfm'
     mb_members = []
     if musicbrainz_client and mbid:
@@ -1787,7 +1839,7 @@ def process_artist(artist_data: Dict, source_tag: str, bio_lang: str, lastfm_cli
         discogs_data = discogs_client.cache.get(cache_key) if discogs_client.cache else None
         if not discogs_data:
             discogs_data = discogs_client.enrich_artist(name)
-            if discogs_client.cache: discogs_client.cache.set(cache_key, discogs_data)
+        if discogs_client.cache: discogs_client.cache.set(cache_key, discogs_data)
         if not albums and discogs_data and discogs_data.get('albums'):
             albums, albums_source = discogs_data['albums'], 'discogs'
     all_members = mb_members if musicbrainz_client and mbid and mb_members else []
@@ -1798,23 +1850,34 @@ def process_artist(artist_data: Dict, source_tag: str, bio_lang: str, lastfm_cli
         if tag_country: country, country_source = tag_country, 'lastfm_tags'
         else: country, country_source = 'Unknown', 'unknown'
     if not formed_source: formed_source = 'unknown'
-    result = {'name': name, 'genre': genre, 'genre_source': genre_source, 'country': country, 'country_source': country_source, 'formed': formed, 'formed_date': formed_date, 'formed_source': formed_source, 'status': status, 'disbanded_date': disbanded_date, 'rating': rating, 'rating_votes': rating_votes, 'mbid': mbid or None, 'biography': biography or None, 'bio_lang': bio_lang, 'image_url': image_url, 'image_source': image_source, 'listeners': listeners, 'albums': albums, 'albums_source': albums_source, 'members': all_members, 'source_tag': source_tag, 'fetched_at': datetime.now(timezone.utc).isoformat()}
+    result = {
+        'name': name, 'genre': genre, 'genre_source': genre_source, 'country': country, 'country_source': country_source,
+        'formed': formed, 'formed_date': formed_date, 'formed_source': formed_source, 'status': status, 'disbanded_date': disbanded_date,
+        'rating': rating, 'rating_votes': rating_votes, 'mbid': mbid or None, 'biography': biography or None, 'bio_lang': bio_lang,
+        'image_url': image_url, 'image_source': image_source, 'listeners': listeners, 'albums': albums, 'albums_source': albums_source,
+        'members': all_members, 'source_tag': source_tag, 'fetched_at': datetime.now(timezone.utc).isoformat()
+    }
     if discogs_data:
         result['discogs_id'] = discogs_data.get('discogs_id')
         result['discogs_uri'] = discogs_data.get('discogs_uri')
     if not image_url and lastfm_client: lastfm_client.image_stats['no_image'] += 1
     return result
 
-def fetch_all_metal_bands(limit: int, resume: bool, progress_path: str, preferred_lang: str, use_musicbrainz: bool, mb_delay: float, use_discogs: bool, min_listeners: int = 0, insecure: bool = False, proxy: Optional[str] = None, focus_albums: bool = False, include_tracks: bool = False, pillar_filter: Optional[str] = None):
+# ═══════════════════════════════════════════════════════════
+# ✨ FONCTION PRINCIPALE AVEC BARRE DE PROGRESSION GLOBALE
+# ═══════════════════════════════════════════════════════════
+def fetch_all_metal_bands(limit: int, resume: bool, progress_path: str, preferred_lang: str, use_musicbrainz: bool, mb_delay: float, use_discogs: bool, min_listeners: int = 0, insecure: bool = False, proxy: Optional[str] = None, focus_albums: bool = False, include_tracks: bool = False, pillar_filter: Optional[str] = None, max_albums: int = DEFAULT_MAX_ALBUMS):
     if not LASTFM_API_KEY:
         logger.error("❌ Erreur: LASTFM_API_KEY non définie dans .env")
         return [], {}, {}, {}, {}, {}
-    logger.info(f"🎸 Démarrage de la récupération des groupes metal (Limite: {limit}, Langue: {preferred_lang.upper()})")
-    if min_listeners > 0: logger.info(f"🔍 Filtre listeners: minimum {min_listeners:,}")
+    
+    logger.info(f"🎸 Démarrage de la récupération des groupes metal (Limite: {limit}, Langue: {preferred_lang.upper()}, Max albums/artiste: {max_albums})")
+    logger.info(f"⚡ SOLUTION A activée : max {max_albums * RAW_ALBUMS_MULTIPLIER} albums bruts traités par artiste (fallback album.getInfo désactivé)")
+    if min_listeners > 0: logger.info(f"🔍 Filtre listeners: minimum {min_listeners:,} (appliqué en post-collecte)")
     if focus_albums: logger.info("⚡ MODE FOCUS-ALBUMS activé")
     if include_tracks: logger.warning("⚠️  MODE INCLUDE-TRACKS ACTIVÉ")
     logger.info(f"🎨 Filtrage des genres : {len(ALLOWED_METAL_GENRES)} genres metal autorisés")
-        
+    
     lastfm_client = LastFmClient(LASTFM_API_KEY, default_lang=preferred_lang, insecure=insecure, proxy=proxy)
     musicbrainz_client = MusicBrainzClient(mb_delay=mb_delay, use_cache=use_musicbrainz, proxy=proxy) if use_musicbrainz else None
     discogs_client = DiscogsClient(token=DISCOGS_TOKEN, use_cache=use_discogs, proxy=proxy) if use_discogs else None
@@ -1823,11 +1886,10 @@ def fetch_all_metal_bands(limit: int, resume: bool, progress_path: str, preferre
     if resume:
         progress = load_progress(progress_path)
         seen_names, bands_list, start_tag_idx, start_page = set(progress.get('seen_names', [])), progress.get('bands', []), progress.get('last_tag_index', 0), progress.get('last_page', 1)
-        logger.info(f"🔄 Reprise depuis le tag {start_tag_idx}, page {start_page}")
+        logger.info(f"🔄 Reprise depuis le tag {start_tag_idx}, page {start_page} — {len(bands_list)} groupes déjà en cache")
     else:
         progress, seen_names, bands_list, start_tag_idx, start_page = {'seen_names': [], 'bands': [], 'last_tag_index': 0, 'last_page': 1}, set(), [], 0, 1
     
-    # ✨ FILTRAGE DES TAGS PAR PILIER
     tags_to_fetch = METAL_TAGS
     if pillar_filter:
         tags_to_fetch = [t for t in METAL_TAGS if resolve_pillar(t) == pillar_filter]
@@ -1836,61 +1898,159 @@ def fetch_all_metal_bands(limit: int, resume: bool, progress_path: str, preferre
         if not tags_to_fetch:
             logger.warning(f"⚠️  Aucun tag Last.fm ne correspond au pilier '{pillar_filter}'")
             return [], {}, {}, {}, {}, {}
-    
     logger.info(f"📊 {len(tags_to_fetch)} sous-genres à parcourir")
     if use_musicbrainz and not focus_albums: logger.info(f"🎵 MusicBrainz: ACTIVÉ (délai: {mb_delay}s)")
     else: logger.info("⏭️  MusicBrainz: DÉSACTIVÉ")
     if use_discogs: logger.info(f"💿 Discogs: ACTIVÉ ({'AVEC' if DISCOGS_TOKEN else 'SANS'} token)")
     else: logger.info("⏭️  Discogs: DÉSACTIVÉ")
     
-    for tag_idx, tag in enumerate(tqdm(tags_to_fetch[start_tag_idx:], desc="Genres", initial=start_tag_idx)):
-        page = start_page if tag_idx == 0 else 1
-        while len(bands_list) < limit:
-            artists = lastfm_client.get_top_artists_by_tag(tag, limit=100, page=page)
-            if not artists: break
-            for artist in artists:
-                if len(bands_list) >= limit: break
-                artist_name = artist.get('name', '').strip()
-                if not artist_name or artist_name in seen_names: continue
-                seen_names.add(artist_name)
-                artist_info, actual_lang = lastfm_client.get_artist_info_with_fallback(artist_name, preferred_lang, 'en')
-                if artist_info:
-                    lastfm_client.bio_stats[f'bio_{preferred_lang}' if actual_lang == preferred_lang else ('bio_en' if actual_lang == 'en' else 'bio_none')] += 1
-                    processed = process_artist(artist_info, tag, actual_lang, lastfm_client, musicbrainz_client, discogs_client, coverart_client, focus_albums, include_tracks)
+    # ✨ NOUVELLE BARRE DE PROGRESSION GLOBALE basée sur la limite de groupes
+    progress_bar = tqdm(
+        total=limit,
+        initial=len(bands_list),
+        desc="🎸 Groupes",
+        unit="band",
+        bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}] {postfix}",
+        dynamic_ncols=True,
+    )
+    
+    # ✨ Stats de suivi en temps réel
+    stats_live = {
+        'artists_seen': 0,
+        'artists_skipped_duplicate': 0,
+        'artists_processed': 0,
+    }
+    
+    start_time = time.time()
+    last_stats_log = len(bands_list)
+    interrupted = False
+    
+    try:
+        for tag_idx, tag in enumerate(tags_to_fetch[start_tag_idx:], start=start_tag_idx):
+            page = start_page if tag_idx == 0 else 1
+            progress_bar.set_postfix_str(f"Genre: {tag} (p.{page})")
+            
+            while len(bands_list) < limit:
+                artists = lastfm_client.get_top_artists_by_tag(tag, limit=100, page=page)
+                if not artists:
+                    break
+                
+                for artist in artists:
+                    if len(bands_list) >= limit:
+                        break
+                    
+                    stats_live['artists_seen'] += 1
+                    artist_name = artist.get('name', '').strip()
+                    
+                    if not artist_name or artist_name in seen_names:
+                        stats_live['artists_skipped_duplicate'] += 1
+                        continue
+                    seen_names.add(artist_name)
+                    
+                    artist_info, actual_lang = lastfm_client.get_artist_info_with_fallback(artist_name, preferred_lang, 'en')
+                    if artist_info:
+                        lastfm_client.bio_stats[f'bio_{preferred_lang}' if actual_lang == preferred_lang else ('bio_en' if actual_lang == 'en' else 'bio_none')] += 1
+                    
+                    processed = process_artist(artist_info, tag, actual_lang, lastfm_client, musicbrainz_client, discogs_client, coverart_client, focus_albums, include_tracks, max_albums)
                     if processed:
                         bands_list.append(processed)
-                        progress['seen_names'], progress['bands'], progress['last_tag_index'], progress['last_page'] = list(seen_names), bands_list, start_tag_idx + tag_idx, page
+                        stats_live['artists_processed'] += 1
+                        
+                        # ✨ Mise à jour de la barre de progression
+                        progress_bar.update(1)
+                        
+                        # ✨ Log détaillé toutes les PROGRESS_LOG_INTERVAL groupes
+                        if len(bands_list) - last_stats_log >= PROGRESS_LOG_INTERVAL:
+                            elapsed = time.time() - start_time
+                            rate = len(bands_list) / elapsed if elapsed > 0 else 0
+                            remaining = (limit - len(bands_list)) / rate if rate > 0 else 0
+                            albums_total = lastfm_client.album_stats.get('total_albums_fetched', 0)
+                            albums_mbid = lastfm_client.album_stats.get('albums_with_valid_mbid', 0)
+                            albums_rejected = lastfm_client.album_stats.get('albums_rejected_no_mbid', 0)
+                            mbid_pct = (albums_mbid / albums_total * 100) if albums_total > 0 else 0
+                            logger.info(
+                                f"📊 [{len(bands_list)}/{limit}] "
+                                f"{rate:.2f} band/s | "
+                                f"ETA: {remaining/60:.1f}min | "
+                                f"Artistes vus: {stats_live['artists_seen']} | "
+                                f"Doublons: {stats_live['artists_skipped_duplicate']} | "
+                                f"Albums MBID: {albums_mbid}/{albums_total} ({mbid_pct:.1f}%) "
+                                f"(rejetés: {albums_rejected})"
+                            )
+                            last_stats_log = len(bands_list)
+                        
+                        progress['seen_names'] = list(seen_names)
+                        progress['bands'] = bands_list
+                        progress['last_tag_index'] = tag_idx
+                        progress['last_page'] = page
                         save_progress(progress_path, progress)
-                        if len(bands_list) % 100 == 0: logger.info(f"📊 Progression: {len(bands_list)} groupes récupérés")
-            page += 1
-        if len(bands_list) >= limit:
-            logger.info(f"🎯 Limite atteinte: {limit} groupes")
-            break
+                
+                page += 1
+                progress_bar.set_postfix_str(f"Genre: {tag} (p.{page})")
+                
+                if len(bands_list) >= limit:
+                    break
+            
+            if len(bands_list) >= limit:
+                break
+        
+        progress_bar.set_postfix_str("✅ Terminé !")
+    except KeyboardInterrupt:
+        interrupted = True
+        progress_bar.set_postfix_str("⚠️ Interrompu")
+        logger.warning(f"\n⚠️  Interruption par l'utilisateur — {len(bands_list)} groupes sauvegardés dans le cache")
+        logger.warning("💡 Relancez avec --resume pour continuer")
+    finally:
+        progress_bar.close()
     
+    # ✨ Filtrage post-collecte par listeners
     if min_listeners > 0 and bands_list:
+        before_count = len(bands_list)
         bands_list, filter_stats = filter_bands_by_listeners(bands_list, min_listeners)
-        logger.info(f"🔍 Filtrage listeners : {filter_stats['total_before']:,} -> {filter_stats['total_after']:,} (supprimés: {filter_stats['removed']:,})")
+        logger.info(f"🔍 Filtrage listeners : {before_count:,} -> {len(bands_list):,} (supprimés: {filter_stats['removed']:,})")
     
     lastfm_client.save_cache()
     if musicbrainz_client: musicbrainz_client.save_cache()
     if discogs_client: discogs_client.save_cache()
     coverart_client.save_cache()
-    logger.info(f"✅ Récupération terminée: {len(bands_list)} groupes")
+    
+    # ✨ RAPPORT FINAL CONSOLIDÉ
+    total_elapsed = time.time() - start_time
+    albums_total = lastfm_client.album_stats.get('total_albums_fetched', 0)
+    albums_mbid = lastfm_client.album_stats.get('albums_with_valid_mbid', 0)
+    albums_rejected = lastfm_client.album_stats.get('albums_rejected_no_mbid', 0)
+    mbid_pct = (albums_mbid / albums_total * 100) if albums_total > 0 else 0
+    
+    logger.info(f"\n✅ Récupération {'interrompue' if interrupted else 'terminée'}: {len(bands_list)} groupes")
+    logger.info(
+        f"\n{'='*80}\n"
+        f"📈 RAPPORT FINAL DE COLLECTE\n"
+        f"{'='*80}\n"
+        f"   Durée totale           : {total_elapsed/60:.1f} minutes\n"
+        f"   Groupes récupérés      : {len(bands_list):,}\n"
+        f"   Artistes examinés      : {stats_live['artists_seen']:,}\n"
+        f"   Artistes doublons      : {stats_live['artists_skipped_duplicate']:,}\n"
+        f"   Albums Last.fm         : {albums_total:,}\n"
+        f"   Albums avec MBID       : {albums_mbid:,} ({mbid_pct:.1f}%)\n"
+        f"   Albums rejetés (MBID)  : {albums_rejected:,}\n"
+        f"{'='*80}"
+    )
     
     if musicbrainz_client:
-        logger.info(f"\n📊 STATISTIQUES MB: Pays résolus (direct: {musicbrainz_client.country_stats.get('resolved_direct', 0):,}, hiérarchie: {musicbrainz_client.country_stats.get('resolved_hierarchy', 0):,}, échecs: {musicbrainz_client.country_stats.get('unresolved', 0):,}) | Genres filtrés: {musicbrainz_client.genre_stats.get('filtered_genres', 0):,}/{musicbrainz_client.genre_stats.get('total_raw_genres', 0):,}")
+        logger.info(f"📊 MB: Pays (direct: {musicbrainz_client.country_stats.get('resolved_direct', 0):,}, hiérarchie: {musicbrainz_client.country_stats.get('resolved_hierarchy', 0):,}, échecs: {musicbrainz_client.country_stats.get('unresolved', 0):,}) | Genres filtrés: {musicbrainz_client.genre_stats.get('filtered_genres', 0):,}/{musicbrainz_client.genre_stats.get('total_raw_genres', 0):,}")
     if discogs_client:
         total, enriched = discogs_client.album_enrichment_stats.get('total', 0), discogs_client.album_enrichment_stats.get('enriched', 0)
-        logger.info(f"📊 STATISTIQUES DISCOGS: Albums enrichis: {enriched:,}/{total:,} ({(enriched/total*100) if total > 0 else 0:.1f}%)")
+        logger.info(f"💿 Discogs: Albums enrichis: {enriched:,}/{total:,} ({(enriched/total*100) if total > 0 else 0:.1f}%)")
     
-    print_artist_statistics(bands_list)
-    print_album_statistics(bands_list)
+    if not interrupted:
+        print_artist_statistics(bands_list)
+        print_album_statistics(bands_list)
+    
     return bands_list, lastfm_client.stats, musicbrainz_client.stats if musicbrainz_client else {}, discogs_client.stats if discogs_client else {}, lastfm_client.album_stats, coverart_client.stats
 
 # ═══════════════════════════════════════════════════════════
 # POINT D'ENTRÉE
 # ═══════════════════════════════════════════════════════════
-
 def main():
     parser = argparse.ArgumentParser(description='Récupère des groupes metal via Last.fm + MusicBrainz + Discogs', formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--limit', type=int, default=DEFAULT_LIMIT)
@@ -1922,15 +2082,18 @@ def main():
     parser.add_argument('--force', action='store_true', help='Force la récupération même si les données existent')
     parser.add_argument('--enrich-years', action='store_true', help='Enrichit les années manquantes des albums (MusicBrainz + Discogs URI)')
     parser.add_argument('--pillar', type=str, default=None, choices=sorted(METAL_PILLARS), help='Filtre les groupes par pilier (ex: "Folk Metal")')
+    parser.add_argument('--max-albums', type=int, default=DEFAULT_MAX_ALBUMS, help=f'Nombre maximum d\'albums à récupérer par artiste (défaut: {DEFAULT_MAX_ALBUMS})')
     args = parser.parse_args()
-
+    
     setup_logging(args.log_level, None if args.no_log_file else LOG_FILE)
     logger.info("=" * 80 + "\n🚀 METAL FETCHER - Démarrage\n" + "=" * 80)
+    
     proxy = args.proxy or os.getenv('HTTP_PROXY') or os.getenv('HTTPS_PROXY')
     if proxy: logger.info(f"🌐 Proxy utilisé: {proxy}")
-
+    
     if args.test:
         sys.exit(0 if test_services(insecure=args.insecure, proxy=proxy) else 1)
+        
     if args.reset: reset_progress(PROGRESS_FILE)
     if args.clear_mb_cache: Path(MB_CACHE_FILE).unlink(missing_ok=True); logger.info("🗑️  Cache MusicBrainz vidé")
     if args.clear_discogs_cache: Path(DISCOGS_CACHE_FILE).unlink(missing_ok=True); logger.info("🗑️  Cache Discogs vidé")
@@ -1949,7 +2112,7 @@ def main():
                     logger.info(f"🗑️  Cache albums vidé: {original_size - len(cache)} entrées supprimées")
                 except Exception as e:
                     logger.error(f"❌ Erreur vidage cache albums: {e}")
-
+                    
     if args.enrich_years:
         logger.info("📅 Mode enrichissement des années d'albums activé (MusicBrainz + Discogs URI)")
         input_file = args.update_from or '../data/metal_bands_updated_latest.json'
@@ -1959,15 +2122,12 @@ def main():
         with open(input_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
         bands = data.get('bands', data) if isinstance(data, dict) else data
-        
-        # ✨ FILTRAGE PAR PILIER
         if args.pillar:
             bands, filter_stats = filter_bands_by_pillar(bands, args.pillar)
             logger.info(f"🎯 Pilier '{args.pillar}' : {filter_stats['total_after']}/{filter_stats['total_before']} groupes retenus")
             if not bands:
                 logger.warning("⚠️  Aucun groupe ne correspond à ce pilier")
                 sys.exit(0)
-        
         discogs_client = DiscogsClient(token=DISCOGS_TOKEN, use_cache=True, proxy=proxy)
         musicbrainz_client = MusicBrainzClient(mb_delay=DEFAULT_MB_DELAY, use_cache=True, proxy=proxy)
         total_albums, albums_with_year, albums_enriched = 0, 0, 0
@@ -1992,7 +2152,7 @@ def main():
             json.dump({'bands': bands}, f, ensure_ascii=False, indent=2)
         logger.info(f"✅ Fichier sauvegardé : {output_path}")
         sys.exit(0)
-
+        
     if args.update_from:
         logger.info(f"🔄 Mise à jour du fichier {args.update_from}...")
         update_fields = args.update_fields.split(',') if args.update_fields else None
@@ -2002,8 +2162,6 @@ def main():
         if not bands:
             logger.error("❌ Format de fichier inconnu ou vide")
             sys.exit(1)
-        
-        # ✨ FILTRAGE PAR PILIER
         if args.pillar:
             before = len(bands)
             bands, filter_stats = filter_bands_by_pillar(bands, args.pillar)
@@ -2011,13 +2169,12 @@ def main():
             if not bands:
                 logger.warning("⚠️  Aucun groupe ne correspond à ce pilier")
                 sys.exit(0)
-        
         if args.min_listeners > 0:
             bands, filter_stats = filter_bands_by_listeners(bands, args.min_listeners)
             logger.info(f"🔍 Filtrage listeners : {filter_stats['total_before']:,} -> {filter_stats['total_after']:,}")
         try:
             album_type_filter = [t.strip() for t in args.filter_album_type.split(',')] if args.filter_album_type else None
-            updated_bands, update_stats = update_bands_from_file(args.update_from, fields=update_fields, insecure=args.insecure, proxy=proxy, use_musicbrainz=not args.skip_musicbrainz, use_discogs=args.with_discogs, max_albums_per_band=args.max_albums_per_band, preloaded_bands=bands, include_tracks=args.include_tracks, filter_album_type=album_type_filter, force=args.force)
+            updated_bands, update_stats = update_bands_from_file(args.update_from, fields=update_fields, insecure=args.insecure, proxy=proxy, use_musicbrainz=not args.skip_musicbrainz, use_discogs=args.with_discogs, max_albums_per_band=args.max_albums_per_band, preloaded_bands=bands, include_tracks=args.include_tracks, filter_album_type=album_type_filter, force=args.force, max_albums=args.max_albums)
             if args.filter_album_type:
                 updated_bands, filter_stats = filter_albums_by_type(updated_bands, album_type_filter, max_per_band=args.max_albums_per_band)
                 logger.info(f"🔍 Filtrage albums : {filter_stats['total_albums_before']:,} -> {filter_stats['total_albums_after']:,} (supprimés: {filter_stats['albums_removed']:,})")
@@ -2037,9 +2194,14 @@ def main():
         except Exception as e:
             logger.error(f"❌ Erreur lors de la mise à jour: {e}", exc_info=True)
             sys.exit(1)
-
+    
     try:
-        bands, lastfm_stats, mb_stats, discogs_stats, album_stats, caa_stats = fetch_all_metal_bands(limit=args.limit, resume=args.resume, progress_path=PROGRESS_FILE, preferred_lang=args.lang, use_musicbrainz=not args.skip_musicbrainz, mb_delay=args.mb_delay, use_discogs=args.with_discogs, min_listeners=args.min_listeners, insecure=args.insecure, proxy=proxy, focus_albums=args.focus_albums, include_tracks=args.include_tracks, pillar_filter=args.pillar)
+        bands, lastfm_stats, mb_stats, discogs_stats, album_stats, caa_stats = fetch_all_metal_bands(
+            limit=args.limit, resume=args.resume, progress_path=PROGRESS_FILE, preferred_lang=args.lang,
+            use_musicbrainz=not args.skip_musicbrainz, mb_delay=args.mb_delay, use_discogs=args.with_discogs,
+            min_listeners=args.min_listeners, insecure=args.insecure, proxy=proxy, focus_albums=args.focus_albums,
+            include_tracks=args.include_tracks, pillar_filter=args.pillar, max_albums=args.max_albums
+        )
         if args.filter_album_type and bands:
             types_to_filter = [t.strip() for t in args.filter_album_type.split(',')]
             bands, filter_stats = filter_albums_by_type(bands, types_to_filter, max_per_band=args.max_albums_per_band)
