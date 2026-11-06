@@ -7,7 +7,7 @@ Fonctionnalités :
 - Biographies multi-langues (FR → EN fallback)
 - Albums via Last.fm artist.getTopAlbums
 - ✨ FILTRAGE MBID STRICT : Seuls les albums avec un MBID valide (36 chars) sont conservés
-- ✨ OPTIMISATION RAPIDE : Limite albums bruts traités + suppression fallback album.getInfo
+- ✨ OPTIMISATION RAPIDE (Solution A) : Limite albums bruts traités + suppression fallback album.getInfo
 - ✨ Enrichissement Discogs priorisé par MBID (via MusicBrainz url-rels)
 - ✨ Recherche Discogs ciblée par artiste (fallback via 'q')
 - ✨ Filtrage côté client pour ne garder que les masters de l'artiste
@@ -15,7 +15,7 @@ Fonctionnalités :
 - ✨ Recherche MusicBrainz ciblée par type (release-group type:album)
 - ✨ OPTIMISATION : MBID cherchés uniquement pour les albums filtrés (master/album)
 - ✨ ANTI-BACKOFF : Délai augmenté, nettoyage des requêtes, réinitialisation après succès, negative caching
-- ✨ FILTRAGE DES GENRES ARTISTES : Liste blanche de 30 genres metal officiels
+- ✨ FILTRAGE DES GENRES ARTISTES : Liste blanche de 35 genres metal officiels
 - ✨ CHAÎNE DE RÉSOLUTION D'IMAGES : Last.fm → Discogs → MusicBrainz/Wikimedia
 - ✨ MODE --force : Force la récupération même si les données existent déjà
 - ✨ RÉCUPÉRATION DISCOGS_ID, DISCOGS_URI et MEMBRES pour les artistes
@@ -35,6 +35,9 @@ Fonctionnalités :
 - ✨ RAPPORT FINAL consolidé (durée, taux MBID, rejets)
 - ✨ GESTION CTRL+C propre avec message de reprise
 - ✨ OPTION --max-albums : Limite strictement le nombre d'albums récupérés par artiste
+- ✨ MAPPING GENRE → PILIER : grindcore/goregrind/pornogrind/noisecore → Death Metal
+- ✨ MAPPING GENRE → PILIER : mathcore → Metalcore
+- ✨ MAPPING GENRE → PILIER : glam metal → Heavy Metal
 - Covers albums via Last.fm / Discogs → Cover Art Archive (fallback)
 - ✨ Résolution du pays via hiérarchie des zones MusicBrainz (ville → pays)
 - ✨ Support de --min-listeners dans toutes les configurations
@@ -44,6 +47,7 @@ Usage:
 python fetch_metal_bands.py --limit 500 --with-discogs --min-listeners 5000 --max-albums 50
 python fetch_metal_bands.py --pillar "Folk Metal" --limit 100 --with-discogs --max-albums 30
 python fetch_metal_bands.py --pillar "Thrash Metal" --limit 200 --with-discogs --min-listeners 10000 --max-albums 25
+python fetch_metal_bands.py --pillar "Death Metal" --limit 500 --with-discogs --min-listeners 10000 --max-albums 25
 python fetch_metal_bands.py --update-from ../data/metal_bands_latest.json --pillar "Folk Metal" --update-fields members
 python fetch_metal_bands.py --focus-albums --include-tracks --limit 100 --with-discogs --max-albums 30
 python fetch_metal_bands.py --update-from ../data/metal_bands_latest.json --update-fields albums
@@ -118,7 +122,9 @@ ALLOWED_METAL_GENRES = {
     "heavy metal", "kawaii metal", "neoclassical metal", "post-metal",
     "power metal", "progressive metal", "sludge metal", "southern metal",
     "stoner metal", "symphonic metal", "thrash metal", "viking metal",
-    "grindcore", "industrial metal", "metalcore", "goregrind", "pornogrind", "noisecore"
+    "grindcore", "industrial metal", "metalcore",
+    # ✨ NOUVEAUX GENRES AJOUTÉS
+    "goregrind", "pornogrind", "noisecore", "glam metal", "pagan metal"
 }
 
 # ═══════════════════════════════════════════════════════════
@@ -130,32 +136,44 @@ METAL_PILLARS = {
 }
 
 # ═══════════════════════════════════════════════════════════
-# ✨ MAPPING GENRE → PILIER
+# ✨ MAPPING GENRE → PILIER (CORRIGÉ ET COMPLÉTÉ)
 # ═══════════════════════════════════════════════════════════
 GENRE_TO_PILLAR = {
+    # Folk Metal
     'folk metal': 'Folk Metal', 'viking metal': 'Folk Metal', 'pagan metal': 'Folk Metal',
+    # Black Metal
     'black metal': 'Black Metal', 'norwegian black metal': 'Black Metal',
     'symphonic black metal': 'Black Metal', 'melodic black metal': 'Black Metal',
     'folk black metal': 'Black Metal', 'viking black metal': 'Black Metal',
+    # Death Metal (inclut grindcore et sous-genres extrêmes)
     'death metal': 'Death Metal', 'melodic death metal': 'Death Metal',
     'brutal death metal': 'Death Metal', 'technical death metal': 'Death Metal',
     'swedish death metal': 'Death Metal', 'finnish death metal': 'Death Metal',
-    'grindcore': 'Death Metal', 'goregrind': 'Death Metal',        # ✨ NOUVEAU
-    'pornogrind': 'Death Metal', 'noisecore': 'Death Metal',       # ✨ NOUVEAU
+    'grindcore': 'Death Metal', 'goregrind': 'Death Metal',
+    'pornogrind': 'Death Metal', 'noisecore': 'Death Metal',
+    # Thrash Metal
     'thrash metal': 'Thrash Metal', 'thrash': 'Thrash Metal',
     'speed metal': 'Thrash Metal', 'crossover thrash': 'Thrash Metal',
     'teutonic thrash': 'Thrash Metal', 'groove metal': 'Thrash Metal',
+    # Power Metal
     'power metal': 'Power Metal', 'epic metal': 'Power Metal', 'symphonic metal': 'Power Metal',
+    # Doom Metal
     'doom metal': 'Doom Metal', 'sludge metal': 'Doom Metal',
     'stoner metal': 'Doom Metal', 'gothic metal': 'Doom Metal',
+    # Progressive Metal
     'progressive metal': 'Progressive Metal', 'post-metal': 'Progressive Metal',
-    'djent': 'Progressive Metal', 'mathcore': 'Progressive Metal',
+    'djent': 'Progressive Metal',
+    # Metalcore (mathcore déplacé ici depuis Progressive Metal)
     'metalcore': 'Metalcore', 'melodic metalcore': 'Metalcore',
-    'metallic hardcore': 'Metalcore', 'deathcore': 'Metalcore', 'nu metal': 'Metalcore', 'Mathcore': 'Metalcore'
-    'heavy metal': 'Heavy Metal', 'true metal': 'Heavy Metal', 'metal': 'Heavy Metal',
+    'metallic hardcore': 'Metalcore', 'deathcore': 'Metalcore',
+    'nu metal': 'Metalcore', 'mathcore': 'Metalcore',
+    # Heavy Metal (défaut)
+    'heavy metal': 'Heavy Metal', 'true metal': 'Heavy Metal',
+    'metal': 'Heavy Metal', 'glam metal': 'Heavy Metal',
 }
 
 def resolve_pillar(genre: Optional[str]) -> str:
+    """Résout un genre (ou un pilier déjà normalisé) vers l'un des 9 piliers."""
     if not genre:
         return 'Heavy Metal'
     return GENRE_TO_PILLAR.get(genre.strip().lower(), 'Heavy Metal')
@@ -218,6 +236,7 @@ def generate_output_filename(base_name: str = 'metal_bands', output_dir: str = '
     return filepath
 
 def is_placeholder(url: Optional[str]) -> bool:
+    """Détecte les images placeholder (à rejeter)."""
     if not url:
         return True
     lowered = url.lower()
@@ -246,21 +265,25 @@ def normalize_album_title(title: str) -> str:
     return normalized
 
 def get_discogs_style_from_genre(genre: str) -> str:
+    """✨ CORRIGÉ : Couverture explicite des sous-genres extrêmes."""
     if not genre:
         return 'Heavy Metal'
     genre_lower = genre.lower()
     if 'black metal' in genre_lower: return 'Black Metal'
-    if 'death metal' in genre_lower or 'grindcore' in genre_lower: return 'Death Metal'
+    if ('death metal' in genre_lower or 'grindcore' in genre_lower or
+        'goregrind' in genre_lower or 'pornogrind' in genre_lower or
+        'noisecore' in genre_lower): return 'Death Metal'
     if 'thrash metal' in genre_lower or 'industrial metal' in genre_lower: return 'Thrash Metal'
     if 'power metal' in genre_lower: return 'Power Metal'
     if 'doom metal' in genre_lower: return 'Doom Metal'
     if 'progressive metal' in genre_lower or 'avant-garde' in genre_lower or 'experimental' in genre_lower: return 'Progressive Metal'
     if 'folk metal' in genre_lower or 'pagan metal' in genre_lower or 'viking metal' in genre_lower: return 'Folk Metal'
-    if 'metalcore' in genre_lower or 'core' in genre_lower: return 'Metalcore'
-    if 'heavy metal' in genre_lower or 'metal' in genre_lower: return 'Heavy Metal'
+    if 'metalcore' in genre_lower or 'core' in genre_lower or 'mathcore' in genre_lower: return 'Metalcore'
+    if 'heavy metal' in genre_lower or 'metal' in genre_lower or 'glam metal' in genre_lower: return 'Heavy Metal'
     return 'Heavy Metal'
 
 def sanitize_mb_query(text: str) -> str:
+    """Échappe les caractères spéciaux pour les requêtes Lucene de MusicBrainz."""
     if not text:
         return ""
     special_chars = r'[\+\-\!\(\)\{\}\[\]\^\"\'\~\*\?\:\\\/]'
@@ -389,7 +412,7 @@ def test_services(insecure: bool = False, proxy: Optional[str] = None) -> bool:
     return all_ok
 
 # ═══════════════════════════════════════════════════════════
-# ✨ SOUS-GENRES METAL ÉTENDUS
+# ✨ SOUS-GENRES METAL ÉTENDUS (COMPLÉTÉ)
 # ═══════════════════════════════════════════════════════════
 METAL_TAGS = [
     'heavy metal', 'thrash metal', 'death metal', 'black metal', 'power metal', 'doom metal',
@@ -400,6 +423,7 @@ METAL_TAGS = [
     'norwegian black metal', 'symphonic black metal', 'epic metal', 'true metal',
     'avant-garde metal', 'experimental metal', 'industrial', 'cyber metal', 'neue deutsche härte',
     'folk black metal', 'viking black metal', 'goregrind', 'pornogrind', 'noisecore',
+    'glam metal', 'mathcore',
 ]
 METAL_GENRES = {
     'black metal', 'death metal', 'thrash metal', 'heavy metal', 'power metal', 'doom metal',
@@ -409,6 +433,8 @@ METAL_GENRES = {
     'brutal death metal', 'technical death metal', 'epic metal', 'true metal', 'swedish death metal',
     'finnish death metal', 'norwegian black metal', 'symphonic black metal', 'avant-garde metal',
     'experimental metal', 'industrial metal',
+    # ✨ NOUVEAUX GENRES AJOUTÉS
+    'goregrind', 'pornogrind', 'noisecore', 'glam metal', 'mathcore',
 }
 TAG_TO_COUNTRY = {
     'swedish': 'Sweden', 'norwegian': 'Norway', 'finnish': 'Finland', 'danish': 'Denmark',
@@ -626,6 +652,20 @@ class LastFmClient:
                 if len(bio_clean) >= MIN_BIO_LENGTH:
                     return artist_data_fallback, fallback_lang
         return artist_data, 'none'
+
+    def get_album_info(self, artist_name: str, album_name: str) -> Optional[Dict]:
+        """✨ Récupère les infos d'un album spécifique pour garantir l'obtention du MBID."""
+        cache_key = f"album_info:{artist_name.lower().strip()}:{album_name.lower().strip()}"
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            return cached
+        params = {'method': 'album.getInfo', 'artist': artist_name, 'album': album_name, 'autocorrect': 1}
+        data = self._request(params)
+        if data and 'album' in data:
+            album_data = data['album']
+            self.cache.set(cache_key, album_data)
+            return album_data
+        return None
 
     def get_artist_albums(self, artist_name: str, limit: int = 100, max_pages: Optional[int] = None, max_albums: int = DEFAULT_MAX_ALBUMS) -> List[Dict]:
         """✨ SOLUTION A : Récupération optimisée des albums.
