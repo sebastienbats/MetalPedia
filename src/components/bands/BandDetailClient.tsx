@@ -46,6 +46,14 @@ export default function BandDetailClient({
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
 
+  // ✅ NOUVEAU : États pour la traduction
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translatedBio, setTranslatedBio] = useState<string | null>(null);
+  // Détermine la langue actuelle (fr ou en). Fallback sur 'en' si inconnu.
+  const [currentLang, setCurrentLang] = useState<'fr' | 'en'>(
+    band.bio_lang === 'fr' ? 'fr' : 'en'
+  );
+
   const pillarMeta = PILLAR_METADATA[band.genre_pillar as GamificationPillar] || PILLAR_METADATA['Heavy Metal'];
 
   useEffect(() => {
@@ -73,7 +81,7 @@ export default function BandDetailClient({
         country: band.country,
       });
     }
-  }, [isMounted, band?.id]);
+  }, [isMounted, band?.id, recordGamificationView, recordStatsView]);
 
   const handleBandImageError = () => setBandImageError(true);
   const handleAlbumImageError = (albumId: number) => {
@@ -104,6 +112,39 @@ export default function BandDetailClient({
     { id: 'reviews', label: 'Avis' },
     { id: 'similar', label: 'Groupes similaires 🕸️' },
   ], [albums.length, members.length]);
+
+  // ✅ NOUVEAU : Fonction de traduction
+  const handleTranslate = async () => {
+    if (!band.biography) return;
+    
+    setIsTranslating(true);
+    try {
+      const targetLang = currentLang === 'fr' ? 'en' : 'fr';
+      
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          text: band.biography, 
+          source: currentLang, 
+          target: targetLang 
+        }),
+      });
+
+      const data = await res.json();
+      
+      if (data.translatedText) {
+        setTranslatedBio(data.translatedText);
+        setCurrentLang(targetLang);
+      } else {
+        console.error('Erreur de traduction:', data.error);
+      }
+    } catch (err) {
+      console.error('Erreur réseau lors de la traduction:', err);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   if (!band) {
     return <Loader text="Chargement des détails du groupe..." />;
@@ -220,16 +261,35 @@ export default function BandDetailClient({
         <div className="lg:col-span-2 min-h-[300px]" suppressHydrationWarning>
           {activeTab === 'about' && (
             <div className="metal-card p-4 sm:p-6">
-              <h3 className="font-serif text-lg sm:text-xl mb-3 sm:mb-4 text-metal-rust flex items-center gap-2">
+              <h3 className="font-serif text-lg sm:text-xl mb-3 sm:mb-4 text-metal-rust flex items-center gap-2 flex-wrap">
                 📜 Biographie
-                {band.bio_lang && (
-                  <span className="text-xs font-sans font-normal text-gray-400 bg-metal-gray/30 px-2 py-1 rounded">
-                    {band.bio_lang.toUpperCase()}
-                  </span>
+                
+                {/* ✅ NOUVEAU : Bouton de traduction interactif */}
+                {band.biography && (
+                  <button 
+                    onClick={handleTranslate}
+                    disabled={isTranslating}
+                    className="text-xs font-sans font-normal text-gray-300 bg-metal-gray/30 hover:bg-metal-fire/20 hover:text-metal-fire px-2 py-1 rounded border border-metal-gray/50 transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={`Traduire en ${currentLang === 'fr' ? 'anglais' : 'français'}`}
+                  >
+                    {isTranslating ? (
+                      <>
+                        <span className="animate-spin">⏳</span> Traduction...
+                      </>
+                    ) : (
+                      <>
+                        <span>🔄</span> Voir en {currentLang === 'fr' ? 'EN' : 'FR'}
+                      </>
+                    )}
+                  </button>
                 )}
               </h3>
+              
               <p className="text-gray-300 text-sm sm:text-base leading-relaxed whitespace-pre-line">
-                {band.biography || 'Aucune biographie disponible pour ce groupe pour le moment.'}
+                {isTranslating 
+                  ? 'Chargement de la traduction...' 
+                  : (translatedBio || band.biography || 'Aucune biographie disponible pour ce groupe pour le moment.')
+                }
               </p>
             </div>
           )}
@@ -356,15 +416,12 @@ export default function BandDetailClient({
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-          MODALE D'IMAGE DU GROUPE (Sans animation, centrage stable)
-      ═══════════════════════════════════════════════════════════ */}
+      {/* Modale d'image du groupe (inchangée) */}
       {isImageModalOpen && hasValidBandImage && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md !mt-0"
           onClick={() => setIsImageModalOpen(false)}
         >
-          {/* Conteneur modale : centrage stable via flexbox */}
           <div 
             className="relative flex flex-col items-center rounded-xl border-2 overflow-hidden w-fit h-fit"
             style={{
@@ -374,7 +431,6 @@ export default function BandDetailClient({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* ✕ BOUTON DE FERMETURE : ancré dans le coin de la bordure de la modale */}
             <button
               onClick={() => setIsImageModalOpen(false)}
               className="absolute top-2 right-2 z-30 text-white hover:text-metal-fire transition-colors text-2xl sm:text-3xl bg-black/70 hover:bg-black/90 rounded-full w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center border border-white/20"
@@ -382,8 +438,6 @@ export default function BandDetailClient({
             >
               ✕
             </button>
-            
-            {/* Image EN GRAND : dimensions fixes élevées, contraintes par max */}
             <div className="p-3 sm:p-4 pt-12 sm:pt-14">
               <Image
                 src={band.image_url!}
@@ -395,8 +449,6 @@ export default function BandDetailClient({
                 priority
               />
             </div>
-            
-            {/* Nom du groupe en bas */}
             <div 
               className="w-full px-4 py-3 sm:px-6 sm:py-4 border-t-2"
               style={{
@@ -410,15 +462,12 @@ export default function BandDetailClient({
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════
-          MODALE D'IMAGE D'ALBUM (Même design que la modale du groupe)
-      ═══════════════════════════════════════════════════════════ */}
+      {/* Modale d'image d'album (inchangée) */}
       {selectedAlbum && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md !mt-0"
           onClick={() => setSelectedAlbum(null)}
         >
-          {/* Conteneur modale : centrage stable via flexbox */}
           <div 
             className="relative flex flex-col items-center rounded-xl border-2 overflow-hidden w-fit h-fit"
             style={{
@@ -428,7 +477,6 @@ export default function BandDetailClient({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* ✕ BOUTON DE FERMETURE */}
             <button
               onClick={() => setSelectedAlbum(null)}
               className="absolute top-2 right-2 z-30 text-white hover:text-metal-fire transition-colors text-2xl sm:text-3xl bg-black/70 hover:bg-black/90 rounded-full w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center border border-white/20"
@@ -436,8 +484,6 @@ export default function BandDetailClient({
             >
               ✕
             </button>
-            
-            {/* Image EN GRAND */}
             <div className="p-3 sm:p-4 pt-12 sm:pt-14">
               <Image
                 src={selectedAlbum.image_url!}
@@ -449,8 +495,6 @@ export default function BandDetailClient({
                 priority
               />
             </div>
-            
-            {/* Infos de l'album en bas */}
             <div 
               className="w-full px-4 py-3 sm:px-6 sm:py-4 border-t-2"
               style={{
