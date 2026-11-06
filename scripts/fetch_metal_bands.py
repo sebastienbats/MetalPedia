@@ -118,7 +118,7 @@ ALLOWED_METAL_GENRES = {
     "heavy metal", "kawaii metal", "neoclassical metal", "post-metal",
     "power metal", "progressive metal", "sludge metal", "southern metal",
     "stoner metal", "symphonic metal", "thrash metal", "viking metal",
-    "grindcore", "industrial metal", "metalcore"
+    "grindcore", "industrial metal", "metalcore", "goregrind", "pornogrind", "noisecore"
 }
 
 # ═══════════════════════════════════════════════════════════
@@ -151,7 +151,7 @@ GENRE_TO_PILLAR = {
     'progressive metal': 'Progressive Metal', 'post-metal': 'Progressive Metal',
     'djent': 'Progressive Metal', 'mathcore': 'Progressive Metal',
     'metalcore': 'Metalcore', 'melodic metalcore': 'Metalcore',
-    'metallic hardcore': 'Metalcore', 'deathcore': 'Metalcore', 'nu metal': 'Metalcore',
+    'metallic hardcore': 'Metalcore', 'deathcore': 'Metalcore', 'nu metal': 'Metalcore', 'Mathcore': 'Metalcore'
     'heavy metal': 'Heavy Metal', 'true metal': 'Heavy Metal', 'metal': 'Heavy Metal',
 }
 
