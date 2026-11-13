@@ -46,7 +46,7 @@ export default function BandDetailClient({
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
 
-  // ✅ NOUVEAU : États pour la traduction
+  // ✅ États pour la traduction
   const [isTranslating, setIsTranslating] = useState(false);
   const [translatedBio, setTranslatedBio] = useState<string | null>(null);
   // Détermine la langue actuelle (fr ou en). Fallback sur 'en' si inconnu.
@@ -113,7 +113,7 @@ export default function BandDetailClient({
     { id: 'similar', label: 'Groupes similaires 🕸️' },
   ], [albums.length, members.length]);
 
-  // ✅ NOUVEAU : Fonction de traduction
+  // ✅ Fonction de traduction
   const handleTranslate = async () => {
     if (!band.biography) return;
     
@@ -185,6 +185,7 @@ export default function BandDetailClient({
                   sizes="(max-width: 768px) 96px, 160px"
                   className="object-cover z-10"
                   priority={true}
+                  unoptimized // ✅ AJOUTÉ : Contourne le quota d'optimisation Vercel
                   onError={handleBandImageError}
                 />
                 <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors duration-300 z-20 flex items-center justify-center opacity-0 hover:opacity-100">
@@ -264,7 +265,7 @@ export default function BandDetailClient({
               <h3 className="font-serif text-lg sm:text-xl mb-3 sm:mb-4 text-metal-rust flex items-center gap-2 flex-wrap">
                 📜 Biographie
                 
-                {/* ✅ NOUVEAU : Bouton de traduction interactif */}
+                {/* ✅ Bouton de traduction interactif */}
                 {band.biography && (
                   <button 
                     onClick={handleTranslate}
@@ -324,6 +325,7 @@ export default function BandDetailClient({
                               sizes="64px"
                               className="object-cover z-10"
                               loading="lazy"
+                              unoptimized // ✅ AJOUTÉ : Contourne le quota d'optimisation Vercel
                               onError={() => handleAlbumImageError(album.id)}
                             />
                           )}
@@ -416,7 +418,7 @@ export default function BandDetailClient({
         </div>
       </div>
 
-      {/* Modale d'image du groupe (inchangée) */}
+      {/* Modale d'image du groupe */}
       {isImageModalOpen && hasValidBandImage && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md !mt-0"
@@ -447,6 +449,7 @@ export default function BandDetailClient({
                 className="object-contain max-w-[85vw] max-h-[65vh]"
                 style={{ width: '85vw', height: '65vh' }}
                 priority
+                unoptimized // ✅ AJOUTÉ : Contourne le quota d'optimisation Vercel
               />
             </div>
             <div 
@@ -462,7 +465,7 @@ export default function BandDetailClient({
         </div>
       )}
 
-      {/* Modale d'image d'album (inchangée) */}
+      {/* Modale d'image d'album */}
       {selectedAlbum && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md !mt-0"
@@ -493,6 +496,7 @@ export default function BandDetailClient({
                 className="object-contain max-w-[85vw] max-h-[65vh]"
                 style={{ width: '85vw', height: '65vh' }}
                 priority
+                unoptimized // ✅ AJOUTÉ : Contourne le quota d'optimisation Vercel
               />
             </div>
             <div 
