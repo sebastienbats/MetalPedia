@@ -224,7 +224,14 @@ export default function SearchBar() {
             >
               <div className="w-8 h-8 rounded bg-metal-gray flex items-center justify-center text-xs shrink-0 overflow-hidden">
                 {band.image_url ? (
-                  <Image src={band.image_url} alt="" width={32} height={32} className="w-full h-full object-cover" />
+                  <Image 
+                    src={band.image_url} 
+                    alt="" 
+                    width={32} 
+                    height={32} 
+                    className="w-full h-full object-cover" 
+                    unoptimized // ✅ AJOUTÉ : Contourne le quota d'optimisation Vercel
+                  />
                 ) : (
                   <span>🎸</span>
                 )}
