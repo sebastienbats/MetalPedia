@@ -118,6 +118,7 @@ const nextConfig = {
   poweredByHeader: false,
 
   images: {
+    unoptimized: true,
     remotePatterns: [
       { protocol: 'https', hostname: 'www.metal-archives.com', pathname: '/**' },
       { protocol: 'https', hostname: 'cdn.metal-api.dev', pathname: '/**' },
