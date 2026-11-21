@@ -37,7 +37,7 @@ export default function AnimBorder({
   radius = 12,
   glow = true,
   glowWidth = 2,
-  glowOpacity = 0.45,
+  glowOpacity = 0.25,
   segmentLength = 18,
   paused = false,
 }: AnimBorderProps) {
