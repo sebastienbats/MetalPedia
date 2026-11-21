@@ -61,7 +61,7 @@ function PasswordInput({
           }
         >
           {show ? (
-            // Icône mot de passe masqué
+            // Masquer le mot de passe
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -77,7 +77,7 @@ function PasswordInput({
               />
             </svg>
           ) : (
-            // Icône mot de passe visible
+            // Afficher le mot de passe
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -114,7 +114,7 @@ export default function LoginPage() {
   // Mode connexion / inscription
   const [isSignUp, setIsSignUp] = useState(false);
 
-  // Formulaire
+  // Données du formulaire
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -139,13 +139,13 @@ export default function LoginPage() {
   // FORM SUBMISSION
   // ==========================================
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setError('');
     setSuccessMessage('');
 
-    // Vérification des mots de passe
+    // Vérification de la confirmation du mot de passe
     if (isSignUp && password !== confirmPassword) {
       setError('Les mots de passe ne correspondent pas.');
       return;
@@ -167,7 +167,7 @@ export default function LoginPage() {
         await signUpMutation.mutateAsync({
           email,
           password,
-          username,
+          username: username.trim(),
         });
 
         setSuccessMessage(
@@ -201,11 +201,10 @@ export default function LoginPage() {
   // ==========================================
 
   const toggleAuthMode = () => {
-    setIsSignUp(!isSignUp);
+    setIsSignUp((previous) => !previous);
 
     setError('');
     setSuccessMessage('');
-
     setConfirmPassword('');
 
     setShowPassword(false);
@@ -217,19 +216,23 @@ export default function LoginPage() {
   // ==========================================
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center w-full px-2 py-6 sm:px-4 sm:py-12">
+    <main className="min-h-[80vh] flex items-center justify-center w-full px-2 py-6 sm:px-4 sm:py-12">
 
       {/* ================================== */}
-      {/* ANIMATED BORDER */}
+      {/* ANIMATED BORDER V2 */}
       {/* ================================== */}
 
       <AnimBorder
-        className="w-full sm:max-w-md"
+        className="w-full max-w-md"
         duration={3.5}
         color="#ff7518"
         borderWidth={2}
         radius={12}
         glow={true}
+        glowWidth={2}
+        glowOpacity={0.45}
+        segmentLength={18}
+        paused={false}
       >
 
         {/* ================================== */}
@@ -240,7 +243,7 @@ export default function LoginPage() {
 
           {/* HEADER */}
 
-          <div className="text-center mb-6 sm:mb-8">
+          <header className="text-center mb-6 sm:mb-8">
             <h1 className="font-metal text-2xl sm:text-4xl text-metal-fire mb-2">
               {isSignUp
                 ? 'Rejoins la Horde'
@@ -252,7 +255,7 @@ export default function LoginPage() {
                 ? 'Crée ton compte pour laisser des avis et suivre ta progression.'
                 : 'Connecte-toi pour accéder à toutes les fonctionnalités.'}
             </p>
-          </div>
+          </header>
 
           {/* ================================== */}
           {/* FORM */}
@@ -277,6 +280,7 @@ export default function LoginPage() {
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full px-4 py-2 bg-metal-black/50 border border-metal-gray rounded-lg text-gray-200 focus:border-metal-fire focus:outline-none focus:ring-1 focus:ring-metal-fire transition-all"
                   placeholder="ex: IronMaidenFan666"
+                  autoComplete="username"
                   required
                 />
               </div>
@@ -295,6 +299,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 bg-metal-black/50 border border-metal-gray rounded-lg text-gray-200 focus:border-metal-fire focus:outline-none focus:ring-1 focus:ring-metal-fire transition-all"
                 placeholder="ton@email.com"
+                autoComplete="email"
                 required
               />
             </div>
@@ -306,7 +311,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               show={showPassword}
-              onToggle={() => setShowPassword(!showPassword)}
+              onToggle={() => setShowPassword((previous) => !previous)}
               placeholder="••••••••"
             />
 
@@ -319,7 +324,7 @@ export default function LoginPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 show={showConfirmPassword}
                 onToggle={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
+                  setShowConfirmPassword((previous) => !previous)
                 }
                 placeholder="••••••••"
               />
@@ -342,7 +347,7 @@ export default function LoginPage() {
                 >
                   <path
                     fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5a.75.75 0 01.75-.75z"
                     clipRule="evenodd"
                   />
                 </svg>
@@ -471,9 +476,7 @@ export default function LoginPage() {
           </div>
 
         </div>
-
       </AnimBorder>
-
-    </div>
+    </main>
   );
 }
