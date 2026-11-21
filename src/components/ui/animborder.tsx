@@ -19,7 +19,7 @@ export default function AnimBorder({
   className = '',
   duration = 4,
   color = '#ff7518',
-  borderWidth = 2,
+  borderWidth = 0.5,
   radius = 12,
   glow = true,
   paused = false,
