@@ -31,9 +31,9 @@ interface Dimensions {
 export default function AnimBorder({
   children,
   className = '',
-  duration = 3.5,
+  duration = 6,
   color = '#ff7518',
-  borderWidth = 2,
+  borderWidth = 1,
   radius = 12,
   glow = true,
   glowWidth = 2,
