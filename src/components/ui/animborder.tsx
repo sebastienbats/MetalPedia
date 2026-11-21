@@ -21,7 +21,7 @@ export default function AnimBorder({
   color = '#ff7518',
   borderWidth = 0.5,
   radius = 12,
-  glow = true,
+  glow = false,
   paused = false,
 }: AnimBorderProps) {
   // Identifiant unique pour chaque instance SVG
