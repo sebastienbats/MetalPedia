@@ -1,170 +1,259 @@
 
 'use client';
 
-import React, { useId } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react';
 
 interface AnimBorderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
-
-  /** Durée d'un tour complet en secondes */
   duration?: number;
-
-  /** Couleur du segment lumineux */
   color?: string;
-
-  /** Épaisseur réelle du segment en pixels */
   borderWidth?: number;
-
-  /** Rayon des angles en pixels */
   radius?: number;
-
-  /** Active le halo lumineux */
   glow?: boolean;
-
-  /** Épaisseur du halo en pixels */
   glowWidth?: number;
-
-  /** Intensité du halo */
   glowOpacity?: number;
-
-  /** Longueur du segment lumineux en pourcentage */
   segmentLength?: number;
-
-  /** Met en pause l'animation */
   paused?: boolean;
+}
+
+interface Dimensions {
+  width: number;
+  height: number;
 }
 
 export default function AnimBorder({
   children,
   className = '',
-  duration = 4,
+  duration = 3.5,
   color = '#ff7518',
-  borderWidth = 1,
+  borderWidth = 2,
   radius = 12,
   glow = true,
-  glowWidth = 4,
-  glowOpacity = 0.55,
+  glowWidth = 2,
+  glowOpacity = 0.45,
   segmentLength = 18,
   paused = false,
 }: AnimBorderProps) {
-  const rawId = useId().replace(/:/g, '');
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const filterId = `animborder-filter-${rawId}`;
-  const gradientId = `animborder-gradient-${rawId}`;
+  const [dimensions, setDimensions] = useState<Dimensions>({
+    width: 0,
+    height: 0,
+  });
 
-  // Sécurisation des paramètres
-  const safeDuration = Math.max(0.1, duration);
-  const safeBorderWidth = Math.max(0, borderWidth);
+  // ==========================================
+  // RESPONSIVE DIMENSIONS
+  // ==========================================
+
+  useEffect(() => {
+    const element = containerRef.current;
+
+    if (!element) return;
+
+    const updateDimensions = () => {
+      const rect = element.getBoundingClientRect();
+
+      setDimensions({
+        width: rect.width,
+        height: rect.height,
+      });
+    };
+
+    updateDimensions();
+
+    const observer = new ResizeObserver(updateDimensions);
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  // ==========================================
+  // SVG ROUNDED RECTANGLE PATH
+  // ==========================================
+
+  const createRoundedPath = (
+    width: number,
+    height: number,
+    strokeWidth: number,
+    cornerRadius: number,
+  ) => {
+    const inset = strokeWidth / 2;
+
+    const x = inset;
+    const y = inset;
+
+    const right = width - inset;
+    const bottom = height - inset;
+
+    const r = Math.max(
+      0,
+      Math.min(
+        cornerRadius - inset,
+        (Math.min(width, height) - strokeWidth) / 2,
+      ),
+    );
+
+    return [
+      `M ${x + r} ${y}`,
+      `H ${right - r}`,
+      `A ${r} ${r} 0 0 1 ${right} ${y + r}`,
+      `V ${bottom - r}`,
+      `A ${r} ${r} 0 0 1 ${right - r} ${bottom}`,
+      `H ${x + r}`,
+      `A ${r} ${r} 0 0 1 ${x} ${bottom - r}`,
+      `V ${y + r}`,
+      `A ${r} ${r} 0 0 1 ${x + r} ${y}`,
+      'Z',
+    ].join(' ');
+  };
+
+  // ==========================================
+  // SVG GEOMETRY
+  // ==========================================
+
+  const safeBorderWidth = Math.max(0.1, borderWidth);
   const safeGlowWidth = Math.max(0, glowWidth);
-  const safeRadius = Math.max(0, radius);
+
+  const path = dimensions.width > 0 && dimensions.height > 0
+    ? createRoundedPath(
+        dimensions.width,
+        dimensions.height,
+        safeBorderWidth,
+        radius,
+      )
+    : '';
 
   const safeSegmentLength = Math.min(
     99,
-    Math.max(1, segmentLength)
-  );
-
-  const safeGlowOpacity = Math.min(
-    1,
-    Math.max(0, glowOpacity)
+    Math.max(1, segmentLength),
   );
 
   const dashArray = `${safeSegmentLength} ${100 - safeSegmentLength}`;
 
-  const animationStyle = {
-    animationDuration: `${safeDuration}s`,
-    animationPlayState: paused ? 'paused' as const : 'running' as const,
+  // ==========================================
+  // ANIMATION STYLE
+  // ==========================================
+
+  const animationStyle: CSSProperties = {
+    animationDuration: `${Math.max(0.1, duration)}s`,
+    animationPlayState: paused ? 'paused' : 'running',
   };
+
+  // ==========================================
+  // RENDER
+  // ==========================================
 
   return (
     <div
-      className={`animborder-v2 relative ${className}`}
+      ref={containerRef}
+      className={`anim-border-v2 relative ${className}`}
       style={{
-        borderRadius: `${safeRadius}px`,
-        isolation: 'isolate',
+        borderRadius: `${radius}px`,
       }}
     >
-      {/* CONTENU */}
-      <div className="relative z-10 h-full w-full">
-        {children}
-      </div>
+      {/* ANIMATED SVG BORDER */}
 
-      {/* SVG RESPONSIVE */}
-      <svg
-        className="pointer-events-none absolute inset-0 z-20 h-full w-full overflow-visible"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <defs>
-          {/* Filtre du halo */}
-          <filter
-            id={filterId}
-            x="-100%"
-            y="-100%"
-            width="300%"
-            height="300%"
-            colorInterpolationFilters="sRGB"
-          >
-            <feGaussianBlur stdDeviation="1.5" />
-          </filter>
+      {path && (
+        <svg
+          className="anim-border-v2__svg"
+          width="100%"
+          height="100%"
+          viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <defs>
+            <filter
+              id="anim-border-v2-glow"
+              x="-50%"
+              y="-50%"
+              width="200%"
+              height="200%"
+            >
+              <feGaussianBlur stdDeviation="2" />
+            </filter>
+          </defs>
 
-          {/* Dégradé du segment */}
-          <linearGradient id={gradientId}>
-            <stop offset="0%" stopColor={color} stopOpacity="0" />
-            <stop offset="50%" stopColor={color} stopOpacity="0.65" />
-            <stop offset="100%" stopColor={color} stopOpacity="1" />
-          </linearGradient>
-        </defs>
+          {/* ================================== */}
+          {/* GLOW - SAME PATH AND ANIMATION */}
+          {/* ================================== */}
 
-        {/* HALO LUMINEUX */}
-        {glow && safeGlowWidth > 0 && (
-          <rect
-            x="0.5"
-            y="0.5"
-            width="99"
-            height="99"
-            rx="12"
+          {glow && (
+            <path
+              d={path}
+              pathLength="100"
+              fill="none"
+              stroke={color}
+              strokeWidth={safeBorderWidth + safeGlowWidth * 2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeDasharray={dashArray}
+              filter="url(#anim-border-v2-glow)"
+              opacity={glowOpacity}
+              className="anim-border-v2__path"
+              style={animationStyle}
+            />
+          )}
+
+          {/* ================================== */}
+          {/* ORANGE ANIMATED SEGMENT */}
+          {/* ================================== */}
+
+          <path
+            d={path}
             pathLength="100"
             fill="none"
             stroke={color}
-            strokeWidth={safeGlowWidth}
-            strokeDasharray={dashArray}
+            strokeWidth={safeBorderWidth}
             strokeLinecap="round"
-            vectorEffect="non-scaling-stroke"
-            filter={`url(#${filterId})`}
-            opacity={safeGlowOpacity}
-            className="animborder-v2-path"
+            strokeLinejoin="round"
+            strokeDasharray={dashArray}
+            className="anim-border-v2__path"
             style={animationStyle}
           />
-        )}
+        </svg>
+      )}
 
-        {/* SEGMENT LUMINEUX PRINCIPAL */}
-        <rect
-          x="0.5"
-          y="0.5"
-          width="99"
-          height="99"
-          rx="12"
-          pathLength="100"
-          fill="none"
-          stroke={`url(#${gradientId})`}
-          strokeWidth={safeBorderWidth}
-          strokeDasharray={dashArray}
-          strokeLinecap="round"
-          vectorEffect="non-scaling-stroke"
-          className="animborder-v2-path"
-          style={animationStyle}
-        />
-      </svg>
+      {/* CONTENT */}
+
+      <div className="relative z-10">
+        {children}
+      </div>
 
       {/* ANIMATION CSS */}
-      <style jsx>{`
-        .animborder-v2-path {
-          animation: animborder-v2-flow linear infinite;
+
+      <style jsx global>{`
+        .anim-border-v2 {
+          position: relative;
+          isolation: isolate;
         }
 
-        @keyframes animborder-v2-flow {
+        .anim-border-v2__svg {
+          position: absolute;
+          inset: 0;
+          z-index: 20;
+          display: block;
+          overflow: visible;
+          pointer-events: none;
+        }
+
+        .anim-border-v2__path {
+          animation-name: anim-border-v2-dash;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+        }
+
+        @keyframes anim-border-v2-dash {
           from {
             stroke-dashoffset: 0;
           }
@@ -175,7 +264,7 @@ export default function AnimBorder({
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .animborder-v2-path {
+          .anim-border-v2__path {
             animation: none !important;
           }
         }
