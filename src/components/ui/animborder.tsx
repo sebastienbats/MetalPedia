@@ -19,9 +19,9 @@ export default function AnimBorder({
   className = '',
   duration = 4,
   color = '#ff7518',
-  borderWidth = 0.5,
+  borderWidth = 0.8,
   radius = 12,
-  glow = false,
+  glow = true,
   paused = false,
 }: AnimBorderProps) {
   // Identifiant unique pour chaque instance SVG
@@ -95,7 +95,7 @@ export default function AnimBorder({
             pathLength="100"
             fill="none"
             stroke={color}
-            strokeWidth={borderWidth * 2.5}
+            strokeWidth={borderWidth * 1.5}
             strokeLinecap="round"
             strokeDasharray="18 82"
             className={
